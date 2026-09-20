@@ -1,0 +1,26 @@
+[package]
+name = "skid-desion"
+version = "0.1.0"
+edition = "2024"
+description = "Typed decisions from local GGUF chat model logits"
+license = "MIT"
+exclude = ["/models/**", "**/*.gguf", "**/*.safetensors", "/target/**", "/results/**", "/web/**"]
+build = "build.rs"
+
+[features]
+default = []
+llama = []
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+clap = { version = "4", features = ["derive"] }
+
+[build-dependencies]
+cc = "1"
+
+[[bin]]
+name = "skid-desion"
+path = "src/main.rs"
+required-features = ["llama"]
