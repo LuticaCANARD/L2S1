@@ -1,4 +1,4 @@
-# skid-desion
+# skid-decision
 
 A Rust library and CLI for typed decisions from local GGUF chat models. It reads next-token logits for option codes A–Z and returns structured choice, binary, or ordinal results. Option IDs remain separate from model output codes. No additional head training or generated explanation is required.
 
