@@ -10,7 +10,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     use clap::Parser;
     use l2s1::{
         ComputeOptions, DecisionPolicy, DecisionRequest, EvidenceTransfer, ExecutionMode,
-        FlashAttention, PreparationCacheConfig, PromptLayout, PromptProfile, llama::LlamaBackend,
+        FlashAttention, PreparationCacheConfig, PromptDetail, PromptLayout, PromptProfile,
+        llama::LlamaBackend,
     };
     use serde::Deserialize;
     use std::{
@@ -54,6 +55,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         execution_mode: ExecutionMode,
         #[arg(long, value_enum, default_value_t = PromptLayout::Legacy)]
         prompt_layout: PromptLayout,
+        #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
+        prompt_detail: PromptDetail,
+        #[arg(long, default_value_t = 0, value_parser = clap::value_parser!(u32).range(0..26))]
+        code_rotation: u32,
         #[arg(long, default_value_t = 4, value_parser = clap::value_parser!(u32).range(1..=32))]
         parallel_width: u32,
         /// Independent article requests per call; prompts/states are never merged.
@@ -111,6 +116,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     backend.set_execution_mode(args.execution_mode);
     backend.set_prompt_layout(args.prompt_layout);
+    backend.set_prompt_detail(args.prompt_detail);
+    backend.set_code_rotation(args.code_rotation as usize)?;
     backend.set_evidence_transfer(args.evidence_transfer)?;
     backend.set_preparation_cache(PreparationCacheConfig {
         max_entries: args.preparation_cache_entries,

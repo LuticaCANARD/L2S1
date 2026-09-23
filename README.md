@@ -168,6 +168,38 @@ For repeated requests, retain the backend instead of loading it for every call. 
 
 `BackendWorker::spawn_batched()` additionally collects requests under explicit request-count, model-input-token and collection-wait limits. With `LlamaBackend`, native batching requires selecting `ExecutionMode::Parallel`; other modes keep requests serial. Collection alone does not make inference parallel, and the existing parallel score-drift limits still apply.
 
+### Optional prompt detail and answer-code mixtures
+
+`--prompt-detail minimal` and `--code-rotation 0` preserve the existing prompt and remain the defaults. `typed` adds the decision kind, semantic option IDs, ordinal values and exact-comparison guidance. `typed-examples` also adds generic numerical interval examples before the input. These variants remain model-neutral, accept changing schemas and can change predictions and context usage; they are not measured accuracy guarantees.
+
+```sh
+./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \
+  --input examples/warehouse.json --prompt-detail typed-examples --code-rotation 1
+```
+
+Rotation changes code assignment: displayed position `i` represents canonical option `(i + rotation) % option_count`. The backend accepts rotations 0–25 and returns scores in the original semantic order, including the original ordinal scale. Returned codes and token IDs describe the actual rotated assignment. The corresponding Rust setters are `set_prompt_detail(PromptDetail::TypedExamples)` and `set_code_rotation(1)?`. Changing either clears preparation caches and changes the prompt identity, so calibrations and heads must match that configuration. Default response JSON omits the added detail/rotation fields.
+
+For multiple rotated passes, `score_semantic_mixture(&decision, &passes, &policy)` aligns results by semantic option ID and pools **full candidate probabilities**:
+
+```text
+q(y)                    = mean(candidate_mass[pass] * option_probability[pass][y])
+mixture candidate_mass  = mean(candidate_mass[pass])
+mixture option_probability[y] = q(y) / sum(q)
+```
+
+This retains the mass gate instead of setting it to one. It accepts at least two uncalibrated native passes; learned-head, calibrated and previously mixed results are rejected. The caller must use the same model, state, task and inference configuration, changing only code rotation. Mixture scores are not calibrated probabilities of correctness. The result is marked `semantic_probability_mixture_v1`; its `raw_logit` is `ln(q)`, code/token metadata represents the first pass, and token counts sum all passes. Additional passes consume additional inference time.
+
+The [paired evaluation example](examples/evaluate_accuracy.rs) runs these variants on JSONL records containing `id`, optional `group`, and a `request` with one decision:
+
+```sh
+cargo run --release --locked --features llama --example evaluate_accuracy -- \
+  --model models/Qwen3-0.6B-Q8_0.gguf --input cases.jsonl \
+  --output /tmp/l2s1-accuracy-passes.jsonl \
+  --prompt-details minimal,typed,typed-examples --all-rotations
+```
+
+The output must be new. The evaluator records native passes, mixture results, configuration identities and timing without reading answer labels. Evaluate task accuracy and acceptance coverage separately on held-out labels before selecting a variant.
+
 ## Model-specific identity and calibration
 
 A `ModelIdentity` fingerprints the checkpoint, embedded template, effective prompt profile/version, runtime build and loaded libraries, active adapter/head, device label and compute/execution configuration. `preflight()` combines that identity with checks of the actual request. Capability inspection establishes available operations; labeled evaluation establishes task quality.
