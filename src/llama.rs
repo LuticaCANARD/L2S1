@@ -1,7 +1,7 @@
 //! Small owned wrapper around the locally built llama.cpp C ABI adapter.
-use crate::prompt::{
-    DATA_MARKER, SYSTEM, compile_model_prompt, prefill_gpt_oss_final, split_model_prompt,
-};
+#[cfg(test)]
+use crate::prompt::compile_model_prompt;
+use crate::prompt::{DATA_MARKER, SYSTEM, prefill_gpt_oss_final, split_model_prompt};
 use crate::*;
 use std::{
     cell::RefCell,
@@ -143,6 +143,8 @@ unsafe extern "C" {
 
 pub struct LlamaBackend {
     engine: NonNull<c_void>,
+    prompt_detail: PromptDetail,
+    code_rotation: usize,
     evidence_transfer: EvidenceTransfer,
     preparation_cache_enabled: bool,
     prepared_cache: RefCell<BoundedTokenCache<(Vec<i32>, Vec<i32>)>>,
@@ -338,6 +340,8 @@ impl LlamaBackend {
         let engine = NonNull::new(engine).ok_or_else(|| native_error(&error))?;
         let mut backend = Self {
             engine,
+            prompt_detail: PromptDetail::Minimal,
+            code_rotation: 0,
             evidence_transfer: EvidenceTransfer::Full,
             preparation_cache_enabled: false,
             prepared_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
@@ -664,6 +668,34 @@ impl LlamaBackend {
         self.clear_preparation_cache();
     }
 
+    /// Opt-in prompt information. Changing it invalidates prepared tokens and
+    /// changes the artifact identity; existing calibrations are checked at use.
+    pub fn set_prompt_detail(&mut self, detail: PromptDetail) {
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        self.prompt_detail = detail;
+        self.clear_preparation_cache();
+    }
+
+    /// Rotate answer-code assignment while preserving semantic option order,
+    /// including ordinal level values. Rotation is modulo each option count.
+    pub fn set_code_rotation(&mut self, rotation: usize) -> Result<()> {
+        if rotation >= 26 {
+            return Err(Error::Invalid("code rotation must be in 0..26".into()));
+        }
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        self.code_rotation = rotation;
+        self.clear_preparation_cache();
+        Ok(())
+    }
+
+    fn restore_code_metadata(&self, result: &mut DecisionResult) {
+        let count = result.scores.len();
+        for (index, score) in result.scores.iter_mut().enumerate() {
+            let position = (index + count - self.code_rotation % count) % count;
+            score.code = ((b'A' + position as u8) as char).to_string();
+        }
+    }
+
     fn tokenize(&self, text: &str, special: bool) -> Result<Vec<i32>> {
         let length = i32::try_from(text.len())
             .map_err(|_| Error::Invalid("text exceeds tokenizer limit".into()))?;
@@ -757,8 +789,21 @@ impl LlamaBackend {
         decision: &Decision,
     ) -> std::result::Result<(Vec<i32>, Vec<i32>), DecisionFailure> {
         let parts = match &self.chat_skeleton {
-            Some(skeleton) => compile_model_prompt(skeleton, state, decision, self.prompt_layout)?,
-            None => compile_prompt_with_layout(state, decision, self.prompt_layout),
+            Some(skeleton) => crate::prompt::compile_model_prompt_with_detail(
+                skeleton,
+                state,
+                decision,
+                self.prompt_layout,
+                self.prompt_detail,
+                self.code_rotation,
+            )?,
+            None => compile_prompt_with_detail(
+                state,
+                decision,
+                self.prompt_layout,
+                self.prompt_detail,
+                self.code_rotation,
+            ),
         };
         let mut input = Vec::new();
         for part in &parts {
@@ -821,6 +866,8 @@ impl LlamaBackend {
                 "candidate tokens must be unique",
             ));
         }
+        let count = candidates.len();
+        candidates.rotate_right(self.code_rotation % count);
         if let Some(candidate_key) = candidate_key {
             self.candidate_cache.borrow_mut().insert(
                 "model-local-v1".into(),
@@ -945,6 +992,7 @@ impl LlamaBackend {
             )?;
         }
         result = self.apply_calibration(decision, result)?;
+        self.restore_code_metadata(&mut result);
         self.timings.score_ms += started.elapsed().as_secs_f64() * 1000.0;
         self.timings.decisions += 1;
         result.reused_prefix_tokens = reused as usize;
@@ -1016,7 +1064,9 @@ impl LlamaBackend {
                     &self.policy,
                 )?;
                 result.reused_prefix_tokens = reused[index] as usize;
-                results.push(self.apply_calibration(decision, result)?);
+                let mut result = self.apply_calibration(decision, result)?;
+                self.restore_code_metadata(&mut result);
+                results.push(result);
             }
             self.timings.score_ms += started.elapsed().as_secs_f64() * 1000.0;
             self.timings.decisions += decisions.len();
@@ -1073,6 +1123,8 @@ impl LlamaBackend {
             .to_string_lossy()
             .into_owned();
         BackendInfo {
+            prompt_detail: self.prompt_detail,
+            code_rotation: self.code_rotation,
             evidence_transfer: self.evidence_transfer,
             model_path: self.model_path.clone(),
             lora_path: self.lora_path.clone(),
@@ -1086,17 +1138,28 @@ impl LlamaBackend {
             }
             .into(),
             prompt_layout: self.prompt_layout,
-            prompt_version: match (self.prompt_layout, self.profile) {
-                (PromptLayout::Legacy, PromptProfile::Qwen3) => PROMPT_VERSION,
-                (PromptLayout::Legacy, PromptProfile::GptOssFinal) => GPT_OSS_FINAL_PROMPT_VERSION,
-                (PromptLayout::Legacy, _) => MODEL_PROMPT_VERSION,
-                (PromptLayout::StateFirst, PromptProfile::Qwen3) => STATE_FIRST_PROMPT_VERSION,
-                (PromptLayout::StateFirst, PromptProfile::GptOssFinal) => {
-                    STATE_FIRST_GPT_OSS_PROMPT_VERSION
+            prompt_version: {
+                let base = match (self.prompt_layout, self.profile) {
+                    (PromptLayout::Legacy, PromptProfile::Qwen3) => PROMPT_VERSION,
+                    (PromptLayout::Legacy, PromptProfile::GptOssFinal) => {
+                        GPT_OSS_FINAL_PROMPT_VERSION
+                    }
+                    (PromptLayout::Legacy, _) => MODEL_PROMPT_VERSION,
+                    (PromptLayout::StateFirst, PromptProfile::Qwen3) => STATE_FIRST_PROMPT_VERSION,
+                    (PromptLayout::StateFirst, PromptProfile::GptOssFinal) => {
+                        STATE_FIRST_GPT_OSS_PROMPT_VERSION
+                    }
+                    (PromptLayout::StateFirst, _) => STATE_FIRST_MODEL_PROMPT_VERSION,
+                };
+                if self.prompt_detail.is_minimal() && self.code_rotation == 0 {
+                    base.into()
+                } else {
+                    format!(
+                        "{base}/detail-{:?}-v1/rotation-{}",
+                        self.prompt_detail, self.code_rotation
+                    )
                 }
-                (PromptLayout::StateFirst, _) => STATE_FIRST_MODEL_PROMPT_VERSION,
-            }
-            .into(),
+            },
             runtime: "local-libllama".into(),
             compute: Some(self.compute),
             execution_mode: self.execution_mode,

@@ -1,8 +1,8 @@
 use clap::Parser;
 use l2s1::{
     ComputeOptions, DecisionBackend, DecisionPolicy, DecisionRequest, EvidenceTransfer,
-    ExecutionMode, FlashAttention, PreparationCacheConfig, PromptLayout, PromptProfile,
-    llama::LlamaBackend,
+    ExecutionMode, FlashAttention, PreparationCacheConfig, PromptDetail, PromptLayout,
+    PromptProfile, llama::LlamaBackend,
 };
 use std::{
     io::{self, Read},
@@ -58,6 +58,12 @@ struct Args {
     /// State-first improves shared-prefix reuse but can change model predictions.
     #[arg(long, value_enum, default_value_t = PromptLayout::Legacy)]
     prompt_layout: PromptLayout,
+    /// Opt-in typed metadata and generic numeric comparison examples.
+    #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
+    prompt_detail: PromptDetail,
+    /// Cyclic answer-code assignment; semantic option/ordinal order is unchanged.
+    #[arg(long, default_value_t = 0, value_parser = clap::value_parser!(u32).range(0..26))]
+    code_rotation: u32,
     #[arg(long, default_value = "-")]
     input: String,
     /// CUDA device is required when selected; no silent CPU fallback.
@@ -111,6 +117,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     backend.set_execution_mode(args.execution_mode);
     backend.set_parallel_width(args.parallel_width as usize)?;
     backend.set_prompt_layout(args.prompt_layout);
+    backend.set_prompt_detail(args.prompt_detail);
+    backend.set_code_rotation(args.code_rotation as usize)?;
     backend.set_evidence_transfer(args.evidence_transfer)?;
     backend.set_preparation_cache(PreparationCacheConfig {
         max_entries: args.preparation_cache_entries,

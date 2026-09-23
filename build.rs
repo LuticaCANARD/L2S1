@@ -38,6 +38,7 @@ fn main() {
             "src/llama/batching.rs",
             "src/optimization.rs",
             "src/worker.rs",
+            "src/consensus.rs",
             "src/calibration.rs",
             "src/output_head.rs",
             "src/interoperability.rs",

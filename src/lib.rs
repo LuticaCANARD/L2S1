@@ -7,19 +7,22 @@ mod prompt;
 pub use decision::*;
 pub use output_head::*;
 pub use prompt::{
-    GPT_OSS_FINAL_PROMPT_VERSION, MODEL_PROMPT_VERSION, PROMPT_VERSION, PromptLayout, PromptPart,
-    PromptProfile, STATE_FIRST_GPT_OSS_PROMPT_VERSION, STATE_FIRST_MODEL_PROMPT_VERSION,
-    STATE_FIRST_PROMPT_VERSION, compile_prompt, compile_prompt_with_layout,
+    GPT_OSS_FINAL_PROMPT_VERSION, MODEL_PROMPT_VERSION, PROMPT_VERSION, PromptDetail, PromptLayout,
+    PromptPart, PromptProfile, STATE_FIRST_GPT_OSS_PROMPT_VERSION,
+    STATE_FIRST_MODEL_PROMPT_VERSION, STATE_FIRST_PROMPT_VERSION, compile_prompt,
+    compile_prompt_with_detail, compile_prompt_with_layout,
 };
 #[cfg(feature = "llama")]
 pub mod llama;
 
 mod calibration;
+mod consensus;
 mod evidence;
 mod interoperability;
 mod optimization;
 mod worker;
 pub use calibration::*;
+pub use consensus::*;
 pub use evidence::*;
 pub use interoperability::*;
 pub use optimization::*;

@@ -298,7 +298,9 @@ impl LlamaBackend {
                 &self.policy,
             )?;
             result.reused_prefix_tokens = reused[i] as usize;
-            results.push(self.apply_calibration(d, result)?);
+            let mut result = self.apply_calibration(d, result)?;
+            self.restore_code_metadata(&mut result);
+            results.push(result);
         }
         self.timings.score_ms += started.elapsed().as_secs_f64() * 1000.0;
         self.timings.decisions += results.len();

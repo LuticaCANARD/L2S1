@@ -208,6 +208,10 @@ pub struct DecisionResult {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BackendInfo {
+    #[serde(default, skip_serializing_if = "crate::PromptDetail::is_minimal")]
+    pub prompt_detail: crate::PromptDetail,
+    #[serde(default, skip_serializing_if = "zero_rotation")]
+    pub code_rotation: usize,
     #[serde(default, skip_serializing_if = "crate::EvidenceTransfer::is_full")]
     pub evidence_transfer: crate::EvidenceTransfer,
     pub model_path: String,
@@ -236,6 +240,10 @@ pub struct BackendInfo {
     pub compute: Option<ComputeOptions>,
     pub offload_requested: bool,
     pub offload_device: Option<String>,
+}
+
+fn zero_rotation(value: &usize) -> bool {
+    *value == 0
 }
 
 #[derive(Debug, Serialize, Deserialize)]

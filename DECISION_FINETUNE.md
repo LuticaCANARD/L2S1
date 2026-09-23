@@ -86,3 +86,135 @@ python scripts/train_decision_lora.py --data results/decision-pilot-new/data \
 python3 scripts/report_decision_finetune.py --data results/decision-pilot-new/data \
   --run results/decision-pilot-new/pilot
 ```
+
+## Frozen synthetic accuracy study
+
+The new study is separate from the airline pilot and the earlier warehouse
+fixtures. It generates 480 train, 120 dev, 120 calibration and 180 test logical
+cases across six domains. Both threshold values and wording-template families
+are disjoint across splits. Each case has paired natural-language and symbolic
+criteria; these are two representations of one case, not independent samples.
+Choice, binary and ordinal targets are balanced, including exact and neighboring
+integer/fractional boundaries. Ordinal values retain their sorted order.
+
+The following workflow requires a configured native build and an existing local
+Gemma 4 E2B IT checkpoint at the pinned revision above. Training additionally
+requires the GPU Python environment with compatible PyTorch, Transformers,
+bitsandbytes and PEFT. Record its dependency versions with the experiment. Keep
+all data, token exports, teacher responses, adapters and reports under ignored
+`results/`; keep base GGUF weights under ignored `models/`. The new scripts refuse
+to overwrite their output files/directories and do not download checkpoints.
+
+Prepare the study and compare prompt configurations on **dev only**:
+
+```sh
+study=results/accuracy-study-new
+model=models/gemma-4-E2B-it-Q8_0.gguf
+checkpoint=/path/to/local/snapshots/3e22461f65e89153144f8adb70e3b8c2cc9845a7
+variant=natural
+mkdir -p "$study"
+python3 scripts/prepare_accuracy_study.py --output "$study/data"
+python3 scripts/prepare_accuracy_study.py --output "$study/data" --verify
+cargo build --release --locked --features llama \
+  --example evaluate_accuracy --example export_decision_tokens
+
+target/release/examples/evaluate_accuracy --model "$model" --cuda \
+  --input "$study/data/dev-$variant-requests.jsonl" \
+  --output "$study/dev-$variant-predictions.jsonl" \
+  --prompt-details minimal,typed,typed-examples --layouts legacy,state-first \
+  --all-rotations
+python3 scripts/report_accuracy_study.py --data "$study/data" \
+  --predictions "$study/dev-$variant-predictions.jsonl" \
+  --split dev --variant "$variant" --output "$study/dev-$variant-report.json" \
+  --select "$study/dev-$variant-selection.json"
+```
+
+Use `symbolic` for the paired representation experiment. If comparing both
+variants, finish both dev reports and freeze the winning variant before reading
+calibration/test predictions. Selection ranks raw top-1, then accepted-correct
+fraction over all cases, then median compute-path latency, with a deterministic
+final tie break. Only configurations covering the whole split are eligible:
+rotation 2 covers three-option tasks only and cannot win against full-split
+configurations. `--select` rejects calibration and test splits. Timings exclude
+model loading and output serialization; they are not end-to-end service latency.
+
+Read the frozen choice and export **training requests only**, including their
+code rotations. The exporter uses the production GGUF tokenizer. The trainer's
+`--detail` uses underscores; native CLI enum values use hyphens.
+
+```sh
+selection="$study/dev-$variant-selection.json"
+detail=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["selected"]["setting"]["prompt_detail"])' "$selection")
+detail_cli=$(python3 -c 'import sys; print(sys.argv[1].replace("_", "-"))' "$detail")
+layout=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["selected"]["setting"]["prompt_layout"].replace("_", "-"))' "$selection")
+target/release/examples/export_decision_tokens --model "$model" \
+  --input "$study/data/train-$variant-requests.jsonl" \
+  --output "$study/train-tokens.jsonl" --all-rotations \
+  --prompt-detail "$detail_cli" --prompt-layout "$layout"
+
+python3 - "$study" "$variant" "$detail" <<'PY'
+import hashlib, json, pathlib, sys
+root = pathlib.Path(sys.argv[1])
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+seal = dict(schema_version=1, split='train', variant=sys.argv[2], detail=sys.argv[3],
+            manifest_sha256=digest(root/'data/manifest.json'),
+            token_sha256=digest(root/'train-tokens.jsonl'),
+            hf_model='google/gemma-4-E2B-it',
+            hf_revision='3e22461f65e89153144f8adb70e3b8c2cc9845a7')
+with (root/'train-token-seal.json').open('x') as out:
+    json.dump(seal, out, sort_keys=True, indent=2)
+    out.write('\n')
+PY
+```
+
+Generate thinking-teacher answers, run a discarded smoke check, then train a
+fresh adapter. Only teacher final answers matching independent **train** labels
+are admitted. Generated rationales are logged but never used as student targets;
+missing or wrong teacher answers are not replaced with oracle labels. The same
+accepted examples and protocol must bind smoke and final training.
+
+`--teacher-batch-size` enables left-padded teacher generation (default 1). Each
+answer is trimmed independently at its first EOS before validation. Use a separate
+limited pilot to size GPU memory; the teacher report records peak CUDA allocation
+and batch timing. Incomplete pilots are not accepted as training inputs.
+
+```sh
+train_stage() {
+  python3 scripts/train_accuracy_lora.py "$@" \
+    --data "$study/data" --variant "$variant" --detail "$detail" \
+    --tokens "$study/train-tokens.jsonl" --token-seal "$study/train-token-seal.json" \
+    --checkpoint "$checkpoint"
+}
+train_stage teacher --output "$study/teacher" --max-new-tokens 384
+train_stage smoke --teacher "$study/teacher" --output "$study/smoke"
+train_stage train --teacher "$study/teacher" \
+  --smoke-report "$study/smoke/complete.json" --output "$study/train"
+python3 "$LLAMA_CPP_DIR/convert_lora_to_gguf.py" "$study/train/adapter" \
+  --base "$checkpoint" --outfile "$study/adapter.gguf" --outtype f16
+```
+
+A successful training loss, smoke check or conversion does not establish a
+native accuracy improvement. Evaluate the converted adapter with the same GGUF,
+compute configuration and frozen prompt settings as the base. For example:
+
+```sh
+target/release/examples/evaluate_accuracy --model "$model" --cuda \
+  --lora "$study/adapter.gguf" \
+  --input "$study/data/test-$variant-requests.jsonl" \
+  --output "$study/test-$variant-adapter.jsonl" \
+  --prompt-details "$detail_cli" --layouts "$layout" --all-rotations
+python3 scripts/report_accuracy_study.py --data "$study/data" \
+  --predictions "$study/test-$variant-adapter.jsonl" \
+  --split test --variant "$variant" --output "$study/test-$variant-adapter-report.json"
+```
+
+Run the identical native evaluation without `--lora` into separate base output
+files. Compare only the previously frozen single rotation or ensemble; additional
+rotation rows are diagnostics, not new opportunities to select on test. If fitting
+calibration or abstention thresholds, finish that work using the calibration
+split before the final test evaluation; the reporter itself fits neither.
+Report raw top-1, NLL/Brier, coverage, accepted accuracy, accepted-correct/all and
+rotation sensitivity together. NF4 teacher/training results and GGUF adapter
+results have different runtime/precision boundaries. This workflow makes no
+measured accuracy or performance claim by itself.

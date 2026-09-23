@@ -7,7 +7,10 @@ fn main() {
 #[cfg(feature = "llama")]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     use clap::Parser;
-    use l2s1::{DecisionPolicy, DecisionRequest, PromptProfile, llama::LlamaBackend};
+    use l2s1::{
+        DecisionPolicy, DecisionRequest, PromptDetail, PromptLayout, PromptProfile,
+        llama::LlamaBackend,
+    };
     use serde::Deserialize;
     use std::{
         fs::{File, OpenOptions},
@@ -22,6 +25,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         input: PathBuf,
         #[arg(long)]
         output: PathBuf,
+        #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
+        prompt_detail: PromptDetail,
+        #[arg(long, value_enum, default_value_t = PromptLayout::Legacy)]
+        prompt_layout: PromptLayout,
+        /// Export every cyclic code assignment, preserving the logical case ID.
+        #[arg(long)]
+        all_rotations: bool,
     }
     #[derive(Deserialize)]
     struct Case {
@@ -29,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         request: DecisionRequest,
     }
     let args = Args::parse();
-    let backend = LlamaBackend::load_with_profile(
+    let mut backend = LlamaBackend::load_with_profile(
         &args.model,
         2048,
         256,
@@ -38,6 +48,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         DecisionPolicy::default(),
         PromptProfile::Auto,
     )?;
+    backend.set_prompt_layout(args.prompt_layout);
+    backend.set_prompt_detail(args.prompt_detail);
     let mut output = BufWriter::new(
         OpenOptions::new()
             .write(true)
@@ -51,13 +63,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             return Err("Expected one decision".into());
         }
         let decision = &case.request.decisions[0];
-        let (input_ids, candidate_ids) = backend.encode_decision(&case.request.state, decision)?;
         let option_ids: Vec<_> = decision.options().into_iter().map(|o| o.id).collect();
-        writeln!(
-            output,
-            "{}",
-            serde_json::json!({"id":case.id,"input_ids":input_ids,"candidate_ids":candidate_ids,"option_ids":option_ids})
-        )?;
+        let count = option_ids.len();
+        for rotation in 0..if args.all_rotations { count } else { 1 } {
+            backend.set_code_rotation(rotation)?;
+            let (input_ids, candidate_ids) =
+                backend.encode_decision(&case.request.state, decision)?;
+            let candidate_codes: Vec<_> = (0..count)
+                .map(|i| ((b'A' + ((i + count - rotation) % count) as u8) as char).to_string())
+                .collect();
+            writeln!(
+                output,
+                "{}",
+                serde_json::json!({"id":case.id,"decision_id":decision.id,"code_rotation":rotation,
+                "input_ids":input_ids,"candidate_ids":candidate_ids,"candidate_codes":candidate_codes,
+                "option_ids":option_ids,"model_identity":backend.identity()})
+            )?;
+        }
     }
     Ok(())
 }
