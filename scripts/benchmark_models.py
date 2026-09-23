@@ -60,7 +60,7 @@ def llama_revision():
     source = os.environ.get("L2S1_LLAMA_CPP_SOURCE") or os.environ.get("LLAMA_CPP_DIR")
     if source:
         return revision(source)
-    marker = ROOT / "crates/l2s1-llama-sys/vendor/llama.cpp/UPSTREAM_COMMIT"
+    marker = ROOT / "crates/l2s1-llama-sys/UPSTREAM_COMMIT"
     return marker.read_text().strip() if marker.is_file() else None
 
 

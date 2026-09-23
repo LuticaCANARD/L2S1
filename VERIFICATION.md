@@ -4,7 +4,7 @@ Run checks for the exact checkpoint, runtime and execution configuration you int
 
 ## Build and general checks
 
-The bundled llama.cpp revision is `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`. The sys dependency builds matching source, headers and shared libraries. The native backend currently requires Linux. Set `L2S1_LLAMA_CPP_SOURCE` to check a custom upstream revision.
+The pinned llama.cpp revision is `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`. CMake FetchContent downloads it on the first default build and verifies the archive hash. The sys dependency builds matching source, headers and shared libraries. The native backend currently requires Linux. Set `L2S1_LLAMA_CPP_SOURCE` to use a local checkout for offline checks or to test another upstream revision.
 
 ```sh
 cargo fmt --all -- --check
@@ -16,7 +16,7 @@ python3 -m unittest discover -s scripts -p 'test_*.py'
 
 For GPU checks, build with `--features llama-cuda` and use `SKID_CUDA=1` for native tests. A CPU-only build rejects a CUDA request.
 
-Offline Cargo commands require cached dependencies. General test runs skip tests that need model files; they do not download weights or establish real-model compatibility. Upstream C++ helper warnings are separate from Rust lint results.
+Offline Cargo commands also need a previously populated CMake source cache or `L2S1_LLAMA_CPP_SOURCE` set to a local checkout. General test runs skip tests that need model files; they do not download weights or establish real-model compatibility. Upstream C++ helper warnings are separate from Rust lint results.
 
 ## Model contract checks
 

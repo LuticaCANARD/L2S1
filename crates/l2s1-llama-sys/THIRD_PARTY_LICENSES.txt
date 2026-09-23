@@ -1034,7 +1034,7 @@ MIT License
 
 Copyright (c) 2023 https://github.com/cmp-nct
 
-This project includes work that is Copyright (c) 2023 by Georgi Gerganov 
+This project includes work that is Copyright (c) 2023 by Georgi Gerganov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

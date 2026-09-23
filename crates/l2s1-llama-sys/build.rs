@@ -42,57 +42,67 @@ fn main() {
     let selected = env::var_os("L2S1_LLAMA_CPP_SOURCE")
         .or_else(|| env::var_os("LLAMA_CPP_DIR"))
         .map(PathBuf::from)
-        .unwrap_or_else(|| manifest.join("vendor/llama.cpp"));
-    let source = selected
-        .canonicalize()
-        .expect("llama.cpp source directory unavailable");
-    for required in [
-        "CMakeLists.txt",
-        "include/llama.h",
-        "src/llama-ext.h",
-        "common/jinja/lexer.cpp",
-    ] {
-        assert!(
-            source.join(required).is_file(),
-            "incompatible llama.cpp source: missing {required}"
-        );
-    }
-    for directory in ["include", "src", "ggml", "common", "vendor", "cmake"] {
+        .map(|path| {
+            path.canonicalize()
+                .expect("llama.cpp source directory unavailable")
+        });
+    if let Some(source) = &selected {
+        for directory in ["include", "src", "ggml", "common", "vendor", "cmake"] {
+            println!(
+                "cargo:rerun-if-changed={}",
+                source.join(directory).display()
+            );
+        }
         println!(
             "cargo:rerun-if-changed={}",
-            source.join(directory).display()
+            source.join("CMakeLists.txt").display()
         );
     }
-    println!(
-        "cargo:rerun-if-changed={}",
-        source.join("CMakeLists.txt").display()
-    );
-    for file in ["native/bridge.cpp", "native/chat.cpp", "build.rs"] {
+    for file in [
+        "native/bridge.cpp",
+        "native/chat.cpp",
+        "cmake/CMakeLists.txt",
+        "UPSTREAM_COMMIT",
+        "build.rs",
+    ] {
         println!("cargo:rerun-if-changed={file}");
     }
 
     let cuda = env::var_os("CARGO_FEATURE_CUDA").is_some();
     let cuda_architectures = env::var("L2S1_CUDA_ARCHITECTURES").ok();
-    let commit = fs::read_to_string(source.join("UPSTREAM_COMMIT")).unwrap_or_else(|_| {
-        std::process::Command::new("git")
-            .arg("-C")
-            .arg(&source)
-            .args(["rev-parse", "HEAD"])
-            .output()
-            .ok()
-            .filter(|output| output.status.success())
-            .and_then(|output| String::from_utf8(output.stdout).ok())
-            .unwrap_or_else(|| "custom-source".into())
-    });
+    let commit = if let Some(source) = &selected {
+        fs::read_to_string(source.join("UPSTREAM_COMMIT")).unwrap_or_else(|_| {
+            std::process::Command::new("git")
+                .arg("-C")
+                .arg(source)
+                .args(["rev-parse", "HEAD"])
+                .output()
+                .ok()
+                .filter(|output| output.status.success())
+                .and_then(|output| String::from_utf8(output.stdout).ok())
+                .unwrap_or_else(|| "custom-source".into())
+        })
+    } else {
+        fs::read_to_string(manifest.join("UPSTREAM_COMMIT"))
+            .expect("pinned llama.cpp commit unavailable")
+    };
     let mut build_key = Sha256::new();
-    build_key.update(source.to_string_lossy().as_bytes());
+    build_key.update(
+        selected
+            .as_ref()
+            .map_or("pinned", |source| {
+                source.to_str().expect("source path is UTF-8")
+            })
+            .as_bytes(),
+    );
+    build_key.update(commit.trim().as_bytes());
     build_key.update(if cuda { "cuda" } else { "cpu" }.as_bytes());
     if let Some(architectures) = &cuda_architectures {
         build_key.update(architectures.as_bytes());
     }
     let build_dir = format!("{:x}", build_key.finalize());
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
-    let mut cmake = cmake::Config::new(&source);
+    let mut cmake = cmake::Config::new(manifest.join("cmake"));
     cmake
         .out_dir(out_dir.join("llama").join(&build_dir[..16]))
         .profile("Release")
@@ -108,6 +118,9 @@ fn main() {
         .define("LLAMA_BUILD_COMMIT", commit.trim())
         .define("LLAMA_BUILD_NUMBER", "0")
         .define("GGML_CUDA", if cuda { "ON" } else { "OFF" });
+    if let Some(source) = &selected {
+        cmake.define("FETCHCONTENT_SOURCE_DIR_LLAMA_CPP", source);
+    }
     if cuda {
         cmake.define("GGML_NATIVE", "OFF");
         if let Some(architectures) = &cuda_architectures {
@@ -120,6 +133,23 @@ fn main() {
         lib.join("libllama.so").is_file(),
         "llama.cpp did not install libllama.so"
     );
+    let source = PathBuf::from(
+        fs::read_to_string(install.join("build/l2s1-llama-source.txt"))
+            .expect("CMake did not report its llama.cpp source directory"),
+    )
+    .canonicalize()
+    .expect("llama.cpp source directory unavailable after CMake build");
+    for required in [
+        "CMakeLists.txt",
+        "include/llama.h",
+        "src/llama-ext.h",
+        "common/jinja/lexer.cpp",
+    ] {
+        assert!(
+            source.join(required).is_file(),
+            "incompatible llama.cpp source: missing {required}"
+        );
+    }
 
     let mut bridge = cc::Build::new();
     bridge

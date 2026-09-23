@@ -100,7 +100,7 @@ cargo build --release --locked --features llama
 cargo build --release --locked --features llama-cuda
 ```
 
-The default CPU build uses bundled llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`. To build another revision, set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`; the legacy `LLAMA_CPP_DIR` source override also works. `LLAMA_LIB_DIR` is no longer used. Validate custom revisions with the native contract tests. See [verification commands](VERIFICATION.md) and [native dependency details](crates/l2s1-llama-sys/README.md).
+The default CPU build uses CMake FetchContent to download and verify llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`; the first build needs network access. For an offline build or another revision, set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`; the legacy `LLAMA_CPP_DIR` source override also works. `LLAMA_LIB_DIR` is no longer used. Validate custom revisions with the native contract tests. See [verification commands](VERIFICATION.md) and [native dependency details](crates/l2s1-llama-sys/README.md).
 
 For an independent source release, publish `l2s1-llama-sys` before `l2s1`. A prebuilt executable must ship its matching native shared libraries with a portable loader path; swapping only `libllama.so` is unsupported.
 

@@ -4,7 +4,7 @@ L2S1 source code is licensed under the [MIT License](LICENSE), as declared in `C
 
 [THIRD_PARTY_LICENSES.txt](THIRD_PARTY_LICENSES.txt) contains the dependency license texts and attribution notices. Preserve the applicable notices when distributing those components.
 
-The `l2s1-llama-sys` source package includes a pinned llama.cpp source snapshot, its upstream license, and its own [third-party notices](crates/l2s1-llama-sys/THIRD_PARTY_LICENSES.txt). Preserve those notices when distributing the native dependency.
+The `l2s1-llama-sys` source package fetches a pinned llama.cpp archive during its build. The archive contains the upstream license; the crate also includes [third-party notices](crates/l2s1-llama-sys/THIRD_PARTY_LICENSES.txt). Preserve those notices when distributing the native dependency.
 
 ## Model weights
 
