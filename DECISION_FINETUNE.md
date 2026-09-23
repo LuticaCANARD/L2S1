@@ -174,6 +174,11 @@ are admitted. Generated rationales are logged but never used as student targets;
 missing or wrong teacher answers are not replaced with oracle labels. The same
 accepted examples and protocol must bind smoke and final training.
 
+`--teacher-batch-size` enables left-padded teacher generation (default 1). Each
+answer is trimmed independently at its first EOS before validation. Use a separate
+limited pilot to size GPU memory; the teacher report records peak CUDA allocation
+and batch timing. Incomplete pilots are not accepted as training inputs.
+
 ```sh
 train_stage() {
   python3 scripts/train_accuracy_lora.py "$@" \

@@ -207,27 +207,60 @@ def teacher_messages(case, row):
                    kind=decision['kind']['type'], candidates=mapped)
     return [dict(role='user', content=(
         'Determine the correct decision from the state and the exact candidate criteria. '
-        'For ordinal candidates apply their thresholds exactly. Think carefully in the thought channel. '
+        'For ordinal candidates apply their thresholds exactly. Keep the thought to at most two short sentences: '
+        'identify the relevant value and compare the thresholds. '
         'After ending the thought channel, output exactly one candidate code and nothing else.\n'
         + json.dumps(content, ensure_ascii=False, sort_keys=True)))]
 
 
 def teacher_inputs(tokenizer, messages, device):
-    # Transformers 5 defaults to BatchEncoding; request the mapping explicitly
-    # and pass its tensors (including the attention mask) into generation.
-    encoded = tokenizer.apply_chat_template(
-        messages, tokenize=True, return_tensors='pt', return_dict=True,
-        add_generation_prompt=True, enable_thinking=True)
+    # Transformers 5 defaults to BatchEncoding. Decoder-only batch generation
+    # requires left padding so every row's final input position is meaningful.
+    require(messages, 'Teacher prompt list is empty')
+    batched = isinstance(messages[0], list)
+    count = len(messages) if batched else 1
+    require(not batched or all(isinstance(m, list) and m for m in messages),
+            'Teacher batch contains an empty/invalid conversation')
+    previous_padding = getattr(tokenizer, 'padding_side', 'right')
+    try:
+        tokenizer.padding_side = 'left'
+        encoded = tokenizer.apply_chat_template(
+            messages, tokenize=True, return_tensors='pt', return_dict=True,
+            padding=batched, add_generation_prompt=True, enable_thinking=True)
+    finally:
+        tokenizer.padding_side = previous_padding
     if isinstance(encoded, Mapping):
         require('input_ids' in encoded, 'Teacher tokenizer returned no input IDs')
-        inputs = {key: value.to(device) for key, value in encoded.items()
+        inputs = {key: value for key, value in encoded.items()
                   if key in ('input_ids', 'attention_mask')}
     else:
-        # Compatible with tokenizer implementations that still return a tensor.
-        inputs = {'input_ids': encoded.to(device)}
-    require(len(inputs['input_ids'].shape) == 2 and inputs['input_ids'].shape[0] == 1,
-            'Teacher requires exactly one tokenized prompt')
-    return inputs
+        require(not batched, 'Batched teacher tokenizer must provide an attention mask')
+        inputs = {'input_ids': encoded}
+    require(len(inputs['input_ids'].shape) == 2 and inputs['input_ids'].shape[0] == count,
+            'Teacher tokenizer batch size mismatch')
+    if batched:
+        require('attention_mask' in inputs, 'Batched teacher requires an attention mask')
+        require(inputs['attention_mask'].shape == inputs['input_ids'].shape,
+                'Teacher attention mask shape mismatch')
+        for mask in inputs['attention_mask'].tolist():
+            require(mask and mask[-1] == 1 and all(v in (0, 1) for v in mask) and mask == sorted(mask),
+                    'Teacher attention mask must use left padding')
+    return {key: value.to(device) for key, value in inputs.items()}
+
+
+def trim_teacher_generation(tokens, eos_token_ids, pad_token_id, max_new_tokens):
+    """Keep the first terminating EOS, removing only its following batch padding."""
+    require(isinstance(eos_token_ids, (list, tuple)) and eos_token_ids and
+            all(type(i) is int and i >= 0 for i in eos_token_ids), 'Invalid configured teacher EOS IDs')
+    require(type(pad_token_id) is int and pad_token_id >= 0, 'Teacher padding token missing')
+    require(0 < len(tokens) <= max_new_tokens, 'Generated sequence exceeds token budget or is empty')
+    for index, token in enumerate(tokens):
+        if token in eos_token_ids:
+            require(all(t == pad_token_id for t in tokens[index+1:]),
+                    'Non-padding tokens after teacher EOS')
+            return tokens[:index+1], True, False
+    # Without EOS, do not strip any pad-like generated token: it is model output.
+    return tokens, False, len(tokens) >= max_new_tokens
 
 
 def parse_teacher(text, codes, reached_budget):
@@ -289,42 +322,69 @@ def run_teacher(args, cases, rows, provenance, tokenizer):
             key = row['id'], row['decision_id']
             if key not in by_task or row.get('code_rotation', 0) < by_task[key].get('code_rotation', 0):
                 by_task[key] = row
+    eos_ids = model.generation_config.eos_token_id
+    if type(eos_ids) is int:
+        eos_ids = [eos_ids]
+    require(isinstance(eos_ids, (list, tuple)) and eos_ids, 'Teacher EOS configuration missing')
+    pad_id = tokenizer.pad_token_id
+    require(type(pad_id) is int and pad_id >= 0, 'Teacher tokenizer has no padding token')
+    tasks = [row for _, row in sorted(by_task.items())]
     counts = collections.Counter()
+    torch.cuda.reset_peak_memory_stats()
+    started_all = time.monotonic()
+    batch_times = []
     with torch.inference_mode(), (args.output / 'teacher.jsonl').open('x') as output:
-        for key, row in sorted(by_task.items()):
-            case = cases[row['id']]
-            messages = teacher_messages(case, row)
-            prompt = tokenizer.apply_chat_template(messages, tokenize=False,
-                                                   add_generation_prompt=True, enable_thinking=True)
-            require('<|think|>' in prompt, 'Checkpoint template did not enable thinking')
+        for start in range(0, len(tasks), args.teacher_batch_size):
+            batch = tasks[start:start+args.teacher_batch_size]
+            messages = [teacher_messages(cases[row['id']], row) for row in batch]
+            prompts = tokenizer.apply_chat_template(messages, tokenize=False,
+                                                    add_generation_prompt=True, enable_thinking=True)
+            require(len(prompts) == len(batch) and all('<|think|>' in p for p in prompts),
+                    'Checkpoint template did not enable thinking for every prompt')
             inputs = teacher_inputs(tokenizer, messages, 'cuda')
             input_length = inputs['input_ids'].shape[-1]
             require(input_length <= 2048, 'Teacher input exceeds budget')
+            torch.cuda.synchronize()
             started = time.monotonic()
             generated = model.generate(**inputs, max_new_tokens=args.max_new_tokens,
-                                       do_sample=False, use_cache=True)
-            continuation = generated[0, input_length:].tolist()
-            text = tokenizer.decode(continuation, skip_special_tokens=False,
-                                    clean_up_tokenization_spaces=False)
-            budget = len(continuation) >= args.max_new_tokens
-            status, code = parse_teacher(text, row['candidate_codes'], budget)
-            predicted = (row['option_ids'][row['candidate_codes'].index(code)]
-                         if code is not None else None)
-            if status == 'parsed':
-                status = 'correct' if predicted == case['expected'][row['decision_id']] else 'wrong'
-            record = dict(id=row['id'], decision_id=row['decision_id'], group=case['group'],
-                          status=status, code=code, predicted=predicted,
-                          candidate_codes=row['candidate_codes'], option_ids=row['option_ids'],
-                          generated_text=text, generated_tokens=len(continuation), reached_budget=budget,
-                          elapsed_s=time.monotonic()-started)
-            output.write(json.dumps(record, ensure_ascii=False)+'\n')
-            output.flush()
-            counts[status] += 1
-            print('TEACHER', len(by_task), sum(counts.values()), status, flush=True)
+                                       do_sample=False, use_cache=True, eos_token_id=eos_ids,
+                                       pad_token_id=pad_id, return_dict_in_generate=False)
+            continuations = generated[:, input_length:].tolist()
+            elapsed = time.monotonic()-started
+            batch_times.append(elapsed)
+            require(len(continuations) == len(batch), 'Teacher output batch size mismatch')
+            for row, raw_tokens in zip(batch, continuations):
+                case = cases[row['id']]
+                continuation, ended_eos, budget = trim_teacher_generation(
+                    raw_tokens, eos_ids, pad_id, args.max_new_tokens)
+                text = tokenizer.decode(continuation, skip_special_tokens=False,
+                                        clean_up_tokenization_spaces=False)
+                status, code = parse_teacher(text, row['candidate_codes'], budget)
+                predicted = (row['option_ids'][row['candidate_codes'].index(code)]
+                             if code is not None else None)
+                if status == 'parsed':
+                    status = 'correct' if predicted == case['expected'][row['decision_id']] else 'wrong'
+                record = dict(id=row['id'], decision_id=row['decision_id'], group=case['group'],
+                              status=status, code=code, predicted=predicted,
+                              candidate_codes=row['candidate_codes'], option_ids=row['option_ids'],
+                              generated_text=text, generated_tokens=len(continuation), reached_budget=budget,
+                              ended_eos=ended_eos, padded_output_tokens=len(raw_tokens),
+                              batch_index=len(batch_times)-1, actual_batch_size=len(batch),
+                              elapsed_s=elapsed, elapsed_scope='shared_batch_generation_wall')
+                output.write(json.dumps(record, ensure_ascii=False)+'\n')
+                output.flush()
+                counts[status] += 1
+                print('TEACHER', len(by_task), sum(counts.values()), status, flush=True)
     report = dict(provenance, complete=True, teacher_sha256=digest(args.output/'teacher.jsonl'),
                   checkpoint_sha256=provenance['checkpoint_sha256'], statuses=dict(counts),
                   selected_logical_cases=len(selected_ids), teacher_tasks=len(by_task),
                   max_new_tokens=args.max_new_tokens, max_teacher_cases=args.max_teacher_cases,
+                  teacher_batch_size=args.teacher_batch_size, batch_generation_seconds=batch_times,
+                  gpu=torch.cuda.get_device_name(),
+                  peak_cuda_gib=torch.cuda.max_memory_allocated()/1024**3,
+                  teacher_elapsed_s=time.monotonic()-started_all,
+                  per_case_elapsed_scope='shared_batch_generation_wall; do not sum across rows',
+                  padding_side='left', eos_token_ids=list(eos_ids), pad_token_id=pad_id,
                   enable_thinking=True, teacher_precision='NF4 base, bf16 matrices, fp32 norms; SDPA',
                   student_supervision='verified final semantic answer only; no rationale loss')
     write_json(args.output/'teacher-report.json', report)
@@ -466,10 +526,12 @@ def main():
     parser.add_argument('--smoke-report', type=Path, help='Discarded smoke complete.json for final train')
     parser.add_argument('--max-teacher-cases', type=int, default=0, help='0 means all train logical cases')
     parser.add_argument('--max-new-tokens', type=int, default=384)
+    parser.add_argument('--teacher-batch-size', type=int, default=1, help='Opt-in left-padded generation batch size')
     parser.add_argument('--max-train-cases', type=int, default=0, help='0 means all accepted logical cases and rotations')
     args = parser.parse_args()
     require(args.max_teacher_cases >= 0 and args.max_train_cases >= 0 and args.max_new_tokens > 0,
             'Limits must be nonnegative; token budget must be positive')
+    require(1 <= args.teacher_batch_size <= 32, 'Teacher batch size must be in 1..32')
     require(args.command == 'teacher' or args.teacher is not None, 'Training requires --teacher')
     from prepare_accuracy_study import validate_dataset
     validate_dataset(args.data)  # Also enforce frozen threshold/template allocation and pairing.

@@ -71,9 +71,57 @@ class AccuracyDistillationTests(unittest.TestCase):
         self.assertEqual(mask.device, 'cpu')
         self.assertTrue(tokenizer.kwargs['return_dict'])
         self.assertTrue(tokenizer.kwargs['enable_thinking'])
-        self.assertEqual(trainer.teacher_inputs(Tokenizer(ids), [], 'cpu'), {'input_ids': ids})
+        self.assertEqual(trainer.teacher_inputs(Tokenizer(ids), [{'role': 'user', 'content': 'Test'}], 'cpu'), {'input_ids': ids})
         with self.assertRaisesRegex(ValueError, 'no input IDs'):
-            trainer.teacher_inputs(Tokenizer({'attention_mask': mask}), [], 'cpu')
+            trainer.teacher_inputs(Tokenizer({'attention_mask': mask}), [{'role': 'user', 'content': 'Test'}], 'cpu')
+
+    def test_teacher_batch_uses_left_padding_and_validates_mask_shape(self):
+        class Tensor:
+            def __init__(self, values):
+                self.values = values
+                self.shape = (len(values), len(values[0]))
+            def tolist(self):
+                return self.values
+            def to(self, device):
+                return self
+        class Tokenizer:
+            padding_side = 'right'
+            def __init__(self, output):
+                self.output = output
+            def apply_chat_template(self, messages, **kwargs):
+                self.padding_seen = self.padding_side
+                self.kwargs = kwargs
+                return self.output
+        conversations = [[{'role': 'user', 'content': text}] for text in ('Short', 'Longer text')]
+        ids = Tensor([[0, 1, 2], [1, 2, 3]])
+        mask = Tensor([[0, 1, 1], [1, 1, 1]])
+        tokenizer = Tokenizer({'input_ids': ids, 'attention_mask': mask})
+        result = trainer.teacher_inputs(tokenizer, conversations, 'cpu')
+        self.assertEqual(result['input_ids'].shape, (2, 3))
+        self.assertEqual(tokenizer.padding_seen, 'left')
+        self.assertEqual(tokenizer.padding_side, 'right')
+        self.assertTrue(tokenizer.kwargs['padding'])
+        for output in ({'input_ids': ids},
+                       {'input_ids': ids, 'attention_mask': Tensor([[1, 1, 0], [1, 1, 1]])},
+                       {'input_ids': ids, 'attention_mask': Tensor([[1], [1]])}):
+            with self.assertRaises(ValueError):
+                trainer.teacher_inputs(Tokenizer(output), conversations, 'cpu')
+        with self.assertRaisesRegex(ValueError, 'batch size mismatch'):
+            trainer.teacher_inputs(tokenizer, conversations[:1], 'cpu')
+        with self.assertRaisesRegex(ValueError, 'prompt list is empty'):
+            trainer.teacher_inputs(tokenizer, [], 'cpu')
+
+    def test_teacher_eos_trimming_preserves_own_budget_and_never_strips_model_output(self):
+        trim = trainer.trim_teacher_generation
+        self.assertEqual(trim([7, 106, 0, 0], [1, 106, 50], 0, 4), ([7, 106], True, False))
+        self.assertEqual(trim([7, 8, 9, 106], [106], 0, 4), ([7, 8, 9, 106], True, False))
+        self.assertEqual(trim([7, 8, 9, 0], [106], 0, 4), ([7, 8, 9, 0], False, True))
+        self.assertEqual(trim([7, 0, 8], [106], 0, 4), ([7, 0, 8], False, False))
+        self.assertEqual(trim([7, 106, 106], [106], 106, 4), ([7, 106], True, False))
+        for tokens, eos, pad, maximum in ([7, 106, 8], [106], 0, 4), ([], [106], 0, 4), \
+                ([1, 2, 3, 4, 5], [106], 0, 4), ([1], [], 0, 4):
+            with self.assertRaises(ValueError):
+                trim(tokens, eos, pad, maximum)
 
     def test_streaming_digest_does_not_read_entire_checkpoint(self):
         with tempfile.TemporaryDirectory() as tmp:
