@@ -96,9 +96,9 @@ impl DecisionRequest {
                 ));
             }
             let options = d.options();
-            if !(2..=26).contains(&options.len()) {
+            if options.len() < 2 {
                 return Err(Error::Invalid(
-                    "each decision requires 2..=26 options".into(),
+                    "each decision requires at least 2 options".into(),
                 ));
             }
             let mut option_ids = HashSet::new();
@@ -176,6 +176,10 @@ pub struct OptionScore {
     pub id: String,
     pub code: String,
     pub token_id: i32,
+    /// Full continuation for sequence scoring; token_id is -1 for multiple tokens.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub token_ids: Vec<i32>,
+    /// A native logit for single-token scoring; joint log probability for sequences.
     pub raw_logit: f64,
     pub option_probability: f64,
 }
@@ -203,6 +207,12 @@ pub struct DecisionResult {
     /// Exact prefix tokens reused in this forward pass; evaluated = input - reused.
     #[serde(default)]
     pub reused_prefix_tokens: usize,
+    /// Native prefix evaluations for complete multi-letter code likelihoods.
+    #[serde(default, skip_serializing_if = "zero_rotation")]
+    pub code_prefix_evaluations: usize,
+    /// Tokens actually decoded across those evaluations, excluding KV reuse.
+    #[serde(default, skip_serializing_if = "zero_rotation")]
+    pub code_evaluated_tokens: usize,
     pub truncated: bool,
 }
 
@@ -270,6 +280,23 @@ pub enum FlashAttention {
     On,
 }
 
+/// Model-file loading strategy; separate from tensor placement and quantization.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
+#[serde(rename_all = "snake_case")]
+pub enum ModelLoadMode {
+    /// Preserve llama.cpp's device-dependent default.
+    #[default]
+    Auto,
+    /// Read weights into backend buffers without mapping the entire GGUF.
+    Read,
+}
+
+impl ModelLoadMode {
+    fn is_auto(&self) -> bool {
+        *self == Self::Auto
+    }
+}
+
 /// Explicit opt-in compute tuning. FlashAttention records the requested mode;
 /// consult llama.cpp logs for actual kernel support on the selected device.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -279,6 +306,18 @@ pub struct ComputeOptions {
     pub ubatch: u32,
     pub threads: i32,
     pub flash_attention: FlashAttention,
+    /// None preserves the device default; Some(n) puts at most n layers on CUDA.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gpu_layers: Option<u32>,
+    /// Keep expert weights of the first n MoE layers in CPU RAM (CUDA only).
+    #[serde(default, skip_serializing_if = "zero_u32")]
+    pub cpu_moe_layers: u32,
+    #[serde(default, skip_serializing_if = "ModelLoadMode::is_auto")]
+    pub model_load_mode: ModelLoadMode,
+}
+
+fn zero_u32(value: &u32) -> bool {
+    *value == 0
 }
 
 impl ComputeOptions {
@@ -290,9 +329,20 @@ impl ComputeOptions {
             || self.ubatch == 0
             || self.ubatch > self.batch
             || self.threads <= 0
+            || self.gpu_layers.is_some_and(|n| n > i32::MAX as u32)
+            || self.cpu_moe_layers > i32::MAX as u32
         {
             return Err(Error::Invalid(
-                "require 0 < ubatch <= batch <= context <= i32::MAX and threads > 0".into(),
+                "require 0 < ubatch <= batch <= context <= i32::MAX, threads > 0, and placement counts <= i32::MAX".into(),
+            ));
+        }
+        Ok(())
+    }
+    pub fn validate_device(&self, cuda: bool) -> Result<()> {
+        self.validate()?;
+        if !cuda && (self.gpu_layers.is_some_and(|n| n > 0) || self.cpu_moe_layers > 0) {
+            return Err(Error::Invalid(
+                "GPU layer placement and CPU MoE splitting require the CUDA device".into(),
             ));
         }
         Ok(())
@@ -402,8 +452,9 @@ pub(crate) fn score_candidate_logits(
             .enumerate()
             .map(|(i, o)| OptionScore {
                 id: o.id.clone(),
-                code: ((b'A' + i as u8) as char).to_string(),
+                code: crate::option_code(i, options.len()).expect("validated option count"),
                 token_id: candidate_tokens[i],
+                token_ids: Vec::new(),
                 raw_logit: selected_logits[i],
                 option_probability: p[i],
             })
@@ -416,6 +467,8 @@ pub(crate) fn score_candidate_logits(
         calibration_id: None,
         input_tokens,
         reused_prefix_tokens: 0,
+        code_prefix_evaluations: 0,
+        code_evaluated_tokens: 0,
         truncated: false,
     })
 }

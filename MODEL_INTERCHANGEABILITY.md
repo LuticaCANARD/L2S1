@@ -18,7 +18,7 @@ l2s1 --model models/SmolLM2-135M-Instruct-Q8_0.gguf \
 
 Loaded-library discovery currently uses Linux's dynamic loader. The native backend fails explicitly when verified runtime discovery is unavailable; the pure Rust scoring, calibration and worker modules do not require Linux or llama.cpp. The runtime build hash binds bridge/scoring/prompt/calibration sources, dependency lockfile, Jinja sources, linked core libraries, the compiled bridge archive (including transitive headers and C++ compilation), target/profile/Rust flags and compiler version; loaded-library hashes also cover the dynamically loaded ggml device backends.
 
-`preflight()` uses the same model-bound preparation as inference. It checks request structure, execution support, active artifacts, context length and unique stable single-token continuations at the actual answer boundary. It returns token counts, candidate mappings and prompt-token fingerprints without inference. Capability flags are metadata-based, not a guarantee of model quality or numerical equivalence. Hybrid/recurrent models reject parallel execution; prefix reuse explicitly falls back to fresh. State restore is experimental even when exposed as an available operation. A loaded head still enforces its existing fresh-only/device/compute restrictions.
+`preflight()` uses the same model-bound preparation as inference. It checks request structure, execution support, active artifacts, context length and stable candidate continuations at the actual answer boundary. Up to 26 candidates use the existing single-token mapping. Larger sets use fixed-width uppercase codes and return `candidate_token_sequences` instead of scalar `candidate_token_ids`; the token sequences must be unique and prefix-free. These decisions support fresh or prefix-reuse execution with full evidence without output heads, scalar calibration or feature export. `encode_decision_sequences()` exposes the complete paths; the old scalar export API explicitly rejects wide codes. See [the sequence scoring contract](INTENT_BENCHMARK.md). Preflight returns token counts, candidate mappings and prompt-token fingerprints without inference. Capability flags are metadata-based, not a guarantee of model quality or numerical equivalence. Hybrid/recurrent models reject parallel execution; prefix reuse explicitly falls back to fresh. State restore is experimental even when exposed as an available operation. A loaded head still enforces its existing fresh-only/device/compute restrictions.
 
 The existing `DecisionBackend::decide()` and response JSON remain available. `decide_detailed()` adds a separate envelope with model identity, per-decision requested/effective execution, fallback reason, evidence origin, calibration ID, request-local timing, and snapshot accounting. It never returns raw prompt text. Preparation/token hashes in preflight are outside inference timings; a parallel batch's native time is counted once. Ordinary abstention stays a successful result. Detailed failures distinguish invalid requests, unsupported capabilities, incompatible artifacts, context overflow, invalid score evidence and native failure. CLI `--preflight`/`--diagnostics` return request-stage failure JSON on stdout and a nonzero exit status; model loading and malformed JSON can still fail before this envelope.
 
@@ -44,7 +44,7 @@ let cache_stats = backend.preparation_cache_stats();
 backend.clear_preparation_cache();
 ```
 
-The backend owns two FIFO caches. Complete preparation is keyed by the exact serialized state and decision. Candidate mapping is keyed by the actual assistant-boundary text and candidate count. Model/tokenizer/template ownership is local to the backend, and relevant configuration changes invalidate cached preparation. Different questions, option counts, instructions and states use ordinary preparation on a miss. Only successful preparation is cached; predictions and native KV state are never stored here. Returned token vectors are still copied.
+The backend owns two FIFO caches. Complete preparation is keyed by the exact serialized state and decision. Candidate mapping is keyed by the actual assistant-boundary text and candidate count. Model/tokenizer/template ownership is local to the backend, and relevant configuration changes invalidate cached preparation. Different questions, option counts, instructions and states use ordinary preparation on a miss. Only successful preparation is cached; predictions and native KV state are never stored here. Returned token vectors are still copied. Single-letter mappings and multi-letter token paths share these limits; wide mappings count both the outer vector allocation and every token-path allocation. Cache hits do not bypass execution-mode or artifact checks.
 
 `max_entries` applies independently to each cache, so their combined entry count can reach twice that limit. One combined `max_bytes` budget allocates three quarters to complete prompts and one quarter to candidate mappings. Accounting includes retained key/token allocations and inline entries; allocator metadata, spare queue capacity, temporary input keys and returned clones are outside this bound. Oversized entries bypass storage without evicting useful entries. A zero entry or byte limit disables storage. `clear_preparation_cache()` removes entries but retains hit/miss/eviction counters; `set_preparation_cache()` replaces both caches and resets those counters. Ordinary request boundaries retain prepared tokens, while clearing native KV state.
 
@@ -76,7 +76,7 @@ backend.set_prompt_layout(l2s1::PromptLayout::StateFirst);
 
 Sessions require an explicitly selected `PrefixReuse` mode and reject recurrent/hybrid memory and output heads. They preserve the chosen prompt layout and evidence transfer mode. State-first layout can expose a longer common prefix when questions change, but changing layout can change predictions. This is the existing causal decoder's prefix reuse across explicit session calls, not a bidirectional state encoder or a small learned reading head. Reuse depends on actual matching tokens; one short question need not become faster.
 
-Creation, a failed call and drop clear native KV state. After a failed call the same session can accept another valid call. Ordinary `DecisionBackend::decide()` remains isolated at request boundaries; sessions do not change its lifetime contract. `reused_prefix_tokens` in each result reports actual reuse.
+Creation, a failed call and drop clear native KV state. After a failed call the same session can accept another valid call. Ordinary `DecisionBackend::decide()` remains isolated at request boundaries; sessions do not change its lifetime contract. `reused_prefix_tokens` in each result reports actual reuse. For multi-letter codes it reports reuse on the root prompt evaluation; `code_evaluated_tokens` counts decoded tokens across every code-prefix branch. Wide codes require full evidence. `session.preparation_cache_stats()` and `session.take_timings()` expose counters while the session is borrowed.
 
 ## Scoped scalar calibration
 
@@ -174,3 +174,36 @@ cargo run --release --locked --offline --features llama \
 The output must be new. One backend remains resident per model. The harness uses short/long synthetic warehouse states and 1/4/16 questions cycling choice, binary and ordinal schemas, rotates path order, and runs one untimed warmup immediately before each measured path/scenario/round. It records full responses, identities, cache counters, input/reused tokens, timing and maximum probability/mass/logit differences. Cached/compact paths are compared with legacy fresh; shared-state calls are compared with state-first fresh. Amortized time per question is not individual request latency. Identical warmup inputs exercise repeated preparation; they do not establish cache gains for new questions. This harness does not measure worker batching or labeled task accuracy.
 
 `ExecutionMode::StateRestore` and the added `EvidenceTransfer` configuration require downstream exhaustive matches and manually constructed Rust metadata structs to be updated where applicable. Default full-transfer JSON omits the added transfer field. Legacy prompt/fresh execution defaults and base score semantics are preserved. Test fixtures and contract equivalence do not establish production or labeled workload quality.
+
+## CPU/GPU placement
+
+CUDA loading accepts `--gpu-layers N` and `--cpu-moe-layers N`. The first limits
+GPU layer placement; the second keeps the expert weights of the first N MoE
+layers in CPU RAM while retaining normal placement for attention and shared
+weights. These settings can be combined. This controls weight residency; llama.cpp may still offload operations using host weights to CUDA during prefill. Omit both to preserve the original
+CUDA loading behavior. CPU-only loading rejects CUDA placement requests.
+
+```sh
+l2s1 --model models/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf --device cuda \
+  --cpu-moe-layers 18 --context 8192 --batch 256 --threads 8 \
+  --preparation-cache-bytes 67108864 --input request.json
+```
+
+The Rust fields are `ComputeOptions.gpu_layers: Option<u32>` and
+`cpu_moe_layers: u32`; manually constructed structs must supply `None` and `0`
+for legacy defaults. Old JSON remains readable, and default serialization omits
+both fields. Non-default values appear in response compute metadata and model
+identity, so calibration/head/worker identities distinguish placements.
+
+CPU expert splitting requires an MoE checkpoint and N no greater than its layer
+count. Patterns use llama.cpp's expert tensor naming and remain owned by the
+loaded engine. This is explicit weight placement, not a CPU fallback after CUDA
+allocation failure. The native log reports actual CPU/GPU buffers; requested
+layer counts alone do not prove a VRAM budget. CPU RAM, KV and compute buffers
+must also fit. On the RTX 3060 12 GiB, the 26B Q4 checkpoint with context 8192 and batch 256 failed context allocation with 14 CPU expert layers; 18 layers completed all 400 intent cases (200 BANKING77 English and 200 MASSIVE Korean), each with a first call and one cached repeat. All 400 cached calls preserved the complete decision evidence exactly. This validates the tested placement and context, not arbitrary context lengths or concurrent model instances.
+
+Quantized CPU and GPU kernels can produce different scores. A Qwen3 0.6B Q8
+probe with CPU-resident layers exceeded the existing 0.02 probability-difference
+criterion against full CUDA (maximum 0.028); this is not an equivalence claim.
+Evaluate accuracy on the intended placement. Preparation and session cache
+checks compare against fresh inference with that same placement.

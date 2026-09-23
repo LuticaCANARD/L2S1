@@ -62,7 +62,7 @@ struct Args {
     #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
     prompt_detail: PromptDetail,
     /// Cyclic answer-code assignment; semantic option/ordinal order is unchanged.
-    #[arg(long, default_value_t = 0, value_parser = clap::value_parser!(u32).range(0..26))]
+    #[arg(long, default_value_t = 0)]
     code_rotation: u32,
     #[arg(long, default_value = "-")]
     input: String,
@@ -78,6 +78,15 @@ struct Args {
     ubatch: Option<u32>,
     #[arg(long, value_enum, default_value_t = FlashAttention::Off)]
     flash_attention: FlashAttention,
+    /// Maximum layers on CUDA; omit to preserve full offload.
+    #[arg(long)]
+    gpu_layers: Option<u32>,
+    /// Keep expert weights of the first N MoE layers in CPU RAM.
+    #[arg(long, default_value_t = 0)]
+    cpu_moe_layers: u32,
+    /// Read avoids whole-file mmap during model loading; auto preserves defaults.
+    #[arg(long, value_enum, default_value_t = l2s1::ModelLoadMode::Auto)]
+    model_load_mode: l2s1::ModelLoadMode,
     #[arg(long, default_value_t = 4)]
     threads: i32,
     #[arg(long, default_value_t = 0.8)]
@@ -106,6 +115,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             ubatch: args.ubatch.unwrap_or(args.batch),
             threads: args.threads,
             flash_attention: args.flash_attention,
+            gpu_layers: args.gpu_layers,
+            cpu_moe_layers: args.cpu_moe_layers,
+            model_load_mode: args.model_load_mode,
         },
         matches!(args.device, Device::Cuda),
         policy,

@@ -127,9 +127,18 @@ def main():
     parser.add_argument('--model', type=pathlib.Path, required=True)
     parser.add_argument('--output', type=pathlib.Path, required=True)
     parser.add_argument('--context', type=int, default=8192)
+    parser.add_argument('--threads', type=int, default=4)
+    parser.add_argument('--gpu-layers', type=int)
+    parser.add_argument('--cpu-moe-layers', type=int, default=0)
+    parser.add_argument('--model-load-mode', choices=['auto', 'read'], default='auto')
     parser.add_argument('--device', choices=['cuda', 'cpu'], default='cuda')
+    parser.add_argument('--expected-gpu', help='Require this substring in the reported CUDA device name')
     parser.add_argument('--timeout', type=int, default=1800)
     args = parser.parse_args()
+    if args.threads < 1 or args.cpu_moe_layers < 0 or (args.gpu_layers is not None and args.gpu_layers < 0):
+        parser.error('Threads must be positive and placement counts nonnegative')
+    if args.device == 'cpu' and (args.cpu_moe_layers or args.gpu_layers not in (None, 0)):
+        parser.error('CPU loading does not accept CUDA placement requests')
     upstream = args.jevbench.resolve()
     revision = subprocess.check_output(['git', '-C', str(upstream), 'rev-parse', 'HEAD'], text=True).strip()
     if revision != JEVBENCH_REVISION:
@@ -163,14 +172,24 @@ def main():
     predictions_path = out / 'predictions.jsonl'
     command = [str(args.evaluator.resolve()), '--model', str(args.model.resolve()),
                '--input', str(request_path), '--output', str(predictions_path),
-               '--context', str(args.context), '--batch', '256', '--threads', '4',
+               '--context', str(args.context), '--batch', '256', '--threads', str(args.threads),
                '--execution-mode', 'fresh', '--prompt-layout', 'legacy', '--warmup']
     if args.device == 'cuda':
         command.append('--cuda')
+    if args.gpu_layers is not None:
+        command.extend(['--gpu-layers', str(args.gpu_layers)])
+    if args.cpu_moe_layers:
+        command.extend(['--cpu-moe-layers', str(args.cpu_moe_layers)])
+    if args.model_load_mode != 'auto':
+        command.extend(['--model-load-mode', args.model_load_mode])
     manifest = {'jevbench_revision': revision, 'dataset_hash': dataset_hash(tasks),
                 'source_sha256': source_files, 'requests_sha256': sha256(request_path),
                 'evaluator_sha256': sha256(args.evaluator), 'model_sha256': sha256(args.model),
                 'model_name': args.model.name, 'device': args.device,
+                'expected_gpu': args.expected_gpu,
+                'placement': {'gpu_layers': args.gpu_layers, 'cpu_moe_layers': args.cpu_moe_layers},
+                'threads': args.threads,
+                'model_load_mode': args.model_load_mode,
                 'adapter_sha256': sha256(__file__), 'command': command,
                 'planned': len(tasks), 'tier_counts': SPLITS,
                 'label_order': 'canonical task.labels; binary false/true mapped to no/yes',
@@ -195,8 +214,16 @@ def main():
     predictions = [json.loads(line) for line in predictions_path.read_text().splitlines()]
     records, selective = score_predictions(tasks, predictions, score_task, args.model.name + '/l2s1')
     backends = [p['response']['backend'] for p in predictions if 'response' in p]
-    if args.device == 'cuda' and any(not b['offload_requested'] or '3060' not in b['offload_device'] for b in backends):
-        raise ValueError('Run did not use the expected RTX 3060')
+    if any(b['compute'].get('model_load_mode', 'auto') != args.model_load_mode for b in backends):
+        raise ValueError('Reported model loading mode differs from the requested configuration')
+    if any(b['compute'].get('gpu_layers') != args.gpu_layers or
+           b['compute'].get('cpu_moe_layers', 0) != args.cpu_moe_layers for b in backends):
+        raise ValueError('Reported CPU/GPU placement differs from the requested configuration')
+    if args.device == 'cuda' and any(
+            not b['offload_requested'] or not b.get('offload_device') or
+            (args.expected_gpu and args.expected_gpu not in b['offload_device'])
+            for b in backends):
+        raise ValueError('Run did not use CUDA or the expected GPU')
     summary = summarize(tasks, records)
     summary['backend'] = backends[0] if backends else None
     samples = [float(line.split(',')[1]) for line in (out / 'gpu-memory.csv').read_text().splitlines()

@@ -51,6 +51,16 @@ impl LlamaBackend {
 }
 
 impl SharedStateSession<'_> {
+    /// Model-local preparation-cache counters, including this session's calls.
+    pub fn preparation_cache_stats(&self) -> super::PreparationCacheStats {
+        self.backend.preparation_cache_stats()
+    }
+
+    /// Drain inference timings without ending the session or clearing its KV.
+    pub fn take_timings(&mut self) -> super::InferenceTimings {
+        self.backend.take_timings()
+    }
+
     /// Evaluate independent decisions against the session's immutable state.
     /// IDs must be unique within this call; the same IDs may be reused in later
     /// calls. A failed call clears native state and can be followed by a new call.
@@ -67,12 +77,13 @@ impl SharedStateSession<'_> {
                 .map(|decision| self.backend.evaluate(&self.request.state, decision))
                 .collect::<Result<Vec<_>>>()
         })();
+        let backend_info = self.backend.info_for_request(&self.request);
         self.request.decisions.clear();
         if results.is_err() {
             unsafe { sd_clear(self.backend.engine.as_ptr()) };
         }
         Ok(DecisionResponse {
-            backend: self.backend.info(),
+            backend: backend_info,
             policy: self.backend.policy.clone(),
             results: results?,
         })

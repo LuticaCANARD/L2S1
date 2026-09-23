@@ -179,9 +179,8 @@ mod native {
                 assert_semantics(&response, &request, &prepared, rotation);
             }
         }
-        let before_bad_rotation = backend.identity();
-        assert!(backend.set_code_rotation(26).is_err());
-        assert_eq!(backend.identity(), before_bad_rotation);
+        // Rotation is reduced modulo the actual option count, including wide codes.
+        backend.set_code_rotation(26).unwrap();
 
         backend.set_prompt_detail(PromptDetail::Minimal);
         backend.set_code_rotation(0).unwrap();

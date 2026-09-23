@@ -14,11 +14,12 @@ use std::{
 };
 
 mod batching;
+mod code_sequences;
 mod interchange;
 mod prepared_cache;
 mod shared_state;
-use prepared_cache::BoundedTokenCache;
 pub use prepared_cache::CacheMetrics;
+use prepared_cache::{BoundedTokenCache, CandidateTokens};
 pub use shared_state::SharedStateSession;
 
 #[derive(Debug, Clone, Copy, Default, serde::Serialize)]
@@ -69,7 +70,7 @@ unsafe extern "C" {
         error: *mut c_char,
         cap: usize,
     ) -> bool;
-    fn sd_open(
+    fn sd_open_loading(
         path: *const c_char,
         context: u32,
         batch: u32,
@@ -77,6 +78,9 @@ unsafe extern "C" {
         flash_attention: i32,
         threads: i32,
         cuda: bool,
+        gpu_layers: i32,
+        cpu_moe_layers: i32,
+        model_load_mode: i32,
         error: *mut c_char,
         cap: usize,
     ) -> *mut c_void;
@@ -147,8 +151,8 @@ pub struct LlamaBackend {
     code_rotation: usize,
     evidence_transfer: EvidenceTransfer,
     preparation_cache_enabled: bool,
-    prepared_cache: RefCell<BoundedTokenCache<(Vec<i32>, Vec<i32>)>>,
-    candidate_cache: RefCell<BoundedTokenCache<Vec<i32>>>,
+    prepared_cache: RefCell<BoundedTokenCache<(Vec<i32>, CandidateTokens)>>,
+    candidate_cache: RefCell<BoundedTokenCache<CandidateTokens>>,
     logits_buffer: Vec<f32>,
     model_path: String,
     lora_path: Option<String>,
@@ -292,6 +296,9 @@ impl LlamaBackend {
                 ubatch: batch,
                 threads,
                 flash_attention: FlashAttention::Off,
+                gpu_layers: None,
+                cpu_moe_layers: 0,
+                model_load_mode: crate::ModelLoadMode::Auto,
             },
             cuda,
             policy,
@@ -307,7 +314,7 @@ impl LlamaBackend {
         profile: PromptProfile,
     ) -> Result<Self> {
         policy.validate()?;
-        compute.validate()?;
+        compute.validate_device(cuda)?;
         let path = path
             .canonicalize()
             .map_err(|e| Error::Backend(e.to_string()))?;
@@ -321,7 +328,7 @@ impl LlamaBackend {
         let mut error = [0 as c_char; 1024];
         // All pointers refer to live buffers and the native handle owns model/context.
         let engine = unsafe {
-            sd_open(
+            sd_open_loading(
                 path_c.as_ptr(),
                 compute.context,
                 compute.batch,
@@ -333,6 +340,14 @@ impl LlamaBackend {
                 },
                 compute.threads,
                 cuda,
+                compute
+                    .gpu_layers
+                    .map_or(if cuda { -1 } else { 0 }, |n| n as i32),
+                compute.cpu_moe_layers as i32,
+                match compute.model_load_mode {
+                    crate::ModelLoadMode::Auto => -1,
+                    crate::ModelLoadMode::Read => 0,
+                },
                 error.as_mut_ptr(),
                 error.len(),
             )
@@ -576,7 +591,7 @@ impl LlamaBackend {
             Ok((
                 self.copy_features()?,
                 DecisionResponse {
-                    backend: self.info(),
+                    backend: self.info_for_request(request),
                     policy: self.policy.clone(),
                     results: vec![result],
                 },
@@ -598,6 +613,11 @@ impl LlamaBackend {
         state: &serde_json::Value,
         decision: &Decision,
     ) -> Result<(Vec<i32>, Vec<i32>)> {
+        if decision.options().len() > 26 {
+            return Err(Error::Invalid(
+                "wide answer codes require encode_decision_sequences".into(),
+            ));
+        }
         DecisionRequest {
             state: state.clone(),
             decisions: vec![decision.clone()],
@@ -679,9 +699,6 @@ impl LlamaBackend {
     /// Rotate answer-code assignment while preserving semantic option order,
     /// including ordinal level values. Rotation is modulo each option count.
     pub fn set_code_rotation(&mut self, rotation: usize) -> Result<()> {
-        if rotation >= 26 {
-            return Err(Error::Invalid("code rotation must be in 0..26".into()));
-        }
         unsafe { sd_clear(self.engine.as_ptr()) };
         self.code_rotation = rotation;
         self.clear_preparation_cache();
@@ -692,7 +709,7 @@ impl LlamaBackend {
         let count = result.scores.len();
         for (index, score) in result.scores.iter_mut().enumerate() {
             let position = (index + count - self.code_rotation % count) % count;
-            score.code = ((b'A' + position as u8) as char).to_string();
+            score.code = option_code(position, count).expect("validated option count");
         }
     }
 
@@ -770,15 +787,21 @@ impl LlamaBackend {
             None
         };
         if let Some(key) = &key
-            && let Some(prepared) = self.prepared_cache.borrow_mut().get("model-local-v1", key)
+            && let Some((input, CandidateTokens::Single(tokens))) =
+                self.prepared_cache.borrow_mut().get("model-local-v1", key)
         {
-            return Ok(prepared);
+            return Ok((input, tokens));
         }
         let prepared = self.prepare_uncached(state, decision)?;
         if let Some(key) = key {
-            self.prepared_cache
-                .borrow_mut()
-                .insert("model-local-v1".into(), key, prepared.clone());
+            self.prepared_cache.borrow_mut().insert(
+                "model-local-v1".into(),
+                key,
+                (
+                    prepared.0.clone(),
+                    CandidateTokens::Single(prepared.1.clone()),
+                ),
+            );
         }
         Ok(prepared)
     }
@@ -833,7 +856,7 @@ impl LlamaBackend {
             .preparation_cache_enabled
             .then(|| format!("{}:{}", decision.options().len(), tail.text));
         if let Some(candidate_key) = &candidate_key
-            && let Some(candidates) = self
+            && let Some(CandidateTokens::Single(candidates)) = self
                 .candidate_cache
                 .borrow_mut()
                 .get("model-local-v1", candidate_key)
@@ -872,7 +895,7 @@ impl LlamaBackend {
             self.candidate_cache.borrow_mut().insert(
                 "model-local-v1".into(),
                 candidate_key,
-                candidates.clone(),
+                CandidateTokens::Single(candidates.clone()),
             );
         }
         Ok((input, candidates))
@@ -883,6 +906,9 @@ impl LlamaBackend {
         state: &serde_json::Value,
         decision: &Decision,
     ) -> Result<DecisionResult> {
+        if decision.options().len() > 26 {
+            return self.evaluate_code_sequences(state, decision);
+        }
         let applies = self
             .output_head
             .as_ref()
@@ -1104,7 +1130,7 @@ impl LlamaBackend {
             Ok(requests
                 .iter()
                 .map(|request| DecisionResponse {
-                    backend: self.info(),
+                    backend: self.info_for_request(request),
                     policy: self.policy.clone(),
                     results: results.by_ref().take(request.decisions.len()).collect(),
                 })
@@ -1112,6 +1138,15 @@ impl LlamaBackend {
         })();
         unsafe { sd_clear(self.engine.as_ptr()) };
         responses
+    }
+
+    fn info_for_request(&self, request: &DecisionRequest) -> BackendInfo {
+        let mut info = self.info();
+        if request.decisions.iter().any(|d| d.options().len() > 26) {
+            info.prompt_version
+                .push_str("/fixed-width-code-sequences-v1");
+        }
+        info
     }
 
     fn info(&self) -> BackendInfo {
@@ -1204,7 +1239,7 @@ impl DecisionBackend for LlamaBackend {
         })();
         unsafe { sd_clear(self.engine.as_ptr()) };
         Ok(DecisionResponse {
-            backend: self.info(),
+            backend: self.info_for_request(request),
             policy: self.policy.clone(),
             results: results?,
         })

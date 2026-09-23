@@ -70,7 +70,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let (input_ids, candidate_ids) =
                 backend.encode_decision(&case.request.state, decision)?;
             let candidate_codes: Vec<_> = (0..count)
-                .map(|i| ((b'A' + ((i + count - rotation) % count) as u8) as char).to_string())
+                .map(|i| {
+                    l2s1::option_code((i + count - rotation) % count, count)
+                        .expect("validated options")
+                })
                 .collect();
             writeln!(
                 output,

@@ -1,7 +1,9 @@
 //! L2S1 — LLM to System 1.
 //!
 //! Typed decision contracts and scoring, independent of the inference backend.
+mod codes;
 mod decision;
+pub use codes::{option_code, option_code_width};
 mod output_head;
 mod prompt;
 pub use decision::*;

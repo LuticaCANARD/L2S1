@@ -5,6 +5,7 @@ import concurrent.futures
 import fcntl
 import hashlib
 import json
+import os
 import pathlib
 import subprocess
 import time
@@ -32,7 +33,7 @@ def download(row):
     print('DOWNLOAD', path.name, flush=True)
     try:
         with path.with_suffix('.download.log').open('w') as log:
-            subprocess.run(['curl', '-fL', '--retry', '5', '--retry-delay', '3',
+            subprocess.run(['curl', '-fL', '--http1.1', '--retry', '5', '--retry-all-errors', '--retry-delay', '3',
                             '--connect-timeout', '30', '--max-time', '14400',
                             '-C', '-', '-o', str(part), url], stderr=log, check=True)
         with part.open('rb') as stream:
@@ -88,7 +89,13 @@ def main():
                 print('RUN', row['id'], flush=True)
                 started = time.time()
                 with (args.output / (row['id'] + '.log')).open('x') as log:
-                    result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+                    result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT,
+                                            env={**os.environ, **row.get('environment', {})})
+                manifest_path = out / 'manifest.json'
+                if manifest_path.exists():
+                    manifest = json.loads(manifest_path.read_text())
+                    manifest['runtime_environment_overrides'] = row.get('environment', {})
+                    save(manifest_path, manifest)
                 record = dict(row, status='complete' if result.returncode == 0 else 'failed',
                               exit_code=result.returncode, elapsed_s=time.time() - started,
                               started_unix=started, command=command)

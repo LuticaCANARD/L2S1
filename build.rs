@@ -29,6 +29,8 @@ fn main() {
     inputs.extend(
         [
             "src/decision.rs",
+            "src/codes.rs",
+            "src/llama/code_sequences.rs",
             "src/evidence.rs",
             "src/prompt.rs",
             "src/llama.rs",
