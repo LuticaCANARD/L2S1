@@ -12,6 +12,8 @@
 !.env.example
 *.gguf
 *.safetensors
+__pycache__/
+*.pyc
 
 /web/node_modules/
 /web/.svelte-kit/

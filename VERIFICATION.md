@@ -1,16 +1,19 @@
 # Local verification record
 
-Date: 2026-09-20. These results cover local integration behavior, not task accuracy, production readiness, or throughput.
+State-first v2 update: the earlier measurements below retain their original v1 prompt scope. Optional prefix-reuse correctness, prompt comparison, and timing results are recorded separately in [SEMIF_ALGORITHM.md](SEMIF_ALGORITHM.md).
 
-## Runtime
+GPT-OSS update: `gpt-oss-final-prefill-decision-v1` passed the CUDA native suite, including the unchanged batch-size tolerance, request isolation, all 26 candidate tokens, and oversized-input rejection. The earlier open-header GPT-OSS failure is superseded for this measured implementation only. See [GPT-OSS final-prefill results](GPT_OSS_FINAL_RESULTS.md) for the frozen Kaggle before/after comparison and later working-tree changes not covered by this run. CPU verification for this new profile remains unperformed.
 
-- llama.cpp commit: `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`.
-- Shared libraries: the existing Linux/WSL `build-cuda/bin` build.
-- Jinja: `common/jinja`, JSON, and Unicode helper sources from the same checkout, compiled into the adapter.
-- GPU: NVIDIA GeForce RTX 3080.
-- The external llama.cpp checkout and its existing shared-library build were not modified.
+Date: 2026-09-21. The current fixture is the English warehouse scenario in `examples/warehouse.json`. It replaces the earlier ticket scenario; results from those scenarios are not interchangeable. This is local integration and smoke-performance evidence, not production or task-accuracy certification.
 
-The current project location requires explicit `LLAMA_CPP_DIR` and `LLAMA_LIB_DIR`; there is no sibling `../llama.cpp` checkout. CUDA initialization failed inside the execution sandbox. Re-running with native GPU access succeeded; the final CUDA results below use that environment.
+## Runtime and scope
+
+- llama.cpp: `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`, using its matching Linux/WSL shared libraries and Jinja helper sources.
+- CPU: Intel Core i9-9900K, four inference threads.
+- CUDA: NVIDIA GeForce RTX 3080, with native GPU access outside the execution sandbox.
+- Real-model tests and CLI: release build. Context 2048; performance/CLI batch 256. Ordinary unit tests also passed in the debug profile.
+- Inputs: three sequential questions about storage zone, cold-chain requirements, and dispatch priority.
+- Local weights are not distributed. No model is downloaded by the tests or the website.
 
 ## Checkpoint provenance
 
@@ -26,82 +29,79 @@ All model files live in the ignored `models/` directory. Downloaded file SHA256 
 
 SmolLM2 and TinyLlama use community GGUF conversions. Both report `general.architecture=llama` but use different vocabularies and embedded templates. Qwen3 reports `qwen3`; Gemma 3 reports `gemma3`. The Gemma file hash was verified against its pinned Hugging Face LFS metadata.
 
-## Checks
+## Current correctness checks
 
-- `cargo fmt --check`: passed.
-- `cargo test --locked --offline`: 7 tests passed; no real model required.
-- `cargo test --locked --offline --features llama`: 11 tests passed; the real-model test is ignored by default.
-- `cargo clippy --locked --offline --all-targets --features llama -- -D warnings`: passed. Upstream C++ Jinja headers emit unused-function warnings; Rust Clippy reported no errors.
-- Explicit Qwen3 `--prompt-profile model` CLI run on CPU: passed, in addition to the default Qwen3 profile.
+The native suite reuses a context for A–B–A request isolation, checks unique single-token continuations for all 26 codes, compares batches 32 and 512 with an unchanged 0.02 probability tolerance, rejects incompatible explicit profiles, and rejects oversized input. Model handles are released between independent checks to limit test memory use.
 
-The Jinja tests use synthetic fixtures for ChatML, Llama 3, Gemma, Phi, Mistral, and Zephyr-style delimiters. They verify payload separation, role suffixes, BOS/EOS substitution, generation/non-thinking flags, and rejection of malformed or unusable templates. These fixture tests are not real-weight validation for Llama 3, Phi, Mistral, or unlisted Gemma checkpoints. The Gemma 3 1B checkpoint now has the separate real-weight evidence below.
-
-## Real-model matrix
-
-| Checkpoint | CPU native suite | CUDA native suite | CPU/CUDA CLI JSON |
+| Checkpoint | CPU native suite | CUDA native suite | CPU/CUDA performance test and CLI |
 | --- | --- | --- | --- |
+| Gemma 4 E2B Q8_0 | Passed | Passed | Passed / Passed |
+| Gemma 3 1B Q8_0 | Passed | Failed: batch consistency | Passed / Passed |
 | Qwen3 0.6B Q8_0 | Passed | Passed | Passed / Passed |
 | SmolLM2 135M Q8_0 | Passed | Passed | Passed / Passed |
-| Gemma 3 1B IT Q8_0 | Passed | Passed | Passed / Passed |
-| Gemma 4 E2B Instruct Q8_0 | Passed | Passed | Passed / Passed |
-| TinyLlama 1.1B Q4_K_M | Passed | **Failed: batch-size probability difference** | Passed / Passed |
+| TinyLlama 1.1B Q4_K_M | Passed | Failed: batch consistency | Passed / Passed |
 
-Each successful native suite checks A–B–A request/KV isolation, candidate-probability differences below 0.02 between batch sizes 32 and 512, unique single-token continuations for all 26 codes, and rejection of an oversized request. Non-Qwen checkpoints additionally reject an explicit `qwen3` profile. CPU/CUDA numerical equality is not asserted.
+The CUDA consistency failures are reproducible on this warehouse input:
 
-The CLI runs use all three decision types in `examples/ticket.json` at the default batch size of 256. The output artifacts are:
+- TinyLlama option A: 0.5203199292 at batch 32 versus 0.4535476556 at batch 512; difference 0.0667722736.
+- Gemma 3 option B: 0.9527877347 at batch 32 versus 0.9904579977 at batch 512; difference 0.0376702630.
 
-| Model | CPU | CUDA |
+Their A–B–A and alphabet checks execute before this failure. The later explicit-profile and oversized-input checks are not claimed for these CUDA runs; they pass on CPU. Both checkpoints run at the fixed performance batch of 256, but these timings do not establish batch-independent decisions. CPU/CUDA numerical equality is not asserted for any model. Gemma 4's native suite passes on both devices. No tolerance was relaxed.
+
+## English example outputs
+
+| Checkpoint | CPU | CUDA |
 | --- | --- | --- |
-| Qwen3 | [JSON](examples/ticket.qwen3.cpu.output.json) | [JSON](examples/ticket.qwen3.cuda.output.json) |
-| SmolLM2 | [JSON](examples/ticket.smollm2.cpu.output.json) | [JSON](examples/ticket.smollm2.cuda.output.json) |
-| Gemma 3 | [JSON](examples/ticket.gemma3.cpu.output.json) | [JSON](examples/ticket.gemma3.cuda.output.json) |
-| Gemma 4 | [JSON](examples/ticket.gemma4.cpu.output.json) | [JSON](examples/ticket.gemma4.cuda.output.json) |
-| TinyLlama | [JSON](examples/ticket.tinyllama.cpu.output.json) | [JSON](examples/ticket.tinyllama.cuda.output.json) |
+| Gemma 4 E2B Q8_0 | [JSON](examples/warehouse.gemma4.cpu.output.json) | [JSON](examples/warehouse.gemma4.cuda.output.json) |
+| Gemma 3 1B Q8_0 | [JSON](examples/warehouse.gemma3.cpu.output.json) | [JSON](examples/warehouse.gemma3.cuda.output.json) |
+| Qwen3 0.6B Q8_0 | [JSON](examples/warehouse.qwen3.cpu.output.json) | [JSON](examples/warehouse.qwen3.cuda.output.json) |
+| SmolLM2 135M Q8_0 | [JSON](examples/warehouse.smollm2.cpu.output.json) | [JSON](examples/warehouse.smollm2.cuda.output.json) |
+| TinyLlama 1.1B Q4_K_M | [JSON](examples/warehouse.tinyllama.cpu.output.json) | [JSON](examples/warehouse.tinyllama.cuda.output.json) |
 
-GPU logs confirm full layer offload for Qwen3 (29/29) and SmolLM2 (31/31), and Gemma 3 (27/27). Detailed logs are available locally under the ignored `target/verification-multimodel/` directory.
+The fixture's rule-derived answers are `chilled`, `true`, and `high`. An inference result or high candidate probability is not an accuracy guarantee. TinyLlama and SmolLM2 abstain on all three questions with the default policy in the measured runs. The other measured models accept their three answers. This single scenario is not a representative evaluation dataset. Published output files normalize only the model path to a portable `models/<filename>`; scores and decisions retain their measured values.
 
-### TinyLlama CUDA limitation
+## Inference performance test
 
-TinyLlama Q4_K_M loads and returns valid JSON on CUDA, and its A–B–A isolation check passed. However, the department question produced these candidate probabilities:
+`tests/performance.rs` is opt-in and uses `SKID_MODEL` to locate an existing checkpoint. It measures loading, the first request, additional warmups, and individual steady-state request durations. See the README for the command and environment variables.
 
-| Batch | A | B | C |
-| --- | --- | --- | --- |
-| 32 | 0.7580996680 | 0.1571134331 | 0.0847868989 |
-| 256 | 0.6735461659 | 0.2375104192 | 0.0889434149 |
-| 512 | 0.6735461659 | 0.2375104192 | 0.0889434149 |
+These measurements used five samples after one separately measured first request and one additional warmup. One request includes three sequential decisions. Model files had already been accessed by the correctness run, so load times are not cold-disk measurements. Normal host activity was not isolated; the small sample count is intended to verify the measurement path rather than establish stable performance rankings.
 
-The A probability difference of **0.0845535021** exceeds the existing 0.02 test tolerance. The tolerance was not relaxed. The recorded TinyLlama CUDA native run stopped at that assertion; alphabet/profile/oversized-input checks from that run are not claimed for TinyLlama CUDA. (The subsequent Gemma 4 follow-up moves alphabet checks earlier and releases model handles between comparisons.) Those checks passed on CPU. The underlying CUDA numerical cause has not been established; this checkpoint is not validated for batch-independent CUDA results. Use CPU for the fully passing TinyLlama configuration, or treat a fixed CUDA batch/build as a separately evaluated configuration.
+| Checkpoint | Device | Load ms | First request ms | Request p50 ms | Request p95 ms | Decisions/s | Abstained |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Gemma 4 E2B Q8_0 | CPU | 983.0 | 7482.4 | 7537.0 | 7699.1 | 0.40 | 0/15 |
+| Gemma 4 E2B Q8_0 | CUDA | 1554.9 | 263.6 | 96.8 | 102.6 | 30.69 | 0/15 |
+| Gemma 3 1B Q8_0 | CPU | 529.7 | 2767.6 | 2796.4 | 3028.6 | 1.05 | 0/15 |
+| Gemma 3 1B Q8_0 | CUDA | 812.7 | 184.9 | 61.8 | 72.7 | 46.44 | 0/15 |
+| Qwen3 0.6B Q8_0 | CPU | 447.5 | 2272.2 | 2334.4 | 2843.8 | 1.26 | 0/15 |
+| Qwen3 0.6B Q8_0 | CUDA | 632.9 | 194.7 | 63.5 | 67.0 | 47.83 | 0/15 |
+| SmolLM2 135M Q8_0 | CPU | 176.4 | 2250.5 | 720.4 | 1695.9 | 3.33 | 15/15 |
+| SmolLM2 135M Q8_0 | CUDA | 316.3 | 181.4 | 52.2 | 65.0 | 56.82 | 15/15 |
+| TinyLlama 1.1B Q4_K_M | CPU | 369.4 | 3677.8 | 3797.0 | 4144.4 | 0.79 | 15/15 |
+| TinyLlama 1.1B Q4_K_M | CUDA | 374.7 | 171.1 | 49.4 | 50.1 | 60.95 | 15/15 |
 
-## Interpretation
+Latency covers the complete `decide` call, including prompt preparation, prefill, logits transfer, and scoring. Input tokens/second in the JSON reports is not generated tokens/second. Throughput counts completed decisions, including abstentions. Percentiles use nearest rank; five samples make p95 equal to the maximum observed latency. There is no hardware-dependent pass threshold.
 
-Successful execution is not evidence of correct decisions. For example, the small SmolLM2 checkpoint returned `false` for the refund question in this Korean ticket; the Qwen3 checkpoint returned `true`. These examples do not establish either model's general accuracy. Evaluate model choice, language coverage, option ordering, and abstention policies on task-specific labeled data.
+Full local reports are in the excluded `results/performance/` directory, with execution logs and statuses in `results/verification-warehouse/`. The website uses a selected, path-free summary in `web/src/lib/benchmarks.json`; its playground uses explicitly labeled synthetic probabilities instead of running a model in the browser.
 
-The earlier Qwen3-only CUDA output remains at [ticket.cuda.output.json](examples/ticket.cuda.output.json) for historical reference. The model-specific artifacts above were generated after the multi-model changes.
+## Source and website checks
 
-## Gemma 3 follow-up
+- Rust: 14 ordinary tests passed with the `llama` feature; the three real-model tests are opt-in. Native and single-fixture performance results are listed above; the separate labeled comparison is recorded in [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md). Formatting and Clippy with `-D warnings` passed; upstream C++ headers still emit unused-function warnings.
+- SvelteKit: type and accessibility checks completed with zero errors and warnings; the static production build passed.
+- Chromium: all five browser tests passed, covering prerendered content without JavaScript, keyboard-controlled abstention, decision types, clipboard interaction, documentation downloads, and viewport overflow at 1440 and 375 pixels. Desktop and mobile screenshots were visually inspected.
+- Packaging: `cargo package --locked --offline --allow-dirty` built and verified the source archive. Its contents include the performance test, English fixture, and license notices, and exclude weights, local results, and the separate website. Static website assets were also inspected for model files and local filesystem paths in JSON examples.
+- No website deployment was performed.
 
-Gemma 3 1B IT Q8_0 passed the existing native suite on CPU and RTX 3080 CUDA without inference-code changes or relaxed tolerances. The generic embedded-Jinja profile was selected. CUDA logs report a 1013.61 MiB model buffer; this is not total GPU/process memory.
+## Distribution and licensing
 
-The Korean ticket example yielded:
+The project source is MIT-licensed. Upstream notices are in `THIRD_PARTY_LICENSES.txt`; model licenses are separate and reviewed in `LICENSING.md`. Gemma 3 uses its own terms; Gemma 4 uses Apache-2.0.
 
-| Decision | CPU | CUDA |
-| --- | --- | --- |
-| Department | `billing` | Abstained |
-| Refund requested | `true` (`p_true=0.998981`) | `true` (`p_true=0.999907`) |
-| Urgency | Abstained (expected value 0.531813) | `low` (expected value 0.198202) |
+Cargo excludes local model/build/result directories, GGUF and safetensors files, and the separate website. The actual source archive is inspected for model weights and required notices after packaging. Neither the website nor tests redistribute weights. The previous ticket assets are retained only in excluded local history, not in the distributed examples.
 
-The batch-size checks compare executions within one backend. Passing them does not establish CPU/CUDA numerical equality or decision equivalence. This single example is not an accuracy benchmark.
 
-## Distribution review
+## Model interchangeability implementation (2026-09-23)
 
-The initial `cargo package --list` included local GGUF files despite `.gitignore`. Explicit Cargo exclusions now prevent model weights and local build/results directories from entering the source package. The project MIT license, third-party license texts, and [licensing assessment](LICENSING.md) are included. An actual source `.crate` was built and verified locally with `cargo package --locked --offline --allow-dirty`; its archive contains the license documents and no GGUF files. This review does not publish a crate or redistribute any model weights.
-
-## Gemma 4 follow-up
-
-Gemma 4 E2B Instruct Q8_0 passed the native suite and all three CLI decision types on CPU and RTX 3080 CUDA with the same llama.cpp revision. It reports architecture `gemma4` and uses `gguf-jinja-decision-v1`. No inference-code changes or tolerance relaxations were needed. The model's pinned SHA256 matched Hugging Face LFS metadata. Only text weights were loaded; image/audio projection and MTP were not tested.
-
-The native test now releases each model/context after its checks, before constructing the next comparison context. This avoids loading several copies of the roughly 4.97 GB model simultaneously. A–B–A request isolation still reuses one live context; batch-size comparisons, all 26 candidate tokens, invalid-profile rejection, and oversized-input rejection retain their assertions. Gemma 3 was re-run successfully on CPU and CUDA after this test resource change.
-
-For the Korean ticket, both Gemma 4 backends selected `billing`, returned `true` for the refund request, and selected urgency `medium`. The refund probabilities were 0.999999772 (CPU) and 0.999999725 (CUDA). Matching labels on one example are not a general accuracy or backend-equivalence guarantee.
-
-Gemma 4 weights use Apache-2.0, whereas the tested Gemma 3 weights use the Gemma Terms of Use. See [LICENSING.md](LICENSING.md) for the implications when distributing this MIT application with or without weights.
+The identity/preflight, evidence/policy boundary, scalar calibration, diagnostics,
+whole-sequence restoration and bounded-worker checks are recorded separately in
+[MODEL_INTERCHANGEABILITY_RESULTS.md](MODEL_INTERCHANGEABILITY_RESULTS.md).
+The report distinguishes original-response regression checks, real-model contracts,
+synthetic calibration/lifecycle tests and experimental parallel equivalence.

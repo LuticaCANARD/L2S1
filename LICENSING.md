@@ -1,6 +1,6 @@
 # Licensing assessment
 
-Reviewed on 2026-09-20 against this `Cargo.lock` and llama.cpp commit `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`.
+Reviewed on 2026-09-21 against this `Cargo.lock` and llama.cpp commit `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`.
 
 ## Conclusion
 
@@ -50,3 +50,7 @@ The application can retain MIT while those weights retain Apache-2.0. If redistr
 - Cargo metadata and each dependency's license files in the local registry for the exact locked versions.
 - [YaRN license](https://github.com/jquesnelle/yarn/blob/master/LICENSE) and [ggllm.cpp license](https://github.com/cmp-nct/ggllm.cpp/blob/master/LICENSE).
 - [Gemma checkpoint](https://huggingface.co/ggml-org/gemma-3-1b-it-GGUF/tree/f9c28bcd85737ffc5aef028638d3341d49869c27) and the official terms linked above.
+
+## Separate Svelte website
+
+The MIT-licensed introduction site in `web/` is excluded from the Rust crate. Its installed npm dependency notices are recorded separately in `web/THIRD_PARTY_LICENSES.txt` and included in the static site's documentation assets. The site includes only an illustrative scoring demo, aggregate performance measurements, documentation, and JSON examples; it contains no model weights or inference service. Regenerate its dependency notices when changing the npm lockfile.

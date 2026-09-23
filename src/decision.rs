@@ -200,19 +200,38 @@ pub struct DecisionResult {
     pub scoring_method: String,
     pub calibration_id: Option<String>,
     pub input_tokens: usize,
+    /// Exact prefix tokens reused in this forward pass; evaluated = input - reused.
+    #[serde(default)]
+    pub reused_prefix_tokens: usize,
     pub truncated: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BackendInfo {
     pub model_path: String,
+    /// Explicit adapter at scale 1; absent for the unchanged base model.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lora_path: Option<String>,
+    /// Task-scoped output head; inspect each result's scoring_method for usage.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub output_head_path: Option<String>,
     pub model_description: String,
     #[serde(default)]
     pub model_architecture: String,
     #[serde(default)]
     pub prompt_profile: String,
+    #[serde(default)]
+    pub prompt_layout: crate::PromptLayout,
     pub prompt_version: String,
     pub runtime: String,
+    #[serde(default)]
+    pub execution_mode: ExecutionMode,
+    /// Configured maximum questions per parallel wave; one for serial modes.
+    #[serde(default = "serial_width")]
+    pub parallel_width: usize,
+    /// Requested compute settings; absent in historical responses.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub compute: Option<ComputeOptions>,
     pub offload_requested: bool,
     pub offload_device: Option<String>,
 }
@@ -228,6 +247,61 @@ pub trait DecisionBackend {
     fn decide(&mut self, request: &DecisionRequest) -> Result<DecisionResponse>;
 }
 
+fn serial_width() -> usize {
+    1
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
+#[serde(rename_all = "snake_case")]
+pub enum FlashAttention {
+    #[default]
+    Off,
+    Auto,
+    On,
+}
+
+/// Explicit opt-in compute tuning. FlashAttention records the requested mode;
+/// consult llama.cpp logs for actual kernel support on the selected device.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ComputeOptions {
+    pub context: u32,
+    pub batch: u32,
+    pub ubatch: u32,
+    pub threads: i32,
+    pub flash_attention: FlashAttention,
+}
+
+impl ComputeOptions {
+    pub fn validate(&self) -> Result<()> {
+        if self.context == 0
+            || self.context > i32::MAX as u32
+            || self.batch == 0
+            || self.batch > self.context
+            || self.ubatch == 0
+            || self.ubatch > self.batch
+            || self.threads <= 0
+        {
+            return Err(Error::Invalid(
+                "require 0 < ubatch <= batch <= context <= i32::MAX and threads > 0".into(),
+            ));
+        }
+        Ok(())
+    }
+}
+
+/// Optimized modes are opt-in because batch shapes can affect model scores.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
+#[serde(rename_all = "snake_case")]
+pub enum ExecutionMode {
+    #[default]
+    Fresh,
+    PrefixReuse,
+    /// Experimental independent sequence batching with shared-prefix prefill.
+    Parallel,
+    /// Experimental request-local whole-sequence snapshot restoration.
+    StateRestore,
+}
+
 /// Scores are conditional on the supplied candidate set. No calibration is implied.
 pub fn score_logits(
     decision: &Decision,
@@ -236,40 +310,46 @@ pub fn score_logits(
     input_tokens: usize,
     policy: &DecisionPolicy,
 ) -> Result<DecisionResult> {
-    DecisionRequest {
-        state: serde_json::Value::Null,
-        decisions: vec![decision.clone()],
-    }
-    .validate()?;
+    crate::ExactEvidence::from_logits(decision, logits, candidate_tokens)?.score(
+        decision,
+        input_tokens,
+        policy,
+    )
+}
+
+/// A learned head has no full-vocabulary mass. Retain the base LM mass as a
+/// separate compatibility gate rather than fabricating one for the new head.
+pub(crate) fn score_candidate_logits(
+    decision: &Decision,
+    selected_logits: &[f64],
+    candidate_tokens: &[i32],
+    input_tokens: usize,
+    mass: f64,
+    policy: &DecisionPolicy,
+) -> Result<DecisionResult> {
     policy.validate()?;
     let options = decision.options();
-    if candidate_tokens.len() != options.len()
-        || logits.is_empty()
-        || logits.iter().any(|v| v.is_nan() || *v == f32::INFINITY)
+    if options.len() != selected_logits.len()
+        || options.len() != candidate_tokens.len()
+        || options.len() < 2
+        || selected_logits.iter().any(|x| !x.is_finite())
+        || !mass.is_finite()
+        || !(0.0..=1.0).contains(&mass)
     {
-        return Err(Error::Backend("invalid logits or candidate count".into()));
+        return Err(Error::Backend(
+            "invalid candidate scores or base mass".into(),
+        ));
     }
-    let mut seen = HashSet::new();
-    let mut selected_logits = Vec::new();
-    for &id in candidate_tokens {
-        if id < 0 || id as usize >= logits.len() || !seen.insert(id) {
-            return Err(Error::Backend(
-                "candidate tokens must be unique and in vocabulary".into(),
-            ));
-        }
-        let z = logits[id as usize] as f64;
-        if !z.is_finite() {
-            return Err(Error::Backend("candidate logit is not finite".into()));
-        }
-        selected_logits.push(z);
-    }
-    let log_sum_exp = |values: &[f64]| {
-        let max = values.iter().copied().fold(f64::NEG_INFINITY, f64::max);
-        max + values.iter().map(|v| (v - max).exp()).sum::<f64>().ln()
-    };
-    let candidate_lse = log_sum_exp(&selected_logits);
-    let full_lse = log_sum_exp(&logits.iter().map(|&x| x as f64).collect::<Vec<_>>());
-    let mass = (candidate_lse - full_lse).exp().clamp(0.0, 1.0);
+    let max = selected_logits
+        .iter()
+        .copied()
+        .fold(f64::NEG_INFINITY, f64::max);
+    let candidate_lse = max
+        + selected_logits
+            .iter()
+            .map(|v| (v - max).exp())
+            .sum::<f64>()
+            .ln();
     let p: Vec<f64> = selected_logits
         .iter()
         .map(|z| (z - candidate_lse).exp())
@@ -325,6 +405,7 @@ pub fn score_logits(
         scoring_method: "single_token_conditional_softmax_v1".into(),
         calibration_id: None,
         input_tokens,
+        reused_prefix_tokens: 0,
         truncated: false,
     })
 }

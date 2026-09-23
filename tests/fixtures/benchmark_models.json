@@ -1,0 +1,24 @@
+{
+  "models": [
+    {
+      "id": "smollm2",
+      "path": "models/SmolLM2-135M-Instruct-Q8_0.gguf"
+    },
+    {
+      "id": "qwen3",
+      "path": "models/Qwen3-0.6B-Q8_0.gguf"
+    },
+    {
+      "id": "gemma3",
+      "path": "models/gemma-3-1b-it-Q8_0.gguf"
+    },
+    {
+      "id": "tinyllama",
+      "path": "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+    },
+    {
+      "id": "gemma4",
+      "path": "models/gemma-4-E2B-it-Q8_0.gguf"
+    }
+  ]
+}

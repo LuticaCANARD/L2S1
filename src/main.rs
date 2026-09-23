@@ -1,6 +1,7 @@
 use clap::Parser;
-use skid_desion::{
-    DecisionBackend, DecisionPolicy, DecisionRequest, PromptProfile, llama::LlamaBackend,
+use l2s1::{
+    ComputeOptions, DecisionBackend, DecisionPolicy, DecisionRequest, ExecutionMode,
+    FlashAttention, PromptLayout, PromptProfile, llama::LlamaBackend,
 };
 use std::{
     io::{self, Read},
@@ -10,14 +11,44 @@ use std::{
 #[derive(Parser)]
 #[command(
     version,
-    about = "Typed decisions from GGUF chat models. Read JSON from a file or standard input."
+    about = "L2S1 (LLM to System 1). Typed decisions from GGUF chat models. Read JSON from a file or standard input."
 )]
 struct Args {
     #[arg(long)]
     model: PathBuf,
-    /// Auto selects Qwen3 non-thinking or the model's embedded chat template.
+    /// Print verified model identity and metadata capabilities, without reading input.
+    #[arg(long, conflicts_with_all = ["preflight", "diagnostics"])]
+    inspect: bool,
+    /// Validate prompt, candidates and artifacts without inference.
+    #[arg(long, conflicts_with = "diagnostics")]
+    preflight: bool,
+    /// Include request-local execution diagnostics and structured errors.
+    #[arg(long)]
+    diagnostics: bool,
+    /// Task-scoped scalar calibration; repeat for multiple decision IDs.
+    #[arg(long, conflicts_with = "output_head")]
+    calibration: Vec<PathBuf>,
+    /// Maximum bytes allocated for an experimental sequence snapshot.
+    #[arg(long, default_value_t = 268435456)]
+    snapshot_limit_bytes: usize,
+    /// Optional compatible GGUF LoRA adapter, applied at scale 1.
+    #[arg(long)]
+    lora: Option<PathBuf>,
+    /// Optional task-specific output head bound to this GGUF and compute profile.
+    #[arg(long, conflicts_with = "lora")]
+    output_head: Option<PathBuf>,
+    /// Auto selects GPT-OSS final prefill, Qwen3 non-thinking, or the GGUF template.
     #[arg(long, value_enum, default_value_t = PromptProfile::Auto)]
     prompt_profile: PromptProfile,
+    /// Fresh, prefix reuse, or experimental parallel questions; validate score drift first.
+    #[arg(long, value_enum, default_value_t = ExecutionMode::Fresh)]
+    execution_mode: ExecutionMode,
+    /// Maximum questions per parallel wave (1..32); increases KV memory use.
+    #[arg(long, default_value_t = 4, value_parser = clap::value_parser!(u32).range(1..=32))]
+    parallel_width: u32,
+    /// State-first improves shared-prefix reuse but can change model predictions.
+    #[arg(long, value_enum, default_value_t = PromptLayout::Legacy)]
+    prompt_layout: PromptLayout,
     #[arg(long, default_value = "-")]
     input: String,
     /// CUDA device is required when selected; no silent CPU fallback.
@@ -27,6 +58,11 @@ struct Args {
     context: u32,
     #[arg(long, default_value_t = 256)]
     batch: u32,
+    /// Physical token microbatch; defaults to --batch.
+    #[arg(long)]
+    ubatch: Option<u32>,
+    #[arg(long, value_enum, default_value_t = FlashAttention::Off)]
+    flash_attention: FlashAttention,
     #[arg(long, default_value_t = 4)]
     threads: i32,
     #[arg(long, default_value_t = 0.8)]
@@ -43,6 +79,41 @@ enum Device {
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+    let policy = DecisionPolicy {
+        min_top_probability: args.min_top_probability,
+        min_candidate_mass: args.min_candidate_mass,
+    };
+    let mut backend = LlamaBackend::load_with_options(
+        &args.model,
+        ComputeOptions {
+            context: args.context,
+            batch: args.batch,
+            ubatch: args.ubatch.unwrap_or(args.batch),
+            threads: args.threads,
+            flash_attention: args.flash_attention,
+        },
+        matches!(args.device, Device::Cuda),
+        policy,
+        args.prompt_profile,
+    )?;
+    if let Some(path) = &args.lora {
+        backend.load_lora(path)?;
+    }
+    backend.set_execution_mode(args.execution_mode);
+    backend.set_parallel_width(args.parallel_width as usize)?;
+    backend.set_prompt_layout(args.prompt_layout);
+    if let Some(path) = &args.output_head {
+        backend.load_output_head(path)?;
+    }
+    backend.set_snapshot_limit_bytes(args.snapshot_limit_bytes);
+    for path in &args.calibration {
+        backend.load_calibration(path)?;
+    }
+    if args.inspect {
+        serde_json::to_writer_pretty(io::stdout().lock(), &backend.inspect())?;
+        println!();
+        return Ok(());
+    }
     let text = if args.input == "-" {
         let mut text = String::new();
         io::stdin().read_to_string(&mut text)?;
@@ -51,22 +122,35 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         std::fs::read_to_string(&args.input)?
     };
     let request: DecisionRequest = serde_json::from_str(&text)?;
-    request.validate()?;
-    let policy = DecisionPolicy {
-        min_top_probability: args.min_top_probability,
-        min_candidate_mass: args.min_candidate_mass,
+
+    let output = if args.preflight {
+        match backend.preflight(&request) {
+            Ok(report) => serde_json::to_value(report)?,
+            Err(error) => {
+                serde_json::to_writer_pretty(
+                    io::stdout().lock(),
+                    &serde_json::json!({"error":error}),
+                )?;
+                println!();
+                return Err(error.into());
+            }
+        }
+    } else if args.diagnostics {
+        match backend.decide_detailed(&request) {
+            Ok(report) => serde_json::to_value(report)?,
+            Err(error) => {
+                serde_json::to_writer_pretty(
+                    io::stdout().lock(),
+                    &serde_json::json!({"error":error}),
+                )?;
+                println!();
+                return Err(error.into());
+            }
+        }
+    } else {
+        serde_json::to_value(backend.decide(&request)?)?
     };
-    let mut backend = LlamaBackend::load_with_profile(
-        &args.model,
-        args.context,
-        args.batch,
-        args.threads,
-        matches!(args.device, Device::Cuda),
-        policy,
-        args.prompt_profile,
-    )?;
-    let response = backend.decide(&request)?;
-    serde_json::to_writer_pretty(io::stdout().lock(), &response)?;
+    serde_json::to_writer_pretty(io::stdout().lock(), &output)?;
     println!();
     Ok(())
 }
