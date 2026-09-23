@@ -1,0 +1,175 @@
+[
+  {
+    "id": "Qwen3-0.6B-Q8_0",
+    "path": "/home/lutica/personal/skid/skid-desion/models/Qwen3-0.6B-Q8_0.gguf"
+  },
+  {
+    "id": "SmolLM2-135M-Instruct-Q8_0",
+    "path": "/home/lutica/personal/skid/skid-desion/models/SmolLM2-135M-Instruct-Q8_0.gguf"
+  },
+  {
+    "id": "gemma-3-1b-it-Q8_0",
+    "path": "/home/lutica/personal/skid/skid-desion/models/gemma-3-1b-it-Q8_0.gguf"
+  },
+  {
+    "id": "gemma-4-E2B-it-Q8_0",
+    "path": "/home/lutica/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf"
+  },
+  {
+    "id": "tinyllama-1.1b-chat-v1.0.Q4_K_M",
+    "path": "/home/lutica/personal/skid/skid-desion/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+  },
+  {
+    "id": "Qwen3.5-0.8B-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3.5-0.8B-Q8_0.gguf",
+    "repo": "unsloth/Qwen3.5-0.8B-GGUF",
+    "revision": "6ab461498e2023f6e3c1baea90a8f0fe38ab64d0",
+    "file": "Qwen3.5-0.8B-Q8_0.gguf",
+    "size": 811843840,
+    "sha256": "0ad885ffd4bb022fc4f0d33a3308fa108ef8613159d3b3a67e23abca056b7a6c"
+  },
+  {
+    "id": "Qwen3.5-2B-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3.5-2B-Q8_0.gguf",
+    "repo": "unsloth/Qwen3.5-2B-GGUF",
+    "revision": "f6d5376be1edb4d416d56da11e5397a961aca8ae",
+    "file": "Qwen3.5-2B-Q8_0.gguf",
+    "size": 2012012800,
+    "sha256": "1b04acba824817554f4ce23639bc8495ff70453b8fcb047900c731521021f2c1"
+  },
+  {
+    "id": "Qwen3.5-4B-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3.5-4B-Q8_0.gguf",
+    "repo": "unsloth/Qwen3.5-4B-GGUF",
+    "revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+    "file": "Qwen3.5-4B-Q8_0.gguf",
+    "size": 4482403488,
+    "sha256": "10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1"
+  },
+  {
+    "id": "Qwen3.5-4B-Q4_K_M",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3.5-4B-Q4_K_M.gguf",
+    "repo": "unsloth/Qwen3.5-4B-GGUF",
+    "revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+    "file": "Qwen3.5-4B-Q4_K_M.gguf",
+    "size": 2740937888,
+    "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+  },
+  {
+    "id": "Qwen3.5-9B-Q4_K_M",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3.5-9B-Q4_K_M.gguf",
+    "repo": "unsloth/Qwen3.5-9B-GGUF",
+    "revision": "3885219b6810b007914f3a7950a8d1b469d598a5",
+    "file": "Qwen3.5-9B-Q4_K_M.gguf",
+    "size": 5680522464,
+    "sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8"
+  },
+  {
+    "id": "Qwen3.5-9B-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3.5-9B-Q8_0.gguf",
+    "repo": "unsloth/Qwen3.5-9B-GGUF",
+    "revision": "3885219b6810b007914f3a7950a8d1b469d598a5",
+    "file": "Qwen3.5-9B-Q8_0.gguf",
+    "size": 9527502048,
+    "sha256": "809626574d0cb43d4becfa56169980da2bb448f2299270f7be443cb89d0a6ae4"
+  },
+  {
+    "id": "Qwen3-4B-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3-4B-Q8_0.gguf",
+    "repo": "unsloth/Qwen3-4B-GGUF",
+    "revision": "22c9fc8a8c7700b76a1789366280a6a5a1ad1120",
+    "file": "Qwen3-4B-Q8_0.gguf",
+    "size": 4280405792,
+    "sha256": "eed555233267a33c7e8ee31682762cc7751b3f6d224039086e0e846f05fffa5d"
+  },
+  {
+    "id": "Qwen3-8B-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3-8B-Q8_0.gguf",
+    "repo": "unsloth/Qwen3-8B-GGUF",
+    "revision": "a6adef130ffb23ddaf1a62fec9dced968c9bc482",
+    "file": "Qwen3-8B-Q8_0.gguf",
+    "size": 8709519168,
+    "sha256": "0cfbf745760f07a76ddeb358dd025a27f2e11d1ca9c9a4169a373d52990fe86e"
+  },
+  {
+    "id": "gemma-4-E4B-it-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/gemma-4-E4B-it-Q8_0.gguf",
+    "repo": "unsloth/gemma-4-E4B-it-GGUF",
+    "revision": "bfc15c382204943c3a8fff0c750b94ae2364d7a3",
+    "file": "gemma-4-E4B-it-Q8_0.gguf",
+    "size": 8192953472,
+    "sha256": "f8854aa4480df62585a279e7ca0a881554fc18a41c59c4f62642d16a2ae47012"
+  },
+  {
+    "id": "gemma-4-E4B-it-Q4_K_M",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/gemma-4-E4B-it-Q4_K_M.gguf",
+    "repo": "unsloth/gemma-4-E4B-it-GGUF",
+    "revision": "bfc15c382204943c3a8fff0c750b94ae2364d7a3",
+    "file": "gemma-4-E4B-it-Q4_K_M.gguf",
+    "size": 4977171584,
+    "sha256": "85a896a047553e842f25297ee5b031d64ff30147d9c4af17b1e4b394cd1fab87"
+  },
+  {
+    "id": "gemma-3-4b-it-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/gemma-3-4b-it-Q8_0.gguf",
+    "repo": "unsloth/gemma-3-4b-it-GGUF",
+    "revision": "5a3566e716d80f709ed7b79817eaf7733d2a1fce",
+    "file": "gemma-3-4b-it-Q8_0.gguf",
+    "size": 4130402176,
+    "sha256": "81bf0583ab5bad155a5a3b15d155a880a1a1e4f7de2de5c06f10f64ac49f8336"
+  },
+  {
+    "id": "Llama-3.2-3B-Instruct-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Llama-3.2-3B-Instruct-Q8_0.gguf",
+    "repo": "unsloth/Llama-3.2-3B-Instruct-GGUF",
+    "revision": "e7d0997e49c9cb00d88b4c1a6a16aa894b0bbc31",
+    "file": "Llama-3.2-3B-Instruct-Q8_0.gguf",
+    "size": 3421898816,
+    "sha256": "f34112a11b7dad74ab517dedf6dcf00d624c9adac2dc0c72c719ca0478554ef2"
+  },
+  {
+    "id": "Phi-4-mini-instruct.Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Phi-4-mini-instruct.Q8_0.gguf",
+    "repo": "unsloth/Phi-4-mini-instruct-GGUF",
+    "revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+    "file": "Phi-4-mini-instruct.Q8_0.gguf",
+    "size": 4084611040,
+    "sha256": "26188c6050d525376a88b04514c236c5e28a36730f1e936f2a00314212b7ba42"
+  },
+  {
+    "id": "Ministral-3-8B-Instruct-2512-Q4_K_M",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Ministral-3-8B-Instruct-2512-Q4_K_M.gguf",
+    "repo": "unsloth/Ministral-3-8B-Instruct-2512-GGUF",
+    "revision": "3731507ec3e867db16d620f73e14d689125758f4",
+    "file": "Ministral-3-8B-Instruct-2512-Q4_K_M.gguf",
+    "size": 5198386720,
+    "sha256": "5dbc3647eb563b9f8d3c70ec3d906cce84b86bb35c5e0b8a36e7df3937ab7174"
+  },
+  {
+    "id": "SmolLM3-3B-Q8_0",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/SmolLM3-3B-Q8_0.gguf",
+    "repo": "unsloth/SmolLM3-3B-GGUF",
+    "revision": "a7bc17204c8a326d6bd6e466e076959eddae2025",
+    "file": "SmolLM3-3B-Q8_0.gguf",
+    "size": 3275575840,
+    "sha256": "5bd828e684d883459a03ce1eec9dc9044345c6da64075d9ae7e890dedc68de28"
+  },
+  {
+    "id": "gpt-oss-20b-Q4_K_M",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/gpt-oss-20b-Q4_K_M.gguf",
+    "repo": "unsloth/gpt-oss-20b-GGUF",
+    "revision": "d449b42d93e1c2c7bda5312f5c25c8fb91dfa9b4",
+    "file": "gpt-oss-20b-Q4_K_M.gguf",
+    "size": 11624759488,
+    "sha256": "c27536640e410032865dc68781d80a08b98f8db5e93575919af8ccc0568aeb4f"
+  },
+  {
+    "id": "Qwen3.8-27B-UD-IQ2_XXS",
+    "path": "/home/lutica/personal/skid/jevbench-20260923/models/Qwen3.8-27B-UD-IQ2_XXS.gguf",
+    "repo": "unsloth/Qwen3.8-27B-GGUF",
+    "revision": "4ca720788d1e01f1bff70c033e0d0028fd02e502",
+    "file": "Qwen3.8-27B-UD-IQ2_XXS.gguf",
+    "size": 7266070528,
+    "sha256": "e792d8fb3142fe6d9171876d6da0f71f05a71028718debc72dbec93ff645e67d"
+  }
+]

@@ -226,6 +226,26 @@ L2S1_CONFORMANCE_MODELS=/path/to/model-a.gguf:/path/to/model-b.gguf \
 
 The general test run skips model-dependent tests; invoke them explicitly with local checkpoints. Add `SKID_CUDA=1` to run conformance on CUDA. Tests do not download weights. The recorded default/native suites passed 21/30 tests; real-model contract checks and the original-response comparison are reported separately. Those checks are synthetic compatibility evidence, not production accuracy guarantees.
 
+## Recorded model comparison
+
+The September 23, 2026 [JevBench matrix snapshot](docs/benchmarks/jevbench-20260923/REPORT.md) measures the same 231 public items on an RTX 3060 12 GiB. **Nine of 22 planned configurations were scored; 13 were still pending.** All scored rows used identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration.
+
+| Checkpoint | Argmax accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms |
+| --- | ---: | ---: | ---: | ---: |
+| Qwen3.5-4B-Q8_0 | 79.65% | 9 | 93 | 86.88 / 1137.30 |
+| Qwen3.5-4B-Q4_K_M | 76.19% | 10 | 91 | 88.47 / 1175.18 |
+| gemma-4-E2B-it-Q8_0 | 67.97% | 58 | 22 | 46.79 / 701.11 |
+| Qwen3.5-2B-Q8_0 | 62.34% | 15 | 133 | 40.99 / 513.03 |
+| Qwen3.5-0.8B-Q8_0 | 51.95% | 16 | 183 | 27.93 / 350.53 |
+| gemma-3-1b-it-Q8_0 | 38.96% | 121 | 30 | 25.06 / 309.24 |
+| tinyllama-1.1b-chat-v1.0.Q4_K_M | 33.77% | 1 | 230 | 30.08 / 702.65 |
+| Qwen3-0.6B-Q8_0 | 31.60% | 129 | 41 | 34.01 / 445.12 |
+| SmolLM2-135M-Instruct-Q8_0 | 30.30% | 8 | 211 | 14.88 / 253.65 |
+
+Argmax accuracy counts the top candidate before abstention; it is separate from the accuracy of accepted decisions. For Qwen3.5-4B Q8_0, the default policy accepted 138 decisions, including 129 correct and 9 wrong, and abstained on 93. That is 93.48% accepted accuracy at 59.74% coverage. Gemma4 E2B accepted 209, including 58 wrong, illustrating why model-specific evaluation matters even with the same contract and thresholds.
+
+These are single-run, public-subset measurements, not an official full-suite score or rank. Latency excludes loading and warmup; small models may exceed their training context. The source report records independent recounting of predictions, Brier and ECE. This PR preserves that supplied snapshot and checks aggregate consistency; it does not rerun the remote matrix. See the [JSON metrics](docs/benchmarks/jevbench-20260923/REPORT.json), [pinned plan](docs/benchmarks/jevbench-20260923/plan.json), and [evaluation method](JEVBENCH.md).
+
 ## Further documentation
 
 | Topic | Document |
