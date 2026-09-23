@@ -95,3 +95,38 @@ fn disabled_storage_and_oversized_replacements_preserve_correctness() {
     assert_eq!(cache.get("m", "a"), Some(vec![1]));
     assert_eq!(cache.metrics().evictions, 0);
 }
+
+#[test]
+fn mixed_code_widths_share_limits_and_account_for_nested_capacity() {
+    use prepared_cache::{CandidateTokens, TokenCacheValue};
+    let mut paths = Vec::with_capacity(8);
+    let mut path = Vec::with_capacity(32);
+    path.push(5);
+    paths.push(path);
+    let expected = paths.capacity() * std::mem::size_of::<Vec<i32>>()
+        + paths[0].capacity() * std::mem::size_of::<i32>();
+    let sequences = CandidateTokens::Sequences(paths);
+    assert_eq!(sequences.retained_bytes(), expected);
+    let mut cache = BoundedTokenCache::new(1, 4096);
+    cache.insert(
+        "narrow".into(),
+        "key".into(),
+        CandidateTokens::Single(vec![1]),
+    );
+    cache.insert("wide".into(), "key".into(), sequences.clone());
+    assert_eq!(cache.metrics().entries, 1);
+    assert_eq!(cache.metrics().evictions, 1);
+    assert_eq!(cache.get("narrow", "key"), None);
+    let mut hit = cache.get("wide", "key").unwrap();
+    if let CandidateTokens::Sequences(paths) = &mut hit {
+        paths[0][0] = 99;
+    }
+    assert_eq!(cache.get("wide", "key"), Some(sequences));
+    let before = cache.metrics().retained_bytes;
+    assert!(!cache.insert(
+        "wide".into(),
+        "huge".into(),
+        CandidateTokens::Sequences(vec![Vec::with_capacity(4096)])
+    ));
+    assert_eq!(cache.metrics().retained_bytes, before);
+}

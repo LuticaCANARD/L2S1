@@ -86,6 +86,9 @@ impl LlamaBackend {
     }
     pub(super) fn check_artifacts(&self, request: &DecisionRequest) -> Result<()> {
         self.check_evidence_transfer()?;
+        if request.decisions.iter().any(|d| d.options().len() > 26) {
+            self.check_sequence_config()?;
+        }
         if let Some(head) = &self.output_head {
             self.check_head_config(head)?;
             for d in &request.decisions {
@@ -139,12 +142,28 @@ impl LlamaBackend {
         }
         let mut decisions = Vec::new();
         for d in &request.decisions {
-            let (input, candidates) = self.prepare_checked(&request.state, d)?;
+            let (input, candidates, paths) = if d.options().len() > 26 {
+                let (input, paths) =
+                    self.encode_decision_sequences(&request.state, d)
+                        .map_err(|e| {
+                            DecisionFailure::new(
+                                FailureKind::UnsupportedCapability,
+                                "candidate_sequences",
+                                Some(&d.id),
+                                e,
+                            )
+                        })?;
+                (input, Vec::new(), paths)
+            } else {
+                let (input, candidates) = self.prepare_checked(&request.state, d)?;
+                (input, candidates, Vec::new())
+            };
             decisions.push(PreparedDecisionReport {
                 decision_id: d.id.clone(),
                 input_tokens: input.len(),
                 prompt_tokens_sha256: token_hash(&input),
                 candidate_token_ids: candidates,
+                candidate_token_sequences: paths,
                 option_ids: d.options().into_iter().map(|o| o.id).collect(),
             });
         }

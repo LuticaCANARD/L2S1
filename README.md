@@ -15,7 +15,7 @@ flowchart TD
     A[Application or CLI] --> B[DecisionRequest: state and decisions]
     B --> C[LlamaBackend: model-specific prompt and token preparation]
     C --> D[C++ bridge and llama.cpp: GGUF inference]
-    D --> E[ExactEvidence: candidate logits and full-vocabulary normalizer]
+    D --> E[Candidate logits or complete answer-code likelihoods]
     E --> F[Shared scoring, optional calibration or head, and DecisionPolicy]
     F --> G[DecisionResponse: typed values, scores, and abstention reasons]
 ```
@@ -27,6 +27,7 @@ flowchart TD
 | [`llama.rs`](src/llama.rs) | Own the model/context, select the prompt profile, tokenize inputs, dispatch inference and assemble results |
 | [`l2s1-llama-sys`](crates/l2s1-llama-sys), [`bridge.cpp`](crates/l2s1-llama-sys/native/bridge.cpp), [`chat.cpp`](crates/l2s1-llama-sys/native/chat.cpp) | Call llama.cpp, render GGUF Jinja templates, manage sequence memory and copy inference evidence |
 | [`evidence.rs`](src/evidence.rs) | Validate complete vocabulary logits and preserve semantic option/token mappings |
+| [`codes.rs`](src/codes.rs), [`llama/code_sequences.rs`](src/llama/code_sequences.rs) | Size A-Z/AA-ZZ/AAA-ZZZ codes and score complete token paths for larger candidate sets |
 | [`calibration.rs`](src/calibration.rs), [`output_head.rs`](src/output_head.rs) | Optional task-scoped temperature calibration or learned output scoring |
 | [`interoperability.rs`](src/interoperability.rs), [`llama/interchange.rs`](src/llama/interchange.rs) | Model fingerprints, capabilities, request preflight, structured failures and execution diagnostics |
 | [`worker.rs`](src/worker.rs) | Bounded admission and dedicated-thread ownership of a backend |
@@ -65,7 +66,7 @@ For example:
 }
 ```
 
-L2S1 maps these semantic IDs to codes `A`, `B`, `C`, then checks their token IDs at the model's actual assistant answer boundary. Each code must be a unique, stable, single-token continuation. The application receives `chilled`, not a model-specific token ID, as its selected value. Token IDs and raw scores remain available as evidence.
+L2S1 maps these semantic IDs to answer codes and checks their tokenization at the model's actual assistant answer boundary. Up to 26 options retain the original `A`–`Z` single-token path. Larger candidate sets automatically use fixed-width codes: `AA`–`ZZ`, then `AAA`–`ZZZ`, and so on. Complete code-sequence likelihoods are scored when codes span multiple tokens. The application receives `chilled`, not a model-specific code, as its selected value. Token paths and raw scores remain available as evidence. See [answer-code expansion and intent evaluation](INTENT_BENCHMARK.md).
 
 Each decision is evaluated independently. A request can contain different decision kinds over the same state; it is not encoded as a conversation in which later questions see earlier answers. See [`examples/warehouse.json`](examples/warehouse.json) for all three kinds.
 
@@ -178,7 +179,7 @@ For repeated requests, retain the backend instead of loading it for every call. 
   --input examples/warehouse.json --prompt-detail typed-examples --code-rotation 1
 ```
 
-Rotation changes code assignment: displayed position `i` represents canonical option `(i + rotation) % option_count`. The backend accepts rotations 0–25 and returns scores in the original semantic order, including the original ordinal scale. Returned codes and token IDs describe the actual rotated assignment. The corresponding Rust setters are `set_prompt_detail(PromptDetail::TypedExamples)` and `set_code_rotation(1)?`. Changing either clears preparation caches and changes the prompt identity, so calibrations and heads must match that configuration. Default response JSON omits the added detail/rotation fields.
+Rotation changes code assignment: displayed position `i` represents canonical option `(i + rotation) % option_count`. The backend accepts nonnegative rotations, reduces them modulo the option count, and returns scores in the original semantic order, including the original ordinal scale. Returned codes and token IDs describe the actual rotated assignment. The corresponding Rust setters are `set_prompt_detail(PromptDetail::TypedExamples)` and `set_code_rotation(1)?`. Changing either clears preparation caches and changes the prompt identity, so calibrations and heads must match that configuration. Default response JSON omits the added detail/rotation fields.
 
 For multiple rotated passes, `score_semantic_mixture(&decision, &passes, &policy)` aligns results by semantic option ID and pools **full candidate probabilities**:
 
@@ -245,6 +246,11 @@ State copying has a cost and does not guarantee a speedup. Parallel execution ha
 
 ### Optional preparation and evidence optimizations
 
+For models larger than VRAM, CUDA loading accepts `--gpu-layers N` or
+`--cpu-moe-layers N` to place part of the weights in CPU RAM. Placement is recorded
+in compute identity and can change numerical scores. See
+[CPU/GPU placement](MODEL_INTERCHANGEABILITY.md#cpugpu-placement).
+
 Legacy prompts, fresh execution, full evidence transfer and disabled preparation caching remain the defaults. Existing repeated requests and fixed decision schemas continue to work; none of these options requires a fixed schema.
 
 ```sh
@@ -268,7 +274,7 @@ Repeat `--model` for additional checkpoints; use `--cuda` explicitly for GPU run
 
 ## Compatibility and validation
 
-A compatible checkpoint must be a decoder-only model supported by the linked runtime, have a renderable GGUF chat template that preserves the payload, fit the chosen device/context, and provide unique single-token continuations for every requested code. There are 2–26 candidates per decision. Compatibility is checked against actual model behavior rather than a general family-name promise.
+A compatible checkpoint must be a decoder-only model supported by the linked runtime, have a renderable GGUF chat template that preserves the payload, and fit the chosen device/context. Decisions require at least two candidates; answer-code width grows automatically without an alphabet-derived count ceiling. The original path requires unique single-token continuations; multi-letter codes require stable, unique, prefix-free token sequences and support fresh or prefix-reuse execution with full evidence, without output heads, scalar calibration or feature export. Prompt length, answer-prefix length and available memory still bound real workloads. Compatibility is checked against actual model behavior rather than a general family-name promise.
 
 Local conformance checks have covered SmolLM2, Qwen3, Gemma3, TinyLlama, Gemma4, a Qwen3.8 file with `qwen35` hybrid architecture, and GPT-OSS across CPU/CUDA configurations. Support remains checkpoint- and configuration-specific; use the [verification guide](VERIFICATION.md) for your model. Base models without suitable templates, encoder-only models, multimodal inputs and multi-token candidate scoring are outside the current contract.
 
@@ -286,23 +292,42 @@ The general test run skips model-dependent tests; invoke them explicitly with lo
 
 ## Recorded model comparison
 
-The September 23, 2026 JevBench matrix report measures the same 231 public items on an RTX 3060 12 GiB. **Nine of 22 planned configurations were scored; 13 were still pending.** All scored rows used identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration.
+The September 23, 2026 JevBench matrix measured **22 GGUF checkpoints on all 231 public items** using the same frozen project build on an RTX 3060 12 GiB. All 5,082 predictions in the completed comparison runs were valid, with no inference errors or truncation. The 23 runtime configurations include one failed default GPT-OSS attempt and its successful CUDA Graphs-disabled recovery.
 
-| Checkpoint | Argmax accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms |
-| --- | ---: | ---: | ---: | ---: |
-| Qwen3.5-4B-Q8_0 | 79.65% | 9 | 93 | 86.88 / 1137.30 |
-| Qwen3.5-4B-Q4_K_M | 76.19% | 10 | 91 | 88.47 / 1175.18 |
-| gemma-4-E2B-it-Q8_0 | 67.97% | 58 | 22 | 46.79 / 701.11 |
-| Qwen3.5-2B-Q8_0 | 62.34% | 15 | 133 | 40.99 / 513.03 |
-| Qwen3.5-0.8B-Q8_0 | 51.95% | 16 | 183 | 27.93 / 350.53 |
-| gemma-3-1b-it-Q8_0 | 38.96% | 121 | 30 | 25.06 / 309.24 |
-| tinyllama-1.1b-chat-v1.0.Q4_K_M | 33.77% | 1 | 230 | 30.08 / 702.65 |
-| Qwen3-0.6B-Q8_0 | 31.60% | 129 | 41 | 34.01 / 445.12 |
-| SmolLM2-135M-Instruct-Q8_0 | 30.30% | 8 | 211 | 14.88 / 253.65 |
+Completed rows use identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration. The explicit GPT-OSS exception is marked below.
 
-Argmax accuracy counts the top candidate before abstention; it is separate from the accuracy of accepted decisions. For Qwen3.5-4B Q8_0, the default policy accepted 138 decisions, including 129 correct and 9 wrong, and abstained on 93. That is 93.48% accepted accuracy at 59.74% coverage. Gemma4 E2B accepted 209, including 58 wrong, illustrating why model-specific evaluation matters even with the same contract and thresholds.
+| Checkpoint | Argmax accuracy | Hard accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Qwen3.5-4B-Q8_0 | 79.65% | 61.26% | 9 | 93 | 86.88 / 1137.30 |
+| Qwen3.5-9B-Q4_K_M | 77.92% | 58.56% | 13 | 64 | 130.55 / 1697.14 |
+| Qwen3.5-9B-Q8_0 | 77.92% | 56.76% | 14 | 66 | 124.68 / 1613.79 |
+| gemma-4-E4B-it-Q4_K_M | 77.49% | 55.86% | 30 | 37 | 86.62 / 1186.47 |
+| gemma-4-E4B-it-Q8_0 | 76.62% | 54.05% | 32 | 37 | 85.04 / 1146.21 |
+| Qwen3.5-4B-Q4_K_M | 76.19% | 55.86% | 10 | 91 | 88.47 / 1175.18 |
+| Qwen3.8-27B-UD-IQ2_XXS | 73.16% | 47.75% | 18 | 84 | 414.61 / 5460.22 |
+| Qwen3-8B-Q8_0 | 71.43% | 48.65% | 56 | 15 | 121.45 / 1817.94 |
+| gemma-4-E2B-it-Q8_0 | 67.97% | 43.24% | 58 | 22 | 46.79 / 701.11 |
+| Qwen3-4B-Q8_0 | 65.80% | 44.14% | 63 | 29 | 85.26 / 1349.28 |
+| Ministral-3-8B-Instruct-2512-Q4_K_M | 65.37% | 47.75% | 23 | 93 | 441.43 / 2399.70 |
+| gpt-oss-20b-Q4_K_M (CUDA Graphs off) | 64.94% | 48.65% | 31 | 82 | 181.93 / 2262.28 |
+| Qwen3.5-2B-Q8_0 | 62.34% | 48.65% | 15 | 133 | 40.99 / 513.03 |
+| gemma-3-4b-it-Q8_0 | 59.74% | 36.04% | 88 | 9 | 74.71 / 879.92 |
+| Phi-4-mini-instruct.Q8_0 | 56.71% | 42.34% | 30 | 115 | 70.50 / 971.95 |
+| Qwen3.5-0.8B-Q8_0 | 51.95% | 42.34% | 16 | 183 | 27.93 / 350.53 |
+| SmolLM3-3B-Q8_0 | 46.32% | 31.53% | 41 | 127 | 71.47 / 884.76 |
+| Llama-3.2-3B-Instruct-Q8_0 | 43.72% | 30.63% | 46 | 147 | 68.18 / 884.75 |
+| gemma-3-1b-it-Q8_0 | 38.96% | 28.83% | 121 | 30 | 25.06 / 309.24 |
+| tinyllama-1.1b-chat-v1.0.Q4_K_M | 33.77% | 36.04% | 1 | 230 | 30.08 / 702.65 |
+| Qwen3-0.6B-Q8_0 | 31.60% | 31.53% | 129 | 41 | 34.01 / 445.12 |
+| SmolLM2-135M-Instruct-Q8_0 | 30.30% | 29.73% | 8 | 211 | 14.88 / 253.65 |
 
-These are single-run, public-subset measurements, not an official full-suite score or rank. Latency excludes loading and warmup; small models may exceed their training context. The source report records independent recounting of predictions, Brier and ECE. These figures summarize the supplied report; the remote matrix was not rerun for this documentation. See the [evaluation method](JEVBENCH.md).
+Qwen3.5-4B Q8_0 had the highest argmax accuracy in this selected matrix: 184/231 (79.65%), including 68/111 Hard items (61.26%). Its default policy accepted 138 decisions: 129 correct and 9 wrong, for 93.48% accepted accuracy at 59.74% coverage. Qwen3.5-9B Q4_K_M covered 72.29% with 13 accepted errors; Gemma4 E2B covered 90.48% with 58 accepted errors. Accuracy before abstention, accepted accuracy and coverage answer different questions.
+
+GPT-OSS 20B Q4_K_M exhausted GPU memory in `cudaGraphInstantiate` after 129 predictions. With `GGML_CUDA_DISABLE_GRAPHS=1`, it completed all 231 at 64.94% accuracy and a sampled peak of 11,901 MiB. Its first 129 probability distributions were identical to the failed run. Keep this runtime exception when reproducing its result.
+
+After model downloads finished, complete reruns of Qwen3.5-4B Q8_0 and Gemma4 E2B produced identical probabilities for every item. Their confirmation p50/p95 latencies were 86.99/1139.49 ms and 46.08/699.14 ms respectively; the table retains the original matrix timings.
+
+These are public-subset, local inference measurements, not an official full-suite score, rank or production validation. Latency excludes loading and warmup; small models may exceed their training context. Raw predictions, model/source hashes, memory samples, failed-attempt evidence and the independent accuracy/Brier/ECE recount remain in `results/jevbench-matrix-20260923/`. The measured remote source snapshot is included there; later working-tree optimizations are outside this frozen comparison. See the [evaluation method](JEVBENCH.md).
 
 ## Further documentation
 
@@ -311,7 +336,7 @@ These are single-run, public-subset measurements, not an official full-suite sco
 | Identity, preflight, calibration, diagnostics and worker API | [Model interchangeability](MODEL_INTERCHANGEABILITY.md) |
 | Build and model-specific validation | [Verification guide](VERIFICATION.md) |
 | Prefix reuse and parallel execution | [Prefix algorithm](SEMIF_ALGORITHM.md), [parallel execution](PARALLEL_EXECUTION.md) |
-| Evaluation methods | [Synthetic benchmark](BENCHMARK.md), [AG News](KAGGLE_BENCHMARK.md), [JevBench](JEVBENCH.md) |
+| Evaluation methods | [Synthetic benchmark](BENCHMARK.md), [AG News](KAGGLE_BENCHMARK.md), [JevBench](JEVBENCH.md), [Laya/Jev tasks and CPU caching](LAYA_BENCHMARK.md) |
 | Optional model/task adaptation | [Decision fine-tuning](DECISION_FINETUNE.md), [output heads](OUTPUT_HEAD.md) |
 
 ## License

@@ -269,3 +269,4 @@ fn model_templates_keep_detail_and_examples_in_the_safe_data_segment() {
     assert!(!typed[1].parse_special);
     assert_eq!(data(&typed)["options"][0]["id"], "option_2");
 }
+pub use l2s1::{option_code, option_code_width};

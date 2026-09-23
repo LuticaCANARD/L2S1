@@ -51,13 +51,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         threads: i32,
         #[arg(long, value_enum, default_value_t = FlashAttention::Off)]
         flash_attention: FlashAttention,
+        /// Maximum layers on CUDA; omit to preserve full offload.
+        #[arg(long)]
+        gpu_layers: Option<u32>,
+        /// Keep expert weights of the first N MoE layers in CPU RAM.
+        #[arg(long, default_value_t = 0)]
+        cpu_moe_layers: u32,
+        /// Read avoids whole-file mmap during model loading; auto preserves defaults.
+        #[arg(long, value_enum, default_value_t = l2s1::ModelLoadMode::Auto)]
+        model_load_mode: l2s1::ModelLoadMode,
         #[arg(long, value_enum, default_value_t = ExecutionMode::Fresh)]
         execution_mode: ExecutionMode,
         #[arg(long, value_enum, default_value_t = PromptLayout::Legacy)]
         prompt_layout: PromptLayout,
         #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
         prompt_detail: PromptDetail,
-        #[arg(long, default_value_t = 0, value_parser = clap::value_parser!(u32).range(0..26))]
+        #[arg(long, default_value_t = 0)]
         code_rotation: u32,
         #[arg(long, default_value_t = 4, value_parser = clap::value_parser!(u32).range(1..=32))]
         parallel_width: u32,
@@ -83,8 +92,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect::<Result<_, Box<dyn std::error::Error>>>()?;
     let mut ids = std::collections::HashSet::new();
     for case in &cases {
-        if !ids.insert(&case.id) || case.id.is_empty() || case.request.decisions.len() != 1 {
-            return Err("Expected unique case IDs and one decision per case".into());
+        if !ids.insert(&case.id) || case.id.is_empty() {
+            return Err("Expected unique, nonempty case IDs".into());
         }
         case.request.validate()?;
     }
@@ -106,6 +115,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ubatch: args.ubatch.unwrap_or(args.batch),
             threads: args.threads,
             flash_attention: args.flash_attention,
+            gpu_layers: args.gpu_layers,
+            cpu_moe_layers: args.cpu_moe_layers,
+            model_load_mode: args.model_load_mode,
         },
         args.cuda,
         DecisionPolicy::default(),
@@ -137,13 +149,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .collect();
         backend.decide_batch(&requests)?;
     }
+    // Warmup must not populate the measured preparation-cache hit counts.
+    backend.clear_preparation_cache();
     backend.take_timings(); // Exclude warmup profiling.
     for (batch_index, batch) in cases.chunks(batch_size).enumerate() {
         let requests: Vec<_> = batch.iter().map(|case| case.request.clone()).collect();
+        let cache_before = serde_json::to_value(backend.preparation_cache_stats())?;
         let started = Instant::now();
         let response = backend.decide_batch(&requests);
         let elapsed_ms = started.elapsed().as_secs_f64() * 1000.0;
         let timings = serde_json::to_value(backend.take_timings())?;
+        let cache_after = serde_json::to_value(backend.preparation_cache_stats())?;
         let records: Vec<_> = match response {
             Ok(responses) => batch
                 .iter()
@@ -163,10 +179,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 })
                 .collect(),
         };
-        for mut record in records {
+        for (mut record, case) in records.into_iter().zip(batch) {
             // elapsed_ms is the article's full batch completion latency, not
             // latency divided by batch size. Throughput uses unique batch times.
             record["batch_profile"] = timings.clone();
+            // Batch-level snapshots repeat on each record in that batch;
+            // consumers must count each batch only once.
+            record["preparation_cache_before"] = cache_before.clone();
+            record["preparation_cache_after"] = cache_after.clone();
+            record["decision_count"] = case.request.decisions.len().into();
             record["elapsed_ms"] = elapsed_ms.into();
             record["batch_elapsed_ms"] = elapsed_ms.into();
             record["amortized_elapsed_ms"] = (elapsed_ms / batch.len() as f64).into();

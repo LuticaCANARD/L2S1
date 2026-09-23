@@ -18,7 +18,26 @@ impl TokenCacheValue for Vec<i32> {
     }
 }
 
-impl TokenCacheValue for (Vec<i32>, Vec<i32>) {
+/// Both code widths share the same entry and byte limits.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum CandidateTokens {
+    Single(Vec<i32>),
+    Sequences(Vec<Vec<i32>>),
+}
+
+impl TokenCacheValue for CandidateTokens {
+    fn retained_bytes(&self) -> usize {
+        match self {
+            Self::Single(tokens) => tokens.retained_bytes(),
+            Self::Sequences(paths) => paths.iter().fold(
+                paths.capacity().saturating_mul(size_of::<Vec<i32>>()),
+                |bytes, path| bytes.saturating_add(path.retained_bytes()),
+            ),
+        }
+    }
+}
+
+impl<T: TokenCacheValue> TokenCacheValue for (Vec<i32>, T) {
     fn retained_bytes(&self) -> usize {
         self.0
             .retained_bytes()

@@ -72,6 +72,9 @@ pub struct PreparedDecisionReport {
     pub input_tokens: usize,
     pub prompt_tokens_sha256: String,
     pub candidate_token_ids: Vec<i32>,
+    /// Populated instead of scalar token IDs for multi-letter answer codes.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub candidate_token_sequences: Vec<Vec<i32>>,
     pub option_ids: Vec<String>,
 }
 #[derive(Debug, Serialize)]

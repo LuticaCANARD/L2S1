@@ -63,15 +63,13 @@ pub fn score_semantic_mixture(
         let mut codes = HashSet::new();
         let mut probability_sum = 0.0;
         for score in &pass.scores {
-            let code = score.code.as_bytes();
+            let code_index = crate::codes::option_code_index(&score.code, options.len());
             if !option_ids.contains(score.id.as_str())
                 || by_id.insert(score.id.as_str(), score).is_some()
                 || score.token_id < 0
                 || !tokens.insert(score.token_id)
-                || code.len() != 1
-                || code[0] < b'A'
-                || usize::from(code[0] - b'A') >= options.len()
-                || !codes.insert(code[0])
+                || code_index.is_none()
+                || !codes.insert(score.code.as_str())
                 || !score.raw_logit.is_finite()
                 || !score.option_probability.is_finite()
                 || !(0.0 < score.option_probability && score.option_probability <= 1.0)
@@ -80,7 +78,7 @@ pub fn score_semantic_mixture(
                     "invalid semantic mixture option probabilities or token mapping".into(),
                 ));
             }
-            let code_index = usize::from(code[0] - b'A');
+            let code_index = code_index.expect("validated code");
             if pass_index == 0 {
                 first_code_tokens[code_index] = Some(score.token_id);
             } else if first_code_tokens[code_index] != Some(score.token_id) {
