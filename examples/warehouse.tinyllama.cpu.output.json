@@ -1,0 +1,136 @@
+{
+  "backend": {
+    "model_path": "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+    "model_description": "llama 1B Q4_K - Medium",
+    "model_architecture": "llama",
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-decision-v1",
+    "runtime": "local-libllama",
+    "offload_requested": false,
+    "offload_device": null
+  },
+  "policy": {
+    "min_top_probability": 0.8,
+    "min_candidate_mass": 0.05
+  },
+  "results": [
+    {
+      "id": "storage_zone",
+      "value": {
+        "type": "choice",
+        "selected": null
+      },
+      "scores": [
+        {
+          "id": "ambient",
+          "code": "A",
+          "token_id": 29909,
+          "raw_logit": 10.903234481811523,
+          "option_probability": 0.46156129167983106
+        },
+        {
+          "id": "chilled",
+          "code": "B",
+          "token_id": 29933,
+          "raw_logit": 10.583586692810059,
+          "option_probability": 0.33528035613906676
+        },
+        {
+          "id": "frozen",
+          "code": "C",
+          "token_id": 29907,
+          "raw_logit": 10.082605361938477,
+          "option_probability": 0.20315835218110265
+        }
+      ],
+      "candidate_mass": 0.014333419655887436,
+      "top_option_probability": 0.46156129167983106,
+      "entropy_confidence": 0.046952487942204635,
+      "abstention_reasons": [
+        "low_candidate_mass",
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 175,
+      "truncated": false
+    },
+    {
+      "id": "cold_chain_required",
+      "value": {
+        "type": "binary",
+        "p_true": 0.32331625188846524,
+        "value": null
+      },
+      "scores": [
+        {
+          "id": "false",
+          "code": "A",
+          "token_id": 29909,
+          "raw_logit": 11.586648941040039,
+          "option_probability": 0.6766837481115351
+        },
+        {
+          "id": "true",
+          "code": "B",
+          "token_id": 29933,
+          "raw_logit": 10.848075866699219,
+          "option_probability": 0.32331625188846524
+        }
+      ],
+      "candidate_mass": 0.016248014831577538,
+      "top_option_probability": 0.6766837481115351,
+      "entropy_confidence": 0.09204863236743754,
+      "abstention_reasons": [
+        "low_candidate_mass",
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 164,
+      "truncated": false
+    },
+    {
+      "id": "dispatch_priority",
+      "value": {
+        "type": "ordinal",
+        "expected_value": 0.47797811175801297,
+        "selected": null
+      },
+      "scores": [
+        {
+          "id": "low",
+          "code": "A",
+          "token_id": 29909,
+          "raw_logit": 11.795475006103516,
+          "option_probability": 0.6457744232586827
+        },
+        {
+          "id": "medium",
+          "code": "B",
+          "token_id": 29933,
+          "raw_logit": 10.765158653259277,
+          "option_probability": 0.23047304172462052
+        },
+        {
+          "id": "high",
+          "code": "C",
+          "token_id": 29907,
+          "raw_logit": 10.143308639526367,
+          "option_probability": 0.12375253501669622
+        }
+      ],
+      "candidate_mass": 0.019216895862098144,
+      "top_option_probability": 0.6457744232586827,
+      "entropy_confidence": 0.19969496503594275,
+      "abstention_reasons": [
+        "low_candidate_mass",
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 188,
+      "truncated": false
+    }
+  ]
+}

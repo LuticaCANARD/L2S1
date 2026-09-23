@@ -1,0 +1,134 @@
+{
+  "backend": {
+    "model_path": "models/SmolLM2-135M-Instruct-Q8_0.gguf",
+    "model_description": "llama 256M Q8_0",
+    "model_architecture": "llama",
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-decision-v1",
+    "runtime": "local-libllama",
+    "offload_requested": false,
+    "offload_device": null
+  },
+  "policy": {
+    "min_top_probability": 0.8,
+    "min_candidate_mass": 0.05
+  },
+  "results": [
+    {
+      "id": "storage_zone",
+      "value": {
+        "type": "choice",
+        "selected": null
+      },
+      "scores": [
+        {
+          "id": "ambient",
+          "code": "A",
+          "token_id": 49,
+          "raw_logit": 31.43653106689453,
+          "option_probability": 0.49164946000368304
+        },
+        {
+          "id": "chilled",
+          "code": "B",
+          "token_id": 50,
+          "raw_logit": 30.231260299682617,
+          "option_probability": 0.14730351936461059
+        },
+        {
+          "id": "frozen",
+          "code": "C",
+          "token_id": 51,
+          "raw_logit": 31.12777328491211,
+          "option_probability": 0.3610470206317092
+        }
+      ],
+      "candidate_mass": 0.08265847236202482,
+      "top_option_probability": 0.49164946000368304,
+      "entropy_confidence": 0.09066555191937309,
+      "abstention_reasons": [
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 171,
+      "truncated": false
+    },
+    {
+      "id": "cold_chain_required",
+      "value": {
+        "type": "binary",
+        "p_true": 0.3981280685748263,
+        "value": null
+      },
+      "scores": [
+        {
+          "id": "false",
+          "code": "A",
+          "token_id": 49,
+          "raw_logit": 30.62581443786621,
+          "option_probability": 0.601871931425175
+        },
+        {
+          "id": "true",
+          "code": "B",
+          "token_id": 50,
+          "raw_logit": 30.212543487548828,
+          "option_probability": 0.3981280685748263
+        }
+      ],
+      "candidate_mass": 0.03453605274334105,
+      "top_option_probability": 0.601871931425175,
+      "entropy_confidence": 0.030154952795696466,
+      "abstention_reasons": [
+        "low_candidate_mass",
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 162,
+      "truncated": false
+    },
+    {
+      "id": "dispatch_priority",
+      "value": {
+        "type": "ordinal",
+        "expected_value": 0.7143375801053615,
+        "selected": null
+      },
+      "scores": [
+        {
+          "id": "low",
+          "code": "A",
+          "token_id": 49,
+          "raw_logit": 31.82669448852539,
+          "option_probability": 0.563549249034182
+        },
+        {
+          "id": "medium",
+          "code": "B",
+          "token_id": 50,
+          "raw_logit": 30.558597564697266,
+          "option_probability": 0.1585639218262723
+        },
+        {
+          "id": "high",
+          "code": "C",
+          "token_id": 51,
+          "raw_logit": 31.119653701782227,
+          "option_probability": 0.2778868291395446
+        }
+      ],
+      "candidate_mass": 0.07517045082707588,
+      "top_option_probability": 0.563549249034182,
+      "entropy_confidence": 0.11611011029789275,
+      "abstention_reasons": [
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 192,
+      "truncated": false
+    }
+  ]
+}

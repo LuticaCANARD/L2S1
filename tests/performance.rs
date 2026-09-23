@@ -1,6 +1,6 @@
 #![cfg(feature = "llama")]
 //! Opt-in measurements of a local checkpoint; no downloads or model distribution.
-use skid_desion::{llama::LlamaBackend, *};
+use l2s1::{llama::LlamaBackend, *};
 use std::{env, fs, path::Path, time::Instant};
 
 fn setting(name: &str, default: u32, minimum: u32) -> u32 {

@@ -1,0 +1,136 @@
+{
+  "backend": {
+    "model_path": "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+    "model_description": "llama 1B Q4_K - Medium",
+    "model_architecture": "llama",
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-decision-v1",
+    "runtime": "local-libllama",
+    "offload_requested": true,
+    "offload_device": "NVIDIA GeForce RTX 3080"
+  },
+  "policy": {
+    "min_top_probability": 0.8,
+    "min_candidate_mass": 0.05
+  },
+  "results": [
+    {
+      "id": "storage_zone",
+      "value": {
+        "type": "choice",
+        "selected": null
+      },
+      "scores": [
+        {
+          "id": "ambient",
+          "code": "A",
+          "token_id": 29909,
+          "raw_logit": 10.879887580871582,
+          "option_probability": 0.45354765558951254
+        },
+        {
+          "id": "chilled",
+          "code": "B",
+          "token_id": 29933,
+          "raw_logit": 10.56872844696045,
+          "option_probability": 0.33226778133952123
+        },
+        {
+          "id": "frozen",
+          "code": "C",
+          "token_id": 29907,
+          "raw_logit": 10.12962532043457,
+          "option_probability": 0.2141845630709663
+        }
+      ],
+      "candidate_mass": 0.014109986289274203,
+      "top_option_probability": 0.45354765558951254,
+      "entropy_confidence": 0.039936389438177455,
+      "abstention_reasons": [
+        "low_candidate_mass",
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 175,
+      "truncated": false
+    },
+    {
+      "id": "cold_chain_required",
+      "value": {
+        "type": "binary",
+        "p_true": 0.3094423401081401,
+        "value": null
+      },
+      "scores": [
+        {
+          "id": "false",
+          "code": "A",
+          "token_id": 29909,
+          "raw_logit": 11.497581481933594,
+          "option_probability": 0.6905576598918607
+        },
+        {
+          "id": "true",
+          "code": "B",
+          "token_id": 29933,
+          "raw_logit": 10.694853782653809,
+          "option_probability": 0.3094423401081401
+        }
+      ],
+      "candidate_mass": 0.018580287868583654,
+      "top_option_probability": 0.6905576598918607,
+      "entropy_confidence": 0.10747131322965175,
+      "abstention_reasons": [
+        "low_candidate_mass",
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 164,
+      "truncated": false
+    },
+    {
+      "id": "dispatch_priority",
+      "value": {
+        "type": "ordinal",
+        "expected_value": 0.4545520046679124,
+        "selected": null
+      },
+      "scores": [
+        {
+          "id": "low",
+          "code": "A",
+          "token_id": 29909,
+          "raw_logit": 11.562952041625977,
+          "option_probability": 0.6703052598491224
+        },
+        {
+          "id": "medium",
+          "code": "B",
+          "token_id": 29933,
+          "raw_logit": 10.377435684204102,
+          "option_probability": 0.20483747563384333
+        },
+        {
+          "id": "high",
+          "code": "C",
+          "token_id": 29907,
+          "raw_logit": 9.882390022277832,
+          "option_probability": 0.12485726451703454
+        }
+      ],
+      "candidate_mass": 0.01837293930595523,
+      "top_option_probability": 0.6703052598491224,
+      "entropy_confidence": 0.22384755568388115,
+      "abstention_reasons": [
+        "low_candidate_mass",
+        "low_top_probability"
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "calibration_id": null,
+      "input_tokens": 188,
+      "truncated": false
+    }
+  ]
+}

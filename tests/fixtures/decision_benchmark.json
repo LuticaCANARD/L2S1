@@ -1,0 +1,869 @@
+{
+  "id": "decision-rules-v1",
+  "cases": [
+    {
+      "id": "warehouse-01",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "ambient",
+          "hours_until_dispatch": 0
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                },
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "ambient",
+        "cold_chain_required": "false",
+        "dispatch_priority": "high"
+      }
+    },
+    {
+      "id": "warehouse-02",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "chilled",
+          "hours_until_dispatch": 6,
+          "note": "This is an unrelated inventory note. The box label is blue."
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                },
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "chilled",
+        "cold_chain_required": "true",
+        "dispatch_priority": "high"
+      }
+    },
+    {
+      "id": "warehouse-03",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "frozen",
+          "hours_until_dispatch": 7
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                },
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "frozen",
+        "cold_chain_required": "true",
+        "dispatch_priority": "medium"
+      }
+    },
+    {
+      "id": "warehouse-04",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "ambient",
+          "hours_until_dispatch": 24,
+          "note": "This is an unrelated inventory note. The box label is blue."
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                },
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "ambient",
+        "cold_chain_required": "false",
+        "dispatch_priority": "medium"
+      }
+    },
+    {
+      "id": "warehouse-05",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "chilled",
+          "hours_until_dispatch": 25
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                },
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                },
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "chilled",
+        "cold_chain_required": "true",
+        "dispatch_priority": "low"
+      }
+    },
+    {
+      "id": "warehouse-06",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "frozen",
+          "hours_until_dispatch": 48,
+          "note": "This is an unrelated inventory note. The box label is blue."
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                },
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                },
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "frozen",
+        "cold_chain_required": "true",
+        "dispatch_priority": "low"
+      }
+    },
+    {
+      "id": "access-01",
+      "domain": "access",
+      "request": {
+        "state": {
+          "role": "reader",
+          "enabled": true,
+          "failed_attempts": 0
+        },
+        "decisions": [
+          {
+            "id": "role_scope",
+            "instruction": "Map role to its scope using the options. For this question only, ignore enabled and failed_attempts.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "read",
+                  "criterion": "The role is reader."
+                },
+                {
+                  "id": "edit",
+                  "criterion": "The role is editor."
+                },
+                {
+                  "id": "administer",
+                  "criterion": "The role is admin."
+                }
+              ]
+            }
+          },
+          {
+            "id": "can_edit",
+            "instruction": "Editing is allowed if enabled is true AND role is editor or admin. Otherwise editing is not allowed.",
+            "kind": {
+              "type": "binary",
+              "false_label": "Editing is not allowed.",
+              "true_label": "Editing is allowed."
+            }
+          },
+          {
+            "id": "review_priority",
+            "instruction": "Choose review priority using only failed_attempts and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "Zero failed attempts.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "One or two failed attempts.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "Three or more failed attempts.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "role_scope": "read",
+        "can_edit": "false",
+        "review_priority": "low"
+      }
+    },
+    {
+      "id": "access-02",
+      "domain": "access",
+      "request": {
+        "state": {
+          "role": "editor",
+          "enabled": false,
+          "failed_attempts": 1,
+          "note": "This is an unrelated account note. The preferred theme is green."
+        },
+        "decisions": [
+          {
+            "id": "role_scope",
+            "instruction": "Map role to its scope using the options. For this question only, ignore enabled and failed_attempts.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "read",
+                  "criterion": "The role is reader."
+                },
+                {
+                  "id": "edit",
+                  "criterion": "The role is editor."
+                },
+                {
+                  "id": "administer",
+                  "criterion": "The role is admin."
+                }
+              ]
+            }
+          },
+          {
+            "id": "can_edit",
+            "instruction": "Editing is allowed if enabled is true AND role is editor or admin. Otherwise editing is not allowed.",
+            "kind": {
+              "type": "binary",
+              "false_label": "Editing is not allowed.",
+              "true_label": "Editing is allowed."
+            }
+          },
+          {
+            "id": "review_priority",
+            "instruction": "Choose review priority using only failed_attempts and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "Zero failed attempts.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "One or two failed attempts.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "Three or more failed attempts.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "role_scope": "edit",
+        "can_edit": "false",
+        "review_priority": "medium"
+      }
+    },
+    {
+      "id": "access-03",
+      "domain": "access",
+      "request": {
+        "state": {
+          "role": "admin",
+          "enabled": true,
+          "failed_attempts": 2
+        },
+        "decisions": [
+          {
+            "id": "role_scope",
+            "instruction": "Map role to its scope using the options. For this question only, ignore enabled and failed_attempts.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "edit",
+                  "criterion": "The role is editor."
+                },
+                {
+                  "id": "administer",
+                  "criterion": "The role is admin."
+                },
+                {
+                  "id": "read",
+                  "criterion": "The role is reader."
+                }
+              ]
+            }
+          },
+          {
+            "id": "can_edit",
+            "instruction": "Editing is allowed if enabled is true AND role is editor or admin. Otherwise editing is not allowed.",
+            "kind": {
+              "type": "binary",
+              "false_label": "Editing is not allowed.",
+              "true_label": "Editing is allowed."
+            }
+          },
+          {
+            "id": "review_priority",
+            "instruction": "Choose review priority using only failed_attempts and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "Zero failed attempts.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "One or two failed attempts.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "Three or more failed attempts.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "role_scope": "administer",
+        "can_edit": "true",
+        "review_priority": "medium"
+      }
+    },
+    {
+      "id": "access-04",
+      "domain": "access",
+      "request": {
+        "state": {
+          "role": "reader",
+          "enabled": false,
+          "failed_attempts": 3,
+          "note": "This is an unrelated account note. The preferred theme is green."
+        },
+        "decisions": [
+          {
+            "id": "role_scope",
+            "instruction": "Map role to its scope using the options. For this question only, ignore enabled and failed_attempts.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "edit",
+                  "criterion": "The role is editor."
+                },
+                {
+                  "id": "administer",
+                  "criterion": "The role is admin."
+                },
+                {
+                  "id": "read",
+                  "criterion": "The role is reader."
+                }
+              ]
+            }
+          },
+          {
+            "id": "can_edit",
+            "instruction": "Editing is allowed if enabled is true AND role is editor or admin. Otherwise editing is not allowed.",
+            "kind": {
+              "type": "binary",
+              "false_label": "Editing is not allowed.",
+              "true_label": "Editing is allowed."
+            }
+          },
+          {
+            "id": "review_priority",
+            "instruction": "Choose review priority using only failed_attempts and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "Zero failed attempts.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "One or two failed attempts.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "Three or more failed attempts.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "role_scope": "read",
+        "can_edit": "false",
+        "review_priority": "high"
+      }
+    },
+    {
+      "id": "access-05",
+      "domain": "access",
+      "request": {
+        "state": {
+          "role": "editor",
+          "enabled": true,
+          "failed_attempts": 4
+        },
+        "decisions": [
+          {
+            "id": "role_scope",
+            "instruction": "Map role to its scope using the options. For this question only, ignore enabled and failed_attempts.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "administer",
+                  "criterion": "The role is admin."
+                },
+                {
+                  "id": "read",
+                  "criterion": "The role is reader."
+                },
+                {
+                  "id": "edit",
+                  "criterion": "The role is editor."
+                }
+              ]
+            }
+          },
+          {
+            "id": "can_edit",
+            "instruction": "Editing is allowed if enabled is true AND role is editor or admin. Otherwise editing is not allowed.",
+            "kind": {
+              "type": "binary",
+              "false_label": "Editing is not allowed.",
+              "true_label": "Editing is allowed."
+            }
+          },
+          {
+            "id": "review_priority",
+            "instruction": "Choose review priority using only failed_attempts and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "Zero failed attempts.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "One or two failed attempts.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "Three or more failed attempts.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "role_scope": "edit",
+        "can_edit": "true",
+        "review_priority": "high"
+      }
+    },
+    {
+      "id": "access-06",
+      "domain": "access",
+      "request": {
+        "state": {
+          "role": "admin",
+          "enabled": false,
+          "failed_attempts": 0,
+          "note": "This is an unrelated account note. The preferred theme is green."
+        },
+        "decisions": [
+          {
+            "id": "role_scope",
+            "instruction": "Map role to its scope using the options. For this question only, ignore enabled and failed_attempts.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "administer",
+                  "criterion": "The role is admin."
+                },
+                {
+                  "id": "read",
+                  "criterion": "The role is reader."
+                },
+                {
+                  "id": "edit",
+                  "criterion": "The role is editor."
+                }
+              ]
+            }
+          },
+          {
+            "id": "can_edit",
+            "instruction": "Editing is allowed if enabled is true AND role is editor or admin. Otherwise editing is not allowed.",
+            "kind": {
+              "type": "binary",
+              "false_label": "Editing is not allowed.",
+              "true_label": "Editing is allowed."
+            }
+          },
+          {
+            "id": "review_priority",
+            "instruction": "Choose review priority using only failed_attempts and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "Zero failed attempts.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "One or two failed attempts.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "Three or more failed attempts.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "role_scope": "administer",
+        "can_edit": "false",
+        "review_priority": "low"
+      }
+    }
+  ]
+}
