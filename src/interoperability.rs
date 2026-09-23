@@ -27,6 +27,8 @@ pub(crate) fn file_digest(path: &std::path::Path) -> Result<String> {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ModelIdentity {
+    #[serde(default, skip_serializing_if = "EvidenceTransfer::is_full")]
+    pub evidence_transfer: EvidenceTransfer,
     pub weights_sha256: String,
     pub template_sha256: String,
     pub prompt_profile: String,

@@ -1,7 +1,8 @@
 use clap::Parser;
 use l2s1::{
-    ComputeOptions, DecisionBackend, DecisionPolicy, DecisionRequest, ExecutionMode,
-    FlashAttention, PromptLayout, PromptProfile, llama::LlamaBackend,
+    ComputeOptions, DecisionBackend, DecisionPolicy, DecisionRequest, EvidenceTransfer,
+    ExecutionMode, FlashAttention, PreparationCacheConfig, PromptLayout, PromptProfile,
+    llama::LlamaBackend,
 };
 use std::{
     io::{self, Read},
@@ -16,6 +17,14 @@ use std::{
 struct Args {
     #[arg(long)]
     model: PathBuf,
+    /// Compact preserves full-vocabulary mass but only copies candidate scores to Rust.
+    #[arg(long, value_enum, default_value_t = EvidenceTransfer::Full)]
+    evidence_transfer: EvidenceTransfer,
+    /// Retained preparation cache bytes; zero disables caching (default).
+    #[arg(long, default_value_t = 0)]
+    preparation_cache_bytes: usize,
+    #[arg(long, default_value_t = 128)]
+    preparation_cache_entries: usize,
     /// Print verified model identity and metadata capabilities, without reading input.
     #[arg(long, conflicts_with_all = ["preflight", "diagnostics"])]
     inspect: bool,
@@ -102,6 +111,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     backend.set_execution_mode(args.execution_mode);
     backend.set_parallel_width(args.parallel_width as usize)?;
     backend.set_prompt_layout(args.prompt_layout);
+    backend.set_evidence_transfer(args.evidence_transfer)?;
+    backend.set_preparation_cache(PreparationCacheConfig {
+        max_entries: args.preparation_cache_entries,
+        max_bytes: args.preparation_cache_bytes,
+    });
     if let Some(path) = &args.output_head {
         backend.load_output_head(path)?;
     }

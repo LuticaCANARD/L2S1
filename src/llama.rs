@@ -4,6 +4,7 @@ use crate::prompt::{
 };
 use crate::*;
 use std::{
+    cell::RefCell,
     ffi::{CStr, CString, c_char, c_void},
     marker::PhantomData,
     path::Path,
@@ -12,7 +13,20 @@ use std::{
     time::Instant,
 };
 
+mod batching;
 mod interchange;
+mod prepared_cache;
+mod shared_state;
+use prepared_cache::BoundedTokenCache;
+pub use prepared_cache::CacheMetrics;
+pub use shared_state::SharedStateSession;
+
+#[derive(Debug, Clone, Copy, Default, serde::Serialize)]
+pub struct PreparationCacheStats {
+    pub prompts: CacheMetrics,
+    pub candidates: CacheMetrics,
+}
+
 #[repr(C)]
 #[derive(Default)]
 struct NativeRestoreMetrics {
@@ -25,6 +39,21 @@ struct NativeRestoreMetrics {
     fallback: i32,
 }
 unsafe extern "C" {
+    fn sd_forward_compact(
+        engine: *mut c_void,
+        tokens: *const i32,
+        count: i32,
+        reuse: bool,
+        reused: *mut i32,
+        candidate_ids: *const i32,
+        candidate_count: usize,
+        candidate_logits: *mut f32,
+        candidate_logits_count: usize,
+        log_normalizer: *mut f64,
+        vocabulary_size: *mut i32,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
     fn sd_recurrent_or_hybrid(engine: *const c_void) -> bool;
     fn sd_training_context(engine: *const c_void) -> u32;
     fn sd_forward_restore(
@@ -114,6 +143,11 @@ unsafe extern "C" {
 
 pub struct LlamaBackend {
     engine: NonNull<c_void>,
+    evidence_transfer: EvidenceTransfer,
+    preparation_cache_enabled: bool,
+    prepared_cache: RefCell<BoundedTokenCache<(Vec<i32>, Vec<i32>)>>,
+    candidate_cache: RefCell<BoundedTokenCache<Vec<i32>>>,
+    logits_buffer: Vec<f32>,
     model_path: String,
     lora_path: Option<String>,
     output_head: Option<OutputHead>,
@@ -304,6 +338,11 @@ impl LlamaBackend {
         let engine = NonNull::new(engine).ok_or_else(|| native_error(&error))?;
         let mut backend = Self {
             engine,
+            evidence_transfer: EvidenceTransfer::Full,
+            preparation_cache_enabled: false,
+            prepared_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
+            candidate_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
+            logits_buffer: Vec::new(),
             model_path,
             context: compute.context as usize,
             compute,
@@ -349,6 +388,69 @@ impl LlamaBackend {
         Ok(backend)
     }
 
+    /// Enable exact preparation reuse; zero limits disable storage. No KV state
+    /// is stored here. Each backend owns its own cache and model identity.
+    pub fn set_preparation_cache(&mut self, config: PreparationCacheConfig) {
+        let boundary_bytes = config.max_bytes / 4;
+        self.preparation_cache_enabled = config.max_entries > 0 && config.max_bytes > 0;
+        self.prepared_cache = RefCell::new(BoundedTokenCache::new(
+            config.max_entries,
+            config.max_bytes - boundary_bytes,
+        ));
+        self.candidate_cache =
+            RefCell::new(BoundedTokenCache::new(config.max_entries, boundary_bytes));
+    }
+
+    pub fn preparation_cache_stats(&self) -> PreparationCacheStats {
+        PreparationCacheStats {
+            prompts: self.prepared_cache.borrow().metrics(),
+            candidates: self.candidate_cache.borrow().metrics(),
+        }
+    }
+
+    pub fn clear_preparation_cache(&self) {
+        self.prepared_cache.borrow_mut().clear();
+        self.candidate_cache.borrow_mut().clear();
+    }
+
+    /// Compact evidence is opt-in and retains the full-vocabulary mass gate.
+    /// Select it before loading a calibration, which binds the transfer mode.
+    pub fn set_evidence_transfer(&mut self, mode: EvidenceTransfer) -> Result<()> {
+        let previous = self.evidence_transfer;
+        self.evidence_transfer = mode;
+        if let Err(error) = self.check_evidence_transfer() {
+            self.evidence_transfer = previous;
+            return Err(error);
+        }
+        if let Some(error) = self
+            .calibrations
+            .iter()
+            .find_map(|a| a.validate(&self.identity()).err())
+        {
+            self.evidence_transfer = previous;
+            return Err(error);
+        }
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        self.clear_preparation_cache();
+        Ok(())
+    }
+
+    fn check_evidence_transfer(&self) -> Result<()> {
+        if self.evidence_transfer == EvidenceTransfer::Compact
+            && (self.output_head.is_some()
+                || !matches!(
+                    self.execution_mode,
+                    ExecutionMode::Fresh | ExecutionMode::PrefixReuse
+                ))
+        {
+            return Err(Error::Invalid(
+                "compact evidence requires fresh/prefix-reuse execution without an output head"
+                    .into(),
+            ));
+        }
+        Ok(())
+    }
+
     pub fn take_timings(&mut self) -> InferenceTimings {
         std::mem::take(&mut self.timings)
     }
@@ -381,11 +483,17 @@ impl LlamaBackend {
         }
         self.lora_path = Some(path_text.into());
         self.adapter_sha256 = Some(adapter_sha256);
+        self.clear_preparation_cache();
         Ok(())
     }
 
     /// Load one explicitly scoped head bound to this GGUF and inference configuration.
     pub fn load_output_head(&mut self, path: &Path) -> Result<()> {
+        if self.evidence_transfer != EvidenceTransfer::Full {
+            return Err(Error::Invalid(
+                "output heads require full evidence transfer".into(),
+            ));
+        }
         if self.output_head.is_some() || self.lora_path.is_some() || !self.calibrations.is_empty() {
             return Err(Error::Invalid(
                 "only one output head, without LoRA, is supported".into(),
@@ -407,6 +515,7 @@ impl LlamaBackend {
         self.head_sha256 = Some(crate::interoperability::digest(&bytes));
         self.output_head_path = Some(path.to_string_lossy().into_owned());
         self.output_head = Some(head);
+        self.clear_preparation_cache();
         Ok(())
     }
 
@@ -494,6 +603,7 @@ impl LlamaBackend {
     }
 
     fn configure_profile(&mut self, requested: PromptProfile) -> Result<()> {
+        self.clear_preparation_cache();
         // Both pointers belong to the live model. Missing template is nullable.
         self.architecture = unsafe { CStr::from_ptr(sd_architecture(self.engine.as_ptr())) }
             .to_string_lossy()
@@ -530,6 +640,7 @@ impl LlamaBackend {
     pub fn set_execution_mode(&mut self, mode: ExecutionMode) {
         unsafe { sd_clear(self.engine.as_ptr()) };
         self.execution_mode = mode;
+        self.clear_preparation_cache();
     }
 
     /// Bound parallel KV memory to at most context * width token slots.
@@ -542,6 +653,7 @@ impl LlamaBackend {
         }
         unsafe { sd_clear(self.engine.as_ptr()) };
         self.parallel_width = width;
+        self.clear_preparation_cache();
         Ok(())
     }
 
@@ -549,6 +661,7 @@ impl LlamaBackend {
     pub fn set_prompt_layout(&mut self, layout: PromptLayout) {
         unsafe { sd_clear(self.engine.as_ptr()) };
         self.prompt_layout = layout;
+        self.clear_preparation_cache();
     }
 
     fn tokenize(&self, text: &str, special: bool) -> Result<Vec<i32>> {
@@ -609,6 +722,40 @@ impl LlamaBackend {
         state: &serde_json::Value,
         decision: &Decision,
     ) -> std::result::Result<(Vec<i32>, Vec<i32>), DecisionFailure> {
+        // Exact serialized key; no semantic normalization or hash-only lookup.
+        // Model/tokenizer/template ownership is local and configuration setters
+        // invalidate both caches. Failed preparations are never inserted.
+        let key = if self.preparation_cache_enabled {
+            Some(serde_json::to_string(&(state, decision)).map_err(|e| {
+                DecisionFailure::new(
+                    FailureKind::InvalidRequest,
+                    "prepare",
+                    Some(&decision.id),
+                    e,
+                )
+            })?)
+        } else {
+            None
+        };
+        if let Some(key) = &key
+            && let Some(prepared) = self.prepared_cache.borrow_mut().get("model-local-v1", key)
+        {
+            return Ok(prepared);
+        }
+        let prepared = self.prepare_uncached(state, decision)?;
+        if let Some(key) = key {
+            self.prepared_cache
+                .borrow_mut()
+                .insert("model-local-v1".into(), key, prepared.clone());
+        }
+        Ok(prepared)
+    }
+
+    fn prepare_uncached(
+        &self,
+        state: &serde_json::Value,
+        decision: &Decision,
+    ) -> std::result::Result<(Vec<i32>, Vec<i32>), DecisionFailure> {
         let parts = match &self.chat_skeleton {
             Some(skeleton) => compile_model_prompt(skeleton, state, decision, self.prompt_layout)?,
             None => compile_prompt_with_layout(state, decision, self.prompt_layout),
@@ -637,6 +784,17 @@ impl LlamaBackend {
             ));
         }
         let tail = parts.last().unwrap();
+        let candidate_key = self
+            .preparation_cache_enabled
+            .then(|| format!("{}:{}", decision.options().len(), tail.text));
+        if let Some(candidate_key) = &candidate_key
+            && let Some(candidates) = self
+                .candidate_cache
+                .borrow_mut()
+                .get("model-local-v1", candidate_key)
+        {
+            return Ok((input, candidates));
+        }
         let tail_tokens = self.tokenize(&tail.text, true)?;
         let mut candidates = Vec::new();
         for i in 0..decision.options().len() {
@@ -662,6 +820,13 @@ impl LlamaBackend {
                 Some(&decision.id),
                 "candidate tokens must be unique",
             ));
+        }
+        if let Some(candidate_key) = candidate_key {
+            self.candidate_cache.borrow_mut().insert(
+                "model-local-v1".into(),
+                candidate_key,
+                candidates.clone(),
+            );
         }
         Ok((input, candidates))
     }
@@ -692,28 +857,51 @@ impl LlamaBackend {
         if size <= 0 {
             return Err(Error::Backend("invalid vocabulary size".into()));
         }
-        let mut logits = vec![0.0; size as usize];
         let mut error = [0 as c_char; 1024];
         let mut reused = 0;
-        // Native code copies the final output into this owned Rust allocation.
         self.failure_stage = (
             "inference",
             FailureKind::BackendFailure,
             Some(decision.id.clone()),
         );
         let started = Instant::now();
-        let ok = unsafe {
-            sd_forward(
-                self.engine.as_ptr(),
-                input.as_ptr(),
-                input.len() as i32,
-                self.execution_mode == ExecutionMode::PrefixReuse,
-                &mut reused,
-                logits.as_mut_ptr(),
-                logits.len(),
-                error.as_mut_ptr(),
-                error.len(),
-            )
+        let mut candidate_logits = [0.0f32; 26];
+        let mut normalizer = 0.0;
+        let mut native_vocab = 0;
+        let compact = self.evidence_transfer == EvidenceTransfer::Compact;
+        let ok = if compact {
+            unsafe {
+                sd_forward_compact(
+                    self.engine.as_ptr(),
+                    input.as_ptr(),
+                    input.len() as i32,
+                    self.execution_mode == ExecutionMode::PrefixReuse,
+                    &mut reused,
+                    candidates.as_ptr(),
+                    candidates.len(),
+                    candidate_logits.as_mut_ptr(),
+                    candidates.len(),
+                    &mut normalizer,
+                    &mut native_vocab,
+                    error.as_mut_ptr(),
+                    error.len(),
+                )
+            }
+        } else {
+            self.logits_buffer.resize(size as usize, 0.0);
+            unsafe {
+                sd_forward(
+                    self.engine.as_ptr(),
+                    input.as_ptr(),
+                    input.len() as i32,
+                    self.execution_mode == ExecutionMode::PrefixReuse,
+                    &mut reused,
+                    self.logits_buffer.as_mut_ptr(),
+                    self.logits_buffer.len(),
+                    error.as_mut_ptr(),
+                    error.len(),
+                )
+            }
         };
         self.timings.native_ms += started.elapsed().as_secs_f64() * 1000.0;
         if !ok {
@@ -725,7 +913,24 @@ impl LlamaBackend {
             FailureKind::InvalidEvidence,
             Some(decision.id.clone()),
         );
-        let mut result = score_logits(decision, &logits, &candidates, input.len(), &self.policy)?;
+        let mut result = if compact {
+            ExactEvidence::from_native_summary(
+                decision,
+                &candidate_logits[..candidates.len()],
+                &candidates,
+                native_vocab as usize,
+                normalizer,
+            )?
+            .score(decision, input.len(), &self.policy)?
+        } else {
+            score_logits(
+                decision,
+                &self.logits_buffer,
+                &candidates,
+                input.len(),
+                &self.policy,
+            )?
+        };
         if applies {
             let features = if hidden {
                 self.copy_features()?
@@ -868,6 +1073,7 @@ impl LlamaBackend {
             .to_string_lossy()
             .into_owned();
         BackendInfo {
+            evidence_transfer: self.evidence_transfer,
             model_path: self.model_path.clone(),
             lora_path: self.lora_path.clone(),
             output_head_path: self.output_head_path.clone(),

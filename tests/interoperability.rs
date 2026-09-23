@@ -4,6 +4,7 @@ fn request() -> DecisionRequest {
 }
 fn identity() -> ModelIdentity {
     ModelIdentity {
+        evidence_transfer: EvidenceTransfer::Full,
         weights_sha256: "a".repeat(64),
         template_sha256: "b".repeat(64),
         prompt_profile: "model".into(),

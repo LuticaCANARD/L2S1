@@ -6,6 +6,7 @@ impl LlamaBackend {
         let info = self.info();
         let template = unsafe { CStr::from_ptr(sd_chat_template(self.engine.as_ptr())) }.to_bytes();
         ModelIdentity {
+            evidence_transfer: self.evidence_transfer,
             weights_sha256: self.weights_sha256.clone(),
             template_sha256: digest(template),
             prompt_profile: info.prompt_profile,
@@ -31,6 +32,9 @@ impl LlamaBackend {
         ];
         if !hybrid {
             modes.push(ExecutionMode::Parallel);
+        }
+        if self.evidence_transfer == EvidenceTransfer::Compact {
+            modes.retain(|mode| matches!(mode, ExecutionMode::Fresh | ExecutionMode::PrefixReuse));
         }
         ModelInspection {
             identity: self.identity(),
@@ -81,6 +85,7 @@ impl LlamaBackend {
         unsafe { sd_clear(self.engine.as_ptr()) };
     }
     pub(super) fn check_artifacts(&self, request: &DecisionRequest) -> Result<()> {
+        self.check_evidence_transfer()?;
         if let Some(head) = &self.output_head {
             self.check_head_config(head)?;
             for d in &request.decisions {
