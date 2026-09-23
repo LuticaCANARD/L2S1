@@ -1,0 +1,19 @@
+[package]
+name = "l2s1-llama-sys"
+version = "0.1.0"
+edition = "2024"
+description = "Pinned llama.cpp native backend for L2S1"
+license = "MIT"
+repository = "https://github.com/LuticaCANARD/L2S1"
+links = "l2s1_llama"
+build = "build.rs"
+include = ["Cargo.toml", "build.rs", "src/**", "native/**", "cmake/**", "UPSTREAM_COMMIT", "README.md", "THIRD_PARTY_LICENSES.txt"]
+
+[features]
+default = []
+cuda = []
+
+[build-dependencies]
+cc = "1"
+cmake = "0.1"
+sha2 = "0.10"

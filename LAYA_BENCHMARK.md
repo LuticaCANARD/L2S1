@@ -33,9 +33,10 @@ python3 scripts/laya_benchmark.py run \
   --evaluator target/release/examples/evaluate_jsonl --model /path/to/model.gguf
 ```
 
-Use `phish` or `probes` in the same fetch/prepare flow. For CUDA, supply `--cuda`
-and the placement required by your checkpoint, such as `--gpu-layers 24
---model-load-mode read`. Use the matching native libraries described in the
+Use `phish` or `probes` in the same fetch/prepare flow. For CUDA, build the
+evaluator with `--features llama-cuda`, then supply `--cuda` and the placement
+required by your checkpoint, such as `--gpu-layers 24 --model-load-mode read`.
+The `llama` feature builds a CPU-only runtime; see the
 [build guide](README.md#build). A small integration check can use `prepare
 --limit 4`; its manifest and report explicitly mark the result as a subset.
 

@@ -25,12 +25,9 @@ The defaults remain `--prompt-layout legacy --execution-mode fresh`, preserving 
 
 ## Reproduce
 
-Use the same matching llama.cpp source and library build described in the README:
+Use the pinned sys dependency build described in the README:
 
 ```sh
-export LLAMA_CPP_DIR=/path/to/llama.cpp
-export LLAMA_LIB_DIR="$LLAMA_CPP_DIR/build-cuda/bin"
-
 cargo test --locked --offline
 cargo test --release --locked --offline --features llama
 
@@ -40,7 +37,7 @@ SKID_MODEL=models/Qwen3-0.6B-Q8_0.gguf SKID_CUDA=0 \
   --test prefix_reuse -- --ignored --nocapture
 ```
 
-Set `SKID_CUDA=1` for CUDA; GPU access is required. Set `SKID_BATCH=32` to check smaller prefill batches (default: 256). The opt-in native test uses 12 synthetic labeled requests (36 decisions), one six-decision long-state request, and one three-decision long-state identical-prompt request. It compares probabilities, candidate mass, raw top-1 and accepted selections, and checks error/request isolation. Its existing 0.02 probability/mass tolerance is a regression check, not an accuracy guarantee; any changed top-1 or accepted selection also fails the test. Timing order alternates between modes, with one warmup request per mode. Each request is measured once per mode, so timings are smoke measurements rather than stable percentiles.
+Set `SKID_CUDA=1` with `--features llama-cuda` for CUDA; GPU access is required. Set `SKID_BATCH=32` to check smaller prefill batches (default: 256). The opt-in native test uses 12 synthetic labeled requests (36 decisions), one six-decision long-state request, and one three-decision long-state identical-prompt request. It compares probabilities, candidate mass, raw top-1 and accepted selections, and checks error/request isolation. Its existing 0.02 probability/mass tolerance is a regression check, not an accuracy guarantee; any changed top-1 or accepted selection also fails the test. Timing order alternates between modes, with one warmup request per mode. Each request is measured once per mode, so timings are smoke measurements rather than stable percentiles.
 
 For labeled accuracy, coverage, latency distributions, and repeated runs:
 

@@ -4,12 +4,18 @@ version = "0.1.0"
 edition = "2024"
 description = "Typed decisions from local GGUF chat model logits"
 license = "MIT"
-exclude = ["/models/**", "**/*.gguf", "**/*.safetensors", "/target/**", "/results/**", "/web/**"]
+repository = "https://github.com/LuticaCANARD/L2S1"
+exclude = ["/models/**", "**/*.gguf", "**/*.safetensors", "/target/**", "/results/**", "/web/**", "/crates/**"]
 build = "build.rs"
+
+[workspace]
+members = [".", "crates/l2s1-llama-sys"]
+resolver = "3"
 
 [features]
 default = []
-llama = []
+llama = ["dep:l2s1-llama-sys"]
+llama-cuda = ["llama", "l2s1-llama-sys/cuda"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
@@ -17,10 +23,10 @@ serde_json = "1"
 thiserror = "2"
 clap = { version = "4", features = ["derive"] }
 sha2 = "0.10"
+l2s1-llama-sys = { path = "crates/l2s1-llama-sys", version = "0.1.0", optional = true }
 
 [build-dependencies]
 sha2 = "0.10"
-cc = "1"
 
 [[bin]]
 name = "l2s1"

@@ -4,7 +4,7 @@ L2S1 keeps the application decision contract while replacing a compatible local 
 
 ## Inspect, validate, run
 
-Build with the existing `llama` feature and matching llama.cpp source/libraries. Examples use the compiled binary:
+Build with the `llama` feature for CPU or `llama-cuda` for CUDA. The sys dependency builds matching llama.cpp source and libraries. Examples use the compiled binary:
 
 ```sh
 l2s1 --model models/SmolLM2-135M-Instruct-Q8_0.gguf --inspect

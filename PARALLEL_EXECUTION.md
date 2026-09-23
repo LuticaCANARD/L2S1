@@ -3,7 +3,7 @@
 The optional `parallel` mode evaluates independent questions using separate llama.cpp sequence IDs. It shares the loaded model, computes an exact common prompt prefix once per wave, and puts suffix tokens from multiple questions into each decode batch. It does not start multiple threads that concurrently mutate one llama context.
 
 ```sh
-cargo run --release --locked --features llama -- \
+cargo run --release --locked --features llama-cuda -- \
   --model models/gemma-4-E2B-it-Q8_0.gguf \
   --input examples/warehouse.json --device cuda \
   --prompt-layout state-first --execution-mode parallel --parallel-width 4
@@ -43,14 +43,12 @@ not individual response latency.
 ## Validation and measurement
 
 ```sh
-export LLAMA_CPP_DIR=/path/to/llama.cpp
-export LLAMA_LIB_DIR="$LLAMA_CPP_DIR/build-cuda/bin"
 SKID_MODEL=models/gemma-4-E2B-it-Q8_0.gguf SKID_CUDA=1 \
-  cargo test --release --locked --offline --features llama \
+  cargo test --release --locked --offline --features llama-cuda \
   --test parallel real_model_parallel_contract -- --ignored --nocapture
 SKID_MODEL=models/gemma-4-E2B-it-Q8_0.gguf SKID_CUDA=1 \
   SKID_PARALLEL_WIDTH=4 SKID_PARALLEL_OUTPUT=/tmp/parallel.json \
-  cargo test --release --locked --offline --features llama \
+  cargo test --release --locked --offline --features llama-cuda \
   --test parallel real_model_parallel_measurement -- --ignored --nocapture
 ```
 

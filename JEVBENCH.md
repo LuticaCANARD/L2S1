@@ -12,7 +12,7 @@ Requirements: Python 3.11+, a clean upstream checkout at the pinned revision, a 
 # On the prepared server:
 source ~/.local/opt/skid-desion/skid-test-env.sh
 cd ~/personal/skid/jevbench-20260923/source
-cargo build --release --locked --features llama --bin l2s1 --example evaluate_jsonl
+cargo build --release --locked --features llama-cuda --bin l2s1 --example evaluate_jsonl
 
 git clone https://github.com/fstandhartinger/jevbench.git ../upstream-new
 git -C ../upstream-new checkout --detach f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84
