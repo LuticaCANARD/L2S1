@@ -25,7 +25,7 @@ flowchart TD
 | [`decision.rs`](src/decision.rs) | Request/response types, `DecisionBackend`, shared scoring and acceptance policy |
 | [`prompt.rs`](src/prompt.rs) | Compile state, instructions and options into the selected prompt layout |
 | [`llama.rs`](src/llama.rs) | Own the model/context, select the prompt profile, tokenize inputs, dispatch inference and assemble results |
-| [`native/bridge.cpp`](native/bridge.cpp), [`native/chat.cpp`](native/chat.cpp) | Call llama.cpp, render GGUF Jinja templates, manage sequence memory and copy inference evidence |
+| [`l2s1-llama-sys`](crates/l2s1-llama-sys), [`bridge.cpp`](crates/l2s1-llama-sys/native/bridge.cpp), [`chat.cpp`](crates/l2s1-llama-sys/native/chat.cpp) | Call llama.cpp, render GGUF Jinja templates, manage sequence memory and copy inference evidence |
 | [`evidence.rs`](src/evidence.rs) | Validate complete vocabulary logits and preserve semantic option/token mappings |
 | [`calibration.rs`](src/calibration.rs), [`output_head.rs`](src/output_head.rs) | Optional task-scoped temperature calibration or learned output scoring |
 | [`interoperability.rs`](src/interoperability.rs), [`llama/interchange.rs`](src/llama/interchange.rs) | Model fingerprints, capabilities, request preflight, structured failures and execution diagnostics |
@@ -92,16 +92,17 @@ The pure Rust library supports validation, scoring, scalar calibration and worke
 cargo test --locked
 ```
 
-The inference backend and CLI require Linux, Rust with edition 2024 support, a C++17 compiler, and a matching llama.cpp source checkout and shared-library build. The source must include `include/llama.h`, `src/llama-ext.h`, `common/jinja`, its JSON/Unicode helpers, and `vendor/nlohmann`.
+The inference backend and CLI require Linux, Rust with edition 2024 support, CMake, and a C++17 compiler. The `l2s1-llama-sys` workspace dependency builds llama.cpp and the matching native bridge together.
 
 ```sh
-export LLAMA_CPP_DIR=/path/to/llama.cpp
-export LLAMA_LIB_DIR="$LLAMA_CPP_DIR/build-cuda/bin"
-
 cargo build --release --locked --features llama
+# CUDA toolkit required for GPU support:
+cargo build --release --locked --features llama-cuda
 ```
 
-Cargo compiles L2S1's native bridge and template helpers; libllama and its CPU/CUDA backends must already be built. Source, headers and shared libraries must match. A CPU-only shared-library build is also usable. The local verification used llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`; see [verification commands](VERIFICATION.md).
+The default CPU build uses bundled llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`. To build another revision, set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`; the legacy `LLAMA_CPP_DIR` source override also works. `LLAMA_LIB_DIR` is no longer used. Validate custom revisions with the native contract tests. See [verification commands](VERIFICATION.md) and [native dependency details](crates/l2s1-llama-sys/README.md).
+
+For an independent source release, publish `l2s1-llama-sys` before `l2s1`. A prebuilt executable must ship its matching native shared libraries with a portable loader path; swapping only `libllama.so` is unsupported.
 
 Model files are supplied by the caller. Place an appropriate text chat/instruct GGUF under `models/` or another directory. The CLI does not download weights. Loading verifies checkpoint and runtime identities, including reading the full checkpoint for its checksum, so release builds are recommended.
 

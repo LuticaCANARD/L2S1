@@ -21,12 +21,10 @@ The native bridge uses the pinned llama.cpp staging API `llama_set_embeddings_ne
 
 ## Reproduce the pilot
 
-Build against llama.cpp commit `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`, matching headers and CUDA libraries:
+Build with the pinned llama.cpp commit `3d82ef62d47fd74e18f36c5eccbdcf965b617b17` and CUDA feature:
 
 ```bash
-LLAMA_CPP_DIR=/path/to/llama.cpp \
-LLAMA_LIB_DIR=/path/to/llama.cpp/build-cuda/bin \
-cargo build --release --offline --features llama --examples --bin l2s1
+cargo build --release --offline --features llama-cuda --examples --bin l2s1
 
 python3 scripts/prepare_output_head.py \
   --source results/kaggle-airline-20260922 \

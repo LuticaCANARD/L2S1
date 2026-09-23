@@ -56,6 +56,14 @@ def revision(path):
         return None
 
 
+def llama_revision():
+    source = os.environ.get("L2S1_LLAMA_CPP_SOURCE") or os.environ.get("LLAMA_CPP_DIR")
+    if source:
+        return revision(source)
+    marker = ROOT / "crates/l2s1-llama-sys/vendor/llama.cpp/UPSTREAM_COMMIT"
+    return marker.read_text().strip() if marker.is_file() else None
+
+
 def cpu_model():
     try:
         for line in Path("/proc/cpuinfo").read_text().splitlines():
@@ -87,8 +95,9 @@ def read_models(manifest, selected):
     return models
 
 
-def build(output):
-    command = ["cargo", "test", "--release", "--locked", "--offline", "--features", "llama",
+def build(output, cuda=False):
+    feature = "llama-cuda" if cuda else "llama"
+    command = ["cargo", "test", "--release", "--locked", "--offline", "--features", feature,
                "--test", "benchmark", "--no-run", "--message-format=json"]
     with (output / "build.log").open("w") as log:
         result = subprocess.run(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=log, text=True)
@@ -159,13 +168,13 @@ def main():
         "suite_sha256": sha256(ROOT / "tests/fixtures/decision_benchmark.json"),
         "host": {"platform": platform.platform(), "cpu": cpu_model()},
         "repository_revision": revision(ROOT),
-        "llama_cpp_revision": revision(os.environ.get("LLAMA_CPP_DIR")),
+        "llama_cpp_revision": llama_revision(),
         "settings": {key: value for key, value in vars(args).items() if key not in ("manifest", "output")},
         "runs": [],
     }
     save_summary(output, summary)
     try:
-        executable = build(output)
+        executable = build(output, "cuda" in args.device)
         summary["benchmark_executable_sha256"] = sha256(executable)
     except (RuntimeError, OSError) as error:
         summary["build_error"] = str(error)
