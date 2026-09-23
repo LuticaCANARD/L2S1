@@ -11,6 +11,7 @@
 #include <limits>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -32,6 +33,9 @@ struct engine {
     std::string architecture;
     std::string runtime_libraries;
     std::vector<int32_t> cached_tokens;
+    // Own pattern strings for at least the model lifetime; no static leaks.
+    std::vector<std::string> cpu_moe_patterns;
+    std::vector<llama_model_tensor_buft_override> placement_overrides;
     ~engine() {
         if (ctx) llama_free(ctx);
         if (model) llama_model_free(model);
@@ -42,12 +46,19 @@ static void report(char * out, size_t cap, const char * message) {
     if (cap) std::snprintf(out, cap, "%s", message);
 }
 
-extern "C" engine * sd_open(const char * path, uint32_t context, uint32_t batch,
+extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_t batch,
         uint32_t ubatch, int32_t flash_attention, int32_t threads, bool cuda,
+        int32_t gpu_layers, int32_t cpu_moe_layers, int32_t model_load_mode,
         char * error, size_t error_cap) noexcept {
     try {
         if (ubatch == 0 || ubatch > batch || flash_attention < -1 || flash_attention > 1)
             throw std::runtime_error("invalid microbatch or FlashAttention option");
+        if (gpu_layers < -1 || cpu_moe_layers < 0 ||
+                static_cast<size_t>(cpu_moe_layers) >= llama_max_tensor_buft_overrides() ||
+                (!cuda && (gpu_layers != 0 || cpu_moe_layers != 0)))
+            throw std::runtime_error("invalid CPU/GPU placement options");
+        if (model_load_mode != -1 && model_load_mode != 0)
+            throw std::runtime_error("invalid model loading mode");
         static std::once_flag init;
         std::call_once(init, [] { ggml_backend_load_all(); llama_backend_init(); });
         auto e = std::make_unique<engine>();
@@ -65,12 +76,38 @@ extern "C" engine * sd_open(const char * path, uint32_t context, uint32_t batch,
             if (!e->devices[0]) throw std::runtime_error("CUDA device unavailable; select CPU explicitly to use CPU");
         }
         mp.devices = e->devices;
-        mp.n_gpu_layers = cuda ? -1 : 0;
+        mp.n_gpu_layers = gpu_layers;
+        // Use llama.cpp's bounded read/upload path. Do not change weight placement,
+        // quantization, lazy-tensor policy, or inference context parameters.
+        if (model_load_mode == 0) mp.load_mode = LLAMA_LOAD_MODE_NONE;
+        std::fprintf(stderr, "l2s1 model loading: %s\n", model_load_mode == 0 ? "read" : "auto");
+        if (cpu_moe_layers > 0) {
+            auto cpu = ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_CPU);
+            if (!cpu) throw std::runtime_error("CPU backend unavailable for MoE split");
+            auto cpu_buffer = ggml_backend_dev_buffer_type(cpu);
+            e->cpu_moe_patterns.reserve(cpu_moe_layers);
+            // Same expert tensor family as llama.cpp's --n-cpu-moe option.
+            for (int32_t layer = 0; layer < cpu_moe_layers; ++layer)
+                e->cpu_moe_patterns.push_back("^blk\\." + std::to_string(layer) +
+                    "\\.ffn_(up|down|gate|gate_up)_(ch|)exps\\.");
+            for (const auto & pattern : e->cpu_moe_patterns)
+                e->placement_overrides.push_back({pattern.c_str(), cpu_buffer});
+            e->placement_overrides.push_back({nullptr, nullptr});
+            mp.tensor_buft_overrides = e->placement_overrides.data();
+        }
+        std::fprintf(stderr, "l2s1 placement: gpu_layers=%d cpu_moe_layers=%d\n", gpu_layers, cpu_moe_layers);
         e->model = llama_model_load_from_file(path, mp);
         if (!e->model) throw std::runtime_error("model load failed; see llama.cpp stderr");
         char arch[64] = {};
         llama_model_meta_val_str(e->model, "general.architecture", arch, sizeof(arch));
         e->architecture = arch;
+        if (cpu_moe_layers > 0) {
+            char experts[32] = {};
+            const std::string key = e->architecture + ".expert_count";
+            llama_model_meta_val_str(e->model, key.c_str(), experts, sizeof(experts));
+            if (std::strtol(experts, nullptr, 10) <= 0 || cpu_moe_layers > llama_model_n_layer(e->model))
+                throw std::runtime_error("CPU MoE split requires an MoE model and a layer count within the model");
+        }
         if (!llama_model_has_decoder(e->model) || llama_model_has_encoder(e->model))
             throw std::runtime_error("decision scoring requires a decoder-only language model");
         auto cp = llama_context_default_params();
@@ -108,6 +145,23 @@ extern "C" engine * sd_open(const char * path, uint32_t context, uint32_t batch,
     } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }
       catch (...) { report(error, error_cap, "unknown native exception"); }
     return nullptr;
+}
+
+// Preserve the placement ABI for native reference callers.
+extern "C" engine * sd_open_placement(const char * path, uint32_t context, uint32_t batch,
+        uint32_t ubatch, int32_t flash_attention, int32_t threads, bool cuda,
+        int32_t gpu_layers, int32_t cpu_moe_layers,
+        char * error, size_t error_cap) noexcept {
+    return sd_open_loading(path, context, batch, ubatch, flash_attention, threads,
+        cuda, gpu_layers, cpu_moe_layers, -1, error, error_cap);
+}
+
+// Keep the original native entry point for existing callers and reference tests.
+extern "C" engine * sd_open(const char * path, uint32_t context, uint32_t batch,
+        uint32_t ubatch, int32_t flash_attention, int32_t threads, bool cuda,
+        char * error, size_t error_cap) noexcept {
+    return sd_open_placement(path, context, batch, ubatch, flash_attention, threads,
+        cuda, cuda ? -1 : 0, 0, error, error_cap);
 }
 
 extern "C" void sd_close(engine * e) noexcept { delete e; }

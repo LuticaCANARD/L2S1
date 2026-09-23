@@ -115,7 +115,7 @@ variant=natural
 mkdir -p "$study"
 python3 scripts/prepare_accuracy_study.py --output "$study/data"
 python3 scripts/prepare_accuracy_study.py --output "$study/data" --verify
-cargo build --release --locked --features llama \
+cargo build --release --locked --features llama-cuda \
   --example evaluate_accuracy --example export_decision_tokens
 
 target/release/examples/evaluate_accuracy --model "$model" --cuda \

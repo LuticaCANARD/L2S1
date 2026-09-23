@@ -35,9 +35,7 @@ curl --fail --location \
   --output results/kaggle-ag-news/dataset.zip
 python3 scripts/kaggle_ag_news.py prepare
 
-export LLAMA_CPP_DIR=/path/to/llama.cpp
-export LLAMA_LIB_DIR="$LLAMA_CPP_DIR/build-cuda/bin"
-cargo build --release --locked --features llama --example evaluate_jsonl
+cargo build --release --locked --features llama-cuda --example evaluate_jsonl
 python3 scripts/kaggle_ag_news.py run
 python3 scripts/kaggle_ag_news.py report
 ```
@@ -50,7 +48,7 @@ Validation of the evaluator:
 
 ```sh
 python3 -m unittest discover -s scripts -p test_kaggle_ag_news.py -v
-cargo clippy --release --locked --features llama --example evaluate_jsonl -- -D warnings
+cargo clippy --release --locked --features llama-cuda --example evaluate_jsonl -- -D warnings
 ```
 
 Scoring tests cover denominator handling, all-abstained outputs, duplicate/unknown IDs, split overlap removal, deterministic sampling, and confidence interval edge cases. Run the model-specific checks in [VERIFICATION.md](VERIFICATION.md) separately; a successful fixed-batch classification run does not establish consistency across execution modes.

@@ -15,12 +15,9 @@ This is a small synthetic rule-following benchmark, not a general reasoning, cod
 
 ## Run the five-model matrix
 
-Prerequisites: Python 3.9+, Rust dependencies already cached, a C++17 compiler, a matching llama.cpp checkout and shared-library build, and locally acquired checkpoints. Model paths are listed in `tests/fixtures/benchmark_models.json`; no Hugging Face client, account, or network request is used by the runner. Review the separate licenses before obtaining a model.
+Prerequisites: Python 3.9+, Rust dependencies already cached, CMake, a C++17 compiler, a CUDA toolkit for GPU runs, and locally acquired checkpoints. Model paths are listed in `tests/fixtures/benchmark_models.json`; no Hugging Face client, account, or network request is used by the runner. Review the separate licenses before obtaining a model.
 
 ```sh
-export LLAMA_CPP_DIR=/path/to/llama.cpp
-export LLAMA_LIB_DIR="$LLAMA_CPP_DIR/build-cuda/bin"
-
 python3 scripts/benchmark_models.py \
   --device cpu cuda \
   --iterations 3 \
