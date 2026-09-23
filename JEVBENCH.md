@@ -45,10 +45,8 @@ Mapping tests:
 python3 -m unittest discover -s scripts -p 'test_jevbench_public.py'
 ```
 
-The September 23 result is in [JEVBENCH_RESULTS.md](JEVBENCH_RESULTS.md).
-
 ## Multi-model comparison
 
-The [README comparison](README.md#recorded-model-comparison) summarizes the supplied September 23 report: nine configurations scored, none failed before complete scoring, and 13 pending out of 22 planned. This matrix is a separate invocation from the original Gemma4 run above, so its latency measurements differ.
+The [README comparison](README.md#recorded-model-comparison) summarizes the supplied September 23 report: nine configurations scored, none failed before complete scoring, and 13 pending out of 22 planned. Latency values belong to this matrix invocation and should not be mixed with separate runs.
 
 `scripts/jevbench_matrix.py` downloads a pinned plan or runs available checkpoints serially through the public evaluator. `scripts/report_jevbench_matrix.py` recounts saved predictions against gold labels and checks shared request/evaluator hashes before producing the report. Regenerating it requires a local model plan, the full per-model run directories and `matrix-status.json`. Generated reports, run artifacts and host-specific plans remain local rather than being versioned with the source.

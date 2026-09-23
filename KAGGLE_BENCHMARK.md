@@ -2,8 +2,6 @@
 
 This evaluates the existing decision engine on natural news articles rather than the synthetic rule fixture. It is a zero-shot classification experiment, not a trained Kaggle competition submission.
 
-The [original results](KAGGLE_BENCHMARK_RESULTS.md) predate the GPT-OSS final-prefill fix. Running the current code uses the new GPT-OSS `auto` behavior; the [controlled before/after comparison](GPT_OSS_FINAL_RESULTS.md) keeps the frozen data and thresholds unchanged and records both code versions separately.
-
 ## Data and frozen protocol
 
 Source: [AG News Classification Dataset on Kaggle](https://www.kaggle.com/datasets/amananandrai/ag-news-classification-dataset), version 2. The downloaded archive contains 120,000 training rows and 7,600 test rows, with four classes: World, Sports, Business, and Science/Technology.
@@ -55,4 +53,4 @@ python3 -m unittest discover -s scripts -p test_kaggle_ag_news.py -v
 cargo clippy --release --locked --features llama --example evaluate_jsonl -- -D warnings
 ```
 
-Scoring tests cover denominator handling, all-abstained outputs, duplicate/unknown IDs, split overlap removal, deterministic sampling, and confidence interval edge cases. Native consistency limitations remain those documented in `VERIFICATION.md` and the additional-model run report; a successful fixed-batch classification run does not resolve them.
+Scoring tests cover denominator handling, all-abstained outputs, duplicate/unknown IDs, split overlap removal, deterministic sampling, and confidence interval edge cases. Run the model-specific checks in [VERIFICATION.md](VERIFICATION.md) separately; a successful fixed-batch classification run does not establish consistency across execution modes.

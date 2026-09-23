@@ -1,6 +1,6 @@
 # Model interchangeability in L2S1
 
-L2S1 keeps the application decision contract while replacing a compatible local GGUF model. Identity and preflight explain compatibility; quality and threshold suitability still require a labeled workload. All seven recommended areas from [the source review](MODEL_INTERCHANGEABILITY_REVIEW.md) now have implementations. No upstream implementation was copied.
+L2S1 keeps the application decision contract while replacing a compatible local GGUF model. Identity and preflight explain compatibility; quality and threshold suitability still require a labeled workload.
 
 ## Inspect, validate, run
 
@@ -54,7 +54,7 @@ l2s1 --model MODEL.gguf --input examples/warehouse.json \
 
 State restore finds an exact prefix common to all decisions in one request, rounded down to complete prefill batches. It computes that prefix, copies the whole sequence state using llama.cpp's sequence-state API, clears and restores it before each suffix, and retains independent answer logits. At least the final token is always evaluated. The first decision pays for prefix prefill and reports zero reused tokens; subsequent decisions report the shared prefix. Single-decision or short-common-prefix requests execute fresh.
 
-Snapshots never leave the native call or survive a request, error, context resize, prompt change or adapter change. Only one snapshot buffer exists. Its size is checked against the configured byte limit before allocation (default 256 MiB; zero forces budget fallback when a common prefix exists). Missing save/restore support or a budget excess triggers explicit fresh fallback; native decode failure remains an error. Diagnostics expose snapshot bytes, save/restore/prefill/suffix wall times and restore count. This bounds the snapshot buffer, not total RSS, GPU allocation, logits buffers or llama.cpp's internal scratch memory. Whole-process peak RSS in the validation report is a separate measure.
+Snapshots never leave the native call or survive a request, error, context resize, prompt change or adapter change. Only one snapshot buffer exists. Its size is checked against the configured byte limit before allocation (default 256 MiB; zero forces budget fallback when a common prefix exists). Missing save/restore support or a budget excess triggers explicit fresh fallback; native decode failure remains an error. Diagnostics expose snapshot bytes, save/restore/prefill/suffix wall times and restore count. This bounds the snapshot buffer, not total RSS, GPU allocation, logits buffers or llama.cpp's internal scratch memory. Measure whole-process peak RSS separately.
 
 This is serial state restoration, including for hybrid memory. It does not enable hybrid parallel sequences. No speedup is promised: state copying can cost more than recomputation. Compare exact models/configurations against fresh execution before deployment. State-first prompts also remain opt-in because their changed ordering can change predictions independently of execution mode.
 
@@ -77,7 +77,7 @@ Reservations must include weights, KV/recurrent state, outputs and native scratc
 
 ## Validation and compatibility
 
-See [implementation validation](MODEL_INTERCHANGEABILITY_RESULTS.md). The same conformance test accepts colon-separated model paths, checks all result kinds/mappings, artifacts, failures, recovery, snapshot limits and fresh-versus-optimized scores. Prefix reuse/state restore retain the existing 0.02 probability/mass criterion plus unchanged top-choice and accepted results. Parallel execution has [known batch-shape drift](PARALLEL_EXECUTION.md); it reports the unchanged equivalence criterion separately and remains opt-in.
+See the [verification guide](VERIFICATION.md). The same conformance test accepts colon-separated model paths, checks all result kinds/mappings, artifacts, failures, recovery, snapshot limits and fresh-versus-optimized scores. Prefix reuse/state restore retain the existing 0.02 probability/mass criterion plus unchanged top-choice and accepted results. Parallel execution has [known batch-shape drift](PARALLEL_EXECUTION.md); it reports the unchanged equivalence criterion separately and remains opt-in.
 
 ```sh
 cargo test --locked --offline

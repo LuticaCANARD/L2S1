@@ -101,7 +101,7 @@ export LLAMA_LIB_DIR="$LLAMA_CPP_DIR/build-cuda/bin"
 cargo build --release --locked --features llama
 ```
 
-Cargo compiles L2S1's native bridge and template helpers; libllama and its CPU/CUDA backends must already be built. Source, headers and shared libraries must match. A CPU-only shared-library build is also usable. The local verification used llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`; see [runtime and checkpoint provenance](VERIFICATION.md).
+Cargo compiles L2S1's native bridge and template helpers; libllama and its CPU/CUDA backends must already be built. Source, headers and shared libraries must match. A CPU-only shared-library build is also usable. The local verification used llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`; see [verification commands](VERIFICATION.md).
 
 Model files are supplied by the caller. Place an appropriate text chat/instruct GGUF under `models/` or another directory. The CLI does not download weights. Loading verifies checkpoint and runtime identities, including reading the full checkpoint for its checksum, so release builds are recommended.
 
@@ -206,13 +206,13 @@ The default prompt layout is `legacy`. `--prompt-layout state-first` places shar
 
 State restoration limits its snapshot buffer to 256 MiB by default and reports fresh fallback when a snapshot cannot be used. `--parallel-width` bounds questions per parallel wave and increases context memory. Cache state is cleared at request boundaries and after errors; snapshots never survive their native call. Neither snapshot limits nor worker reservations are whole-process memory limits.
 
-State copying has a cost and does not guarantee a speedup. Parallel execution has measured probability and top-choice differences on some checkpoints. Both remain explicit options; see [execution details](MODEL_INTERCHANGEABILITY.md#experimental-whole-sequence-restore) and [parallel measurements](PARALLEL_EXECUTION.md).
+State copying has a cost and does not guarantee a speedup. Parallel execution has measured probability and top-choice differences on some checkpoints. Both remain explicit options; see [execution details](MODEL_INTERCHANGEABILITY.md#experimental-whole-sequence-restore) and [parallel execution](PARALLEL_EXECUTION.md).
 
 ## Compatibility and validation
 
 A compatible checkpoint must be a decoder-only model supported by the linked runtime, have a renderable GGUF chat template that preserves the payload, fit the chosen device/context, and provide unique single-token continuations for every requested code. There are 2–26 candidates per decision. Compatibility is checked against actual model behavior rather than a general family-name promise.
 
-The [interchangeability record](MODEL_INTERCHANGEABILITY_RESULTS.md) covers seven local checkpoints: SmolLM2, Qwen3, Gemma3, TinyLlama, Gemma4, a Qwen3.8 file with `qwen35` hybrid architecture, and GPT-OSS. It records exact identities, CPU/CUDA scope, fresh/restore comparisons and the parallel-equivalence failures. Base models without suitable templates, encoder-only models, multimodal inputs and multi-token candidate scoring are outside the current contract.
+Local conformance checks have covered SmolLM2, Qwen3, Gemma3, TinyLlama, Gemma4, a Qwen3.8 file with `qwen35` hybrid architecture, and GPT-OSS across CPU/CUDA configurations. Support remains checkpoint- and configuration-specific; use the [verification guide](VERIFICATION.md) for your model. Base models without suitable templates, encoder-only models, multimodal inputs and multi-token candidate scoring are outside the current contract.
 
 ```sh
 cargo test --locked
@@ -224,7 +224,7 @@ L2S1_CONFORMANCE_MODELS=/path/to/model-a.gguf:/path/to/model-b.gguf \
   --test conformance -- --ignored --nocapture
 ```
 
-The general test run skips model-dependent tests; invoke them explicitly with local checkpoints. Add `SKID_CUDA=1` to run conformance on CUDA. Tests do not download weights. The recorded default/native suites passed 21/30 tests; real-model contract checks and the original-response comparison are reported separately. Those checks are synthetic compatibility evidence, not production accuracy guarantees.
+The general test run skips model-dependent tests; invoke them explicitly with local checkpoints. Add `SKID_CUDA=1` to run conformance on CUDA. Tests do not download weights. Contract checks establish synthetic compatibility, not production accuracy. Keep generated conformance reports and benchmark artifacts in local output directories.
 
 ## Recorded model comparison
 
@@ -251,11 +251,9 @@ These are single-run, public-subset measurements, not an official full-suite sco
 | Topic | Document |
 | --- | --- |
 | Identity, preflight, calibration, diagnostics and worker API | [Model interchangeability](MODEL_INTERCHANGEABILITY.md) |
-| Checkpoint-specific conformance and regression evidence | [Implementation results](MODEL_INTERCHANGEABILITY_RESULTS.md), [JSON evidence](MODEL_INTERCHANGEABILITY_RESULTS.json) |
-| Design sources and adoption decisions | [Design review](MODEL_INTERCHANGEABILITY_REVIEW.md) |
-| Runtime provenance and earlier native checks | [Verification](VERIFICATION.md), [model specifications](MODEL_SPECS.md) |
+| Build and model-specific validation | [Verification guide](VERIFICATION.md) |
 | Prefix reuse and parallel execution | [Prefix algorithm](SEMIF_ALGORITHM.md), [parallel execution](PARALLEL_EXECUTION.md) |
-| Labeled synthetic decision benchmark | [Benchmark guide](BENCHMARK.md), [recorded results](BENCHMARK_RESULTS.md) |
+| Evaluation methods | [Synthetic benchmark](BENCHMARK.md), [AG News](KAGGLE_BENCHMARK.md), [JevBench](JEVBENCH.md) |
 | Optional model/task adaptation | [Decision fine-tuning](DECISION_FINETUNE.md), [output heads](OUTPUT_HEAD.md) |
 
 ## License
