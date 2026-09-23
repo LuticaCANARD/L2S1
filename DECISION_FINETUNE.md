@@ -7,8 +7,8 @@ parallel attention architecture and makes no claim of general decision ability.
 
 ## Frozen protocol
 
-- Source: the pinned Kaggle Twitter US Airline Sentiment archive already used by
-  `AIRLINE_BENCHMARK_RESULTS.md`. Dataset text and weights remain in ignored
+- Source: the pinned Kaggle Twitter US Airline Sentiment archive prepared by
+  `scripts/kaggle_airline.py`. Dataset text and weights remain in ignored
   `results/`; they are not redistributed by this repository.
 - Exclude all 800 previous calibration/evaluation examples by normalized text.
   Remove exact normalized duplicates and conflicting-label text groups.
@@ -64,9 +64,8 @@ parallel execution resizes the context. Response metadata records `lora_path`.
 Without this option the existing base-model path is unchanged. Loading an adapter
 does not apply temperature calibration automatically.
 
-Artifacts for the current run are under `results/finetune-20260923/`. The remote
-training directory is `~/skid-desion-finetune-20260923` on the authorized host.
-The dependency lock and exact executed scripts accompany the results.
+Keep generated artifacts, the dependency lock and exact executed scripts under
+an ignored local `results/` directory.
 
 For a new artifact directory (this reproduces the same split, not a new test set):
 
