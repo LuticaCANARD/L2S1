@@ -7,6 +7,8 @@
 #include <link.h>
 #endif
 #include <climits>
+#include <cmath>
+#include <limits>
 #include <cstdio>
 #include <cstring>
 #include <memory>
@@ -218,61 +220,121 @@ static void ensure_sequences(engine * e, uint32_t capacity) {
     e->sequence_capacity = capacity;
 }
 
+// Both output paths use identical decoding and prefix handling. The returned
+// view belongs to llama.cpp and is consumed before another native call.
+static const float * forward_logits(engine * e, const int32_t * tokens, int32_t count,
+        bool reuse, int32_t * reused) {
+    ensure_sequences(e, 1);
+    if (count <= 0 || uint32_t(count) > llama_n_ctx(e->ctx))
+        throw std::runtime_error("input exceeds context or is empty; truncation is disabled");
+    auto memory = llama_get_memory(e->ctx);
+    if (!memory) throw std::runtime_error("decoder memory unavailable");
+    // Recurrent/hybrid state cannot generally be rolled back to an arbitrary
+    // prefix. Use fresh evaluation there, and whenever partial removal fails.
+    int32_t common = 0;
+    if (reuse && !llama_model_is_recurrent(e->model) && !llama_model_is_hybrid(e->model)) {
+        // Always evaluate at least the final token to obtain current logits.
+        const auto limit = std::min(e->cached_tokens.size(), size_t(count - 1));
+        while (size_t(common) < limit && e->cached_tokens[common] == tokens[common]) ++common;
+        // Reuse only complete original prefill batches. An arbitrary split
+        // changes CUDA kernel/batch shapes and can flip threshold decisions.
+        common -= common % int32_t(e->batch_size);
+    }
+    if (common == 0 || !llama_memory_seq_rm(memory, 0, common, -1)) {
+        sd_clear(e);
+        common = 0;
+    }
+    e->cached_tokens.clear();
+    struct batch_guard {
+        llama_batch value;
+        ~batch_guard() { llama_batch_free(value); }
+    } b { llama_batch_init(int32_t(e->batch_size), 0, 1) };
+    if (!b.value.token || !b.value.pos || !b.value.n_seq_id || !b.value.seq_id || !b.value.logits)
+        throw std::runtime_error("batch allocation failed");
+    for (int32_t start = common; start < count;) {
+        b.value.n_tokens = std::min(int32_t(e->batch_size), count - start);
+        for (int32_t j = 0; j < b.value.n_tokens; ++j) {
+            b.value.token[j] = tokens[start + j];
+            b.value.pos[j] = start + j;
+            b.value.n_seq_id[j] = 1;
+            b.value.seq_id[j][0] = 0;
+            b.value.logits[j] = start + j == count - 1;
+        }
+        if (llama_decode(e->ctx, b.value) != 0) throw std::runtime_error("llama_decode failed");
+        e->last_feature_row = b.value.n_tokens - 1;
+        start += b.value.n_tokens;
+    }
+    const float * output = llama_get_logits_ith(e->ctx, -1);
+    if (!output) throw std::runtime_error("missing final logits");
+    if (reuse) e->cached_tokens.assign(tokens, tokens + count);
+    *reused = common;
+    return output;
+}
+
 extern "C" bool sd_forward(engine * e, const int32_t * tokens, int32_t count,
         bool reuse, int32_t * reused, float * logits, size_t logits_count,
         char * error, size_t error_cap) noexcept {
     *reused = 0;
     try {
-        ensure_sequences(e, 1);
-        if (count <= 0 || uint32_t(count) > llama_n_ctx(e->ctx))
-            throw std::runtime_error("input exceeds context or is empty; truncation is disabled");
         if (logits_count != size_t(sd_vocab_size(e))) throw std::runtime_error("wrong logits buffer size");
-        auto memory = llama_get_memory(e->ctx);
-        if (!memory) throw std::runtime_error("decoder memory unavailable");
-        // Recurrent/hybrid state cannot generally be rolled back to an arbitrary
-        // prefix. Use fresh evaluation there, and whenever partial removal fails.
-        int32_t common = 0;
-        if (reuse && !llama_model_is_recurrent(e->model) && !llama_model_is_hybrid(e->model)) {
-            // Always evaluate at least the final token to obtain current logits.
-            const auto limit = std::min(e->cached_tokens.size(), size_t(count - 1));
-            while (size_t(common) < limit && e->cached_tokens[common] == tokens[common]) ++common;
-            // Reuse only complete original prefill batches. An arbitrary split
-            // changes CUDA kernel/batch shapes and can flip threshold decisions.
-            common -= common % int32_t(e->batch_size);
-        }
-        if (common == 0 || !llama_memory_seq_rm(memory, 0, common, -1)) {
-            sd_clear(e);
-            common = 0;
-        }
-        e->cached_tokens.clear();
-        struct batch_guard {
-            llama_batch value;
-            ~batch_guard() { llama_batch_free(value); }
-        } b { llama_batch_init(int32_t(e->batch_size), 0, 1) };
-        if (!b.value.token || !b.value.pos || !b.value.n_seq_id || !b.value.seq_id || !b.value.logits)
-            throw std::runtime_error("batch allocation failed");
-        for (int32_t start = common; start < count;) {
-            b.value.n_tokens = std::min(int32_t(e->batch_size), count - start);
-            for (int32_t j = 0; j < b.value.n_tokens; ++j) {
-                b.value.token[j] = tokens[start + j];
-                b.value.pos[j] = start + j;
-                b.value.n_seq_id[j] = 1;
-                b.value.seq_id[j][0] = 0;
-                b.value.logits[j] = start + j == count - 1;
-            }
-            if (llama_decode(e->ctx, b.value) != 0) throw std::runtime_error("llama_decode failed");
-            e->last_feature_row = b.value.n_tokens - 1;
-            start += b.value.n_tokens;
-        }
-        const float * output = llama_get_logits_ith(e->ctx, -1);
-        if (!output) throw std::runtime_error("missing final logits");
+        const float * output = forward_logits(e, tokens, count, reuse, reused);
         std::copy_n(output, logits_count, logits);
-        if (reuse) e->cached_tokens.assign(tokens, tokens + count);
-        *reused = common;
         return true;
     } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }
       catch (...) { report(error, error_cap, "unknown native exception"); }
     sd_clear(e);
+    return false;
+}
+
+// Compact transfer only: llama.cpp still computes and exposes the entire
+// vocabulary on the host. Keep its exact normalizer so candidate mass retains
+// the same meaning as the full-logit path. This is not a GPU reduction.
+extern "C" bool sd_forward_compact(engine * e, const int32_t * tokens, int32_t count,
+        bool reuse, int32_t * reused, const int32_t * candidate_ids, size_t candidate_count,
+        float * candidate_logits, size_t candidate_logits_count, double * log_normalizer,
+        int32_t * vocabulary_size, char * error, size_t error_cap) noexcept {
+    if (reused) *reused = 0;
+    try {
+        if (!e || !tokens || !reused || !candidate_ids || !candidate_logits ||
+                !log_normalizer || !vocabulary_size)
+            throw std::runtime_error("null compact evidence argument");
+        const int32_t vocab = sd_vocab_size(e);
+        if (vocab <= 0 || candidate_count < 2 || candidate_count > 26 ||
+                candidate_logits_count != candidate_count)
+            throw std::runtime_error("invalid compact evidence buffer size");
+        for (size_t i = 0; i < candidate_count; ++i) {
+            if (candidate_ids[i] < 0 || candidate_ids[i] >= vocab)
+                throw std::runtime_error("candidate token outside vocabulary");
+            for (size_t j = 0; j < i; ++j) {
+                if (candidate_ids[i] == candidate_ids[j])
+                    throw std::runtime_error("duplicate candidate token");
+            }
+        }
+        const float * output = forward_logits(e, tokens, count, reuse, reused);
+        double maximum = -std::numeric_limits<double>::infinity();
+        for (int32_t i = 0; i < vocab; ++i) {
+            const double value = output[i];
+            if (std::isnan(value) || value == std::numeric_limits<double>::infinity())
+                throw std::runtime_error("invalid vocabulary logit");
+            maximum = std::max(maximum, value);
+        }
+        if (!std::isfinite(maximum)) throw std::runtime_error("no finite vocabulary logit");
+        for (size_t i = 0; i < candidate_count; ++i) {
+            if (!std::isfinite(output[candidate_ids[i]]))
+                throw std::runtime_error("nonfinite candidate logit");
+        }
+        double sum = 0;
+        for (int32_t i = 0; i < vocab; ++i) sum += std::exp(double(output[i]) - maximum);
+        const double normalizer = maximum + std::log(sum);
+        if (!std::isfinite(normalizer)) throw std::runtime_error("invalid vocabulary normalizer");
+        for (size_t i = 0; i < candidate_count; ++i) candidate_logits[i] = output[candidate_ids[i]];
+        *log_normalizer = normalizer;
+        *vocabulary_size = vocab;
+        return true;
+    } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }
+      catch (...) { report(error, error_cap, "unknown native exception"); }
+    if (reused) *reused = 0;
+    if (e) sd_clear(e);
     return false;
 }
 

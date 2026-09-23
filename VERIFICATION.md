@@ -32,6 +32,24 @@ Set `SKID_CUDA=1` for CUDA. The conformance suite checks semantic IDs, all decis
 
 Use [prefix-reuse checks](SEMIF_ALGORITHM.md#reproduce) and [parallel contract checks](PARALLEL_EXECUTION.md#validation-and-measurement) for their specific execution paths. Parallel mode has known numerical differences and remains opt-in. A model that loads or passes preflight still needs inference and labeled workload evaluation.
 
+## Optional optimization checks
+
+```sh
+SKID_MODEL=/path/to/model.gguf \
+  cargo test --release --locked --offline --features llama \
+  --test native_compact --test optimization_contract --test shared_state \
+  --test worker_native -- --include-ignored --test-threads=1
+
+cargo run --release --locked --offline --features llama \
+  --example benchmark_optimizations -- \
+  --model /path/to/model-a.gguf --model /path/to/model-b.gguf \
+  --output /tmp/l2s1-optimizations.json --repeats 3
+```
+
+Repeat the contract checks for each checkpoint; use `SKID_CUDA=1` for tests and `--cuda` for the benchmark when measuring CUDA. The contracts cover exact cached token preparation, dynamic instructions and option order, compact/full evidence equivalence, session error cleanup, and native worker ticket correlation. Compact transfer retains the full-vocabulary normalizer. It removes a host-side buffer copy into Rust; it does not remove vocabulary projection or GPU-to-host transfer.
+
+The benchmark measures 1, 4 and 16 questions with short and extended synthetic states, rotates execution order, excludes loading, and records raw responses, identities, stage timings and cache statistics. Cache measurements intentionally use repeated inputs after warmup. Shared-state measurements issue separate calls with different questions inside one session. Compare each optimization to its same-layout fresh baseline; state-first prompting can change predictions independently of reuse. Amortized time per question is not standalone request latency, and these workloads do not establish task accuracy or production throughput. Reports refuse overwrites and belong in ignored local output directories.
+
 ## Task quality and evidence
 
 - [Synthetic benchmark](BENCHMARK.md): correctness, abstention, consistency and latency on the rule fixture.

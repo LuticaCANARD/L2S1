@@ -9,8 +9,8 @@ fn main() {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     use clap::Parser;
     use l2s1::{
-        ComputeOptions, DecisionPolicy, DecisionRequest, ExecutionMode, FlashAttention,
-        PromptLayout, PromptProfile, llama::LlamaBackend,
+        ComputeOptions, DecisionPolicy, DecisionRequest, EvidenceTransfer, ExecutionMode,
+        FlashAttention, PreparationCacheConfig, PromptLayout, PromptProfile, llama::LlamaBackend,
     };
     use serde::Deserialize;
     use std::{
@@ -24,6 +24,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     struct Args {
         #[arg(long)]
         model: PathBuf,
+        #[arg(long, value_enum, default_value_t = EvidenceTransfer::Full)]
+        evidence_transfer: EvidenceTransfer,
+        #[arg(long, default_value_t = 0)]
+        preparation_cache_bytes: usize,
+        #[arg(long, default_value_t = 128)]
+        preparation_cache_entries: usize,
         #[arg(long)]
         lora: Option<PathBuf>,
         #[arg(long, conflicts_with = "lora")]
@@ -105,6 +111,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     backend.set_execution_mode(args.execution_mode);
     backend.set_prompt_layout(args.prompt_layout);
+    backend.set_evidence_transfer(args.evidence_transfer)?;
+    backend.set_preparation_cache(PreparationCacheConfig {
+        max_entries: args.preparation_cache_entries,
+        max_bytes: args.preparation_cache_bytes,
+    });
     if let Some(path) = &args.output_head {
         backend.load_output_head(path)?;
     }

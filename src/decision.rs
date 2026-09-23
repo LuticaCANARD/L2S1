@@ -208,6 +208,8 @@ pub struct DecisionResult {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BackendInfo {
+    #[serde(default, skip_serializing_if = "crate::EvidenceTransfer::is_full")]
+    pub evidence_transfer: crate::EvidenceTransfer,
     pub model_path: String,
     /// Explicit adapter at scale 1; absent for the unchanged base model.
     #[serde(default, skip_serializing_if = "Option::is_none")]
