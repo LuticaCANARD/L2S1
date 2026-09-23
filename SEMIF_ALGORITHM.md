@@ -42,9 +42,9 @@ Set `SKID_CUDA=1` with `--features llama-cuda` for CUDA; GPU access is required.
 For labeled accuracy, coverage, latency distributions, and repeated runs:
 
 ```sh
-python3 scripts/benchmark_models.py --model qwen3 --device cpu \
+target/release/l2s1-tools benchmark-models --model qwen3 --device cpu \
   --prompt-layout state-first --execution-mode fresh --output results/v2-fresh
-python3 scripts/benchmark_models.py --model qwen3 --device cpu \
+target/release/l2s1-tools benchmark-models --model qwen3 --device cpu \
   --prompt-layout state-first --execution-mode prefix-reuse --output results/v2-reuse
 ```
 

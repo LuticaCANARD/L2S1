@@ -15,21 +15,22 @@ This is a small synthetic rule-following benchmark, not a general reasoning, cod
 
 ## Run the five-model matrix
 
-Prerequisites: Python 3.9+, Rust dependencies already cached, CMake, a C++17 compiler, a CUDA toolkit for GPU runs, and locally acquired checkpoints. Model paths are listed in `tests/fixtures/benchmark_models.json`; no Hugging Face client, account, or network request is used by the runner. Review the separate licenses before obtaining a model.
+Prerequisites: Rust dependencies already cached, CMake, a C++17 compiler, and locally acquired checkpoints. The bundled sys dependency builds the pinned llama.cpp source; CUDA runs additionally need the CUDA toolkit. Model paths are listed in `tests/fixtures/benchmark_models.json`; no Hugging Face client, account, or network request is used by the runner. Review the separate licenses before obtaining a model.
 
 ```sh
-python3 scripts/benchmark_models.py \
+cargo build --release --locked -p l2s1-tools
+target/release/l2s1-tools benchmark-models \
   --device cpu cuda \
   --iterations 3 \
   --warmup 1
 ```
 
-The runner builds a release test executable once with `--locked --offline`, hashes each model, and runs one model/device at a time. CPU is the default device. CUDA is explicit and cannot silently fall back to CPU. The native backend reuses one loaded model for the whole run; Python startup, Cargo compilation, loading, and warmup are excluded from steady-state timings.
+The runner builds a release test executable once with `--locked --offline` and the CUDA feature when requested, hashes each model, and runs one model/device at a time. CPU is the default device. CUDA is explicit and cannot silently fall back to CPU. The native backend reuses one loaded model for the whole run; Rust process startup, Cargo compilation, loading, and warmup are excluded from steady-state timings.
 
 Select a subset or change settings:
 
 ```sh
-python3 scripts/benchmark_models.py \
+target/release/l2s1-tools benchmark-models \
   --model gemma4 --model qwen3 \
   --device cuda \
   --iterations 10 --warmup 2 \
