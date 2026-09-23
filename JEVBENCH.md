@@ -1,23 +1,24 @@
 # JevBench public evaluation
 
-`scripts/jevbench_public.py` connects the existing `evaluate_jsonl` example to the public [JevBench](https://github.com/fstandhartinger/jevbench) tasks and the benchmark author's scoring functions. It records the Gemma 4 E2B Q8_0 evaluation and a multi-model matrix on the remote RTX 3060.
+The Rust `l2s1-tools jevbench-public` command connects the existing `evaluate_jsonl` example to the public [JevBench](https://github.com/fstandhartinger/jevbench) tasks. Its public scorer follows the reviewed upstream revision. Earlier recorded Gemma 4 E2B Q8_0 and multi-model matrix results came from the historical Python adapter; new runs use Rust.
 
-The reviewed upstream revision is `f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84`. The script rejects another revision or a dirty upstream checkout. The three published JSONL files contain 231 decisions: easy 48, original 72, hard 111. This is a public-subset evaluation, not the complete 534-item evaluation or an official leaderboard submission.
+The reviewed upstream revision is `f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84`. Preparation rejects another revision or a dirty upstream checkout. The three published JSONL files contain 231 decisions: easy 48, original 72, hard 111. This is a public-subset evaluation, not the complete 534-item evaluation or an official leaderboard submission.
 
 ## Reproduce
 
-Requirements: Python 3.11+, a clean upstream checkout at the pinned revision, a compatible GGUF, and a CUDA-enabled project build. The evaluator verifies CUDA offload; use `--expected-gpu 'RTX 3060'` (or the intended device name) to additionally require a specific GPU. The harness and public task files retain their upstream MIT notices; model terms remain separate.
+Requirements: a clean upstream checkout at the pinned revision, a compatible GGUF, and a CUDA-enabled project build. The evaluator verifies CUDA offload; use `--expected-gpu 'RTX 3060'` (or the intended device name) to additionally require a specific GPU. The harness and public task files retain their upstream MIT notices; model terms remain separate.
 
 ```bash
 # On the prepared server:
 source ~/.local/opt/skid-desion/skid-test-env.sh
 cd ~/personal/skid/jevbench-20260923/source
 cargo build --release --locked --features llama-cuda --bin l2s1 --example evaluate_jsonl
+cargo build --release --locked -p l2s1-tools
 
 git clone https://github.com/fstandhartinger/jevbench.git ../upstream-new
 git -C ../upstream-new checkout --detach f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84
 
-python3 scripts/jevbench_public.py \
+target/release/l2s1-tools jevbench-public run \
   --jevbench ../upstream-new \
   --evaluator target/release/examples/evaluate_jsonl \
   --model ~/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf \
@@ -31,13 +32,15 @@ For CPU/GPU weight placement, the harness also accepts `--gpu-layers N`,
 on the RTX 3060, use `--cpu-moe-layers 18 --threads 8 --context 8192`.
 The manifest records these settings and the harness checks the reported placement.
 Omitting these options preserves the baseline placement and four-thread setup.
+The optional `--model-load-mode read` changes model loading only; the default
+`auto` preserves automatic loading. Its requested mode is recorded and verified.
 
 ## Mapping and measurement contract
 
 - Pass only `state`, instructions, and criteria to inference. Keep expected answers, rationales, gold distributions, and provenance in a separate scoring file.
 - Preserve the canonical `labels` order. Map `choice` to ordered options, `noul` to false/true with probabilities mapped back to no/yes, and `score` to numeric ordinal levels in ascending order.
 - Use the model's candidate-relative probabilities directly. The official argmax score is computed even when the project's default decision policy abstains. Report that policy's accepted accuracy, wrong accepted answers, and coverage separately.
-- Invoke upstream `score_task` and `summarize`; do not implement an alternative JevBench scoring formula. Brier uses the full multiclass sum, including both binary labels. ECE uses ten equal-width confidence bins.
+- The Rust scorer follows the pinned upstream `score_task` and `summarize` definitions. Brier uses the full multiclass sum, including both binary labels. ECE uses ten equal-width confidence bins. Saved public predictions and aggregate results were compared with the upstream Python scorer.
 - Baseline configuration: legacy prompt, fresh execution, context 8,192, batch/microbatch 256, four threads, one request at a time, FlashAttention off. No LoRA, output head, calibration artifact, or training on these items.
 - Input overflow remains an error, never truncation. Retain inference failures; reject missing, duplicated, or unknown result IDs and candidate mapping mismatches.
 - Report local Rust inference-call latency with loading and one warmup excluded. It includes prompt preparation and inference, but excludes an HTTP/network path. It is not the official board's remote-endpoint latency.
@@ -74,7 +77,7 @@ The [README comparison](README.md#recorded-model-comparison) summarizes the comp
 
 The complete report, CSV, raw predictions, model plan, runtime hashes and measured source snapshot are in `results/jevbench-matrix-20260923/`. Qwen3.5-4B Q8_0 led this selected matrix at 184/231 (79.65%). Full reruns after model downloads finished reproduced all probabilities for that model and Gemma4 E2B exactly. The snapshot records the frozen build used by this comparison, independently of subsequent working-tree changes.
 
-`scripts/jevbench_matrix.py` downloads a pinned plan or runs available checkpoints serially through the public evaluator. `scripts/report_jevbench_matrix.py` recounts saved predictions against gold labels and checks shared request/evaluator hashes before producing the report. Regenerating it requires a local model plan, the full per-model run directories and `matrix-status.json`. Generated reports, run artifacts and host-specific plans remain local rather than being versioned with the source.
+`l2s1-tools jevbench-matrix download/run` downloads a pinned plan or runs available checkpoints serially through the public evaluator. `l2s1-tools report-jevbench-matrix` recounts saved predictions against gold labels and checks shared request/evaluator hashes before producing the report. Regenerating it requires a local model plan, the full per-model run directories and `matrix-status.json`. Generated reports, run artifacts and host-specific plans remain local rather than being versioned with the source.
 
 ## Gemma 4 rebuild confirmation (2026-09-23)
 

@@ -33,14 +33,15 @@ mkdir -p results/kaggle-ag-news
 curl --fail --location \
   https://www.kaggle.com/api/v1/datasets/download/amananandrai/ag-news-classification-dataset \
   --output results/kaggle-ag-news/dataset.zip
-python3 scripts/kaggle_ag_news.py prepare
+cargo build --release --locked -p l2s1-tools
+target/release/l2s1-tools kaggle-ag-news prepare
 
 cargo build --release --locked --features llama-cuda --example evaluate_jsonl
-python3 scripts/kaggle_ag_news.py run
-python3 scripts/kaggle_ag_news.py report
+target/release/l2s1-tools kaggle-ag-news run
+target/release/l2s1-tools kaggle-ag-news report
 ```
 
-Run only one model with `--model gemma4`, or repeat `--model`. Use a fresh directory with `--folder` to preserve earlier results. The script expects the existing local model filenames documented in `scripts/kaggle_ag_news.py`; it does not download weights.
+Run only one model with `--model gemma4`, or repeat `--model`. Use a fresh directory with `--folder` to preserve earlier results. The Rust command expects the existing local model filenames documented in `crates/l2s1-tools/src/kaggle_ag_news.rs`; it does not download weights.
 
 The prepared source archive, individual CSVs, frozen requests, selected row IDs, model files, executable, and source files have SHA256 provenance in `results/kaggle-ag-news/`. `runtime.json` records the llama.cpp revision and dirty working-tree status; the Git commit alone does not describe all tested code. `runner-used.py` preserves the exact runner used for this experiment, before the report-generation command was added.
 

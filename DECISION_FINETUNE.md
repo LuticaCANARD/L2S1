@@ -70,7 +70,8 @@ an ignored local `results/` directory.
 For a new artifact directory (this reproduces the same split, not a new test set):
 
 ```sh
-python3 scripts/prepare_decision_finetune.py \
+cargo build --release --locked -p l2s1-tools
+target/release/l2s1-tools prepare-decision-finetune \
   --source results/kaggle-airline-20260922 --output results/decision-pilot-new/data
 for split in train calibration test probe; do
   target/release/examples/export_decision_tokens \
@@ -78,12 +79,12 @@ for split in train calibration test probe; do
     --input "results/decision-pilot-new/data/$split.jsonl" \
     --output "results/decision-pilot-new/data/$split-tokens.jsonl"
 done
-python3 scripts/prepare_decision_finetune.py \
+target/release/l2s1-tools prepare-decision-finetune \
   --output results/decision-pilot-new/data --seal-tokens
 # Run in the locked training environment on the GPU host:
 python scripts/train_decision_lora.py --data results/decision-pilot-new/data \
   --output results/decision-pilot-new/pilot --cache results/decision-pilot-new/hf-cache
-python3 scripts/report_decision_finetune.py --data results/decision-pilot-new/data \
+target/release/l2s1-tools report-decision-finetune --data results/decision-pilot-new/data \
   --run results/decision-pilot-new/pilot
 ```
 
@@ -113,8 +114,8 @@ model=models/gemma-4-E2B-it-Q8_0.gguf
 checkpoint=/path/to/local/snapshots/3e22461f65e89153144f8adb70e3b8c2cc9845a7
 variant=natural
 mkdir -p "$study"
-python3 scripts/prepare_accuracy_study.py --output "$study/data"
-python3 scripts/prepare_accuracy_study.py --output "$study/data" --verify
+target/release/l2s1-tools prepare-accuracy-study --output "$study/data"
+target/release/l2s1-tools prepare-accuracy-study --output "$study/data" --verify
 cargo build --release --locked --features llama-cuda \
   --example evaluate_accuracy --example export_decision_tokens
 
@@ -123,7 +124,7 @@ target/release/examples/evaluate_accuracy --model "$model" --cuda \
   --output "$study/dev-$variant-predictions.jsonl" \
   --prompt-details minimal,typed,typed-examples --layouts legacy,state-first \
   --all-rotations
-python3 scripts/report_accuracy_study.py --data "$study/data" \
+target/release/l2s1-tools report-accuracy-study --data "$study/data" \
   --predictions "$study/dev-$variant-predictions.jsonl" \
   --split dev --variant "$variant" --output "$study/dev-$variant-report.json" \
   --select "$study/dev-$variant-selection.json"
@@ -194,6 +195,8 @@ python3 "$LLAMA_CPP_DIR/convert_lora_to_gguf.py" "$study/train/adapter" \
   --base "$checkpoint" --outfile "$study/adapter.gguf" --outtype f16
 ```
 
+This conversion command needs a full llama.cpp checkout in `LLAMA_CPP_DIR`; the bundled native build snapshot omits conversion tools. The inference build uses the bundled source unless `L2S1_LLAMA_CPP_SOURCE` or the legacy `LLAMA_CPP_DIR` override is set.
+
 A successful training loss, smoke check or conversion does not establish a
 native accuracy improvement. Evaluate the converted adapter with the same GGUF,
 compute configuration and frozen prompt settings as the base. For example:
@@ -204,7 +207,7 @@ target/release/examples/evaluate_accuracy --model "$model" --cuda \
   --input "$study/data/test-$variant-requests.jsonl" \
   --output "$study/test-$variant-adapter.jsonl" \
   --prompt-details "$detail_cli" --layouts "$layout" --all-rotations
-python3 scripts/report_accuracy_study.py --data "$study/data" \
+target/release/l2s1-tools report-accuracy-study --data "$study/data" \
   --predictions "$study/test-$variant-adapter.jsonl" \
   --split test --variant "$variant" --output "$study/test-$variant-adapter-report.json"
 ```

@@ -1,6 +1,6 @@
 # Laya/Jev task adapter and cache evaluation
 
-`scripts/laya_benchmark.py` evaluates the public tasks used by
+The Rust `l2s1-tools laya-benchmark` command evaluates the public tasks used by
 [Luni/laya-jev-benchmark](https://huggingface.co/datasets/Luni/laya-jev-benchmark)
 with the local L2S1 JSONL evaluator. It does not load Laya, train on evaluation
 labels, or produce the separate JevBench composite score.
@@ -12,23 +12,24 @@ labels, or produce the separate JevBench composite score.
 | `probes` | Luni's literal probe definitions | Nine requests, 14 unique questions: grounding, contradiction and routing variants |
 
 Dataset and benchmark revisions are pinned in the adapter. Fetch records source
-URLs and file SHA256 values. Probe definitions are parsed as literal Python AST
-values; downloaded Python code is never imported or executed. Datasets and
+URLs and file SHA256 values. Probe cases are a frozen rendering of the pinned
+`probe.py`; preparation checks its SHA256 and does not execute downloaded code. Datasets and
 generated evidence belong under ignored `results/`, not in the source package.
 Source datasets retain their own terms; no model checkpoint is downloaded.
 
 ## Prepare and run
 
-The adapter and scoring use the Python standard library. Only preparation of the
-typed Parquet file requires `pyarrow` in your Python environment.
+The adapter and scoring are Rust. Typed Parquet preparation uses the Rust
+Apache Parquet reader; Python and `pyarrow` are not required for these commands.
 
 ```sh
-python3 scripts/laya_benchmark.py fetch --suite typed --output results/laya/typed-source
-python3 scripts/laya_benchmark.py prepare --suite typed \
+cargo build --release --locked -p l2s1-tools
+target/release/l2s1-tools laya-benchmark fetch --suite typed --output results/laya/typed-source
+target/release/l2s1-tools laya-benchmark prepare --suite typed \
   --source results/laya/typed-source --output results/laya/typed
 
-cargo build --release --locked --features llama --example evaluate_jsonl
-python3 scripts/laya_benchmark.py run \
+cargo build --release --locked --features llama-cuda --example evaluate_jsonl
+target/release/l2s1-tools laya-benchmark run \
   --prepared results/laya/typed --output results/laya/fresh \
   --evaluator target/release/examples/evaluate_jsonl --model /path/to/model.gguf
 ```
@@ -84,23 +85,23 @@ Use immediate repeats only for cache diagnostics; repeat zero is the quality
 result. Later repeats are never counted as additional independent examples.
 
 ```sh
-python3 scripts/laya_benchmark.py prepare --suite typed \
+target/release/l2s1-tools laya-benchmark prepare --suite typed \
   --source results/laya/typed-source --output results/laya/cache-input \
   --limit 4 --repeats 2
 
-python3 scripts/laya_benchmark.py run \
+target/release/l2s1-tools laya-benchmark run \
   --prepared results/laya/cache-input --output results/laya/state-fresh \
   --evaluator target/release/examples/evaluate_jsonl --model /path/to/model.gguf \
   --prompt-layout state-first --execution-mode fresh --batch 64 \
   --cache-bytes 67108864
 
-python3 scripts/laya_benchmark.py run \
+target/release/l2s1-tools laya-benchmark run \
   --prepared results/laya/cache-input --output results/laya/state-reuse \
   --evaluator target/release/examples/evaluate_jsonl --model /path/to/model.gguf \
   --prompt-layout state-first --execution-mode prefix-reuse --batch 64 \
   --cache-bytes 67108864
 
-python3 scripts/laya_benchmark.py compare --prepared results/laya/cache-input \
+target/release/l2s1-tools laya-benchmark compare --prepared results/laya/cache-input \
   --baseline results/laya/state-fresh --candidate results/laya/state-reuse \
   --output results/laya/cache-comparison.json
 ```

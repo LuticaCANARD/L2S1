@@ -1,0 +1,302 @@
+{
+  "domains": [
+    [
+      "finance",
+      "net_balance",
+      [
+        "reserve",
+        "maintain",
+        "invest"
+      ]
+    ],
+    [
+      "sensors",
+      "signal_delta",
+      [
+        "weak",
+        "nominal",
+        "strong"
+      ]
+    ],
+    [
+      "ecology",
+      "habitat_index",
+      [
+        "restore",
+        "observe",
+        "protect"
+      ]
+    ],
+    [
+      "manufacturing",
+      "tolerance_score",
+      [
+        "adjust",
+        "retain",
+        "inspect"
+      ]
+    ],
+    [
+      "networking",
+      "capacity_margin",
+      [
+        "restrict",
+        "normal",
+        "expand"
+      ]
+    ],
+    [
+      "education",
+      "progress_index",
+      [
+        "support",
+        "practice",
+        "advance"
+      ]
+    ]
+  ],
+  "thresholds": {
+    "train": [
+      [
+        "11",
+        "19"
+      ],
+      [
+        "31.5",
+        "43.5"
+      ],
+      [
+        "-23",
+        "-13"
+      ],
+      [
+        "71.25",
+        "83.75"
+      ],
+      [
+        "101",
+        "119"
+      ],
+      [
+        "-51.5",
+        "-37.5"
+      ],
+      [
+        "151.25",
+        "163.75"
+      ],
+      [
+        "211",
+        "229"
+      ]
+    ],
+    "dev": [
+      [
+        "17.25",
+        "27.75"
+      ],
+      [
+        "47",
+        "59"
+      ],
+      [
+        "-33.5",
+        "-21.5"
+      ],
+      [
+        "89.25",
+        "97.75"
+      ],
+      [
+        "127",
+        "139"
+      ],
+      [
+        "-67",
+        "-55"
+      ],
+      [
+        "179.5",
+        "193.5"
+      ],
+      [
+        "241.25",
+        "257.75"
+      ]
+    ],
+    "calibration": [
+      [
+        "37",
+        "49"
+      ],
+      [
+        "61.25",
+        "73.75"
+      ],
+      [
+        "-43.25",
+        "-29.75"
+      ],
+      [
+        "107.5",
+        "121.5"
+      ],
+      [
+        "167",
+        "181"
+      ],
+      [
+        "-87.25",
+        "-69.75"
+      ],
+      [
+        "223.5",
+        "237.5"
+      ],
+      [
+        "281",
+        "299"
+      ]
+    ],
+    "test": [
+      [
+        "53.25",
+        "67.75"
+      ],
+      [
+        "79",
+        "91"
+      ],
+      [
+        "-63.5",
+        "-47.5"
+      ],
+      [
+        "137.25",
+        "149.75"
+      ],
+      [
+        "197",
+        "209"
+      ],
+      [
+        "-109",
+        "-93"
+      ],
+      [
+        "263.25",
+        "277.75"
+      ],
+      [
+        "317.5",
+        "331.5"
+      ]
+    ]
+  },
+  "templates": {
+    "train-a": {
+      "intro": "Use the supplied {domain} measurement and choose the matching rule.",
+      "low": "{field} is less than {lo}.",
+      "mid": "{field} is at least {lo} and less than {hi}.",
+      "high": "{field} is at least {hi}.",
+      "ge": "{field} is at least {cutoff}.",
+      "lt": "{field} is less than {cutoff}.",
+      "symbolic_intro": "Evaluate the {domain} rule expressions against the state.",
+      "symbolic": "rule: {expression}"
+    },
+    "train-b": {
+      "intro": "Classify the {domain} reading by the numerical conditions listed below.",
+      "low": "The value of {field} falls below {lo}.",
+      "mid": "The value of {field} reaches {lo} but remains below {hi}.",
+      "high": "The value of {field} reaches or exceeds {hi}.",
+      "ge": "The value of {field} reaches or exceeds {cutoff}.",
+      "lt": "The value of {field} falls below {cutoff}.",
+      "symbolic_intro": "Select the satisfied {domain} Boolean condition.",
+      "symbolic": "condition({expression})"
+    },
+    "dev-a": {
+      "intro": "Assign this {domain} observation to its stated numerical category.",
+      "low": "For {field}, the required range ends strictly before {lo}.",
+      "mid": "For {field}, the range starts inclusively at {lo} and ends exclusively at {hi}.",
+      "high": "For {field}, the required range begins inclusively at {hi}.",
+      "ge": "For {field}, the range begins inclusively at {cutoff}.",
+      "lt": "For {field}, the range ends strictly before {cutoff}.",
+      "symbolic_intro": "Find the true predicate for this {domain} observation.",
+      "symbolic": "predicate[{expression}]"
+    },
+    "dev-b": {
+      "intro": "Resolve the {domain} decision using the comparison criteria.",
+      "low": "Accept when {field} is smaller than {lo}.",
+      "mid": "Accept when {field} is not smaller than {lo} but is smaller than {hi}.",
+      "high": "Accept when {field} is not smaller than {hi}.",
+      "ge": "Accept when {field} is not smaller than {cutoff}.",
+      "lt": "Accept when {field} is smaller than {cutoff}.",
+      "symbolic_intro": "Resolve the {domain} decision by testing each expression.",
+      "symbolic": "accept iff ({expression})"
+    },
+    "calibration-a": {
+      "intro": "Determine which listed interval contains the {domain} measurement.",
+      "low": "{field} belongs below the excluded endpoint {lo}.",
+      "mid": "{field} lies between included endpoint {lo} and excluded endpoint {hi}.",
+      "high": "{field} belongs at or above the included endpoint {hi}.",
+      "ge": "{field} belongs at or above the included endpoint {cutoff}.",
+      "lt": "{field} belongs below the excluded endpoint {cutoff}.",
+      "symbolic_intro": "Determine the matching formal guard for the {domain} value.",
+      "symbolic": "guard = {expression}"
+    },
+    "calibration-b": {
+      "intro": "Apply the specified numerical bands to this {domain} record.",
+      "low": "A {field} reading under {lo} qualifies.",
+      "mid": "A {field} reading from {lo} inclusive to {hi} exclusive qualifies.",
+      "high": "A {field} reading of {hi} or greater qualifies.",
+      "ge": "A {field} reading of {cutoff} or greater qualifies.",
+      "lt": "A {field} reading under {cutoff} qualifies.",
+      "symbolic_intro": "Apply the listed comparison formulas to the {domain} record.",
+      "symbolic": "formula: ({expression})"
+    },
+    "test-a": {
+      "intro": "Locate the {domain} input within the criteria-defined ranges.",
+      "low": "The permitted {field} values are strictly lower than {lo}.",
+      "mid": "The permitted {field} values include {lo} and extend up to, but not including, {hi}.",
+      "high": "The permitted {field} values include {hi} and every greater value.",
+      "ge": "The permitted {field} values include {cutoff} and every greater value.",
+      "lt": "The permitted {field} values are strictly lower than {cutoff}.",
+      "symbolic_intro": "Locate the satisfied logical test for the {domain} input.",
+      "symbolic": "logical test: {expression}"
+    },
+    "test-b": {
+      "intro": "Match the {domain} quantity to the applicable comparison statement.",
+      "low": "This statement holds only while {field} stays short of {lo}.",
+      "mid": "This statement holds from {field} equal to {lo} until it reaches {hi}, which is excluded.",
+      "high": "This statement holds once {field} meets the minimum {hi}.",
+      "ge": "This statement holds once {field} meets the minimum {cutoff}.",
+      "lt": "This statement holds only while {field} stays short of {cutoff}.",
+      "symbolic_intro": "Match the {domain} quantity to a true formal statement.",
+      "symbolic": "statement: [{expression}]"
+    }
+  },
+  "template_allocation": {
+    "train": [
+      "train-a",
+      "train-b"
+    ],
+    "dev": [
+      "dev-a",
+      "dev-b"
+    ],
+    "calibration": [
+      "calibration-a",
+      "calibration-b"
+    ],
+    "test": [
+      "test-a",
+      "test-b"
+    ]
+  },
+  "default_counts": {
+    "train": 480,
+    "dev": 120,
+    "calibration": 120,
+    "test": 180
+  }
+}

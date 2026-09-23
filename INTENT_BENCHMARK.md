@@ -109,8 +109,8 @@ CC BY 4.0. MASSIVE's Korean Parquet is pinned to revision
 `6e31162aba58a715666d3791566f42afdcfa62b2`. Raw file hashes, selected row indices,
 labels and inference requests are retained in the local result manifests.
 
-`scripts/evaluate_intents_wide.py` prepares, runs and recounts the complete-label
-experiment. The earlier `scripts/evaluate_intents.py` preserves the separate
+`l2s1-tools evaluate-intents-wide` prepares, runs and recounts the complete-label
+experiment. The earlier `l2s1-tools evaluate-intents` command preserves the separate
 26-candidate-engine tournament baseline. Its results must not be relabeled as
 single-decision full-label inference.
 
