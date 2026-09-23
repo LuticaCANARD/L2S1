@@ -228,7 +228,7 @@ The general test run skips model-dependent tests; invoke them explicitly with lo
 
 ## Recorded model comparison
 
-The September 23, 2026 [JevBench matrix snapshot](docs/benchmarks/jevbench-20260923/REPORT.md) measures the same 231 public items on an RTX 3060 12 GiB. **Nine of 22 planned configurations were scored; 13 were still pending.** All scored rows used identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration.
+The September 23, 2026 JevBench matrix report measures the same 231 public items on an RTX 3060 12 GiB. **Nine of 22 planned configurations were scored; 13 were still pending.** All scored rows used identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration.
 
 | Checkpoint | Argmax accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms |
 | --- | ---: | ---: | ---: | ---: |
@@ -244,7 +244,7 @@ The September 23, 2026 [JevBench matrix snapshot](docs/benchmarks/jevbench-20260
 
 Argmax accuracy counts the top candidate before abstention; it is separate from the accuracy of accepted decisions. For Qwen3.5-4B Q8_0, the default policy accepted 138 decisions, including 129 correct and 9 wrong, and abstained on 93. That is 93.48% accepted accuracy at 59.74% coverage. Gemma4 E2B accepted 209, including 58 wrong, illustrating why model-specific evaluation matters even with the same contract and thresholds.
 
-These are single-run, public-subset measurements, not an official full-suite score or rank. Latency excludes loading and warmup; small models may exceed their training context. The source report records independent recounting of predictions, Brier and ECE. This PR preserves that supplied snapshot and checks aggregate consistency; it does not rerun the remote matrix. See the [JSON metrics](docs/benchmarks/jevbench-20260923/REPORT.json), [pinned plan](docs/benchmarks/jevbench-20260923/plan.json), and [evaluation method](JEVBENCH.md).
+These are single-run, public-subset measurements, not an official full-suite score or rank. Latency excludes loading and warmup; small models may exceed their training context. The source report records independent recounting of predictions, Brier and ECE. These figures summarize the supplied report; the remote matrix was not rerun for this documentation. See the [evaluation method](JEVBENCH.md).
 
 ## Further documentation
 

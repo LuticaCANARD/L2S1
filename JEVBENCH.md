@@ -47,8 +47,8 @@ python3 -m unittest discover -s scripts -p 'test_jevbench_public.py'
 
 The September 23 result is in [JEVBENCH_RESULTS.md](JEVBENCH_RESULTS.md).
 
-## Multi-model snapshot
+## Multi-model comparison
 
-The [September 23 matrix report](docs/benchmarks/jevbench-20260923/REPORT.md), [JSON metrics](docs/benchmarks/jevbench-20260923/REPORT.json) and [model plan](docs/benchmarks/jevbench-20260923/plan.json) preserve the supplied snapshot: nine configurations scored, none failed before complete scoring, and 13 pending out of 22 planned. The model paths in the plan are specific to the benchmark host. This matrix is a separate invocation from the original Gemma4 run above, so its latency measurements differ.
+The [README comparison](README.md#recorded-model-comparison) summarizes the supplied September 23 report: nine configurations scored, none failed before complete scoring, and 13 pending out of 22 planned. This matrix is a separate invocation from the original Gemma4 run above, so its latency measurements differ.
 
-`scripts/jevbench_matrix.py` downloads a pinned plan or runs available checkpoints serially through the public evaluator. `scripts/report_jevbench_matrix.py` recounts saved predictions against gold labels and checks shared request/evaluator hashes before producing the report. Regenerating the report requires the full per-model run directories and `matrix-status.json`; the three committed snapshot files alone contain aggregate evidence, not every prediction.
+`scripts/jevbench_matrix.py` downloads a pinned plan or runs available checkpoints serially through the public evaluator. `scripts/report_jevbench_matrix.py` recounts saved predictions against gold labels and checks shared request/evaluator hashes before producing the report. Regenerating it requires a local model plan, the full per-model run directories and `matrix-status.json`. Generated reports, run artifacts and host-specific plans remain local rather than being versioned with the source.
