@@ -216,7 +216,7 @@ pub struct DecisionResult {
     pub truncated: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BackendInfo {
     #[serde(default, skip_serializing_if = "crate::PromptDetail::is_minimal")]
     pub prompt_detail: crate::PromptDetail,
