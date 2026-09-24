@@ -340,6 +340,20 @@ After model downloads finished, complete reruns of Qwen3.5-4B Q8_0 and Gemma4 E2
 
 These are public-subset, local inference measurements, not an official full-suite score, rank or production validation. Latency excludes loading and warmup; small models may exceed their training context. The raw predictions, model/source hashes, memory samples, failed-attempt evidence and independent accuracy/Brier/ECE recount are in the local, gitignored `results/jevbench-matrix-20260923/` directory; they are not included in this repository. The measured source snapshot is kept with those artifacts, and later working-tree optimizations are outside this frozen comparison. See the [evaluation method](JEVBENCH.md).
 
+## Bonsai 27B and Gemma 4 31B public JevBench
+
+The [Bonsai 27B collection](https://huggingface.co/collections/prism-ml/bonsai-27b) was evaluated on the same 231 public JevBench decisions as Gemma 4's dense model. Google names that model [Gemma 4 31B](https://ai.google.dev/gemma/docs/core), rather than 32B. Accuracy uses candidate argmax before the default abstention policy.
+
+| GGUF checkpoint | Correct / 231 | Accuracy | Easy / 48 | Original / 72 | Hard / 111 | Accepted / correct accepted |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| [Bonsai 27B Q1_0](https://huggingface.co/prism-ml/Bonsai-27B-gguf) | 164/231 | 71.00% | 48 | 64 | 52 | 140 / 126 |
+| [Ternary Bonsai 27B Q2_g64](https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf) | 174/231 | 75.32% | 48 | 67 | 59 | 151 / 136 |
+| [Gemma 4 31B Q4_K_M](https://huggingface.co/google/gemma-4-31B-it) | 207/231 | 89.61% | 48 | 72 | 87 | 228 / 206 |
+
+All three use the same public dataset (SHA-256 `dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51`) and byte-identical 231 request JSONL (SHA-256 `6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa`), with legacy/fresh execution, context 8192, batch/ubatch 256, and no LoRA, output head or learned calibration. The two Bonsai runs used an RTX 3080 with full GPU offload and four threads. Gemma 4 31B used an RTX 3060 with 24 GPU layers, CPU placement for the remaining layers, read-mode loading and eight threads. Evaluator binaries also differ. These conditions support a task-accuracy comparison; their latency figures are not a controlled hardware comparison. All three fresh runs produced 231 valid predictions, with zero inference errors or truncation. Independent recounts from raw predictions reproduced every tier total; the new Gemma run also reproduced every candidate probability and policy value from its earlier validated run.
+
+Local evidence: `results/bonsai-27b-20260924/REPORT.md` and `results/jevbench-gemma31-rust-20260924/REPORT.md`, with requests, raw predictions, manifests and GPU samples beside each report (ignored benchmark artifacts, not committed). These are public-subset local scores, not official full-suite JevBench scores or ranks.
+
 ## Further documentation
 
 | Topic | Document |
