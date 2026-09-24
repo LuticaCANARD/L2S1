@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-21",
+  "workload": "warehouse-v1",
+  "samples": 5,
+  "rows": [
+    {
+      "model": "Gemma 4 E2B Q8_0",
+      "cpuP50": 7537.0151080000005,
+      "cudaP50": 96.849432,
+      "cudaDecisionsPerSecond": 30.692559810437842,
+      "cudaAbstentionRate": 0.0,
+      "nativeCpu": true,
+      "nativeCuda": true
+    },
+    {
+      "model": "Gemma 3 1B Q8_0",
+      "cpuP50": 2796.4369209999995,
+      "cudaP50": 61.826978,
+      "cudaDecisionsPerSecond": 46.442596495593996,
+      "cudaAbstentionRate": 0.0,
+      "nativeCpu": true,
+      "nativeCuda": false
+    },
+    {
+      "model": "Qwen3 0.6B Q8_0",
+      "cpuP50": 2334.387737,
+      "cudaP50": 63.52426799999999,
+      "cudaDecisionsPerSecond": 47.827340698271904,
+      "cudaAbstentionRate": 0.0,
+      "nativeCpu": true,
+      "nativeCuda": true
+    },
+    {
+      "model": "SmolLM2 135M Q8_0",
+      "cpuP50": 720.385726,
+      "cudaP50": 52.201905,
+      "cudaDecisionsPerSecond": 56.81999596873493,
+      "cudaAbstentionRate": 1.0,
+      "nativeCpu": true,
+      "nativeCuda": true
+    },
+    {
+      "model": "TinyLlama 1.1B Q4_K_M",
+      "cpuP50": 3797.045148,
+      "cudaP50": 49.398651,
+      "cudaDecisionsPerSecond": 60.94845226545457,
+      "cudaAbstentionRate": 1.0,
+      "nativeCpu": true,
+      "nativeCuda": false
+    }
+  ]
+}
