@@ -338,7 +338,7 @@ GPT-OSS 20B Q4_K_M exhausted GPU memory in `cudaGraphInstantiate` after 129 pred
 
 After model downloads finished, complete reruns of Qwen3.5-4B Q8_0 and Gemma4 E2B produced identical probabilities for every item. Their confirmation p50/p95 latencies were 86.99/1139.49 ms and 46.08/699.14 ms respectively; the table retains the original matrix timings.
 
-These are public-subset, local inference measurements, not an official full-suite score, rank or production validation. Latency excludes loading and warmup; small models may exceed their training context. Raw predictions, model/source hashes, memory samples, failed-attempt evidence and the independent accuracy/Brier/ECE recount remain in `results/jevbench-matrix-20260923/`. The measured remote source snapshot is included there; later working-tree optimizations are outside this frozen comparison. See the [evaluation method](JEVBENCH.md).
+These are public-subset, local inference measurements, not an official full-suite score, rank or production validation. Latency excludes loading and warmup; small models may exceed their training context. The raw predictions, model/source hashes, memory samples, failed-attempt evidence and independent accuracy/Brier/ECE recount are in the local, gitignored `results/jevbench-matrix-20260923/` directory; they are not included in this repository. The measured source snapshot is kept with those artifacts, and later working-tree optimizations are outside this frozen comparison. See the [evaluation method](JEVBENCH.md).
 
 ## Further documentation
 
