@@ -1,0 +1,794 @@
+{
+  "source": "https://www.kaggle.com/datasets/imbikramsaha/caltech-101",
+  "source_archive_sha256": "c29bfcb9f72b1b03bdfb6b871907ba08ec436bd4049870c9e0424a6f489d4855",
+  "seed": 20260924,
+  "population": "all 101 object classes; exclude only BACKGROUND_Google",
+  "sampling": "Python random.Random(seed): sample 30 sorted class names, then 5 sorted image names per class",
+  "class_count": 30,
+  "images_per_class": 5,
+  "classes": [
+    "Faces_easy",
+    "accordion",
+    "ant",
+    "bass",
+    "binocular",
+    "cannon",
+    "crab",
+    "dalmatian",
+    "dolphin",
+    "dragonfly",
+    "electric_guitar",
+    "flamingo",
+    "flamingo_head",
+    "gerenuk",
+    "hawksbill",
+    "kangaroo",
+    "lamp",
+    "lotus",
+    "okapi",
+    "pagoda",
+    "pigeon",
+    "pizza",
+    "scissors",
+    "snoopy",
+    "soccer_ball",
+    "stegosaurus",
+    "strawberry",
+    "trilobite",
+    "wheelchair",
+    "windsor_chair"
+  ],
+  "records": [
+    {
+      "name": "caltech-101/Faces_easy/image_0113.jpg",
+      "label": "Faces_easy",
+      "sha256": "03dcc905baa41e5862b68ec603fa5122ba8b43255aa693e29c887a33cd9a7255"
+    },
+    {
+      "name": "caltech-101/Faces_easy/image_0131.jpg",
+      "label": "Faces_easy",
+      "sha256": "b255d3f638f524c233b48965d06c10b252fb24bf341a1b3e52ec2f7a274fb2c1"
+    },
+    {
+      "name": "caltech-101/Faces_easy/image_0238.jpg",
+      "label": "Faces_easy",
+      "sha256": "b333e550922f3b2705bec622f34c57803453f6f3c782d7672d935e80c4d9a645"
+    },
+    {
+      "name": "caltech-101/Faces_easy/image_0258.jpg",
+      "label": "Faces_easy",
+      "sha256": "32caf30de372c4bb26d53b7768dece567ffd65e1c57f2d4ea59d4fa169267378"
+    },
+    {
+      "name": "caltech-101/Faces_easy/image_0307.jpg",
+      "label": "Faces_easy",
+      "sha256": "a00728d6637f16f7793294677186ca6572dea8a2e68341a88e1a0b67b82c38ba"
+    },
+    {
+      "name": "caltech-101/accordion/image_0028.jpg",
+      "label": "accordion",
+      "sha256": "c59d70bfe6b9bc8a4cc6b3ad2d0d2b889cfd77e496761b9836fecaca3c24ff09"
+    },
+    {
+      "name": "caltech-101/accordion/image_0029.jpg",
+      "label": "accordion",
+      "sha256": "f513db2475697a2a164a8da50c5605e132d19e29b6097ac05e477b09a29e76f4"
+    },
+    {
+      "name": "caltech-101/accordion/image_0030.jpg",
+      "label": "accordion",
+      "sha256": "fc4fea3a8ae422e47ab788e42139a34c0406a912084cd089cde3ac7feb3ef97b"
+    },
+    {
+      "name": "caltech-101/accordion/image_0032.jpg",
+      "label": "accordion",
+      "sha256": "320785913aadf707eab6d3739c7738f2b437b3d93299e2461feb33abd7cd3b9b"
+    },
+    {
+      "name": "caltech-101/accordion/image_0055.jpg",
+      "label": "accordion",
+      "sha256": "b23893c197cf5fe138700fc25fe1c0db00400c147b0a913cd9db8b98ce032ceb"
+    },
+    {
+      "name": "caltech-101/ant/image_0003.jpg",
+      "label": "ant",
+      "sha256": "ffeb366419a3725053fc2495d5e55a2402848ca0e78ed6ce52da0780cbd51a1f"
+    },
+    {
+      "name": "caltech-101/ant/image_0011.jpg",
+      "label": "ant",
+      "sha256": "5c08c8687e37910c0a48a37a23431764e16232429b208e8548e6e605d3f0d0d1"
+    },
+    {
+      "name": "caltech-101/ant/image_0018.jpg",
+      "label": "ant",
+      "sha256": "803a8c70ed4f5aac2e5d2847e6611a1efa0cbb05c0e3281ecf92d292cbf83868"
+    },
+    {
+      "name": "caltech-101/ant/image_0029.jpg",
+      "label": "ant",
+      "sha256": "6fc13f1d6906dec5f00a98b874c37d4fd6e3ea76813fbf1f4ecf38b46dfe0d3f"
+    },
+    {
+      "name": "caltech-101/ant/image_0036.jpg",
+      "label": "ant",
+      "sha256": "4354090cf1d88a1685e9319a95460ea2bc4856f9210c9f20f9608c8101e58b76"
+    },
+    {
+      "name": "caltech-101/bass/image_0026.jpg",
+      "label": "bass",
+      "sha256": "5277a1930779c635ac6fbf7769ad3f4c43e56a38470e608aba547fcccb846378"
+    },
+    {
+      "name": "caltech-101/bass/image_0036.jpg",
+      "label": "bass",
+      "sha256": "8d25c1ab0e73a8691f73993d290c52a43a8bb33e11e9b9ececfd7d19e70ebbeb"
+    },
+    {
+      "name": "caltech-101/bass/image_0039.jpg",
+      "label": "bass",
+      "sha256": "8775e74623366c60481dfc4313429374d1014e8fcd029cb369d646442b8c1ca2"
+    },
+    {
+      "name": "caltech-101/bass/image_0042.jpg",
+      "label": "bass",
+      "sha256": "4d63882c4e1315e28a1907a3de82069a747b12a910b14a507c0b62086bc2fe0c"
+    },
+    {
+      "name": "caltech-101/bass/image_0047.jpg",
+      "label": "bass",
+      "sha256": "900f5efdd00a960e0734362d776cfaf85fadc3a385291041de0089f0c695de50"
+    },
+    {
+      "name": "caltech-101/binocular/image_0008.jpg",
+      "label": "binocular",
+      "sha256": "82cfb169aba4cbaa2b5078d4db024f201064cf029e9c3cc4290cd8eb30eb988a"
+    },
+    {
+      "name": "caltech-101/binocular/image_0012.jpg",
+      "label": "binocular",
+      "sha256": "c5a76a2901ed896aac2232f46f702c544f65ef41ec28f078e4b78603818cc24c"
+    },
+    {
+      "name": "caltech-101/binocular/image_0018.jpg",
+      "label": "binocular",
+      "sha256": "c33e5285a7828d5c00922e176811c9852a296d6d6607ba4c9c4c18c381e342a4"
+    },
+    {
+      "name": "caltech-101/binocular/image_0027.jpg",
+      "label": "binocular",
+      "sha256": "43c49d6a1595032f4df82b85783263570c4bdf99c38e03f627a3b517e595c2b8"
+    },
+    {
+      "name": "caltech-101/binocular/image_0033.jpg",
+      "label": "binocular",
+      "sha256": "3f215a6cdb489e7e4ba9d71985ae72ce9e5e72cca21734a65b9dd95db8ed072c"
+    },
+    {
+      "name": "caltech-101/cannon/image_0027.jpg",
+      "label": "cannon",
+      "sha256": "787df71deed7f3efc9c518de7c28a4bc06ce750de56c1a7b6687c9f1d3d9a723"
+    },
+    {
+      "name": "caltech-101/cannon/image_0030.jpg",
+      "label": "cannon",
+      "sha256": "546ec83692038b29401231a9d6d2f01df0f4708f601bd1763b5ec7de699da342"
+    },
+    {
+      "name": "caltech-101/cannon/image_0033.jpg",
+      "label": "cannon",
+      "sha256": "1e3acabbf192a5a3e29c43b36f6ec6b5216d29f6aa21408367d0a3e894d955b0"
+    },
+    {
+      "name": "caltech-101/cannon/image_0034.jpg",
+      "label": "cannon",
+      "sha256": "67d27ca2bb28d9b1734db8cc391b8265436d17c845f2f850ac26f5d8b3f41536"
+    },
+    {
+      "name": "caltech-101/cannon/image_0037.jpg",
+      "label": "cannon",
+      "sha256": "8bf1f59a214eac7ea823148b53c215abdec2831148f3e144d7896900dd82e50d"
+    },
+    {
+      "name": "caltech-101/crab/image_0003.jpg",
+      "label": "crab",
+      "sha256": "0f72ce6f808c03147e8ac69ddb83cdd42ca380a0f85c9821668fc732ba94850c"
+    },
+    {
+      "name": "caltech-101/crab/image_0016.jpg",
+      "label": "crab",
+      "sha256": "75e87a5f3bb32b6f8b9f5c7a54564c68698b7ab6640916b04679dd458298b275"
+    },
+    {
+      "name": "caltech-101/crab/image_0029.jpg",
+      "label": "crab",
+      "sha256": "ee77d0a85e5d742ee57857be1bb5377573467dec6e292748fdbe7546c549fb52"
+    },
+    {
+      "name": "caltech-101/crab/image_0031.jpg",
+      "label": "crab",
+      "sha256": "0e03e3dfd767b5a6660b9944ba0fcbc04f45f6d44fde7f21e49b5afb6aa702fe"
+    },
+    {
+      "name": "caltech-101/crab/image_0063.jpg",
+      "label": "crab",
+      "sha256": "39dde6646d74da85bac944d29382bc6e5bdcd506002f36c8d0874f2c70c866df"
+    },
+    {
+      "name": "caltech-101/dalmatian/image_0014.jpg",
+      "label": "dalmatian",
+      "sha256": "d3b69a8a99561d225a522214715e0b1697a8b403dc35c707055b9adfbed00f74"
+    },
+    {
+      "name": "caltech-101/dalmatian/image_0017.jpg",
+      "label": "dalmatian",
+      "sha256": "a0dfc862076a8c2eadf049c887252306a25af4c00c285ad92aff659f5bdc372a"
+    },
+    {
+      "name": "caltech-101/dalmatian/image_0038.jpg",
+      "label": "dalmatian",
+      "sha256": "f4d407cface33ed603e793d9a0cba39736b30d10c345a1de1bf0950b7ba327e9"
+    },
+    {
+      "name": "caltech-101/dalmatian/image_0054.jpg",
+      "label": "dalmatian",
+      "sha256": "62adfb5471e18f9dd91213c7ccad612c3c793cb5bc3019146a637ea8184fc5d7"
+    },
+    {
+      "name": "caltech-101/dalmatian/image_0057.jpg",
+      "label": "dalmatian",
+      "sha256": "dd61f5d842ada2f3b23f232bcde41b5131c288d42dbd6d8ddd862927790115f8"
+    },
+    {
+      "name": "caltech-101/dolphin/image_0002.jpg",
+      "label": "dolphin",
+      "sha256": "02423d9d09712e9a2c764e9b4cbbe5e78d6156b481fc8ee840c3a1298fe88b1e"
+    },
+    {
+      "name": "caltech-101/dolphin/image_0004.jpg",
+      "label": "dolphin",
+      "sha256": "49e639d61bed3a098b0e105a444e3359346ba0c4fa1aa9c689d93d226da9154b"
+    },
+    {
+      "name": "caltech-101/dolphin/image_0018.jpg",
+      "label": "dolphin",
+      "sha256": "75058e86bdc9e515dbd4b790be659328b9983c68ccf0ed6492254d46f1446752"
+    },
+    {
+      "name": "caltech-101/dolphin/image_0040.jpg",
+      "label": "dolphin",
+      "sha256": "ab864436da14090f297abacad43355523fffbede1ece52f4adf20e5039227e95"
+    },
+    {
+      "name": "caltech-101/dolphin/image_0053.jpg",
+      "label": "dolphin",
+      "sha256": "bbd4ea5b9c02eb7f70bb37b65998101788a6014cb0d7cbcad554bbb6c4a2f8aa"
+    },
+    {
+      "name": "caltech-101/dragonfly/image_0025.jpg",
+      "label": "dragonfly",
+      "sha256": "c84ac90e80cebd57b784a28556ad87db7b42c1d631d95436bd6052b52853ff1c"
+    },
+    {
+      "name": "caltech-101/dragonfly/image_0028.jpg",
+      "label": "dragonfly",
+      "sha256": "2f7fe7f4ecb6b3ff4bc03159d47a474204da534f22dcccaa6c625491a5ac4e3f"
+    },
+    {
+      "name": "caltech-101/dragonfly/image_0045.jpg",
+      "label": "dragonfly",
+      "sha256": "f3687b409612e466d0c1587f84289f1932ede33738dea83989e80e2036386261"
+    },
+    {
+      "name": "caltech-101/dragonfly/image_0049.jpg",
+      "label": "dragonfly",
+      "sha256": "f9deaa7b64901f5cc6aa82e46eb3f7470cd9162daf5f806aabedf256ac4f6b70"
+    },
+    {
+      "name": "caltech-101/dragonfly/image_0063.jpg",
+      "label": "dragonfly",
+      "sha256": "458fe2b2e88d2c0353c80e760e31f4d9617c44a0fea089883c2d630ab660394e"
+    },
+    {
+      "name": "caltech-101/electric_guitar/image_0008.jpg",
+      "label": "electric_guitar",
+      "sha256": "6e5463875f7673a5cd8de3170414e8a1b14633aa32043bc5e11bc334532028a3"
+    },
+    {
+      "name": "caltech-101/electric_guitar/image_0029.jpg",
+      "label": "electric_guitar",
+      "sha256": "00556cda5d335e17b1fa01eafb935750364ab0f41ae92dd316c3d5fd00cee547"
+    },
+    {
+      "name": "caltech-101/electric_guitar/image_0048.jpg",
+      "label": "electric_guitar",
+      "sha256": "4b2cf6456b4a07c43cee9b5fc28dfaef37949072f933ae10921a45c5a1eb3635"
+    },
+    {
+      "name": "caltech-101/electric_guitar/image_0063.jpg",
+      "label": "electric_guitar",
+      "sha256": "150b6d6d6f5a42638555029fe072d8b6c7c8c1f2471f22751c0e3600d7a9390e"
+    },
+    {
+      "name": "caltech-101/electric_guitar/image_0068.jpg",
+      "label": "electric_guitar",
+      "sha256": "c2b703d676b4488e5dc4a0c441b09b5d4cef3fa3adcbc2322bfcab670b4b4279"
+    },
+    {
+      "name": "caltech-101/flamingo/image_0003.jpg",
+      "label": "flamingo",
+      "sha256": "1dafe4728d416cdddb3edacba243cda48b66bffa6c9c110067e90f54b7a5b055"
+    },
+    {
+      "name": "caltech-101/flamingo/image_0014.jpg",
+      "label": "flamingo",
+      "sha256": "1273944e6ca6d33b3da593b1e72e7f182d397c26c7629baf80f6809eb5798abb"
+    },
+    {
+      "name": "caltech-101/flamingo/image_0032.jpg",
+      "label": "flamingo",
+      "sha256": "08a38c9507ea92e330d8390fefe7715548b857a3b39da4f6b5d72594a0826130"
+    },
+    {
+      "name": "caltech-101/flamingo/image_0040.jpg",
+      "label": "flamingo",
+      "sha256": "90e052c65ffe49aa9f3525eec63d803f822dd1d87063889ccb8c9e5bf4e2d04f"
+    },
+    {
+      "name": "caltech-101/flamingo/image_0049.jpg",
+      "label": "flamingo",
+      "sha256": "351d884104820a49d1412c902ff59f7572d3d294ce2c092bb4eddf577d80fed7"
+    },
+    {
+      "name": "caltech-101/flamingo_head/image_0021.jpg",
+      "label": "flamingo_head",
+      "sha256": "8577df95c38461e9378565098b71204d4e39d6e6d9d4d2539790b3c40a986f85"
+    },
+    {
+      "name": "caltech-101/flamingo_head/image_0024.jpg",
+      "label": "flamingo_head",
+      "sha256": "974738a2f761d5280f2fea0590efe8c994eae811949e0c98c12b153478e52aa0"
+    },
+    {
+      "name": "caltech-101/flamingo_head/image_0026.jpg",
+      "label": "flamingo_head",
+      "sha256": "c522d63f1e32d9f96e3f999ca36bbeced9a88b4377d503b59c0471b8206ef878"
+    },
+    {
+      "name": "caltech-101/flamingo_head/image_0032.jpg",
+      "label": "flamingo_head",
+      "sha256": "33bb1f007629b4628b84c11edc230010be15dc112d11c19601e7f21656b32e62"
+    },
+    {
+      "name": "caltech-101/flamingo_head/image_0045.jpg",
+      "label": "flamingo_head",
+      "sha256": "7cd5a6f2853739d87983cf7338714d4c97de10d7e54ffd56c4311c86c91ef5ef"
+    },
+    {
+      "name": "caltech-101/gerenuk/image_0001.jpg",
+      "label": "gerenuk",
+      "sha256": "c3913eb31b9916eb847cc0e3031bcf816937fb5274422b774d5d4629a7429e3b"
+    },
+    {
+      "name": "caltech-101/gerenuk/image_0002.jpg",
+      "label": "gerenuk",
+      "sha256": "2daf09d9c11f368f1ebfc26158264e3431141bb1de034b76cd2d8054d60968d3"
+    },
+    {
+      "name": "caltech-101/gerenuk/image_0010.jpg",
+      "label": "gerenuk",
+      "sha256": "cb08ec5c94f97ae04d73040cfb35484d495078c0c47ded0fb4c95d1ee34ff484"
+    },
+    {
+      "name": "caltech-101/gerenuk/image_0019.jpg",
+      "label": "gerenuk",
+      "sha256": "60676942667d150bfc93d0399e1b92ee039042fe96756015f174603ca447b5b4"
+    },
+    {
+      "name": "caltech-101/gerenuk/image_0033.jpg",
+      "label": "gerenuk",
+      "sha256": "32f97ab23027cb964ce1b8e4eec461a595235a41550156bfe0dfcca027e958df"
+    },
+    {
+      "name": "caltech-101/hawksbill/image_0013.jpg",
+      "label": "hawksbill",
+      "sha256": "a8a35953d2e8044a64c055d72eb5c8cff9d306314750579a0c28fc158c32aad7"
+    },
+    {
+      "name": "caltech-101/hawksbill/image_0027.jpg",
+      "label": "hawksbill",
+      "sha256": "9e1309d2eb376847452c00e979e69bb45d336f0e9c751d6fb71189a133fc743a"
+    },
+    {
+      "name": "caltech-101/hawksbill/image_0038.jpg",
+      "label": "hawksbill",
+      "sha256": "c552c38ea80a4b6bd6e19ad8e720ee31d4f2847ab5a76359a31485df018e62f1"
+    },
+    {
+      "name": "caltech-101/hawksbill/image_0078.jpg",
+      "label": "hawksbill",
+      "sha256": "18a93024518579fdc31139106b1131fe95c4b624335180d8b3718445c41c0105"
+    },
+    {
+      "name": "caltech-101/hawksbill/image_0088.jpg",
+      "label": "hawksbill",
+      "sha256": "56dc6daa840078c7cfe8c0f07a2c294d27d0f2c2ad67de95a07c419274b67081"
+    },
+    {
+      "name": "caltech-101/kangaroo/image_0008.jpg",
+      "label": "kangaroo",
+      "sha256": "50d96739913fbf8555ee174dd29c50796d4d93f4a4abdb8826e8c9d950bc2b3e"
+    },
+    {
+      "name": "caltech-101/kangaroo/image_0015.jpg",
+      "label": "kangaroo",
+      "sha256": "ee58f611cdefcb589b627bf7295992fce129e207dddeefbc52dc539d0e878a37"
+    },
+    {
+      "name": "caltech-101/kangaroo/image_0018.jpg",
+      "label": "kangaroo",
+      "sha256": "8d92e2ca2f660691d052c3fb9ce1e9c916e59b996c1cb500fcc6057f9a80fa87"
+    },
+    {
+      "name": "caltech-101/kangaroo/image_0066.jpg",
+      "label": "kangaroo",
+      "sha256": "3b1d4f622677bd02c8949e9305fe353ab3970bd0e2777ac0de20ea7ee994880b"
+    },
+    {
+      "name": "caltech-101/kangaroo/image_0084.jpg",
+      "label": "kangaroo",
+      "sha256": "5217499bac0e2691f89afce4d60b68d4c4b9a1943fec2ab42664bea3925298d2"
+    },
+    {
+      "name": "caltech-101/lamp/image_0002.jpg",
+      "label": "lamp",
+      "sha256": "98faad781df54052b4d7b8292d88f75c90a7478fb35cd4c03a39536226ccbdcb"
+    },
+    {
+      "name": "caltech-101/lamp/image_0020.jpg",
+      "label": "lamp",
+      "sha256": "ec914c5edd7fc96b71bbbc2a88f04af9d44f83f116d13456b598d3287894bade"
+    },
+    {
+      "name": "caltech-101/lamp/image_0036.jpg",
+      "label": "lamp",
+      "sha256": "17fe592bd0d4ac6b8492b12d993f58a2b5f32fd29a62d18d1d727f69b13a13dd"
+    },
+    {
+      "name": "caltech-101/lamp/image_0039.jpg",
+      "label": "lamp",
+      "sha256": "dd9c74f99175d88d80d8cb92d3038dbb8efabeab988682eee9623bf3b1f6c9c7"
+    },
+    {
+      "name": "caltech-101/lamp/image_0041.jpg",
+      "label": "lamp",
+      "sha256": "edf9d6ac0cecc13db2418b6ec327d470a0f33e46a8076c1bfc06e10ec7006772"
+    },
+    {
+      "name": "caltech-101/lotus/image_0006.jpg",
+      "label": "lotus",
+      "sha256": "1e4e8c06a5f13881c144b7c147b354c2cc31dbff6f8c70bb0636d7886f3a343e"
+    },
+    {
+      "name": "caltech-101/lotus/image_0010.jpg",
+      "label": "lotus",
+      "sha256": "06737a5720f585555865ddca8905de8d240b0c5bd8b6497f044945488404b815"
+    },
+    {
+      "name": "caltech-101/lotus/image_0012.jpg",
+      "label": "lotus",
+      "sha256": "3b257ecbda72f3f0793e4e217f147a3edb4f1db49da0addbf1b4bdcd2477c02e"
+    },
+    {
+      "name": "caltech-101/lotus/image_0045.jpg",
+      "label": "lotus",
+      "sha256": "7fa7ed97ceef8dbc5578b9c39696593a43b176fc176b1208ff23c3f74a4e28c5"
+    },
+    {
+      "name": "caltech-101/lotus/image_0065.jpg",
+      "label": "lotus",
+      "sha256": "299bedf7f4f6fd95188126a3b6cf7782dd32ef3ec195a309293d073a183cc5d9"
+    },
+    {
+      "name": "caltech-101/okapi/image_0013.jpg",
+      "label": "okapi",
+      "sha256": "d5c7f5cc8e367bf3efc5379be44f1eb9d16a022dc3b1de90de3ff4ba57536c88"
+    },
+    {
+      "name": "caltech-101/okapi/image_0014.jpg",
+      "label": "okapi",
+      "sha256": "35e4997edf91f4abb41169b63e464932bc417aa0cf54c6d4e476c97761702067"
+    },
+    {
+      "name": "caltech-101/okapi/image_0017.jpg",
+      "label": "okapi",
+      "sha256": "034606daede75664d358b7107df1cc47b3ac4f09a7e56000607a1237c8f5324a"
+    },
+    {
+      "name": "caltech-101/okapi/image_0036.jpg",
+      "label": "okapi",
+      "sha256": "fdf76e5892f5875d80162ce11236f654e4b2b7547c88e526bc9f459bdca36afb"
+    },
+    {
+      "name": "caltech-101/okapi/image_0038.jpg",
+      "label": "okapi",
+      "sha256": "d62c0997205663772b9535472125e71de9eb390b519e30fd428f13a380c592f5"
+    },
+    {
+      "name": "caltech-101/pagoda/image_0004.jpg",
+      "label": "pagoda",
+      "sha256": "5b7f6c2748b90a7f8aabb844656c1fc4b693fdc3b5221ac5a089f08666a22197"
+    },
+    {
+      "name": "caltech-101/pagoda/image_0006.jpg",
+      "label": "pagoda",
+      "sha256": "0de0947e691f7415582ca1f439cfc6d4dc11ea873399221f241c3f761017a2c2"
+    },
+    {
+      "name": "caltech-101/pagoda/image_0007.jpg",
+      "label": "pagoda",
+      "sha256": "d371af99a5a43645378f436ef37078184540662e7a7d55924573358c3b8817df"
+    },
+    {
+      "name": "caltech-101/pagoda/image_0034.jpg",
+      "label": "pagoda",
+      "sha256": "18f91a3a927685a4aa99ba41a1ed4a06fdedba679fee0e1e6bc77006dbbd2a40"
+    },
+    {
+      "name": "caltech-101/pagoda/image_0038.jpg",
+      "label": "pagoda",
+      "sha256": "efd831a591dbcc8000f86160518d408c7fa1e2868e93f360dc908d88e08c7ba7"
+    },
+    {
+      "name": "caltech-101/pigeon/image_0001.jpg",
+      "label": "pigeon",
+      "sha256": "29bcbf55c5f659a61a10f57534eddfffea00419e0bdfb368e15767e46e9f100b"
+    },
+    {
+      "name": "caltech-101/pigeon/image_0019.jpg",
+      "label": "pigeon",
+      "sha256": "836dee28e0afcbef455902113d0a96c569efa28543e18cd06ceba24cb45017ac"
+    },
+    {
+      "name": "caltech-101/pigeon/image_0023.jpg",
+      "label": "pigeon",
+      "sha256": "49a1d01911c1d41ef783ee8cce3126101ef3b5753c1fd88742a7ffa1876287b3"
+    },
+    {
+      "name": "caltech-101/pigeon/image_0032.jpg",
+      "label": "pigeon",
+      "sha256": "6c25f686fe0d19c031899a3a9109f8912f1933f25164c87cd8117312d5ddf4a4"
+    },
+    {
+      "name": "caltech-101/pigeon/image_0033.jpg",
+      "label": "pigeon",
+      "sha256": "ac98ede9697c3d6ebd9b7cf453c4c29e6fe7607302b10f426656fa9afdecb657"
+    },
+    {
+      "name": "caltech-101/pizza/image_0007.jpg",
+      "label": "pizza",
+      "sha256": "70045179d48a6dfce11cba6cae99ee398fc1d45379559870eb232cf995aa22aa"
+    },
+    {
+      "name": "caltech-101/pizza/image_0025.jpg",
+      "label": "pizza",
+      "sha256": "dde8977afff9bf6db834f1ef3abeda40531c42160e3292d4ac8bf9c0094f6d08"
+    },
+    {
+      "name": "caltech-101/pizza/image_0028.jpg",
+      "label": "pizza",
+      "sha256": "f70fd0481c02c74338ded277510213599ab95c3c6de6263d8e274b486e49b38c"
+    },
+    {
+      "name": "caltech-101/pizza/image_0029.jpg",
+      "label": "pizza",
+      "sha256": "58823f76ce889aab1107efbaf4529a906de82b5a36278c6e107166640ff28e63"
+    },
+    {
+      "name": "caltech-101/pizza/image_0048.jpg",
+      "label": "pizza",
+      "sha256": "6f8a741dfe59af341c17778f0d675c3ff5f6cca40893eec2c35b3fa3f142ddc4"
+    },
+    {
+      "name": "caltech-101/scissors/image_0011.jpg",
+      "label": "scissors",
+      "sha256": "354d5347c65d26330cc28c3b749f592b8602ce951b3663917722aeacb48666d5"
+    },
+    {
+      "name": "caltech-101/scissors/image_0024.jpg",
+      "label": "scissors",
+      "sha256": "34b5611dfb32ba76db7c9e41f9272ce842e8eb3df0abf628407c3fcc33ea6b0b"
+    },
+    {
+      "name": "caltech-101/scissors/image_0025.jpg",
+      "label": "scissors",
+      "sha256": "6bd7805fed2eb6dce9a590d2799a1c39813564d093ef60af85bb291f59e8e0fb"
+    },
+    {
+      "name": "caltech-101/scissors/image_0028.jpg",
+      "label": "scissors",
+      "sha256": "833e1b7be3fc228525e83e1cfe7f23ce669052b125d9cb003ea6b0dd58efdb06"
+    },
+    {
+      "name": "caltech-101/scissors/image_0032.jpg",
+      "label": "scissors",
+      "sha256": "569cbc701854b7cdb999f28b489c1c2e9a5de2c3e11023b6d5205c5ba395ed6c"
+    },
+    {
+      "name": "caltech-101/snoopy/image_0004.jpg",
+      "label": "snoopy",
+      "sha256": "731493a3075aaf1dae827ff092ef15781349a9071be906aa8474f1cd1ced2f2e"
+    },
+    {
+      "name": "caltech-101/snoopy/image_0016.jpg",
+      "label": "snoopy",
+      "sha256": "dda1d4787dbb5623383c31b54476eca8cd3a8aa574114581dd1d7b39067b60e8"
+    },
+    {
+      "name": "caltech-101/snoopy/image_0021.jpg",
+      "label": "snoopy",
+      "sha256": "e3c8184a4148e0a19b27c2dda04dd4bae827be754ff2cc004252107cbc005b0a"
+    },
+    {
+      "name": "caltech-101/snoopy/image_0025.jpg",
+      "label": "snoopy",
+      "sha256": "4b79786b0c65350987448d65d4801c069328ab48b258f70b1ae5a95dca104d6c"
+    },
+    {
+      "name": "caltech-101/snoopy/image_0029.jpg",
+      "label": "snoopy",
+      "sha256": "da6b688fafc86ecbb462285d86f7c5cf296847e019011a38d90821bbb72a07d6"
+    },
+    {
+      "name": "caltech-101/soccer_ball/image_0016.jpg",
+      "label": "soccer_ball",
+      "sha256": "ac063567c2f101774beaeb492c45cfb53c42c192489aeb0126ec439ddfdcb944"
+    },
+    {
+      "name": "caltech-101/soccer_ball/image_0020.jpg",
+      "label": "soccer_ball",
+      "sha256": "14c53f88e87e67b5918a8d4070935d7804353169d26f4e2ef29afb50d4154b04"
+    },
+    {
+      "name": "caltech-101/soccer_ball/image_0036.jpg",
+      "label": "soccer_ball",
+      "sha256": "ba644bd7b32ba21c4b491e0dac13b11e32ae6c6c6e5ffbd2149f2efc9651750b"
+    },
+    {
+      "name": "caltech-101/soccer_ball/image_0044.jpg",
+      "label": "soccer_ball",
+      "sha256": "6726ef60ca3df041bd1972386f0907bb74d1031b068ea38c12604df77183d241"
+    },
+    {
+      "name": "caltech-101/soccer_ball/image_0059.jpg",
+      "label": "soccer_ball",
+      "sha256": "400db08bcd9a77986105fb61238faa87a52f0df508d89bea141248063b1e16bb"
+    },
+    {
+      "name": "caltech-101/stegosaurus/image_0006.jpg",
+      "label": "stegosaurus",
+      "sha256": "2ee1ad4c7dd94e22bb3861028f5a9a8c3fd89ba80149bb6f1107a48375b64bf3"
+    },
+    {
+      "name": "caltech-101/stegosaurus/image_0011.jpg",
+      "label": "stegosaurus",
+      "sha256": "fcb79e0421d3a38be42becd8458fbc16b715dfaee5fe9d0025f38ec3cb6e9772"
+    },
+    {
+      "name": "caltech-101/stegosaurus/image_0032.jpg",
+      "label": "stegosaurus",
+      "sha256": "10a2d529588c8611500270fd97a1cbddd68d1c56b057689aa74b353e5cbe6465"
+    },
+    {
+      "name": "caltech-101/stegosaurus/image_0057.jpg",
+      "label": "stegosaurus",
+      "sha256": "d9e78d1990aa4f3fd106ca1e1abbc3edbe638ea991f445e86b5260e8c9e28673"
+    },
+    {
+      "name": "caltech-101/stegosaurus/image_0059.jpg",
+      "label": "stegosaurus",
+      "sha256": "2b8c2eec9ca5caebdccb4858c2cb642aca0692b03d2d23a0a3fc851bbb8535bf"
+    },
+    {
+      "name": "caltech-101/strawberry/image_0006.jpg",
+      "label": "strawberry",
+      "sha256": "372ee88b51ba1468ab30330ba3e20c482d20ecdccab01bba81b586a229fd0848"
+    },
+    {
+      "name": "caltech-101/strawberry/image_0017.jpg",
+      "label": "strawberry",
+      "sha256": "12e316a681959af578c5bfad7e6e476bdd57ff65281ab147cbd67708c9d25d8f"
+    },
+    {
+      "name": "caltech-101/strawberry/image_0019.jpg",
+      "label": "strawberry",
+      "sha256": "4493383143a5437734001520f9733bfc0caa5a189c2fba9ba7eccaccbeb49627"
+    },
+    {
+      "name": "caltech-101/strawberry/image_0020.jpg",
+      "label": "strawberry",
+      "sha256": "22851118464ad4609083eee3993631255f7b83b678ccaa3aa69890ea4067a4c9"
+    },
+    {
+      "name": "caltech-101/strawberry/image_0028.jpg",
+      "label": "strawberry",
+      "sha256": "ebf5f5462844159b73b9147b0585e344383214099dc2b89ff9aaf9016a646b0e"
+    },
+    {
+      "name": "caltech-101/trilobite/image_0002.jpg",
+      "label": "trilobite",
+      "sha256": "e7529f51f4f6c7bcde276edef7bff9a9fac4693180786d63eeba52c3f17bc553"
+    },
+    {
+      "name": "caltech-101/trilobite/image_0003.jpg",
+      "label": "trilobite",
+      "sha256": "4e989f92ada6f9f1c3a6ea342d51aa1609acd3161a92b5844c69cb98613df1ba"
+    },
+    {
+      "name": "caltech-101/trilobite/image_0022.jpg",
+      "label": "trilobite",
+      "sha256": "bfe81ed9ae3e64c7226d5737c476709ae2849030dae48525f1e9ccef098365b2"
+    },
+    {
+      "name": "caltech-101/trilobite/image_0041.jpg",
+      "label": "trilobite",
+      "sha256": "60771289d58f63b76b5d86934f575da520859cdcf013c7d9c45526e7537477d0"
+    },
+    {
+      "name": "caltech-101/trilobite/image_0053.jpg",
+      "label": "trilobite",
+      "sha256": "d223ba3bd68f8dcfa760ef5381c23039e5b3ed59d896e22aa68a3e8d940cff5f"
+    },
+    {
+      "name": "caltech-101/wheelchair/image_0001.jpg",
+      "label": "wheelchair",
+      "sha256": "aea1a3b4d1051c447dd4e2d344371c95e9678454b0ea7e1099e38d9b9b9dc406"
+    },
+    {
+      "name": "caltech-101/wheelchair/image_0009.jpg",
+      "label": "wheelchair",
+      "sha256": "e31c03c27dc12e85b97a43b4ddbf79d4efab560740a143f7243363a30867cb09"
+    },
+    {
+      "name": "caltech-101/wheelchair/image_0037.jpg",
+      "label": "wheelchair",
+      "sha256": "f79d4d8bf9f21abc60af032ddf0e90f30cce891f16284736d509d37e2d6018ea"
+    },
+    {
+      "name": "caltech-101/wheelchair/image_0041.jpg",
+      "label": "wheelchair",
+      "sha256": "7186edb82f2f57dd9bcbf4109ebf6ea5c51b327f3bd93bb0c98cda385c65a55c"
+    },
+    {
+      "name": "caltech-101/wheelchair/image_0055.jpg",
+      "label": "wheelchair",
+      "sha256": "01f97b5bd5b7d24c9ff5144c9c652fa098a2e0e9fc6b4fc9d61a78493b8bd696"
+    },
+    {
+      "name": "caltech-101/windsor_chair/image_0007.jpg",
+      "label": "windsor_chair",
+      "sha256": "7243bb64c82e02ebb41fe3a09856892d967e14fd1ed5d1929921319cf55b4eea"
+    },
+    {
+      "name": "caltech-101/windsor_chair/image_0013.jpg",
+      "label": "windsor_chair",
+      "sha256": "f7fee0c320348cfdef0d4055ed891b18e7dc51d47709aa29e6b5cb0f15cf1ab0"
+    },
+    {
+      "name": "caltech-101/windsor_chair/image_0037.jpg",
+      "label": "windsor_chair",
+      "sha256": "fc14dc43ebf959b39aaa6ad63285772cd90f9ced4e15a90ffb1a97c7191a3899"
+    },
+    {
+      "name": "caltech-101/windsor_chair/image_0038.jpg",
+      "label": "windsor_chair",
+      "sha256": "c5ca2620c7b67af9d2b17cbd9f68ccf57fd0d73f4aa3abea894fc31e4573979b"
+    },
+    {
+      "name": "caltech-101/windsor_chair/image_0040.jpg",
+      "label": "windsor_chair",
+      "sha256": "4c512f0b250873559e89fb48da20de08fb38401b29cf433d3f1a2f60223882db"
+    }
+  ],
+  "sample_archive_sha256": "421e1a1ad05a288a57ad5e837a4f22d1941854ca561fe67a2b1be0131de4b1de"
+}

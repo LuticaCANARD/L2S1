@@ -73,6 +73,7 @@ The library also accepts original image bytes without base64. The CLI equivalent
 Gemma is a possible vision backend: Gemma 3 4B/12B/27B and Gemma 4 E2B/E4B have image-capable variants in llama.cpp. Gemma 3 1B is text-only. Pair a vision checkpoint with its matching `mmproj`; a text-only GGUF file alone cannot accept pixels. See the [llama.cpp multimodal model list](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md) and [Gemma 3 vision guide](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal/gemma3.md).
 
 For CPU/CUDA latency measurements with Gemma 4 and two labeled image fixtures, see the [direct vision benchmark](VISION_BENCHMARK.md).
+For a 30-class, 150-image CUDA run through the HTTP vision API, see the [Caltech-101 benchmark](benchmarks/caltech101-vision-20260924/README.md).
 
 ## The decision contract
 
