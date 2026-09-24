@@ -305,18 +305,21 @@ The general test run skips model-dependent tests; invoke them explicitly with lo
 
 The September 23, 2026 JevBench matrix measured **22 GGUF checkpoints on all 231 public items** using the same frozen project build on an RTX 3060 12 GiB. All 5,082 predictions in the completed comparison runs were valid, with no inference errors or truncation. The 23 runtime configurations include one failed default GPT-OSS attempt and its successful CUDA Graphs-disabled recovery.
 
-Completed rows use identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration. The explicit GPT-OSS exception is marked below.
+The original 22 matrix rows use identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration. The explicit GPT-OSS exception is marked below. Rows marked † are separate September 24 runs.
 
 | Checkpoint | Argmax accuracy | Hard accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms |
 | --- | ---: | ---: | ---: | ---: | ---: |
+| [Gemma 4 31B Q4_K_M](https://huggingface.co/google/gemma-4-31B-it) † | 89.61% | 78.38% | 22 | 3 | 2287.40 / 24524.56 |
 | Qwen3.5-4B-Q8_0 | 79.65% | 61.26% | 9 | 93 | 86.88 / 1137.30 |
 | Qwen3.5-9B-Q4_K_M | 77.92% | 58.56% | 13 | 64 | 130.55 / 1697.14 |
 | Qwen3.5-9B-Q8_0 | 77.92% | 56.76% | 14 | 66 | 124.68 / 1613.79 |
 | gemma-4-E4B-it-Q4_K_M | 77.49% | 55.86% | 30 | 37 | 86.62 / 1186.47 |
 | gemma-4-E4B-it-Q8_0 | 76.62% | 54.05% | 32 | 37 | 85.04 / 1146.21 |
 | Qwen3.5-4B-Q4_K_M | 76.19% | 55.86% | 10 | 91 | 88.47 / 1175.18 |
+| [Ternary Bonsai 27B Q2_g64](https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf) † | 75.32% | 53.15% | 15 | 80 | 187.15 / 2462.18 |
 | Qwen3.8-27B-UD-IQ2_XXS | 73.16% | 47.75% | 18 | 84 | 414.61 / 5460.22 |
 | Qwen3-8B-Q8_0 | 71.43% | 48.65% | 56 | 15 | 121.45 / 1817.94 |
+| [Bonsai 27B Q1_0](https://huggingface.co/prism-ml/Bonsai-27B-gguf) † | 71.00% | 46.85% | 14 | 91 | 184.51 / 2489.64 |
 | gemma-4-E2B-it-Q8_0 | 67.97% | 43.24% | 58 | 22 | 46.79 / 701.11 |
 | Qwen3-4B-Q8_0 | 65.80% | 44.14% | 63 | 29 | 85.26 / 1349.28 |
 | Ministral-3-8B-Instruct-2512-Q4_K_M | 65.37% | 47.75% | 23 | 93 | 441.43 / 2399.70 |
@@ -332,27 +335,17 @@ Completed rows use identical request and evaluator hashes, fresh/legacy executio
 | Qwen3-0.6B-Q8_0 | 31.60% | 31.53% | 129 | 41 | 34.01 / 445.12 |
 | SmolLM2-135M-Instruct-Q8_0 | 30.30% | 29.73% | 8 | 211 | 14.88 / 253.65 |
 
-Qwen3.5-4B Q8_0 had the highest argmax accuracy in this selected matrix: 184/231 (79.65%), including 68/111 Hard items (61.26%). Its default policy accepted 138 decisions: 129 correct and 9 wrong, for 93.48% accepted accuracy at 59.74% coverage. Qwen3.5-9B Q4_K_M covered 72.29% with 13 accepted errors; Gemma4 E2B covered 90.48% with 58 accepted errors. Accuracy before abstention, accepted accuracy and coverage answer different questions.
+The † rows used the same public dataset (SHA-256 `dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51`) and byte-identical 231 request JSONL (SHA-256 `6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa`). Candidate-argmax scores were 164/231 for Bonsai Q1_0, 174/231 for Ternary Bonsai Q2_g64 and 207/231 for Gemma 4 31B Q4_K_M. All 693 predictions were valid, with no inference errors or truncation; independent recounts reproduced each tier total. The Gemma 4 31B run also reproduced every candidate probability and policy value from its earlier validated run. The default policy accepted 140/151/228 decisions respectively, of which 126/136/206 were correct.
+
+These runs used fresh/legacy execution, context 8192, batch/ubatch 256, and no LoRA, output head or learned calibration. The Bonsai runs used an RTX 3080 with full GPU offload and four threads; Gemma 4 31B used an RTX 3060 with 24 GPU layers, read-mode loading and eight threads. Evaluator binaries also differed, so the † latency figures are not a controlled speed comparison with each other or the original matrix. Their local, gitignored evidence is in `results/bonsai-27b-20260924/` and `results/jevbench-gemma31-rust-20260924/`; these artifacts are not included in the repository.
+
+Qwen3.5-4B Q8_0 had the highest argmax accuracy in the original 22-checkpoint matrix: 184/231 (79.65%), including 68/111 Hard items (61.26%). Its default policy accepted 138 decisions: 129 correct and 9 wrong, for 93.48% accepted accuracy at 59.74% coverage. Qwen3.5-9B Q4_K_M covered 72.29% with 13 accepted errors; Gemma4 E2B covered 90.48% with 58 accepted errors. Accuracy before abstention, accepted accuracy and coverage answer different questions.
 
 GPT-OSS 20B Q4_K_M exhausted GPU memory in `cudaGraphInstantiate` after 129 predictions. With `GGML_CUDA_DISABLE_GRAPHS=1`, it completed all 231 at 64.94% accuracy and a sampled peak of 11,901 MiB. Its first 129 probability distributions were identical to the failed run. Keep this runtime exception when reproducing its result.
 
 After model downloads finished, complete reruns of Qwen3.5-4B Q8_0 and Gemma4 E2B produced identical probabilities for every item. Their confirmation p50/p95 latencies were 86.99/1139.49 ms and 46.08/699.14 ms respectively; the table retains the original matrix timings.
 
-These are public-subset, local inference measurements, not an official full-suite score, rank or production validation. Latency excludes loading and warmup; small models may exceed their training context. The raw predictions, model/source hashes, memory samples, failed-attempt evidence and independent accuracy/Brier/ECE recount are in the local, gitignored `results/jevbench-matrix-20260923/` directory; they are not included in this repository. The measured source snapshot is kept with those artifacts, and later working-tree optimizations are outside this frozen comparison. See the [evaluation method](JEVBENCH.md).
-
-## Bonsai 27B and Gemma 4 31B public JevBench
-
-The [Bonsai 27B collection](https://huggingface.co/collections/prism-ml/bonsai-27b) was evaluated on the same 231 public JevBench decisions as Gemma 4's dense model. Google names that model [Gemma 4 31B](https://ai.google.dev/gemma/docs/core), rather than 32B. Accuracy uses candidate argmax before the default abstention policy.
-
-| GGUF checkpoint | Correct / 231 | Accuracy | Easy / 48 | Original / 72 | Hard / 111 | Accepted / correct accepted |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| [Bonsai 27B Q1_0](https://huggingface.co/prism-ml/Bonsai-27B-gguf) | 164/231 | 71.00% | 48 | 64 | 52 | 140 / 126 |
-| [Ternary Bonsai 27B Q2_g64](https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf) | 174/231 | 75.32% | 48 | 67 | 59 | 151 / 136 |
-| [Gemma 4 31B Q4_K_M](https://huggingface.co/google/gemma-4-31B-it) | 207/231 | 89.61% | 48 | 72 | 87 | 228 / 206 |
-
-All three use the same public dataset (SHA-256 `dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51`) and byte-identical 231 request JSONL (SHA-256 `6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa`), with legacy/fresh execution, context 8192, batch/ubatch 256, and no LoRA, output head or learned calibration. The two Bonsai runs used an RTX 3080 with full GPU offload and four threads. Gemma 4 31B used an RTX 3060 with 24 GPU layers, CPU placement for the remaining layers, read-mode loading and eight threads. Evaluator binaries also differ. These conditions support a task-accuracy comparison; their latency figures are not a controlled hardware comparison. All three fresh runs produced 231 valid predictions, with zero inference errors or truncation. Independent recounts from raw predictions reproduced every tier total; the new Gemma run also reproduced every candidate probability and policy value from its earlier validated run.
-
-Local evidence: `results/bonsai-27b-20260924/REPORT.md` and `results/jevbench-gemma31-rust-20260924/REPORT.md`, with requests, raw predictions, manifests and GPU samples beside each report (ignored benchmark artifacts, not committed). These are public-subset local scores, not official full-suite JevBench scores or ranks.
+These are public-subset, local inference measurements, not an official full-suite score, rank or production validation. Latency excludes loading and warmup; small models may exceed their training context. For the original 22-checkpoint matrix, raw predictions, model/source hashes, memory samples, failed-attempt evidence and independent accuracy/Brier/ECE recount are in the local, gitignored `results/jevbench-matrix-20260923/` directory; they are not included in this repository. The measured source snapshot is kept with those artifacts, and later working-tree optimizations are outside this frozen comparison. See the [evaluation method](JEVBENCH.md).
 
 ## Further documentation
 
