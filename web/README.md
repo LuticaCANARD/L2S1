@@ -5,6 +5,7 @@ An English SvelteKit introduction site, prerendered with `adapter-static`. It ru
 ```sh
 npm ci
 npm run check
+npm run lint
 npm run build
 npm run dev
 ```

@@ -75,14 +75,14 @@
         <div class="window-bar"><span><i></i><i></i><i></i></span><span>decision / storage_zone</span><span>01</span></div>
         <div class="window-content">
           <div class="terminal-label"><span>INPUT STATE</span><span>JSON</span></div>
-          <pre class="input-preview"><span class="code-muted">{'{'}</span>
+          <pre class="input-preview"><span class="code-muted">&#123;</span>
   <span class="code-key">"storage_requirement"</span>: <span class="code-string">"chilled"</span>,
   <span class="code-key">"hours_until_dispatch"</span>: <span class="code-number">4</span>
-<span class="code-muted">{'}'}</span></pre>
+<span class="code-muted">&#125;</span></pre>
           <div class="flow-line"><span></span><b>↓</b><span>LOCAL GGUF MODEL</span></div>
           <div class="option-stack"><div><span class="letter">A</span><span>Ambient</span><span class="option-mark">—</span></div><div class="selected"><span class="letter">B</span><span>Chilled</span><span class="option-mark">↗</span></div><div><span class="letter">C</span><span>Frozen</span><span class="option-mark">—</span></div></div>
           <div class="flow-line small"><span></span><b>↓</b><span>TYPED RESULT</span></div>
-          <div class="result-preview"><span class="code-muted">{'{ '}</span><span>"selected"</span>: <strong>"chilled"</strong><span class="code-muted">{' }'}</span></div>
+          <div class="result-preview"><span class="code-muted">&#123; </span><span>"selected"</span>: <strong>"chilled"</strong><span class="code-muted"> &#125;</span></div>
           <p class="illustration-note">Illustrative output · no model runs in this browser</p>
         </div>
         <span class="window-offset" aria-hidden="true">ONE QUESTION. ONE STRUCTURED RESULT.</span>
@@ -103,9 +103,9 @@
     <section id="playground" class="playground-section">
       <div class="playground-copy"><p class="eyebrow">02 / MAKE ROOM FOR UNCERTAINTY</p><h2>A result can<br /><em>also be “wait.”</em></h2><p>Move the acceptance threshold to see a typed decision become an abstention. Your application decides what happens next.</p><div class="demo-disclosure"><span>ⓘ</span><p><strong>Illustrative scoring demo.</strong> These fixed probabilities are examples, not model inference or accuracy estimates. Candidate mass is fixed at 0.98, above the 0.05 policy threshold.</p></div></div>
       <div class="playground-panel">
-        <div class="segmented-control" aria-label="Decision type">{#each ['choice', 'binary', 'ordinal'] as type}<button class:active={kind === type} aria-pressed={kind === type} onclick={() => kind = type as Kind}>{type}</button>{/each}</div>
+        <div class="segmented-control" aria-label="Decision type">{#each ['choice', 'binary', 'ordinal'] as type (type)}<button class:active={kind === type} aria-pressed={kind === type} onclick={() => kind = type as Kind}>{type}</button>{/each}</div>
         <div class="question-line"><h3>{questions[kind]}</h3><span class:waiting={abstained} class="decision-status">{abstained ? 'Abstained' : 'Accepted'}</span></div>
-        <div class="probability-list">{#each options as option}<div class="probability-row"><span>{option.code}</span><span>{option.label}</span><div class="bar-track"><div style:width={`${option.probability * 100}%`}></div></div><strong>{Math.round(option.probability * 100)}%</strong></div>{/each}</div>
+        <div class="probability-list">{#each options as option (option.code)}<div class="probability-row"><span>{option.code}</span><span>{option.label}</span><div class="bar-track"><div style:width={`${option.probability * 100}%`}></div></div><strong>{Math.round(option.probability * 100)}%</strong></div>{/each}</div>
         <label class="threshold-label" for="threshold"><span>Minimum top probability</span><output for="threshold">{threshold}%</output></label>
         <input id="threshold" type="range" min="50" max="99" step="1" bind:value={threshold} />
         <div class="slider-labels"><span>More accepting</span><span>More selective</span></div>
@@ -116,28 +116,28 @@
 
     <section id="models" class="section model-section">
       <div class="section-heading horizontal"><div><p class="eyebrow">03 / YOUR MODEL, YOUR MACHINE</p><h2>A common contract.<br /><em>Different models.</em></h2></div><p>Use a compatible local chat GGUF. Embedded Jinja templates handle model-specific formatting; Qwen3 keeps its non-thinking profile.</p></div>
-      <div class="model-list">{#each models as model}<a href={model.url} target="_blank" rel="noreferrer"><span class="model-dot" aria-hidden="true"></span><strong>{model.name}</strong><span>{model.detail}</span><span class="model-arrow" aria-hidden="true">↗</span></a>{/each}</div>
-      <p class="section-note">Specific checkpoints tested locally. Compatibility still depends on the template, tokenizer, libllama build, and available memory. <a href="/docs/VERIFICATION.md">Read the verification record ↗</a></p>
+      <div class="model-list">{#each models as model (model.name)}<a href={model.url} target="_blank" rel="noreferrer external"><span class="model-dot" aria-hidden="true"></span><strong>{model.name}</strong><span>{model.detail}</span><span class="model-arrow" aria-hidden="true">↗</span></a>{/each}</div>
+      <p class="section-note">Specific checkpoints tested locally. Compatibility still depends on the template, tokenizer, libllama build, and available memory. <a href="/docs/VERIFICATION.md" rel="external">Read the verification record ↗</a></p>
     </section>
 
     <section id="performance" class="section performance-section">
       <div class="section-heading horizontal"><div><p class="eyebrow">04 / MEASURE THE WORK</p><h2>Performance,<br /><em>with the context attached.</em></h2></div><p>A local inference test measures loading, first-request latency, steady-state latency, and throughput. Use your own checkpoint and hardware.</p></div>
       {#if measurements.length}
         <div class="benchmark-meta"><span class="status-dot"></span><strong>Local measurements</strong><span>RTX 3080 · release build · {benchmarks.samples} samples · 3 decisions/request</span></div>
-        <div class="table-scroll"><table><caption class="sr-only">Warehouse request latency and throughput by model</caption><thead><tr><th>Checkpoint</th><th>CPU p50 / request</th><th>CUDA p50 / request</th><th>CUDA decisions / sec</th><th>CUDA abstentions</th></tr></thead><tbody>{#each measurements as row}<tr><td>{row.model}{#if !row.nativeCuda}<span aria-label="CUDA batch consistency limitation"> †</span>{/if}</td><td>{row.cpuP50.toFixed(1)} <span>ms</span></td><td>{row.cudaP50.toFixed(1)} <span>ms</span></td><td>{row.cudaDecisionsPerSecond.toFixed(2)}</td><td>{Math.round(row.cudaAbstentionRate * 100)}%</td></tr>{/each}</tbody></table></div>
+        <div class="table-scroll"><table><caption class="sr-only">Warehouse request latency and throughput by model</caption><thead><tr><th>Checkpoint</th><th>CPU p50 / request</th><th>CUDA p50 / request</th><th>CUDA decisions / sec</th><th>CUDA abstentions</th></tr></thead><tbody>{#each measurements as row (row.model)}<tr><td>{row.model}{#if !row.nativeCuda}<span aria-label="CUDA batch consistency limitation"> †</span>{/if}</td><td>{row.cpuP50.toFixed(1)} <span>ms</span></td><td>{row.cudaP50.toFixed(1)} <span>ms</span></td><td>{row.cudaDecisionsPerSecond.toFixed(2)}</td><td>{Math.round(row.cudaAbstentionRate * 100)}%</td></tr>{/each}</tbody></table></div>
         <p class="section-note">English warehouse fixture · {benchmarks.date}. Five samples are a smoke measurement, not a broad benchmark. Inference timings include prompt processing and scoring, not generated text. Hardware, quantization, and build differences matter. Throughput includes abstentions. † Gemma 3 and TinyLlama exceed the CUDA batch-consistency tolerance; these timings use a fixed batch of 256.</p>
       {/if}
-      <a class="benchmark-link" href="/docs/README.md">Run the performance test on your machine <span aria-hidden="true">↗</span></a>
+      <a class="benchmark-link" href="/docs/README.md" rel="external">Run the performance test on your machine <span aria-hidden="true">↗</span></a>
     </section>
 
     <section id="get-started" class="start-section">
-      <div><p class="eyebrow">05 / START LOCAL</p><h2>Your next decision<br /><em>starts here.</em></h2><p>Bring a GGUF checkpoint and a matching llama.cpp build. Define a question, run the CLI, and inspect the JSON.</p><a class="text-link" href="/docs/warehouse.json" download>Download the English example <span aria-hidden="true">↓</span></a></div>
+      <div><p class="eyebrow">05 / START LOCAL</p><h2>Your next decision<br /><em>starts here.</em></h2><p>Bring a GGUF checkpoint and a matching llama.cpp build. Define a question, run the CLI, and inspect the JSON.</p><a class="text-link" href="/docs/warehouse.json" rel="external" download>Download the English example <span aria-hidden="true">↓</span></a></div>
       <div class="command-panel"><div class="command-header"><span>TERMINAL / QUICK START</span><button onclick={copyCommand}>{copied ? 'Copied ✓' : 'Copy command'}</button></div><pre><code>{command}</code></pre>{#if copyError}<p role="status">Clipboard access is unavailable. Select and copy the command above.</p>{/if}<div class="command-footer"><span>Local inference</span><span>No automatic downloads</span></div></div>
     </section>
 
-    <section class="license-strip"><div class="license-symbol" aria-hidden="true">↗</div><div><h3>Open source code. Separate model licenses.</h3><p>The application is MIT-licensed. Model weights are never bundled. Gemma 4 uses Apache 2.0; Gemma 3 has its own terms. Preserve applicable third-party notices when distributing.</p></div><a href="/docs/LICENSING.md">License details ↗</a></section>
+    <section class="license-strip"><div class="license-symbol" aria-hidden="true">↗</div><div><h3>Open source code. Separate model licenses.</h3><p>The application is MIT-licensed. Model weights are never bundled. Gemma 4 uses Apache 2.0; Gemma 3 has its own terms. Preserve applicable third-party notices when distributing.</p></div><a href="/docs/LICENSING.md" rel="external">License details ↗</a></section>
   </main>
-  <footer><a class="brand" href="#main"><span class="brand-symbol" aria-hidden="true">s1<span>↗</span></span><span>L2S1</span></a><p>Local models. Typed decisions.</p><div><a href="/docs/README.md">Documentation</a><a href="/docs/LICENSE">MIT license</a><a href="/docs/WEB_THIRD_PARTY_LICENSES.txt">Third-party notices</a></div><span>Built with Rust. Presented with Svelte.</span></footer>
+  <footer><a class="brand" href="#main"><span class="brand-symbol" aria-hidden="true">s1<span>↗</span></span><span>L2S1</span></a><p>Local models. Typed decisions.</p><div><a href="/docs/README.md" rel="external">Documentation</a><a href="/docs/LICENSE" rel="external">MIT license</a><a href="/docs/WEB_THIRD_PARTY_LICENSES.txt" rel="external">Third-party notices</a></div><span>Built with Rust. Presented with Svelte.</span></footer>
 </div>
 
 <style>
