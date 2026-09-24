@@ -88,6 +88,8 @@ unsafe extern "C" {
         after_len: usize,
         suffix: *const c_char,
         suffix_len: usize,
+        continuation: *const i32,
+        continuation_count: usize,
         logits: *mut f32,
         logits_count: usize,
         input_tokens: *mut usize,

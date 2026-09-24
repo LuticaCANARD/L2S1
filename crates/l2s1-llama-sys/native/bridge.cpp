@@ -377,11 +377,13 @@ extern "C" bool sd_forward_vision(engine * e,
         const uint8_t * image, size_t image_len,
         const char * data_after, size_t after_len,
         const char * suffix, size_t suffix_len,
+        const int32_t * continuation, size_t continuation_count,
         float * logits, size_t logits_count, size_t * input_tokens,
         char * error, size_t error_cap) noexcept {
     try {
         if (!e || !e->vision || !prefix || !data_before || !image || !image_len ||
-                !data_after || !suffix || !logits || !input_tokens ||
+                !data_after || !suffix || (continuation_count && !continuation) ||
+                !logits || !input_tokens ||
                 logits_count != size_t(sd_vocab_size(e)))
             throw std::runtime_error("invalid vision inference arguments");
         ensure_sequences(e, 1);
@@ -412,12 +414,39 @@ extern "C" bool sd_forward_vision(engine * e,
             throw std::runtime_error("vision prompt tokenization failed");
         const size_t tokens = mtmd_helper_get_n_tokens(chunks.get());
         const auto positions = mtmd_helper_get_n_pos(chunks.get());
-        if (!tokens || tokens > e->context_size || positions <= 0 || size_t(positions) > e->context_size)
+        if (!tokens || tokens > e->context_size || positions <= 0 ||
+                size_t(positions) > e->context_size ||
+                continuation_count > e->context_size - size_t(positions))
             throw std::runtime_error("vision input exceeds context; truncation is disabled");
         llama_pos end = 0;
         if (mtmd_helper_eval_chunks(e->vision, e->ctx, chunks.get(), 0, 0,
                     int32_t(e->batch_size), true, &end) != 0 || end != positions)
             throw std::runtime_error("vision decode failed");
+        if (continuation_count) {
+            struct batch_guard {
+                llama_batch value;
+                ~batch_guard() { llama_batch_free(value); }
+            } b { llama_batch_init(int32_t(e->batch_size), 0, 1) };
+            if (!b.value.token || !b.value.pos || !b.value.n_seq_id ||
+                    !b.value.seq_id || !b.value.logits)
+                throw std::runtime_error("vision continuation batch allocation failed");
+            for (size_t start = 0; start < continuation_count;) {
+                b.value.n_tokens = int32_t(std::min(size_t(e->batch_size), continuation_count - start));
+                for (int32_t j = 0; j < b.value.n_tokens; ++j) {
+                    const size_t index = start + size_t(j);
+                    if (continuation[index] < 0 || continuation[index] >= sd_vocab_size(e))
+                        throw std::runtime_error("vision continuation token outside vocabulary");
+                    b.value.token[j] = continuation[index];
+                    b.value.pos[j] = end + llama_pos(index);
+                    b.value.n_seq_id[j] = 1;
+                    b.value.seq_id[j][0] = 0;
+                    b.value.logits[j] = index + 1 == continuation_count;
+                }
+                if (llama_decode(e->ctx, b.value) != 0)
+                    throw std::runtime_error("vision continuation decode failed");
+                start += size_t(b.value.n_tokens);
+            }
+        }
         const float * output = llama_get_logits_ith(e->ctx, -1);
         if (!output) throw std::runtime_error("missing vision final logits");
         std::copy_n(output, logits_count, logits);

@@ -90,8 +90,24 @@ impl LlamaBackend {
         if bos >= 0 && input.first() != Some(&bos) {
             input.insert(0, bos);
         }
-        let tail = &parts.last().unwrap().text;
-        let count = decision.options().len();
+        let paths =
+            self.prepare_code_paths(&parts.last().unwrap().text, decision.options().len())?;
+        let longest_prefix = paths.iter().map(|p| p.len() - 1).max().unwrap();
+        if input
+            .len()
+            .checked_add(longest_prefix)
+            .is_none_or(|n| n > self.context)
+        {
+            return Err(Error::Invalid(
+                "prompt plus answer-code prefix exceeds context; truncation is disabled".into(),
+            ));
+        }
+        Ok((input, paths))
+    }
+
+    /// Build exact assistant code continuations for both text and image prompts.
+    /// Each execution path checks its own full input against the context limit.
+    pub(super) fn prepare_code_paths(&self, tail: &str, count: usize) -> Result<Vec<Vec<i32>>> {
         let candidate_key = self
             .preparation_cache_enabled
             .then(|| format!("{count}:{tail}"));
@@ -120,16 +136,6 @@ impl LlamaBackend {
             paths.rotate_right(self.code_rotation % count);
             paths
         };
-        let longest_prefix = paths.iter().map(|p| p.len() - 1).max().unwrap();
-        if input
-            .len()
-            .checked_add(longest_prefix)
-            .is_none_or(|n| n > self.context)
-        {
-            return Err(Error::Invalid(
-                "prompt plus answer-code prefix exceeds context; truncation is disabled".into(),
-            ));
-        }
         if !cache_hit && let Some(key) = candidate_key {
             self.candidate_cache.borrow_mut().insert(
                 "model-local-code-sequences-v1".into(),
@@ -137,7 +143,7 @@ impl LlamaBackend {
                 CandidateTokens::Sequences(paths.clone()),
             );
         }
-        Ok((input, paths))
+        Ok(paths)
     }
 
     pub(super) fn evaluate_code_sequences(
