@@ -5,7 +5,7 @@ use sha2::{Digest, Sha256};
 pub(crate) fn digest(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
-#[cfg(feature = "llama")]
+#[cfg(any(feature = "llama", feature = "wgpu"))]
 pub(crate) fn file_digest(path: &std::path::Path) -> Result<String> {
     use std::io::Read;
     let mut file = std::fs::File::open(path).map_err(|e| Error::Backend(e.to_string()))?;

@@ -10,15 +10,19 @@ The crate is named `l2s1`. The default inference executable uses **llama.cpp and
 
 ## Optional wgpu backend
 
-The `wgpu` feature is separate from `llama` and `llama-cuda`. It uses [FlareLLM](https://github.com/sauravpanda/flarellm)'s Rust compute backend through Metal on Apple Silicon. The small [compatibility fork](crates/flarellm-gpu) disables two optional shaders that wgpu 24 rejects on the tested Mac; baseline GPU compute remains enabled. The backend requires a text-only ChatML GGUF and its matching Hugging Face `tokenizer.json`. It rejects missing GPU devices, raw layer weights, and changed answer-token boundaries instead of falling back to CPU.
+The `wgpu` feature uses the pinned [rullama-engine](https://github.com/Brainwires/rullama-framework/tree/main/engine/rullama-engine) Gemma 4 text and vision implementation. It accepts the llama.cpp Gemma 4 text GGUF and its matching `mmproj` GGUF. A streaming adapter exposes both files as one virtual GGUF to the engine; model weights are read from the original files. GPU inference and image encoding use Rust wgpu. The feature requires a wgpu GPU adapter and rejects software Vulkan adapters unless `--allow-software-adapter` is explicitly set for development. The Gemma 4 E2B Q8_0 pair has been checked locally through software wgpu; native GPU quality and other checkpoint sizes still need verification.
 
 ```sh
 cargo run --release --locked --features wgpu --bin l2s1-wgpu -- \
-  --model /models/model.gguf --tokenizer /models/tokenizer.json \
+  --model /models/gemma-4-E2B-it-Q8_0.gguf \
+  --mmproj /models/mmproj-gemma-4-E2B-it-Q8_0.gguf \
+  --image photo.jpg \
   --input examples/warehouse.json
 ```
 
-The wgpu path supports typed binary, choice and ordinal decisions, full-vocabulary mass, and complete multi-token answer-code scoring. It currently uses fresh execution and ChatML prompting only. llama.cpp-specific options such as multimodal projectors, LoRA, output heads, calibration, CUDA placement, and HTTP serving remain on the `llama` executable. GPU results may differ from llama.cpp because the inference and tokenization implementations differ; validate each model and task before using its scores as calibrated probabilities.
+Omit `--image` for text decisions. Add `--listen 127.0.0.1:8080` to serve the same `POST /v1/decisions` and `GET /healthz` API described below; send `image_base64` for vision requests. Images are decoded up to 25 megapixels and resized to at most 432 pixels on the longer side, aligned to the vision encoder's 48-pixel grid. The wgpu path scores full-vocabulary mass and complete multi-token answer codes for binary, choice and ordinal decisions. It uses fresh execution and Gemma 4 prompting. GPU scores may differ from llama.cpp; validate each model and task before treating them as calibrated probabilities.
+
+This paired-GGUF adapter is specific to Gemma 4 and rejects Qwen model/projector files. A Qwen wgpu backend needs its own vision encoder, preprocessing, positional encoding, and prompt profile; it can use the shared decision and HTTP interfaces.
 
 ## Architecture
 
@@ -26,7 +30,7 @@ The wgpu path supports typed binary, choice and ordinal decisions, full-vocabula
 flowchart TD
     A[Application or CLI] --> B[DecisionRequest: state and decisions]
     B --> C[Backend: model-specific prompt and token preparation]
-    C --> D[llama.cpp or optional FlareLLM wgpu: GGUF inference]
+    C --> D[llama.cpp or Gemma 4 Rust wgpu: GGUF inference]
     D --> E[Candidate logits or complete answer-code likelihoods]
     E --> F[Shared scoring, optional calibration or head, and DecisionPolicy]
     F --> G[DecisionResponse: typed values, scores, and abstention reasons]
@@ -37,7 +41,8 @@ flowchart TD
 | [`decision.rs`](src/decision.rs) | Request/response types, `DecisionBackend`, shared scoring and acceptance policy |
 | [`prompt.rs`](src/prompt.rs) | Compile state, instructions and options into the selected prompt layout |
 | [`llama.rs`](src/llama.rs) | Own the model/context, select the prompt profile, tokenize inputs, dispatch inference and assemble results |
-| [`wgpu.rs`](src/wgpu.rs), [`flarellm-gpu`](crates/flarellm-gpu) | Optional Rust wgpu/Metal text inference and full-vocabulary scoring |
+| [`wgpu.rs`](src/wgpu.rs), [`paired_gguf.rs`](src/wgpu/paired_gguf.rs) | Rust wgpu Gemma 4 text/vision inference and paired GGUF streaming |
+| [`vision.rs`](src/vision.rs), [`http.rs`](src/http.rs) | Shared image validation, backend contract and HTTP request dispatch |
 | [`l2s1-llama-sys`](crates/l2s1-llama-sys), [`bridge.cpp`](crates/l2s1-llama-sys/native/bridge.cpp), [`chat.cpp`](crates/l2s1-llama-sys/native/chat.cpp) | Call llama.cpp, render GGUF Jinja templates, manage sequence memory and copy inference evidence |
 | [`evidence.rs`](src/evidence.rs) | Validate complete vocabulary logits and preserve semantic option/token mappings |
 | [`codes.rs`](src/codes.rs), [`llama/code_sequences.rs`](src/llama/code_sequences.rs) | Size A-Z/AA-ZZ/AAA-ZZZ codes and score complete token paths for larger candidate sets |

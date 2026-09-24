@@ -1,6 +1,7 @@
 use clap::Parser;
 use l2s1::{
-    DecisionBackend, DecisionPolicy, DecisionRequest, PromptDetail, PromptLayout, wgpu::WgpuBackend,
+    DecisionBackend, DecisionPolicy, DecisionRequest, PromptDetail, PromptLayout,
+    VisionDecisionBackend, wgpu::WgpuBackend,
 };
 use std::{
     io::{self, Read},
@@ -13,11 +14,17 @@ struct Args {
     #[arg(long)]
     model: PathBuf,
     #[arg(long)]
-    tokenizer: PathBuf,
+    mmproj: PathBuf,
+    #[arg(long)]
+    image: Option<PathBuf>,
+    #[arg(long)]
+    listen: Option<String>,
     #[arg(long, default_value = "-")]
     input: String,
     #[arg(long)]
     inspect: bool,
+    #[arg(long, help = "Allow a CPU Vulkan adapter for local development only")]
+    allow_software_adapter: bool,
     #[arg(long, value_enum, default_value_t = PromptLayout::Legacy)]
     prompt_layout: PromptLayout,
     #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
@@ -34,13 +41,21 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         min_top_probability: args.min_top_probability,
         min_candidate_mass: args.min_candidate_mass,
     };
-    let mut backend = WgpuBackend::load(&args.model, &args.tokenizer, policy)?;
+    let mut backend = WgpuBackend::load_with_software_adapter(
+        &args.model,
+        &args.mmproj,
+        policy,
+        args.allow_software_adapter,
+    )?;
     backend.set_prompt_layout(args.prompt_layout);
     backend.set_prompt_detail(args.prompt_detail);
     if args.inspect {
         serde_json::to_writer_pretty(io::stdout().lock(), backend.inspect())?;
         println!();
         return Ok(());
+    }
+    if let Some(address) = &args.listen {
+        return l2s1::http::serve(address, &mut backend);
     }
     let text = if args.input == "-" {
         let mut text = String::new();
@@ -50,7 +65,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         std::fs::read_to_string(&args.input)?
     };
     let request: DecisionRequest = serde_json::from_str(&text)?;
-    serde_json::to_writer_pretty(io::stdout().lock(), &backend.decide(&request)?)?;
+    let response = if let Some(path) = &args.image {
+        backend.decide_vision(&request, &std::fs::read(path)?)?
+    } else {
+        backend.decide(&request)?
+    };
+    serde_json::to_writer_pretty(io::stdout().lock(), &response)?;
     println!();
     Ok(())
 }

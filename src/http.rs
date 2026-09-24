@@ -1,6 +1,6 @@
 //! Small synchronous JSON API. One owned backend serializes GPU access.
+use crate::{DecisionRequest, Error, VisionDecisionBackend};
 use base64::Engine;
-use l2s1::{DecisionBackend, DecisionRequest, Error, llama::LlamaBackend};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -11,7 +11,10 @@ const MAX_HEADER: usize = 16 * 1024;
 const MAX_BODY: usize = 12 * 1024 * 1024;
 const MAX_IMAGE_BASE64: usize = 11 * 1024 * 1024;
 
-pub fn serve(address: &str, backend: &mut LlamaBackend) -> Result<(), Box<dyn std::error::Error>> {
+pub fn serve<B: VisionDecisionBackend>(
+    address: &str,
+    backend: &mut B,
+) -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind(address)?;
     eprintln!("l2s1 HTTP listening on {}", listener.local_addr()?);
     for connection in listener.incoming() {
@@ -29,7 +32,10 @@ pub fn serve(address: &str, backend: &mut LlamaBackend) -> Result<(), Box<dyn st
     Ok(())
 }
 
-fn handle(stream: &mut TcpStream, backend: &mut LlamaBackend) -> std::io::Result<()> {
+fn handle<B: VisionDecisionBackend>(
+    stream: &mut TcpStream,
+    backend: &mut B,
+) -> std::io::Result<()> {
     let request = match read_request(stream) {
         Ok(request) => request,
         Err((status, message)) => {
@@ -66,7 +72,10 @@ fn handle(stream: &mut TcpStream, backend: &mut LlamaBackend) -> std::io::Result
     }
 }
 
-fn run_request(backend: &mut LlamaBackend, body: &[u8]) -> l2s1::Result<serde_json::Value> {
+fn run_request<B: VisionDecisionBackend>(
+    backend: &mut B,
+    body: &[u8],
+) -> crate::Result<serde_json::Value> {
     let mut value: serde_json::Value =
         serde_json::from_slice(body).map_err(|e| Error::Invalid(format!("invalid JSON: {e}")))?;
     let object = value
@@ -201,6 +210,51 @@ fn respond(stream: &mut TcpStream, status: u16, body: &serde_json::Value) -> std
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{DecisionBackend, DecisionResponse};
+
+    #[derive(Default)]
+    struct DispatchProbe {
+        text_calls: usize,
+        vision_calls: usize,
+    }
+
+    impl DecisionBackend for DispatchProbe {
+        fn decide(&mut self, _: &DecisionRequest) -> crate::Result<DecisionResponse> {
+            self.text_calls += 1;
+            Err(Error::Backend("probe".into()))
+        }
+    }
+
+    impl VisionDecisionBackend for DispatchProbe {
+        fn decide_vision(
+            &mut self,
+            _: &DecisionRequest,
+            image: &[u8],
+        ) -> crate::Result<DecisionResponse> {
+            assert_eq!(image, [1, 2, 3]);
+            self.vision_calls += 1;
+            Err(Error::Backend("probe".into()))
+        }
+    }
+
+    #[test]
+    fn image_field_selects_vision_backend() {
+        let mut probe = DispatchProbe::default();
+        let request = serde_json::json!({
+            "state": {},
+            "decisions": [{"id": "color", "instruction": "Choose a color", "kind": {
+                "type": "choice", "options": [
+                    {"id": "red", "criterion": "red"},
+                    {"id": "blue", "criterion": "blue"}
+                ]
+            }}]
+        });
+        assert!(run_request(&mut probe, request.to_string().as_bytes()).is_err());
+        let mut with_image = request;
+        with_image["image_base64"] = serde_json::json!("AQID");
+        assert!(run_request(&mut probe, with_image.to_string().as_bytes()).is_err());
+        assert_eq!((probe.text_calls, probe.vision_calls), (1, 1));
+    }
 
     #[test]
     fn malformed_request_is_rejected_before_inference() {
