@@ -225,6 +225,11 @@ pub struct BackendInfo {
     #[serde(default, skip_serializing_if = "crate::EvidenceTransfer::is_full")]
     pub evidence_transfer: crate::EvidenceTransfer,
     pub model_path: String,
+    /// Projector used for direct image input, when present.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vision_projector_path: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vision_projector_sha256: Option<String>,
     /// Explicit adapter at scale 1; absent for the unchanged base model.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lora_path: Option<String>,

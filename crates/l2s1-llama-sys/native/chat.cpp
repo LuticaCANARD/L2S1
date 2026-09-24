@@ -15,17 +15,27 @@ extern "C" int32_t sd_render_chat(const char * tmpl, const char * user,
         if (!tmpl || !*tmpl) return -1;
         jinja::lexer lexer;
         auto program = jinja::parse_from_tokens(lexer.tokenize(tmpl));
-        jinja::context context(tmpl);
-        const common_json variables = {
-            {"messages", common_json::array({common_json{{"role", "user"}, {"content", user}}})},
-            {"add_generation_prompt", true},
-            {"enable_thinking", false},
-            {"bos_token", bos},
-            {"eos_token", eos},
+        auto render = [&](const common_json & content) {
+            jinja::context context(tmpl);
+            const common_json variables = {
+                {"messages", common_json::array({common_json{{"role", "user"}, {"content", content}}})},
+                {"add_generation_prompt", true},
+                {"enable_thinking", false},
+                {"bos_token", bos},
+                {"eos_token", eos},
+            };
+            jinja::global_from_json(context, variables, false);
+            jinja::runtime runtime(context);
+            return runtime.gather_string_parts(runtime.execute(program))->as_string().str();
         };
-        jinja::global_from_json(context, variables, false);
-        jinja::runtime runtime(context);
-        const auto rendered = runtime.gather_string_parts(runtime.execute(program))->as_string().str();
+        std::string rendered;
+        try {
+            rendered = render(user);
+        } catch (...) {
+            // Some vision templates require an OpenAI-style content-part array
+            // even when the data marker is initially only trusted text.
+            rendered = render(common_json::array({common_json{{"type", "text"}, {"text", user}}}));
+        }
         if (rendered.size() > INT_MAX) return -1;
         if (out && capacity > 0)
             std::memcpy(out, rendered.data(), std::min(rendered.size(), size_t(capacity)));

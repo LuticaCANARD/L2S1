@@ -18,6 +18,7 @@ mod code_sequences;
 mod interchange;
 mod prepared_cache;
 mod shared_state;
+mod vision;
 pub use prepared_cache::CacheMetrics;
 use prepared_cache::{BoundedTokenCache, CandidateTokens};
 pub use shared_state::SharedStateSession;
@@ -40,6 +41,8 @@ pub struct LlamaBackend {
     candidate_cache: RefCell<BoundedTokenCache<CandidateTokens>>,
     logits_buffer: Vec<f32>,
     model_path: String,
+    vision_projector_path: Option<String>,
+    vision_projector_sha256: Option<String>,
     lora_path: Option<String>,
     output_head: Option<OutputHead>,
     output_head_path: Option<String>,
@@ -248,6 +251,8 @@ impl LlamaBackend {
             candidate_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
             logits_buffer: Vec::new(),
             model_path,
+            vision_projector_path: None,
+            vision_projector_sha256: None,
             context: compute.context as usize,
             compute,
             timings: InferenceTimings::default(),
@@ -1047,6 +1052,8 @@ impl LlamaBackend {
             code_rotation: self.code_rotation,
             evidence_transfer: self.evidence_transfer,
             model_path: self.model_path.clone(),
+            vision_projector_path: self.vision_projector_path.clone(),
+            vision_projector_sha256: self.vision_projector_sha256.clone(),
             lora_path: self.lora_path.clone(),
             output_head_path: self.output_head_path.clone(),
             model_description: description,

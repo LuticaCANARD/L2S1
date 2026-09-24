@@ -114,7 +114,8 @@ fn main() {
         .define("LLAMA_BUILD_EXAMPLES", "OFF")
         .define("LLAMA_BUILD_SERVER", "OFF")
         .define("LLAMA_BUILD_APP", "OFF")
-        .define("LLAMA_BUILD_MTMD", "OFF")
+        .define("LLAMA_BUILD_MTMD", "ON")
+        .define("MTMD_VIDEO", "OFF")
         .define("LLAMA_BUILD_COMMIT", commit.trim())
         .define("LLAMA_BUILD_NUMBER", "0")
         .define("GGML_CUDA", if cuda { "ON" } else { "OFF" });
@@ -133,6 +134,10 @@ fn main() {
         lib.join("libllama.so").is_file(),
         "llama.cpp did not install libllama.so"
     );
+    assert!(
+        lib.join("libmtmd.so").is_file(),
+        "llama.cpp did not install libmtmd.so"
+    );
     let source = PathBuf::from(
         fs::read_to_string(install.join("build/l2s1-llama-source.txt"))
             .expect("CMake did not report its llama.cpp source directory"),
@@ -143,6 +148,8 @@ fn main() {
         "CMakeLists.txt",
         "include/llama.h",
         "src/llama-ext.h",
+        "tools/mtmd/mtmd.h",
+        "tools/mtmd/mtmd-helper.h",
         "common/jinja/lexer.cpp",
     ] {
         assert!(
@@ -159,6 +166,7 @@ fn main() {
         .include(source.join("ggml/include"))
         .include(source.join("common"))
         .include(source.join("src"))
+        .include(source.join("tools/mtmd"))
         .include(source.join("vendor"))
         .file(manifest.join("native/bridge.cpp"))
         .file(manifest.join("native/chat.cpp"));
@@ -170,7 +178,12 @@ fn main() {
     let mut fingerprint = Sha256::new();
     fingerprint.update(commit.trim().as_bytes());
     fingerprint.update(if cuda { "cuda" } else { "cpu" }.as_bytes());
-    for file in ["include/llama.h", "src/llama-ext.h"] {
+    for file in [
+        "include/llama.h",
+        "src/llama-ext.h",
+        "tools/mtmd/mtmd.h",
+        "tools/mtmd/mtmd-helper.h",
+    ] {
         digest_file(&mut fingerprint, &source.join(file));
     }
     for file in JINJA_FILES {
@@ -186,7 +199,10 @@ fn main() {
         .filter(|path| {
             path.file_name().is_some_and(|name| {
                 let name = name.to_string_lossy();
-                (name.starts_with("libllama.so") || name.starts_with("libggml")) && path.is_file()
+                (name.starts_with("libllama.so")
+                    || name.starts_with("libmtmd.so")
+                    || name.starts_with("libggml"))
+                    && path.is_file()
             })
         })
         .collect::<Vec<_>>();
@@ -201,6 +217,7 @@ fn main() {
     println!("cargo::metadata=libdir={}", lib.display());
     println!("cargo:rustc-link-search=native={}", lib.display());
     println!("cargo:rustc-link-lib=dylib=llama");
+    println!("cargo:rustc-link-lib=dylib=mtmd");
     println!("cargo:rustc-link-lib=dylib=ggml");
     println!("cargo:rustc-link-lib=dylib=ggml-base");
 }

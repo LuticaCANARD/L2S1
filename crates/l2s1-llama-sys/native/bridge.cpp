@@ -1,6 +1,8 @@
 #include "llama.h"
 #include "llama-ext.h"
 #include "ggml-backend.h"
+#include "mtmd.h"
+#include "mtmd-helper.h"
 #include <algorithm>
 #include <chrono>
 #if defined(__linux__)
@@ -22,6 +24,7 @@ struct engine {
     llama_model * model = nullptr;
     llama_context * ctx = nullptr;
     llama_adapter_lora * adapter = nullptr; // owned by model
+    mtmd_context * vision = nullptr;
     ggml_backend_dev_t devices[2] = {nullptr, nullptr};
     bool features_enabled = false;
     int32_t last_feature_row = -1;
@@ -37,6 +40,7 @@ struct engine {
     std::vector<std::string> cpu_moe_patterns;
     std::vector<llama_model_tensor_buft_override> placement_overrides;
     ~engine() {
+        if (vision) mtmd_free(vision);
         if (ctx) llama_free(ctx);
         if (model) llama_model_free(model);
     }
@@ -134,7 +138,7 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
         dl_iterate_phdr([](dl_phdr_info * info, size_t, void * data) {
             const std::string path = info->dlpi_name;
             const auto name = path.substr(path.find_last_of('/') + 1);
-            if (name.rfind("libllama.so", 0) == 0 || name.rfind("libggml", 0) == 0)
+            if (name.rfind("libllama.so", 0) == 0 || name.rfind("libmtmd.so", 0) == 0 || name.rfind("libggml", 0) == 0)
                 static_cast<std::vector<std::string> *>(data)->push_back(path);
             return 0;
         }, &libraries);
@@ -164,7 +168,32 @@ extern "C" engine * sd_open(const char * path, uint32_t context, uint32_t batch,
         cuda, cuda ? -1 : 0, 0, error, error_cap);
 }
 
+extern "C" void sd_clear(engine * e) noexcept;
 extern "C" void sd_close(engine * e) noexcept { delete e; }
+extern "C" const char * sd_vision_marker() noexcept { return mtmd_default_marker(); }
+extern "C" bool sd_load_vision_projector(engine * e, const char * path,
+        char * error, size_t error_cap) noexcept {
+    try {
+        if (!e || !e->model || !path || !*path) throw std::runtime_error("invalid vision projector path");
+        if (e->vision) throw std::runtime_error("vision projector already loaded");
+        auto params = mtmd_context_params_default();
+        params.use_gpu = e->devices[0] != nullptr;
+        params.device = e->devices[0];
+        params.n_threads = e->context_params.n_threads;
+        params.flash_attn_type = e->context_params.flash_attn_type;
+        auto * vision = mtmd_init_from_file(path, e->model, params);
+        if (!vision) throw std::runtime_error("vision projector load failed; see llama.cpp stderr");
+        if (!mtmd_support_vision(vision)) {
+            mtmd_free(vision);
+            throw std::runtime_error("projector does not support image input");
+        }
+        e->vision = vision;
+        sd_clear(e);
+        return true;
+    } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }
+      catch (...) { report(error, error_cap, "unknown native exception"); }
+    return false;
+}
 extern "C" const char * sd_runtime_libraries(const engine * e) noexcept { return e->runtime_libraries.c_str(); }
 extern "C" const char * sd_description(const engine * e) noexcept { return e->description.c_str(); }
 extern "C" const char * sd_architecture(const engine * e) noexcept { return e->architecture.c_str(); }
@@ -337,6 +366,67 @@ extern "C" bool sd_forward(engine * e, const int32_t * tokens, int32_t count,
     } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }
       catch (...) { report(error, error_cap, "unknown native exception"); }
     sd_clear(e);
+    return false;
+}
+
+// Vision input is evaluated from fresh request-local state. The five prompt
+// parts preserve the trust boundary between template control tokens and data.
+extern "C" bool sd_forward_vision(engine * e,
+        const char * prefix, size_t prefix_len,
+        const char * data_before, size_t before_len,
+        const uint8_t * image, size_t image_len,
+        const char * data_after, size_t after_len,
+        const char * suffix, size_t suffix_len,
+        float * logits, size_t logits_count, size_t * input_tokens,
+        char * error, size_t error_cap) noexcept {
+    try {
+        if (!e || !e->vision || !prefix || !data_before || !image || !image_len ||
+                !data_after || !suffix || !logits || !input_tokens ||
+                logits_count != size_t(sd_vocab_size(e)))
+            throw std::runtime_error("invalid vision inference arguments");
+        ensure_sequences(e, 1);
+        sd_clear(e);
+        auto init_opt = mtmd_helper_init_opt_default();
+        auto wrapped = mtmd_helper_bitmap_init_from_buf(e->vision, image, image_len, false, init_opt);
+        std::unique_ptr<mtmd_bitmap, decltype(&mtmd_bitmap_free)> bitmap(wrapped.bitmap, mtmd_bitmap_free);
+        if (wrapped.video_ctx) {
+            mtmd_helper_video_free(wrapped.video_ctx);
+            throw std::runtime_error("video input is unsupported; provide one still image");
+        }
+        if (!bitmap || mtmd_bitmap_is_audio(bitmap.get()))
+            throw std::runtime_error("image must be a supported still-image format");
+        mtmd_input_text texts[] = {
+            {prefix, prefix_len, false, true},
+            {data_before, before_len, false, false},
+            {data_after, after_len, false, false},
+            {suffix, suffix_len, false, true},
+        };
+        mtmd_input_part parts[] = {
+            {&texts[0], nullptr}, {&texts[1], nullptr}, {nullptr, bitmap.get()},
+            {&texts[2], nullptr}, {&texts[3], nullptr},
+        };
+        const mtmd_input_part * part_ptrs[] = {&parts[0], &parts[1], &parts[2], &parts[3], &parts[4]};
+        std::unique_ptr<mtmd_input_chunks, decltype(&mtmd_input_chunks_free)> chunks(
+            mtmd_input_chunks_init(), mtmd_input_chunks_free);
+        if (!chunks || mtmd_tokenize_from_parts(e->vision, chunks.get(), part_ptrs, 5, true) != 0)
+            throw std::runtime_error("vision prompt tokenization failed");
+        const size_t tokens = mtmd_helper_get_n_tokens(chunks.get());
+        const auto positions = mtmd_helper_get_n_pos(chunks.get());
+        if (!tokens || tokens > e->context_size || positions <= 0 || size_t(positions) > e->context_size)
+            throw std::runtime_error("vision input exceeds context; truncation is disabled");
+        llama_pos end = 0;
+        if (mtmd_helper_eval_chunks(e->vision, e->ctx, chunks.get(), 0, 0,
+                    int32_t(e->batch_size), true, &end) != 0 || end != positions)
+            throw std::runtime_error("vision decode failed");
+        const float * output = llama_get_logits_ith(e->ctx, -1);
+        if (!output) throw std::runtime_error("missing vision final logits");
+        std::copy_n(output, logits_count, logits);
+        *input_tokens = tokens;
+        sd_clear(e);
+        return true;
+    } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }
+      catch (...) { report(error, error_cap, "unknown native exception"); }
+    if (e) sd_clear(e);
     return false;
 }
 

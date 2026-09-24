@@ -69,6 +69,31 @@ unsafe extern "C" {
         cap: usize,
     ) -> *mut c_void;
     pub fn sd_close(engine: *mut c_void);
+    pub fn sd_vision_marker() -> *const c_char;
+    pub fn sd_load_vision_projector(
+        engine: *mut c_void,
+        path: *const c_char,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+    pub fn sd_forward_vision(
+        engine: *mut c_void,
+        prefix: *const c_char,
+        prefix_len: usize,
+        data_before: *const c_char,
+        before_len: usize,
+        image: *const u8,
+        image_len: usize,
+        data_after: *const c_char,
+        after_len: usize,
+        suffix: *const c_char,
+        suffix_len: usize,
+        logits: *mut f32,
+        logits_count: usize,
+        input_tokens: *mut usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
     pub fn sd_clear(engine: *mut c_void);
     pub fn sd_set_features(engine: *mut c_void, enabled: bool) -> bool;
     pub fn sd_feature_size(engine: *mut c_void) -> i32;

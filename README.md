@@ -34,6 +34,31 @@ flowchart TD
 
 The CLI calls `LlamaBackend` directly. Long-running applications can place a backend behind `BackendWorker`. Other inference providers would require another `DecisionBackend` implementation and evidence with compatible score semantics.
 
+## Direct image input and HTTP API
+
+Load a vision-capable chat GGUF with its matching multimodal projector GGUF (`mmproj`). The projector encodes a still image through llama.cpp `libmtmd`; L2S1 then scores the same typed options from the resulting next-token logits. `LlamaBackend::load_vision_projector(path)` and `LlamaBackend::decide_vision(&request, image_bytes)` expose the Rust API. Existing text requests still use `decide`.
+
+The opt-in HTTP listener accepts JSON at `POST /v1/decisions` and reports readiness at `GET /healthz`:
+
+```sh
+cargo run --release --locked --features llama-cuda -- \
+  --model /models/vision-model.gguf --mmproj /models/mmproj.gguf \
+  --device cuda --context 4096 --listen 127.0.0.1:8080
+```
+
+The JSON body contains the ordinary `state` and `decisions` fields. Add `image_base64` with standard base64 of one JPEG, PNG or other still-image format accepted by libmtmd to invoke direct vision scoring. Without that field, the endpoint uses the text path. Vision responses include the projector path and SHA-256 hash. For example, add an image to [`examples/warehouse.json`](examples/warehouse.json):
+
+```sh
+jq --arg image "$(base64 -w0 photo.jpg)" '. + {image_base64: $image}' \
+  examples/warehouse.json | \
+  curl -sS -H 'Content-Type: application/json' --data-binary @- \
+  http://127.0.0.1:8080/v1/decisions
+```
+
+The library also accepts original image bytes without base64. The CLI equivalent is `--mmproj /models/mmproj.gguf --image photo.jpg --input request.json`. One request supports one image and any number of decisions with up to 26 options each. Vision uses fresh execution and full-vocabulary scoring; output heads, scalar calibration, parallel/prefix-reuse modes and wide answer codes are currently rejected for image requests. Images are limited to 8 MiB and the HTTP JSON body to 12 MiB. The listener handles one request at a time; bind to loopback or place an authenticated reverse proxy in front of it for remote clients. Check model-specific image prompt behavior and labeled task quality before treating scores as reliable decisions.
+
+Gemma is a possible vision backend: Gemma 3 4B/12B/27B and Gemma 4 E2B/E4B have image-capable variants in llama.cpp. Gemma 3 1B is text-only. Pair a vision checkpoint with its matching `mmproj`; a text-only GGUF file alone cannot accept pixels. See the [llama.cpp multimodal model list](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md) and [Gemma 3 vision guide](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal/gemma3.md).
+
 ## The decision contract
 
 A request has shared JSON `state` and one or more decisions. Each decision supplies an ID, an instruction and its output kind:
@@ -287,7 +312,7 @@ Repeat `--model` for additional checkpoints; use `--cuda` explicitly for GPU run
 
 A compatible checkpoint must be a decoder-only model supported by the linked runtime, have a renderable GGUF chat template that preserves the payload, and fit the chosen device/context. Decisions require at least two candidates; answer-code width grows automatically without an alphabet-derived count ceiling. The original path requires unique single-token continuations; multi-letter codes require stable, unique, prefix-free token sequences and support fresh or prefix-reuse execution with full evidence, without output heads, scalar calibration or feature export. Prompt length, answer-prefix length and available memory still bound real workloads. Compatibility is checked against actual model behavior rather than a general family-name promise.
 
-Local conformance checks have covered SmolLM2, Qwen3, Gemma3, TinyLlama, Gemma4, a Qwen3.8 file with `qwen35` hybrid architecture, and GPT-OSS across CPU/CUDA configurations. Support remains checkpoint- and configuration-specific; use the [verification guide](VERIFICATION.md) for your model. Base models without suitable templates, encoder-only models, multimodal inputs and multi-token candidate scoring are outside the current contract.
+Local conformance checks have covered SmolLM2, Qwen3, Gemma3, TinyLlama, Gemma4, a Qwen3.8 file with `qwen35` hybrid architecture, and GPT-OSS across CPU/CUDA configurations. Support remains checkpoint- and configuration-specific; use the [verification guide](VERIFICATION.md) for your model. Base models without suitable templates, encoder-only models and unverified multimodal configurations are outside the validated contract. The direct image path requires its own checkpoint and task validation.
 
 ```sh
 cargo test --locked
