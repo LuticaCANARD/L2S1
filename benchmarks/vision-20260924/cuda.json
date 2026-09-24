@@ -1,0 +1,349 @@
+{
+  "schema": "l2s1-vision-http-benchmark-v1",
+  "scope": "serial loopback HTTP requests; one loaded model; synthetic solid-color 64x64 PNGs; timings include HTTP transfer and inference, exclude startup and warmup",
+  "host": "lucatagpu",
+  "device": "cuda",
+  "binary_sha256": "586574207661e23078899973320c60a139d8f740fb75cd62709f22661fc7f53e",
+  "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+  "projector_sha256": "9406f99c16d68cda4f1f0552192dcc99021ea1fc6d2fd50b1dc3ccf30d04b292",
+  "images": {
+    "red": {
+      "sha256": "ca96adb50da6a5f6cbfe03c9c5eb8ad8f1a6c88f526b8a4b9d9d7d3b9ef90157",
+      "bytes": 168
+    },
+    "blue": {
+      "sha256": "fb59293297bbed4792e45b1e8a353c63f942d86ac3b235a8c5c38b81ab75e09a",
+      "bytes": 168
+    }
+  },
+  "config": {
+    "context": 2048,
+    "batch": 256,
+    "threads": 4,
+    "model_load_mode": "read",
+    "warmup": 4,
+    "iterations": 30
+  },
+  "startup_to_health_ms": 5013.065,
+  "latency_ms": {
+    "mean": 96.021,
+    "p50": 96.054,
+    "p95_nearest_rank": 96.236,
+    "min": 95.741,
+    "max": 96.305
+  },
+  "gpu_before": "NVIDIA GeForce RTX 3060, 595.71.05, 17, 51",
+  "gpu_after_warmup_and_measurement": "NVIDIA GeForce RTX 3060, 595.71.05, 3813, 70",
+  "process_memory_kib": {
+    "VmHWM": 3642248,
+    "VmRSS": 3642248
+  },
+  "observations": [
+    {
+      "phase": "warmup",
+      "color": "red",
+      "latency_ms": 227.232238,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "warmup",
+      "color": "blue",
+      "latency_ms": 111.72594,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "warmup",
+      "color": "red",
+      "latency_ms": 104.341646,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "warmup",
+      "color": "blue",
+      "latency_ms": 96.854405,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.014288,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 95.766101,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 95.741194,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 95.751223,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.046516,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.055399,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 95.845247,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.082453,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.304639,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.047044,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.136414,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.080806,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 95.799473,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.097224,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.062626,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.167811,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 95.940545,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 95.988895,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.05774,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.147592,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.235624,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.006656,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.053029,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.097317,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.0251,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.055962,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 96.162595,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 95.856422,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 95.946808,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 96.056731,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": "NVIDIA GeForce RTX 3060"
+    }
+  ]
+}

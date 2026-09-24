@@ -1,0 +1,349 @@
+{
+  "schema": "l2s1-vision-http-benchmark-v1",
+  "scope": "serial loopback HTTP requests; one loaded model; synthetic solid-color 64x64 PNGs; timings include HTTP transfer and inference, exclude startup and warmup",
+  "host": "lucatagpu",
+  "device": "cpu",
+  "binary_sha256": "586574207661e23078899973320c60a139d8f740fb75cd62709f22661fc7f53e",
+  "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+  "projector_sha256": "9406f99c16d68cda4f1f0552192dcc99021ea1fc6d2fd50b1dc3ccf30d04b292",
+  "images": {
+    "red": {
+      "sha256": "ca96adb50da6a5f6cbfe03c9c5eb8ad8f1a6c88f526b8a4b9d9d7d3b9ef90157",
+      "bytes": 168
+    },
+    "blue": {
+      "sha256": "fb59293297bbed4792e45b1e8a353c63f942d86ac3b235a8c5c38b81ab75e09a",
+      "bytes": 168
+    }
+  },
+  "config": {
+    "context": 2048,
+    "batch": 256,
+    "threads": 4,
+    "model_load_mode": "read",
+    "warmup": 4,
+    "iterations": 30
+  },
+  "startup_to_health_ms": 5263.471,
+  "latency_ms": {
+    "mean": 3079.159,
+    "p50": 3066.295,
+    "p95_nearest_rank": 3162.112,
+    "min": 3013.389,
+    "max": 3185.205
+  },
+  "gpu_before": "NVIDIA GeForce RTX 3060, 595.71.05, 17, 47",
+  "gpu_after_warmup_and_measurement": "NVIDIA GeForce RTX 3060, 595.71.05, 20, 43",
+  "process_memory_kib": {
+    "VmHWM": 6233312,
+    "VmRSS": 6233312
+  },
+  "observations": [
+    {
+      "phase": "warmup",
+      "color": "red",
+      "latency_ms": 3092.400783,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "warmup",
+      "color": "blue",
+      "latency_ms": 3075.293176,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "warmup",
+      "color": "red",
+      "latency_ms": 3075.608899,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "warmup",
+      "color": "blue",
+      "latency_ms": 3066.151526,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3068.127355,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3051.391282,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3061.386133,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3054.20975,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3013.3889,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3027.355115,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3185.205376,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3072.331679,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3091.737556,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3162.111687,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3108.895567,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3134.296258,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3137.724762,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3107.734254,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3122.599746,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3077.587392,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3060.572752,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3064.461882,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3071.390715,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3076.29823,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3057.910538,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3158.828952,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3061.666333,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3025.105811,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3036.857599,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3070.14573,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3058.913849,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3029.258334,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "red",
+      "latency_ms": 3063.287607,
+      "http_status": 200,
+      "selected": "red",
+      "input_tokens": 180,
+      "offload_device": null
+    },
+    {
+      "phase": "measured",
+      "color": "blue",
+      "latency_ms": 3063.981334,
+      "http_status": 200,
+      "selected": "blue",
+      "input_tokens": 180,
+      "offload_device": null
+    }
+  ]
+}
