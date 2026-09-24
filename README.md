@@ -340,6 +340,27 @@ After model downloads finished, complete reruns of Qwen3.5-4B Q8_0 and Gemma4 E2
 
 These are public-subset, local inference measurements, not an official full-suite score, rank or production validation. Latency excludes loading and warmup; small models may exceed their training context. The raw predictions, model/source hashes, memory samples, failed-attempt evidence and independent accuracy/Brier/ECE recount are in the local, gitignored `results/jevbench-matrix-20260923/` directory; they are not included in this repository. The measured source snapshot is kept with those artifacts, and later working-tree optimizations are outside this frozen comparison. See the [evaluation method](JEVBENCH.md).
 
+## Additional recorded model measurements
+
+The [complete-label intent evaluation](INTENT_BENCHMARK.md#measured-results) used 200 BANKING77 English and 200 MASSIVE Korean examples per checkpoint on the RTX 3060. Each request included all 77 or 60 official labels. Accuracy below is raw top-choice accuracy before the abstention policy; the p50 values are local inference milliseconds. All four configurations completed both samples without inference errors or truncation.
+
+| Checkpoint | BANKING77 correct / 200 | MASSIVE Korean correct / 200 | English / Korean p50 ms |
+| --- | ---: | ---: | ---: |
+| Gemma 4 E2B Q8_0 | 123 (61.5%) | 103 (51.5%) | 214.15 / 157.52 |
+| Gemma 4 E4B Q8_0 | 130 (65.0%) | 143 (71.5%) | 371.72 / 277.05 |
+| Gemma 4 E4B Q4_K_M | 130 (65.0%) | 138 (69.0%) | 383.61 / 287.00 |
+| Qwen3-8B Q8_0 | 111 (55.5%) | 98 (49.0%) | 877.64 / 593.45 |
+
+The [CPU/GPU cache check](LAYA_BENCHMARK.md) additionally measured one larger checkpoint with 24 GPU layers and eight CPU threads. Times below cover two typed cases and their immediate repeats.
+
+| Checkpoint | Batch 256 fresh | Batch 64 fresh / prefix reuse | Batch 128 fresh / prefix reuse |
+| --- | ---: | ---: | ---: |
+| Gemma 4 31B Q4_K_M | 41.677 s | 108.552 / 69.904 s | 62.438 / 42.770 s |
+
+Both same-batch reuse comparisons preserved all 20 probability vectors and selections. This small repeated-input check measures cache behavior, not labeled task accuracy. Neither cached setting beat the batch-256 fresh baseline.
+
+These intent and cache measurements use different tasks and settings from the JevBench matrix above. Their detailed protocols and local-artifact limits are in the linked guides.
+
 ## Further documentation
 
 | Topic | Document |
