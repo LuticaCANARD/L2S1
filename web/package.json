@@ -1,5 +1,5 @@
 {
-  "name": "skid-desion-web",
+  "name": "l2s1-web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -20,5 +20,8 @@
     "svelte-check": "4.7.6",
     "typescript": "6.0.3",
     "vite": "8.3.0"
+  },
+  "overrides": {
+    "cookie": "0.7.2"
   }
 }
