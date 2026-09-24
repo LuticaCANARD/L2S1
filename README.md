@@ -20,6 +20,8 @@ cargo run --release --locked --features wgpu --bin l2s1-wgpu -- \
 
 The wgpu path supports typed binary, choice and ordinal decisions, full-vocabulary mass, and complete multi-token answer-code scoring. It currently uses fresh execution and ChatML prompting only. llama.cpp-specific options such as multimodal projectors, LoRA, output heads, calibration, CUDA placement, and HTTP serving remain on the `llama` executable. GPU results may differ from llama.cpp because the inference and tokenization implementations differ; validate each model and task before using its scores as calibrated probabilities.
 
+On the tested M1 Mac (16 GB), SmolLM2-135M Q8_0 and Qwen2.5-0.5B Q8_0 completed all three decisions in `examples/warehouse.json` through wgpu, but every decision abstained for low candidate mass. Qwen2.5-1.5B Q4_K_M loaded and completed one decision with the same outcome. These runs establish execution compatibility, not decision accuracy.
+
 ## Architecture
 
 ```mermaid

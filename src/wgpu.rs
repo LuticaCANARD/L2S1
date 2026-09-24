@@ -43,15 +43,22 @@ impl WgpuBackend {
         let mut model = Model::new(config.clone(), weights);
 
         let tokenizer = Tokenizer::from_file(tokenizer_path).map_err(backend_error)?;
-        if tokenizer.get_vocab_size(true) != config.vocab_size {
+        let tokenizer_vocab = tokenizer.get_vocab_size(true);
+        if tokenizer_vocab > config.vocab_size {
             return Err(Error::Backend(format!(
-                "tokenizer vocabulary ({}) differs from GGUF model ({})",
-                tokenizer.get_vocab_size(true),
-                config.vocab_size
+                "tokenizer vocabulary ({}) exceeds GGUF model ({})",
+                tokenizer_vocab, config.vocab_size
             )));
         }
         if let Some(MetadataValue::Array(tokens)) = gguf.metadata.get("tokenizer.ggml.tokens") {
-            for (id, token) in tokens.iter().enumerate() {
+            if tokens.len() < tokenizer_vocab {
+                return Err(Error::Backend(
+                    "GGUF token list is shorter than tokenizer vocabulary".into(),
+                ));
+            }
+            // Some GGUF output heads pad their vocabulary to a matrix-friendly
+            // size. Verify every usable ID; padding has no tokenizer entry.
+            for (id, token) in tokens.iter().take(tokenizer_vocab).enumerate() {
                 let Some(text) = token.as_str() else {
                     return Err(Error::Backend(
                         "GGUF vocabulary contains a non-string token".into(),
