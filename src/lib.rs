@@ -16,6 +16,8 @@ pub use prompt::{
 };
 #[cfg(feature = "llama")]
 pub mod llama;
+#[cfg(feature = "wgpu")]
+pub mod wgpu;
 
 mod calibration;
 mod consensus;

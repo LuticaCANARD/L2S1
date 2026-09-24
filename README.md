@@ -6,15 +6,27 @@ L2S1 is a Rust library and CLI that turns a compatible local GGUF chat model int
 
 Application option IDs, result types, and acceptance rules stay consistent across models. Templates, token IDs, predictions, and calibration are model-specific. Changing a model does not guarantee the same answer or accuracy.
 
-The crate and executable are named `l2s1`. The implemented inference backend uses **llama.cpp and local GGUF files**. Model switching currently means loading a new backend or replacing an owned worker; there is no automatic model router or live hot-swap service.
+The crate is named `l2s1`. The default inference executable uses **llama.cpp and local GGUF files**. An optional `wgpu` feature provides a separate `l2s1-wgpu` executable for native GPU inference. Model switching currently means loading a new backend or replacing an owned worker; there is no automatic model router or live hot-swap service.
+
+## Optional wgpu backend
+
+The `wgpu` feature is separate from `llama` and `llama-cuda`. It uses [FlareLLM](https://github.com/sauravpanda/flarellm)'s Rust compute backend through Metal on Apple Silicon. The small [compatibility fork](crates/flarellm-gpu) disables two optional shaders that wgpu 24 rejects on the tested Mac; baseline GPU compute remains enabled. The backend requires a text-only ChatML GGUF and its matching Hugging Face `tokenizer.json`. It rejects missing GPU devices, raw layer weights, and changed answer-token boundaries instead of falling back to CPU.
+
+```sh
+cargo run --release --locked --features wgpu --bin l2s1-wgpu -- \
+  --model /models/model.gguf --tokenizer /models/tokenizer.json \
+  --input examples/warehouse.json
+```
+
+The wgpu path supports typed binary, choice and ordinal decisions, full-vocabulary mass, and complete multi-token answer-code scoring. It currently uses fresh execution and ChatML prompting only. llama.cpp-specific options such as multimodal projectors, LoRA, output heads, calibration, CUDA placement, and HTTP serving remain on the `llama` executable. GPU results may differ from llama.cpp because the inference and tokenization implementations differ; validate each model and task before using its scores as calibrated probabilities.
 
 ## Architecture
 
 ```mermaid
 flowchart TD
     A[Application or CLI] --> B[DecisionRequest: state and decisions]
-    B --> C[LlamaBackend: model-specific prompt and token preparation]
-    C --> D[C++ bridge and llama.cpp: GGUF inference]
+    B --> C[Backend: model-specific prompt and token preparation]
+    C --> D[llama.cpp or optional FlareLLM wgpu: GGUF inference]
     D --> E[Candidate logits or complete answer-code likelihoods]
     E --> F[Shared scoring, optional calibration or head, and DecisionPolicy]
     F --> G[DecisionResponse: typed values, scores, and abstention reasons]
@@ -25,6 +37,7 @@ flowchart TD
 | [`decision.rs`](src/decision.rs) | Request/response types, `DecisionBackend`, shared scoring and acceptance policy |
 | [`prompt.rs`](src/prompt.rs) | Compile state, instructions and options into the selected prompt layout |
 | [`llama.rs`](src/llama.rs) | Own the model/context, select the prompt profile, tokenize inputs, dispatch inference and assemble results |
+| [`wgpu.rs`](src/wgpu.rs), [`flarellm-gpu`](crates/flarellm-gpu) | Optional Rust wgpu/Metal text inference and full-vocabulary scoring |
 | [`l2s1-llama-sys`](crates/l2s1-llama-sys), [`bridge.cpp`](crates/l2s1-llama-sys/native/bridge.cpp), [`chat.cpp`](crates/l2s1-llama-sys/native/chat.cpp) | Call llama.cpp, render GGUF Jinja templates, manage sequence memory and copy inference evidence |
 | [`evidence.rs`](src/evidence.rs) | Validate complete vocabulary logits and preserve semantic option/token mappings |
 | [`codes.rs`](src/codes.rs), [`llama/code_sequences.rs`](src/llama/code_sequences.rs) | Size A-Z/AA-ZZ/AAA-ZZZ codes and score complete token paths for larger candidate sets |
@@ -32,7 +45,7 @@ flowchart TD
 | [`interoperability.rs`](src/interoperability.rs), [`llama/interchange.rs`](src/llama/interchange.rs) | Model fingerprints, capabilities, request preflight, structured failures and execution diagnostics |
 | [`worker.rs`](src/worker.rs) | Bounded admission and dedicated-thread ownership of a backend |
 
-The CLI calls `LlamaBackend` directly. Long-running applications can place a backend behind `BackendWorker`. Other inference providers would require another `DecisionBackend` implementation and evidence with compatible score semantics.
+The standard CLI calls `LlamaBackend` directly; the optional GPU CLI calls `WgpuBackend`. Long-running applications can place either backend behind `BackendWorker`.
 
 ## Direct image input and HTTP API
 

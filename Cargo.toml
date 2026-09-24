@@ -10,12 +10,14 @@ build = "build.rs"
 
 [workspace]
 members = [".", "crates/l2s1-llama-sys", "crates/l2s1-tools"]
+exclude = ["crates/flarellm-gpu"]
 resolver = "3"
 
 [features]
 default = []
 llama = ["dep:l2s1-llama-sys"]
 llama-cuda = ["llama", "l2s1-llama-sys/cuda"]
+wgpu = ["dep:flare-core", "dep:flare-loader", "dep:flare-gpu", "dep:pollster", "dep:tokenizers"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
@@ -25,6 +27,11 @@ clap = { version = "4", features = ["derive"] }
 sha2 = "0.10"
 base64 = "0.22"
 l2s1-llama-sys = { path = "crates/l2s1-llama-sys", version = "0.1.0", optional = true }
+flare-core = { package = "flarellm-core", git = "https://github.com/sauravpanda/flarellm", rev = "a8cb07cf54fa43c4e41664316498ed195fa7b018", optional = true }
+flare-loader = { package = "flarellm-loader", git = "https://github.com/sauravpanda/flarellm", rev = "a8cb07cf54fa43c4e41664316498ed195fa7b018", optional = true }
+flare-gpu = { package = "flarellm-gpu", path = "crates/flarellm-gpu", optional = true }
+pollster = { version = "0.4", optional = true }
+tokenizers = { version = "0.22", default-features = false, features = ["onig"], optional = true }
 
 [build-dependencies]
 sha2 = "0.10"
@@ -33,3 +40,8 @@ sha2 = "0.10"
 name = "l2s1"
 path = "src/main.rs"
 required-features = ["llama"]
+
+[[bin]]
+name = "l2s1-wgpu"
+path = "src/bin/l2s1-wgpu.rs"
+required-features = ["wgpu"]

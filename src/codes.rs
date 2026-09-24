@@ -45,7 +45,7 @@ pub(crate) fn option_code_index(code: &str, option_count: usize) -> Option<usize
 /// Score complete, prefix-free canonical token sequences. Shared prefixes are
 /// evaluated once; every edge uses the full-vocabulary normalizer, not a
 /// shortlist normalizer. Mixing code widths would violate this contract.
-#[cfg(any(feature = "llama", test))]
+#[cfg(any(feature = "llama", feature = "wgpu", test))]
 pub(crate) fn sequence_log_probabilities(
     paths: &[Vec<i32>],
     mut logits: impl FnMut(&[i32]) -> Result<Vec<f32>>,
@@ -96,7 +96,7 @@ pub(crate) fn sequence_log_probabilities(
     Ok(scores)
 }
 
-#[cfg(any(feature = "llama", test))]
+#[cfg(any(feature = "llama", feature = "wgpu", test))]
 pub(crate) fn validate_code_paths(paths: &[Vec<i32>]) -> Result<()> {
     let mut ordered: Vec<_> = paths.iter().collect();
     ordered.sort();
