@@ -1,8 +1,6 @@
 //! Direct image input for one image and one request at a time.
 use super::*;
 
-const MAX_IMAGE_BYTES: usize = 8 * 1024 * 1024;
-
 impl LlamaBackend {
     /// Attach a vision projector compatible with this GGUF. Text decisions
     /// remain available on the same backend.
@@ -50,9 +48,7 @@ impl LlamaBackend {
         if self.vision_projector_path.is_none() {
             return Err(Error::Invalid("vision projector is not loaded".into()));
         }
-        if image.is_empty() || image.len() > MAX_IMAGE_BYTES {
-            return Err(Error::Invalid("image must contain 1 byte to 8 MiB".into()));
-        }
+        crate::validate_image(image)?;
         if self.execution_mode != ExecutionMode::Fresh
             || self.evidence_transfer != EvidenceTransfer::Full
             || self.output_head.is_some()

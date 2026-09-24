@@ -1,20 +1,20 @@
-//! Optional GGUF text inference through FlareLLM's native wgpu compute path.
+//! Native Gemma 4 decisions through Rust wgpu, using GGUF + mmproj files.
+mod paired_gguf;
+
 use crate::{
     BackendInfo, DecisionBackend, DecisionPolicy, DecisionRequest, DecisionResponse, Error,
-    ExactEvidence, ExecutionMode, PromptDetail, PromptLayout, Result, option_code,
+    ExactEvidence, ExecutionMode, PromptDetail, PromptLayout, Result, VisionDecisionBackend,
+    option_code, validate_image,
 };
-use flare_core::model::Model;
-use flare_gpu::WebGpuBackend;
-use flare_loader::{
-    gguf::{GgufFile, MetadataValue},
-    weights::load_model_weights,
-};
-use std::{fs::File, io::BufReader, path::Path};
-use tokenizers::Tokenizer;
+use image::imageops::FilterType;
+use rullama_engine::api::{ChatMessage, ChatRole, Model};
+use std::path::Path;
+
+const IMAGE_ALIGN: u32 = 48;
+const IMAGE_MAX_SIDE: u32 = 432;
 
 pub struct WgpuBackend {
     model: Model,
-    tokenizer: Tokenizer,
     info: BackendInfo,
     policy: DecisionPolicy,
     layout: PromptLayout,
@@ -22,112 +22,57 @@ pub struct WgpuBackend {
 }
 
 impl WgpuBackend {
-    /// Load a ChatML GGUF with the matching Hugging Face tokenizer.json.
-    /// GPU initialization and weight upload are mandatory: there is no CPU fallback.
-    pub fn load(model_path: &Path, tokenizer_path: &Path, policy: DecisionPolicy) -> Result<Self> {
-        policy.validate()?;
-        let mut reader = BufReader::new(File::open(model_path).map_err(backend_error)?);
-        let gguf = GgufFile::parse_header(&mut reader).map_err(backend_error)?;
-        let template = gguf
-            .metadata
-            .get("tokenizer.chat_template")
-            .and_then(MetadataValue::as_str)
-            .ok_or_else(|| Error::Backend("GGUF has no chat template".into()))?;
-        if !template.contains("<|im_start|>") || !template.contains("<|im_end|>") {
-            return Err(Error::Backend(
-                "wgpu backend currently requires a ChatML GGUF".into(),
-            ));
-        }
-        let config = gguf.to_model_config().map_err(backend_error)?;
-        let weights = load_model_weights(&gguf, &mut reader).map_err(backend_error)?;
-        let mut model = Model::new(config.clone(), weights);
+    /// Both text and image decisions share this initialized model.
+    pub fn load(model_path: &Path, projector_path: &Path, policy: DecisionPolicy) -> Result<Self> {
+        Self::load_with_software_adapter(model_path, projector_path, policy, false)
+    }
 
-        let tokenizer = Tokenizer::from_file(tokenizer_path).map_err(backend_error)?;
-        if tokenizer.get_vocab_size(true) != config.vocab_size {
+    /// Permit a CPU Vulkan adapter only for development and parity checks.
+    pub fn load_with_software_adapter(
+        model_path: &Path,
+        projector_path: &Path,
+        policy: DecisionPolicy,
+        allow_software_adapter: bool,
+    ) -> Result<Self> {
+        policy.validate()?;
+        let fetcher = pollster::block_on(paired_gguf::open(model_path, projector_path))?;
+        let model = pollster::block_on(Model::load_streaming(fetcher)).map_err(backend_error)?;
+        let adapter = model.forward().ctx().adapter.get_info();
+        let software_adapter = adapter.device_type == wgpu::DeviceType::Cpu;
+        if software_adapter && !allow_software_adapter {
             return Err(Error::Backend(format!(
-                "tokenizer vocabulary ({}) differs from GGUF model ({})",
-                tokenizer.get_vocab_size(true),
-                config.vocab_size
+                "wgpu selected the software adapter {}; a GPU adapter is required",
+                adapter.name
             )));
         }
-        if let Some(MetadataValue::Array(tokens)) = gguf.metadata.get("tokenizer.ggml.tokens") {
-            for (id, token) in tokens.iter().enumerate() {
-                let Some(text) = token.as_str() else {
-                    return Err(Error::Backend(
-                        "GGUF vocabulary contains a non-string token".into(),
-                    ));
-                };
-                if tokenizer.token_to_id(text) != Some(id as u32) {
-                    return Err(Error::Backend(format!(
-                        "tokenizer and GGUF disagree on token ID {id}"
-                    )));
-                }
-            }
-        }
-        for special in ["<|im_start|>", "<|im_end|>"] {
-            let tokenizer_id = tokenizer.token_to_id(special);
-            let gguf_id =
-                gguf.metadata
-                    .get("tokenizer.ggml.tokens")
-                    .and_then(|tokens| match tokens {
-                        MetadataValue::Array(tokens) => tokens
-                            .iter()
-                            .position(|token| token.as_str() == Some(special))
-                            .map(|i| i as u32),
-                        _ => None,
-                    });
-            if tokenizer_id.is_none() || tokenizer_id != gguf_id {
-                return Err(Error::Backend(format!(
-                    "tokenizer and GGUF disagree on {special} token ID"
-                )));
-            }
-        }
-
-        let mut raw_reader = BufReader::new(File::open(model_path).map_err(backend_error)?);
-        let raw_gguf = GgufFile::parse_header(&mut raw_reader).map_err(backend_error)?;
-        let raw_layers = (0..config.num_layers)
-            .map(|i| {
-                raw_gguf
-                    .load_raw_layer_weights(&mut raw_reader, i)
-                    .map_err(backend_error)?
-                    .ok_or_else(|| Error::Backend(format!("GPU raw weights missing for layer {i}")))
-            })
-            .collect::<Result<Vec<_>>>()?;
-        model.set_raw_weights(raw_layers);
-
-        let gpu = pollster::block_on(WebGpuBackend::new()).map_err(backend_error)?;
-        model.set_backend(Box::new(gpu));
-        model.upload_weights_to_gpu();
-        if !model.backend().has_gpu_weights() || !model.backend().has_gpu_kv_cache() {
+        if !model.has_vision_native() || model.image_sentinel_ids_native().is_none() {
             return Err(Error::Backend(
-                "wgpu weights or KV cache were not uploaded".into(),
+                "Gemma 4 vision tower or image tokens are missing".into(),
             ));
         }
-
         let info = BackendInfo {
             prompt_detail: PromptDetail::Minimal,
             code_rotation: 0,
             evidence_transfer: crate::EvidenceTransfer::Full,
             model_path: model_path.display().to_string(),
-            vision_projector_path: None,
-            vision_projector_sha256: None,
+            vision_projector_path: Some(projector_path.display().to_string()),
+            vision_projector_sha256: Some(crate::interoperability::file_digest(projector_path)?),
             lora_path: None,
             output_head_path: None,
-            model_description: format!("{:?}, {} layers", config.architecture, config.num_layers),
-            model_architecture: format!("{:?}", config.architecture).to_lowercase(),
-            prompt_profile: "chatml".into(),
+            model_description: "Gemma 4 with paired vision projector".into(),
+            model_architecture: "gemma4".into(),
+            prompt_profile: "gemma4".into(),
             prompt_layout: PromptLayout::Legacy,
-            prompt_version: "chatml-wgpu-decision-v1".into(),
-            runtime: "flarellm-wgpu-24".into(),
+            prompt_version: "gemma4-wgpu-decision-v3".into(),
+            runtime: "rullama-engine-wgpu".into(),
             execution_mode: ExecutionMode::Fresh,
             parallel_width: 1,
             compute: None,
-            offload_requested: true,
-            offload_device: Some("wgpu".into()),
+            offload_requested: !software_adapter,
+            offload_device: Some(adapter.name),
         };
         Ok(Self {
             model,
-            tokenizer,
             info,
             policy,
             layout: PromptLayout::Legacy,
@@ -139,69 +84,103 @@ impl WgpuBackend {
         self.layout = layout;
         self.info.prompt_layout = layout;
     }
-
     pub fn set_prompt_detail(&mut self, detail: PromptDetail) {
         self.detail = detail;
         self.info.prompt_detail = detail;
     }
-
     pub fn inspect(&self) -> &BackendInfo {
         &self.info
     }
 
-    fn encode(&self, text: &str) -> Result<Vec<u32>> {
-        self.tokenizer
-            .encode(text, false)
-            .map(|encoding| encoding.get_ids().to_vec())
-            .map_err(backend_error)
+    fn prompt(&self, state: &serde_json::Value, decision: &crate::Decision, image: bool) -> String {
+        let data =
+            crate::prompt::compile_prompt_with_detail(state, decision, self.layout, self.detail, 0)
+                [1]
+            .text
+            .replace('<', "\\u003c");
+        let user = if image {
+            format!(
+                "Image:\n<|image><image|>\nDecision data:\n{data}\nReply with only the matching option code."
+            )
+        } else {
+            format!("Decision data:\n{data}\nReply with only the matching option code.")
+        };
+        self.model.render_chat_native(
+            &[ChatMessage {
+                role: ChatRole::User,
+                content: format!("{}\n\n\n{user}", crate::prompt::decision_system(decision)),
+            }],
+            true,
+        )
     }
 
-    fn logits(&mut self, tokens: &[u32]) -> Result<Vec<f32>> {
-        if tokens.is_empty() || tokens.len() > self.model.config().max_seq_len {
-            return Err(Error::Invalid(
-                "prompt exceeds model context; truncation is disabled".into(),
-            ));
+    fn logits(&mut self, tokens: &[u32], soft: Option<&[f32]>) -> Result<Vec<f32>> {
+        let embedding_width = self.model.forward().cfg().d_model as usize;
+        let (image_begin, _) = self
+            .model
+            .image_sentinel_ids_native()
+            .ok_or_else(|| Error::Backend("image sentinel IDs unavailable".into()))?;
+        let soft_rows = soft.map(|v| v.len() / embedding_width).unwrap_or(0);
+        if tokens.is_empty() || tokens.len() + soft_rows > self.model.max_context_native() as usize
+        {
+            return Err(Error::Invalid("prompt exceeds model context".into()));
         }
         if tokens
             .iter()
-            .any(|&id| id as usize >= self.model.config().vocab_size)
+            .any(|&id| id >= self.model.vocab_size_native())
         {
             return Err(Error::Backend(
-                "tokenizer emitted an out-of-vocabulary ID".into(),
+                "tokenizer produced out-of-vocabulary ID".into(),
             ));
         }
-        self.model.reset();
-        let logits = self.model.forward_prefill(tokens).data().to_vec();
-        if logits.len() != self.model.config().vocab_size || logits.iter().any(|v| !v.is_finite()) {
+        if tokens.iter().filter(|&&id| id == image_begin).count() != usize::from(soft.is_some()) {
             return Err(Error::Backend(
-                "wgpu produced invalid vocabulary logits".into(),
+                "image sentinel count differs from supplied image".into(),
+            ));
+        }
+        self.model.reset_native();
+        let mut logits = Vec::new();
+        for &id in tokens {
+            logits =
+                pollster::block_on(self.model.forward_mut().step(id)).map_err(backend_error)?;
+            if id == image_begin
+                && let Some(soft) = soft
+            {
+                for row in soft.chunks_exact(embedding_width) {
+                    logits = pollster::block_on(self.model.forward_mut().step_with_embedding(row))
+                        .map_err(backend_error)?;
+                }
+            }
+        }
+        if logits.len() != self.model.vocab_size_native() as usize
+            || logits.iter().any(|v| !v.is_finite())
+        {
+            return Err(Error::Backend(
+                "wgpu returned invalid vocabulary logits".into(),
             ));
         }
         Ok(logits)
     }
-}
 
-impl DecisionBackend for WgpuBackend {
-    fn decide(&mut self, request: &DecisionRequest) -> Result<DecisionResponse> {
+    fn decide_inner(
+        &mut self,
+        request: &DecisionRequest,
+        image: Option<&[u8]>,
+    ) -> Result<DecisionResponse> {
         request.validate()?;
+        let soft = image.map(|bytes| self.encode_image(bytes)).transpose()?;
         let mut results = Vec::with_capacity(request.decisions.len());
         for decision in &request.decisions {
-            let prompt = crate::prompt::compile_chatml_prompt_with_detail(
-                &request.state,
-                decision,
-                self.layout,
-                self.detail,
-                0,
-            );
-            let input = self.encode(&prompt)?;
+            let prompt = self.prompt(&request.state, decision, soft.is_some());
+            let input = self.model.encode_tokens(&prompt);
             let options = decision.options();
             let mut paths = Vec::with_capacity(options.len());
             for i in 0..options.len() {
                 let code = option_code(i, options.len())?;
-                let combined = self.encode(&format!("{prompt}{code}"))?;
+                let combined = self.model.encode_tokens(&format!("{prompt}{code}"));
                 if !combined.starts_with(&input) || combined.len() <= input.len() {
                     return Err(Error::Backend(format!(
-                        "candidate {code} changes the assistant token boundary"
+                        "candidate {code} changes the answer token boundary"
                     )));
                 }
                 paths.push(
@@ -212,19 +191,23 @@ impl DecisionBackend for WgpuBackend {
                 );
             }
             crate::codes::validate_code_paths(&paths)?;
-            let longest = paths.iter().map(|p| p.len()).max().unwrap_or(0);
-            if input.len() + longest.saturating_sub(1) > self.model.config().max_seq_len {
+            let longest = paths.iter().map(Vec::len).max().unwrap_or(0);
+            let soft_rows = soft
+                .as_ref()
+                .map(|v| v.len() / self.model.forward().cfg().d_model as usize)
+                .unwrap_or(0);
+            let input_tokens = input.len() + soft_rows;
+            if input_tokens + longest.saturating_sub(1) > self.model.max_context_native() as usize {
                 return Err(Error::Invalid(
-                    "prompt plus answer-code prefix exceeds model context".into(),
+                    "prompt plus answer code exceeds model context".into(),
                 ));
             }
-
             let result = if paths.iter().all(|path| path.len() == 1) {
-                let logits = self.logits(&input)?;
+                let logits = self.logits(&input, soft.as_deref())?;
                 let ids: Vec<i32> = paths.iter().map(|path| path[0]).collect();
                 ExactEvidence::from_logits(decision, &logits, &ids)?.score(
                     decision,
-                    input.len(),
+                    input_tokens,
                     &self.policy,
                 )?
             } else {
@@ -234,8 +217,8 @@ impl DecisionBackend for WgpuBackend {
                     let mut tokens = input.clone();
                     tokens.extend(prefix.iter().map(|&id| id as u32));
                     evaluations += 1;
-                    evaluated_tokens += tokens.len();
-                    self.logits(&tokens)
+                    evaluated_tokens += tokens.len() + soft_rows;
+                    self.logits(&tokens, soft.as_deref())
                 })?;
                 let max = scores.iter().copied().fold(f64::NEG_INFINITY, f64::max);
                 let mass = max + scores.iter().map(|x| (x - max).exp()).sum::<f64>().ln();
@@ -252,7 +235,7 @@ impl DecisionBackend for WgpuBackend {
                     decision,
                     &scores,
                     &representative,
-                    input.len(),
+                    input_tokens,
                     mass.exp().min(1.0),
                     &self.policy,
                 )?;
@@ -272,8 +255,75 @@ impl DecisionBackend for WgpuBackend {
             results,
         })
     }
+
+    fn encode_image(&mut self, bytes: &[u8]) -> Result<Vec<f32>> {
+        validate_image(bytes)?;
+        let dimensions = image::ImageReader::new(std::io::Cursor::new(bytes))
+            .with_guessed_format()
+            .map_err(|e| Error::Invalid(format!("invalid image: {e}")))?
+            .into_dimensions()
+            .map_err(|e| Error::Invalid(format!("invalid image: {e}")))?;
+        if dimensions.0 == 0
+            || dimensions.1 == 0
+            || u64::from(dimensions.0) * u64::from(dimensions.1) > 25_000_000
+        {
+            return Err(Error::Invalid("image exceeds 25 megapixels".into()));
+        }
+        let image = image::load_from_memory(bytes)
+            .map_err(|e| Error::Invalid(format!("invalid image: {e}")))?
+            .to_rgb8();
+        let (width, height) = image.dimensions();
+        let max_side = width.max(height) as f64;
+        let scale = f64::from(IMAGE_MAX_SIDE) / max_side;
+        let scaled = |size: u32| {
+            ((f64::from(size) * scale / f64::from(IMAGE_ALIGN)).round() as u32)
+                .clamp(1, IMAGE_MAX_SIDE / IMAGE_ALIGN)
+                * IMAGE_ALIGN
+        };
+        let (w, h) = (scaled(width), scaled(height));
+        let resized = image::imageops::resize(&image, w, h, FilterType::Triangle);
+        let plane = (w * h) as usize;
+        let mut pixels = vec![0f32; plane * 3];
+        for (i, pixel) in resized.pixels().enumerate() {
+            for c in 0..3 {
+                pixels[c * plane + i] = pixel[c] as f32 / 127.5 - 1.0;
+            }
+        }
+        let soft = pollster::block_on(
+            self.model
+                .encode_image_native(&pixels, h as usize, w as usize, None),
+        )
+        .map_err(backend_error)?;
+        let invalid = soft.iter().filter(|v| !v.is_finite()).count();
+        if soft.is_empty()
+            || soft.len() % self.model.forward().cfg().d_model as usize != 0
+            || invalid != 0
+        {
+            return Err(Error::Backend(format!(
+                "vision encoder returned invalid embeddings: len={}, nonfinite={invalid}, image={}x{}",
+                soft.len(),
+                w,
+                h
+            )));
+        }
+        Ok(soft)
+    }
 }
 
+impl DecisionBackend for WgpuBackend {
+    fn decide(&mut self, request: &DecisionRequest) -> Result<DecisionResponse> {
+        self.decide_inner(request, None)
+    }
+}
+impl VisionDecisionBackend for WgpuBackend {
+    fn decide_vision(
+        &mut self,
+        request: &DecisionRequest,
+        image: &[u8],
+    ) -> Result<DecisionResponse> {
+        self.decide_inner(request, Some(image))
+    }
+}
 fn backend_error(error: impl std::fmt::Display) -> Error {
     Error::Backend(error.to_string())
 }

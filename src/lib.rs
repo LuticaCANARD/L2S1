@@ -14,10 +14,13 @@ pub use prompt::{
     STATE_FIRST_MODEL_PROMPT_VERSION, STATE_FIRST_PROMPT_VERSION, compile_prompt,
     compile_prompt_with_detail, compile_prompt_with_layout,
 };
+pub mod http;
 #[cfg(feature = "llama")]
 pub mod llama;
+mod vision;
 #[cfg(feature = "wgpu")]
 pub mod wgpu;
+pub use vision::{MAX_IMAGE_BYTES, VisionDecisionBackend, validate_image};
 
 mod calibration;
 mod consensus;

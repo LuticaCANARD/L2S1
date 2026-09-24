@@ -8,7 +8,6 @@ use std::{
     io::{self, Read},
     path::PathBuf,
 };
-mod http;
 
 #[derive(Parser)]
 #[command(
@@ -162,7 +161,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     if let Some(address) = &args.listen {
-        return http::serve(address, &mut backend);
+        return l2s1::http::serve(address, &mut backend);
     }
     let text = if args.input == "-" {
         let mut text = String::new();
