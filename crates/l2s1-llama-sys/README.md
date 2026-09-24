@@ -17,10 +17,14 @@ The first default build needs network access to download the pinned source.
 For an offline build or another llama.cpp source checkout, set
 `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`. The legacy `LLAMA_CPP_DIR` is accepted
 when the new variable is unset. The selected checkout must contain `include/llama.h`,
-`src/llama-ext.h`, `common/jinja`, and its dependencies. This crate builds its own
+`src/llama-ext.h`, `tools/mtmd/mtmd.h`, `common/jinja`, and their dependencies. This crate builds its own
 native libraries from that source; a separately built library is never mixed
 with its headers. Alternate upstream revisions are not guaranteed compatible
 and must pass the native contract tests before use.
+
+The build includes `libmtmd` for direct still-image input and links it with the
+same `libllama` revision. Video support is disabled. Source and binary packages
+must include the matching `libmtmd` and GGML shared libraries.
 
 Publish this native package before the `l2s1` package, which depends on its
 versioned release. Prebuilt executables also need the native shared libraries

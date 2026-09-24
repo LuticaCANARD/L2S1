@@ -8,6 +8,7 @@ use std::{
     io::{self, Read},
     path::PathBuf,
 };
+mod http;
 
 #[derive(Parser)]
 #[command(
@@ -17,6 +18,15 @@ use std::{
 struct Args {
     #[arg(long)]
     model: PathBuf,
+    /// Matching multimodal projector GGUF for direct image input.
+    #[arg(long)]
+    mmproj: Option<PathBuf>,
+    /// Start a JSON HTTP API at this address, for example 127.0.0.1:8080.
+    #[arg(long, conflicts_with_all = ["input", "image", "inspect", "preflight", "diagnostics"])]
+    listen: Option<String>,
+    /// One still image for CLI decisions; requires --mmproj.
+    #[arg(long, requires = "mmproj", conflicts_with_all = ["inspect", "preflight", "diagnostics"])]
+    image: Option<PathBuf>,
     /// Compact preserves full-vocabulary mass but only copies candidate scores to Rust.
     #[arg(long, value_enum, default_value_t = EvidenceTransfer::Full)]
     evidence_transfer: EvidenceTransfer,
@@ -126,6 +136,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(path) = &args.lora {
         backend.load_lora(path)?;
     }
+    if let Some(path) = &args.mmproj {
+        backend.load_vision_projector(path)?;
+    }
     backend.set_execution_mode(args.execution_mode);
     backend.set_parallel_width(args.parallel_width as usize)?;
     backend.set_prompt_layout(args.prompt_layout);
@@ -147,6 +160,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         serde_json::to_writer_pretty(io::stdout().lock(), &backend.inspect())?;
         println!();
         return Ok(());
+    }
+    if let Some(address) = &args.listen {
+        return http::serve(address, &mut backend);
     }
     let text = if args.input == "-" {
         let mut text = String::new();
@@ -182,7 +198,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     } else {
-        serde_json::to_value(backend.decide(&request)?)?
+        serde_json::to_value(if let Some(path) = &args.image {
+            backend.decide_vision(&request, &std::fs::read(path)?)?
+        } else {
+            backend.decide(&request)?
+        })?
     };
     serde_json::to_writer_pretty(io::stdout().lock(), &output)?;
     println!();
