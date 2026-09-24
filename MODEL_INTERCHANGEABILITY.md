@@ -207,3 +207,32 @@ probe with CPU-resident layers exceeded the existing 0.02 probability-difference
 criterion against full CUDA (maximum 0.028); this is not an equivalence claim.
 Evaluate accuracy on the intended placement. Preparation and session cache
 checks compare against fresh inference with that same placement.
+
+## Model loading and peak host RSS
+
+`--model-load-mode read` selects llama.cpp's ordinary read/upload path instead of
+its automatic memory mapping. It changes how weights reach their existing CPU
+and CUDA buffers; it does not change the checkpoint, quantization, layer split,
+context, or inference algorithm. `auto` remains the default. This option is
+available in the CLI, JSONL evaluator, intent-cache benchmark and JevBench harness.
+
+For the 26B CPU/GPU split, add it to the placement command:
+
+```sh
+l2s1 --model models/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf --device cuda \
+  --cpu-moe-layers 18 --model-load-mode read \
+  --context 8192 --batch 256 --threads 8 --input request.json
+```
+
+The Rust field is `ComputeOptions.model_load_mode: ModelLoadMode`. Existing Rust
+struct literals must add `ModelLoadMode::Auto`; old JSON remains readable and
+default serialization omits the field. Explicit `read` is recorded in compute
+metadata and model/artifact identity. The original native entry points preserve
+automatic loading for external reference callers.
+
+Reduced process RSS is not the same as reduced total physical memory demand:
+read loading uses allocated backend buffers, potentially CUDA-pinned host memory,
+while mapped weights are clean file-backed pages. The OS file cache remains
+outside process RSS. Measure loading high-water RSS, steady inference RSS and
+memory pressure separately on the intended host. Do not assume read loading is
+better for every checkpoint or a CPU-only deployment.

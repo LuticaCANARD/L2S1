@@ -287,6 +287,8 @@ For models larger than VRAM, CUDA loading accepts `--gpu-layers N` or
 in compute identity and can change numerical scores. See
 [CPU/GPU placement](MODEL_INTERCHANGEABILITY.md#cpugpu-placement).
 
+For lower model-loading peak process RSS, use `--model-load-mode read`; see [loading behavior and measurement limits](MODEL_INTERCHANGEABILITY.md#model-loading-and-peak-host-rss).
+
 Legacy prompts, fresh execution, full evidence transfer and disabled preparation caching remain the defaults. Existing repeated requests and fixed decision schemas continue to work; none of these options requires a fixed schema.
 
 ```sh
