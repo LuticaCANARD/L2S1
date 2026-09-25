@@ -1,0 +1,425 @@
+{
+  "state": {
+    "warehouse": "North",
+    "items": [
+      {
+        "sku": "SKU-01",
+        "condition": "chilled",
+        "batch": 100
+      },
+      {
+        "sku": "SKU-02",
+        "condition": "room_temperature",
+        "batch": 101
+      },
+      {
+        "sku": "SKU-03",
+        "condition": "flammable",
+        "batch": 102
+      },
+      {
+        "sku": "SKU-04",
+        "condition": "chilled",
+        "batch": 103
+      },
+      {
+        "sku": "SKU-05",
+        "condition": "room_temperature",
+        "batch": 104
+      },
+      {
+        "sku": "SKU-06",
+        "condition": "flammable",
+        "batch": 105
+      },
+      {
+        "sku": "SKU-07",
+        "condition": "chilled",
+        "batch": 106
+      },
+      {
+        "sku": "SKU-08",
+        "condition": "room_temperature",
+        "batch": 107
+      },
+      {
+        "sku": "SKU-09",
+        "condition": "flammable",
+        "batch": 108
+      },
+      {
+        "sku": "SKU-10",
+        "condition": "chilled",
+        "batch": 109
+      },
+      {
+        "sku": "SKU-11",
+        "condition": "room_temperature",
+        "batch": 110
+      },
+      {
+        "sku": "SKU-12",
+        "condition": "flammable",
+        "batch": 111
+      },
+      {
+        "sku": "SKU-13",
+        "condition": "chilled",
+        "batch": 112
+      },
+      {
+        "sku": "SKU-14",
+        "condition": "room_temperature",
+        "batch": 113
+      },
+      {
+        "sku": "SKU-15",
+        "condition": "flammable",
+        "batch": 114
+      },
+      {
+        "sku": "SKU-16",
+        "condition": "chilled",
+        "batch": 115
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "id": "zone_01",
+      "instruction": "Choose the correct storage zone for SKU-01. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_02",
+      "instruction": "Choose the correct storage zone for SKU-02. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_03",
+      "instruction": "Choose the correct storage zone for SKU-03. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_04",
+      "instruction": "Choose the correct storage zone for SKU-04. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_05",
+      "instruction": "Choose the correct storage zone for SKU-05. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_06",
+      "instruction": "Choose the correct storage zone for SKU-06. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_07",
+      "instruction": "Choose the correct storage zone for SKU-07. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_08",
+      "instruction": "Choose the correct storage zone for SKU-08. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_09",
+      "instruction": "Choose the correct storage zone for SKU-09. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_10",
+      "instruction": "Choose the correct storage zone for SKU-10. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_11",
+      "instruction": "Choose the correct storage zone for SKU-11. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_12",
+      "instruction": "Choose the correct storage zone for SKU-12. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_13",
+      "instruction": "Choose the correct storage zone for SKU-13. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_14",
+      "instruction": "Choose the correct storage zone for SKU-14. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_15",
+      "instruction": "Choose the correct storage zone for SKU-15. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone_16",
+      "instruction": "Choose the correct storage zone for SKU-16. Chilled items use cold_room; flammable items use hazmat_cage; all other items use ambient.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "cold_room",
+            "criterion": "cold room"
+          },
+          {
+            "id": "ambient",
+            "criterion": "ambient"
+          },
+          {
+            "id": "hazmat_cage",
+            "criterion": "hazmat cage"
+          }
+        ]
+      }
+    }
+  ]
+}
