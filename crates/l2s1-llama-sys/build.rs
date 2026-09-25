@@ -128,6 +128,16 @@ fn main() {
         .profile("Release")
         .define("BUILD_SHARED_LIBS", "ON")
         .define("CMAKE_INSTALL_LIBDIR", "lib")
+        // Shared llama/GGML libraries load one another. Give each installed
+        // library a path relative to itself as well as the executable rpath.
+        .define(
+            "CMAKE_INSTALL_RPATH",
+            if target_os == "macos" {
+                "@loader_path"
+            } else {
+                "$ORIGIN"
+            },
+        )
         .define("LLAMA_BUILD_COMMON", "OFF")
         .define("LLAMA_BUILD_TESTS", "OFF")
         .define("LLAMA_BUILD_TOOLS", "OFF")

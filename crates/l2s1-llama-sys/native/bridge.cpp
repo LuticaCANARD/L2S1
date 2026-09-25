@@ -22,6 +22,64 @@
 #include <string>
 #include <vector>
 
+namespace {
+struct log_state {
+    std::mutex mutex;
+    std::string last_error;
+    ggml_log_level last_level = GGML_LOG_LEVEL_NONE;
+    ggml_log_level threshold = GGML_LOG_LEVEL_WARN;
+};
+
+log_state native_log;
+// llama.cpp uses one process-wide logger, so model load diagnostics are captured
+// one load at a time, including messages emitted by its worker threads.
+std::mutex model_load_mutex;
+
+void llama_log_callback(ggml_log_level level, const char * message, void *) noexcept {
+    if (!message) return;
+    try {
+        std::lock_guard<std::mutex> lock(native_log.mutex);
+        if (level == GGML_LOG_LEVEL_CONT) {
+            if (native_log.last_level == GGML_LOG_LEVEL_ERROR) native_log.last_error += message;
+            if (native_log.last_level >= native_log.threshold)
+                std::fputs(message, stderr);
+            return;
+        }
+        native_log.last_level = level;
+        if (level == GGML_LOG_LEVEL_ERROR) {
+            const std::string text(message);
+            // llama.cpp emits this after the useful error, such as a tensor
+            // count mismatch. Do not replace the actual cause with it.
+            if (native_log.last_error.empty() || text.find("failed to load model") == std::string::npos)
+                native_log.last_error = text;
+        }
+        if (level >= native_log.threshold && level != GGML_LOG_LEVEL_NONE)
+            std::fputs(message, stderr);
+    } catch (...) {
+        // A log callback must not throw through llama.cpp's C API.
+    }
+}
+
+void clear_load_error() {
+    std::lock_guard<std::mutex> lock(native_log.mutex);
+    native_log.last_error.clear();
+    native_log.last_level = GGML_LOG_LEVEL_NONE;
+}
+
+std::string load_error(const char * fallback) {
+    std::lock_guard<std::mutex> lock(native_log.mutex);
+    auto message = native_log.last_error;
+    const auto last = message.find_last_not_of("\r\n \t");
+    if (last == std::string::npos) return fallback;
+    message.erase(last + 1);
+    return message;
+}
+
+bool log_info_enabled() {
+    return native_log.threshold <= GGML_LOG_LEVEL_INFO;
+}
+} // namespace
+
 struct engine {
     llama_model * model = nullptr;
     llama_context * ctx = nullptr;
@@ -66,7 +124,18 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
         if (model_load_mode != -1 && model_load_mode != 0)
             throw std::runtime_error("invalid model loading mode");
         static std::once_flag init;
-        std::call_once(init, [] { ggml_backend_load_all(); llama_backend_init(); });
+        std::call_once(init, [] {
+            if (const char * setting = std::getenv("L2S1_LOG")) {
+                const std::string level(setting);
+                if (level == "off" || level == "none") native_log.threshold = static_cast<ggml_log_level>(6);
+                else if (level == "error") native_log.threshold = GGML_LOG_LEVEL_ERROR;
+                else if (level == "info") native_log.threshold = GGML_LOG_LEVEL_INFO;
+                else if (level == "debug") native_log.threshold = GGML_LOG_LEVEL_DEBUG;
+            }
+            llama_log_set(llama_log_callback, nullptr);
+            ggml_backend_load_all();
+            llama_backend_init();
+        });
         auto e = std::make_unique<engine>();
         auto mp = llama_model_default_params();
         if (device_kind != 0) {
@@ -87,7 +156,7 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
         // Use llama.cpp's bounded read/upload path. Do not change weight placement,
         // quantization, lazy-tensor policy, or inference context parameters.
         if (model_load_mode == 0) mp.load_mode = LLAMA_LOAD_MODE_NONE;
-        std::fprintf(stderr, "l2s1 model loading: %s\n", model_load_mode == 0 ? "read" : "auto");
+        if (log_info_enabled()) std::fprintf(stderr, "l2s1 model loading: %s\n", model_load_mode == 0 ? "read" : "auto");
         if (cpu_moe_layers > 0) {
             auto cpu = ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_CPU);
             if (!cpu) throw std::runtime_error("CPU backend unavailable for MoE split");
@@ -102,9 +171,18 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
             e->placement_overrides.push_back({nullptr, nullptr});
             mp.tensor_buft_overrides = e->placement_overrides.data();
         }
-        std::fprintf(stderr, "l2s1 placement: gpu_layers=%d cpu_moe_layers=%d\n", gpu_layers, cpu_moe_layers);
-        e->model = llama_model_load_from_file(path, mp);
-        if (!e->model) throw std::runtime_error("model load failed; see llama.cpp stderr");
+        if (log_info_enabled()) std::fprintf(stderr, "l2s1 placement: gpu_layers=%d cpu_moe_layers=%d\n", gpu_layers, cpu_moe_layers);
+        {
+            std::lock_guard<std::mutex> load_lock(model_load_mutex);
+            clear_load_error();
+            e->model = llama_model_load_from_file(path, mp);
+            if (!e->model) {
+                auto cause = load_error("llama.cpp did not report a cause");
+                if (cause.find("wrong number of tensors") != std::string::npos)
+                    cause += "; if this is a bundled vision GGUF, model and projector must be separate GGUF files";
+                throw std::runtime_error("model load failed: " + cause);
+            }
+        }
         char arch[64] = {};
         llama_model_meta_val_str(e->model, "general.architecture", arch, sizeof(arch));
         e->architecture = arch;
@@ -197,8 +275,10 @@ extern "C" bool sd_load_vision_projector(engine * e, const char * path,
         params.device = e->devices[0];
         params.n_threads = e->context_params.n_threads;
         params.flash_attn_type = e->context_params.flash_attn_type;
+        std::lock_guard<std::mutex> load_lock(model_load_mutex);
+        clear_load_error();
         auto * vision = mtmd_init_from_file(path, e->model, params);
-        if (!vision) throw std::runtime_error("vision projector load failed; see llama.cpp stderr");
+        if (!vision) throw std::runtime_error("vision projector load failed: " + load_error("llama.cpp did not report a cause"));
         if (!mtmd_support_vision(vision)) {
             mtmd_free(vision);
             throw std::runtime_error("projector does not support image input");

@@ -16,6 +16,7 @@ use std::{
 mod batching;
 mod code_sequences;
 mod interchange;
+mod model_hash;
 mod prepared_cache;
 mod shared_state;
 mod vision;
@@ -90,6 +91,16 @@ fn native_error(buffer: &[c_char]) -> Error {
     // The buffer is zero-initialized; the bridge writes at most cap-1 bytes.
     let message = unsafe { CStr::from_ptr(buffer.as_ptr()) }.to_string_lossy();
     Error::Backend(message.into_owned())
+}
+
+fn model_load_error(buffer: &[c_char]) -> Error {
+    let message = unsafe { CStr::from_ptr(buffer.as_ptr()) }.to_string_lossy();
+    // The bridge gives the model load its own context. Avoid repeating it in
+    // the public error display while keeping the underlying llama.cpp cause.
+    let message = message
+        .strip_prefix("model load failed: ")
+        .unwrap_or(&message);
+    Error::ModelLoad(message.into())
 }
 
 fn render_chat(template: &str, bos: &str, eos: &str) -> Result<String> {
@@ -231,12 +242,11 @@ impl LlamaBackend {
         compute.validate_device(gpu)?;
         let path = path
             .canonicalize()
-            .map_err(|e| Error::Backend(e.to_string()))?;
+            .map_err(|e| Error::ModelLoad(format!("{}: {e}", path.display())))?;
         let model_path = path
             .to_str()
             .ok_or_else(|| Error::Invalid("model path must be UTF-8".into()))?
             .to_owned();
-        let weights_sha256 = crate::interoperability::file_digest(&path)?;
         let path_c =
             CString::new(model_path.as_bytes()).map_err(|e| Error::Invalid(e.to_string()))?;
         let mut error = [0 as c_char; 1024];
@@ -266,7 +276,15 @@ impl LlamaBackend {
                 error.len(),
             )
         };
-        let engine = NonNull::new(engine).ok_or_else(|| native_error(&error))?;
+        let engine = NonNull::new(engine).ok_or_else(|| model_load_error(&error))?;
+        let weights_sha256 = match model_hash::model_digest(&path) {
+            Ok(digest) => digest,
+            Err(error) => {
+                // A successful native load owns a model even when hashing fails.
+                unsafe { sd_close(engine.as_ptr()) };
+                return Err(error);
+            }
+        };
         let mut backend = Self {
             engine,
             prompt_detail: PromptDetail::Minimal,

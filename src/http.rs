@@ -197,6 +197,9 @@ fn handle(
         Ok(Err(Error::Backend(message))) => {
             respond_error(stream, 500, "backend_error", &message, request_id)
         }
+        Ok(Err(Error::ModelLoad(message))) => {
+            respond_error(stream, 500, "model_load_failed", &message, request_id)
+        }
         Ok(Err(Error::Upstream(message))) => {
             respond_error(stream, 502, "upstream_error", &message, request_id)
         }

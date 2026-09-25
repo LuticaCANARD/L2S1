@@ -192,6 +192,8 @@ L2S1 maps these semantic IDs to answer codes and checks their tokenization at th
 
 Each decision is evaluated independently. A request can contain different decision kinds over the same state; it is not encoded as a conversation in which later questions see earlier answers. See [`examples/warehouse.json`](examples/warehouse.json) for all three kinds.
 
+Rust callers can construct ordinal decisions with `Decision::ordinal(id, instruction, levels)` using typed `Level` values. `ComputeOptions::default()` uses the CLI defaults (2048 context, 256 batch and ubatch, four threads, flash attention off, automatic model loading, and no explicit GPU layer override).
+
 ### Scores and abstention
 
 For native candidate logits `z`, L2S1 computes two separate quantities:
@@ -215,12 +217,14 @@ The pure Rust library supports validation, scoring, scalar calibration and worke
 cargo test --locked
 ```
 
-The inference backend and CLI require Linux, Rust with edition 2024 support, CMake, and a C++17 compiler. The `l2s1-llama-sys` workspace dependency builds llama.cpp and the matching native bridge together.
+The inference backend and CLI support Linux (CPU or CUDA) and macOS (CPU or Metal). They require Rust with edition 2024 support, CMake, and a C++17 compiler. Metal builds require an Xcode toolchain with the Metal compiler. The `l2s1-llama-sys` workspace dependency builds llama.cpp and the matching native bridge together.
 
 ```sh
 cargo build --release --locked --features llama
 # CUDA toolkit required for GPU support:
 cargo build --release --locked --features llama-cuda
+# macOS with Metal:
+cargo build --release --locked --features llama-metal
 ```
 
 To produce independent CUDA builds for particular compute capabilities, run `scripts/build_cuda_arch.sh 86 89`. Each architecture gets a separate Cargo target directory and a `release/run-l2s1` launcher with its matching native libraries. The script requires `readelf` and a CUDA toolkit. The [sm_86 build and shared-state cache measurement](benchmarks/shared-state-cache-20260925/REPORT.md) were checked on an RTX 3080, including a fresh build and smoke on this PR branch; other architecture builds still need their own verification.
@@ -229,7 +233,7 @@ The architecture build script automatically uses `ccache` for C/C++/CUDA when in
 
 The default CPU build uses CMake FetchContent to download and verify llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`; the first build needs network access. For an offline build or another revision, set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`; the legacy `LLAMA_CPP_DIR` source override also works. `LLAMA_LIB_DIR` is no longer used. Validate custom revisions with the native contract tests. See [verification commands](VERIFICATION.md) and [native dependency details](crates/l2s1-llama-sys/README.md).
 
-For an independent source release, publish `l2s1-llama-sys` before `l2s1`. A prebuilt executable must ship its matching native shared libraries with a portable loader path; swapping only `libllama.so` is unsupported.
+For an independent source release, publish `l2s1-llama-sys` before `l2s1`. The build embeds the native-library rpath for local Linux and macOS executables. A downstream crate can use `DEP_L2S1_LIBDIR` in its build script to set the rpath for its own executable. Prebuilt executables must ship matching native shared libraries with a portable loader path; swapping only `libllama.so` or `libllama.dylib` is unsupported.
 
 ### Dataset and benchmark tools
 
@@ -242,7 +246,7 @@ target/release/l2s1-tools --help
 
 See the [tool command map](crates/l2s1-tools/README.md) and each benchmark guide for arguments and evidence boundaries. Historical Python adapters remain available for artifact comparison and training imports.
 
-Model files are supplied by the caller. Place an appropriate text chat/instruct GGUF under `models/` or another directory. The CLI does not download weights. Loading verifies checkpoint and runtime identities, including reading the full checkpoint for its checksum, so release builds are recommended.
+Model files are supplied by the caller. Place an appropriate text chat/instruct GGUF under `models/` or another directory. The CLI does not download weights. Loading records checkpoint and runtime identities; a successful model load computes its file checksum once and caches it by file identity for subsequent loads. Set the absolute `L2S1_MODEL_HASH_CACHE_DIR` to relocate the cache, or remove its entries to force a fresh checksum.
 
 ## Inspect, validate and run
 
@@ -275,7 +279,7 @@ Run the same request with either compatible model:
 
 The request and result schema stay the same. Each model uses its own tokenizer and prompt profile. Auto selection uses Qwen3's non-thinking profile for compatible dense Qwen3 checkpoints, Harmony final prefill for GPT-OSS, and the embedded GGUF Jinja template for other supported models.
 
-CPU is the default. Select `--device cuda` explicitly for GPU inference. An unavailable CUDA device or unsupported model produces an error; oversized inputs are rejected without truncation. `--context`, `--batch`, `--ubatch`, `--threads` and `--flash-attention off|auto|on` control requested compute settings. `--input -` reads stdin, ordinary results go to stdout, and native logs go to stderr.
+CPU is the default. Select `--device cuda` or `--device metal` explicitly for GPU inference. An unavailable selected device or unsupported model produces an error; oversized inputs are rejected without truncation. `--context`, `--batch`, `--ubatch`, `--threads` and `--flash-attention off|auto|on` control requested compute settings. `--input -` reads stdin, ordinary results go to stdout, and native logs go to stderr. On macOS, build with `--features llama-metal` before selecting Metal. Native logs use `L2S1_LOG=warn` by default; set `error`, `info`, `debug`, or `off` to change verbosity.
 
 Add `--diagnostics` to receive a separate envelope containing the normal response, model identity, prompt-token fingerprints, requested/effective execution mode, fallback reasons, calibration IDs and request-local timings. Ordinary `decide()` responses retain their existing shape. Request-stage failures under `--preflight` or `--diagnostics` have structured JSON and a nonzero exit status; model loading or malformed JSON can fail before that envelope.
 
@@ -304,6 +308,8 @@ fn decide_with_model(
 For repeated requests, retain the backend instead of loading it for every call. `inspect()`, `preflight()` and `decide_detailed()` expose the corresponding inspection, validation and diagnostics APIs. `decide_batch()` accepts independent requests and preserves their result grouping.
 
 `BackendWorker::spawn()` constructs a backend on its owner thread. Its factory can return the non-Send/non-Sync `LlamaBackend`; the native context never moves between threads. The worker bounds queued request count and serialized request size, reserves an operator-estimated memory budget, rejects a full queue immediately, and returns a `DecisionTicket` for admitted work. `close()` drains work and drops the backend on that same thread. Reservations control admission, not operating-system RSS. See [worker usage and lifecycle](MODEL_INTERCHANGEABILITY.md#bounded-ownership-and-scheduling).
+
+On Metal, call `BackendWorker::close()` and wait for its owner thread to release `LlamaBackend` before process exit. Direct users should drop `LlamaBackend` before exit. This avoids llama.cpp Metal teardown assertions when a model remains loaded.
 
 `BackendWorker::spawn_batched()` additionally collects requests under explicit request-count, model-input-token and collection-wait limits. With `LlamaBackend`, native batching requires selecting `ExecutionMode::Parallel`; other modes keep requests serial. Collection alone does not make inference parallel, and the existing parallel score-drift limits still apply.
 

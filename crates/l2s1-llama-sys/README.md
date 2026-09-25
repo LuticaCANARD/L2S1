@@ -11,6 +11,13 @@ The default build is CPU-only. Enable `l2s1/llama-cuda` for CUDA or
 `l2s1/llama-metal` for Metal on macOS. CMake 3.24+ and a C++17 compiler are
 required; CUDA additionally requires the CUDA toolkit. CUDA and Metal cannot
 be enabled together in one build.
+On macOS and Linux, the `l2s1` build script embeds the llama.cpp library
+directory as an executable rpath. Installed native libraries also search their
+own directory for dependent llama.cpp and GGML libraries. Downstream executables
+can read `DEP_L2S1_LIBDIR` from their build
+script and add their own rpath. Native logs default to warnings; set
+`L2S1_LOG=error|warn|info|debug|off` before process startup to change the
+level. Model-load failures include the last llama.cpp error message.
 The CUDA build disables host-specific architecture selection for distributable
 artifacts. Set `L2S1_CUDA_ARCHITECTURES` (for example `86`) to limit the CUDA
 architectures when building for a known target.
