@@ -172,7 +172,7 @@ cargo build --release --locked --features llama
 cargo build --release --locked --features llama-cuda
 ```
 
-To produce independent CUDA builds for particular compute capabilities, run `scripts/build_cuda_arch.sh 86 89`. Each architecture gets a separate Cargo target directory and a `release/run-l2s1` launcher with its matching native libraries. The script requires `readelf` and a CUDA toolkit. The [sm_86 build and shared-state cache measurement](benchmarks/shared-state-cache-20260925/REPORT.md) were checked on an RTX 3080; other architecture builds still need their own verification.
+To produce independent CUDA builds for particular compute capabilities, run `scripts/build_cuda_arch.sh 86 89`. Each architecture gets a separate Cargo target directory and a `release/run-l2s1` launcher with its matching native libraries. The script requires `readelf` and a CUDA toolkit. The [sm_86 build and shared-state cache measurement](benchmarks/shared-state-cache-20260925/REPORT.md) were checked on an RTX 3080, including a fresh build and smoke on this PR branch; other architecture builds still need their own verification.
 
 The default CPU build uses CMake FetchContent to download and verify llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`; the first build needs network access. For an offline build or another revision, set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`; the legacy `LLAMA_CPP_DIR` source override also works. `LLAMA_LIB_DIR` is no longer used. Validate custom revisions with the native contract tests. See [verification commands](VERIFICATION.md) and [native dependency details](crates/l2s1-llama-sys/README.md).
 

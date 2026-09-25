@@ -30,3 +30,7 @@ The observed gain supports retaining a prefix for several questions about an unc
 ## Architecture-specific build check
 
 `scripts/build_cuda_arch.sh 86` completed in a separate `target/cuda-architectures/sm_86/` Cargo target directory, using an existing local llama.cpp source checkout to avoid a network fetch. Its CUDA compile flags contained only `compute_86` and `sm_86`. The script copied the matching native libraries beside the executable and created `release/run-l2s1`. That launcher completed a three-decision smoke request on the RTX 3080; the local native log confirms 29/29 model layers offloaded to CUDA. See the [build log](build-sm86.log) and [smoke response](sm86-smoke.json). The repetitive native log remains in ignored local results. Other CUDA architectures were not compiled or run in this check.
+
+## Rebuild on the PR branch
+
+Commit `0260180a5c950981cb642a3235b750529b7e4c3a` was also built with `scripts/build_cuda_arch.sh 86` from its clean PR worktree. The release build completed in 17 minutes using a complete local llama.cpp source cache. Its CUDA flags targeted only `compute_86` and `sm_86`; the launcher was created with its matching native libraries. A fresh three-decision Qwen3 0.6B smoke request completed on the RTX 3080, with 29/29 model layers offloaded. The [rebuild evidence](pr28-sm86-rebuild.json) includes the binary, native library and local-log hashes, flags, and scope; the [smoke response](pr28-sm86-smoke.json) contains the backend device and decisions. The shared-state timing table above was not remeasured on this commit.
