@@ -30,7 +30,7 @@ cargo run --release --locked --features llama-cuda -- \
   --device cuda --input examples/warehouse.json
 ```
 
-Change `--model` to load another compatible GGUF. Text models need only the model file; for a supported vision model, supply its matching `--mmproj` file and send the image through the CLI or HTTP API. Each model needs its own backend instance and task-quality evaluation. This route does not require FlareLLM or a Qwen-specific Rust wgpu adapter.
+Change `--model` to load another compatible GGUF. Text models need only the model file; for a supported vision model, supply its matching `--mmproj` file and send the image through the CLI or HTTP API. Each model needs its own backend instance and task-quality evaluation. This route does not require FlareLLM or a Qwen-specific Rust wgpu adapter. A [two-model CUDA smoke measurement](benchmarks/gguf-cuda-20260925/README.md) records the model identities, decisions, abstentions, and timings.
 
 ## Architecture
 
