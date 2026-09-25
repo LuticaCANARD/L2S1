@@ -1,0 +1,41 @@
+{
+  "identity": {
+    "weights_sha256": "f2c28b3dc4776931ac6f879e11f203dec637ea0f14267a86ec8f6165f63f293f",
+    "template_sha256": "845f1ee48e39fc942fe190da9df6a1c5db229e17a96ea08966ad1c9274e73d1b",
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-decision-v1",
+    "runtime_build_sha256": "2da4f228e67a056823828033ab877182c04b40ec4731f11e8e337b894561b4b1",
+    "loaded_runtime_sha256": "94ac43762630d28a5395f49cd39ee79b9ad0fc36cb6c0523d422da4d8d8c69bd",
+    "adapter_sha256": null,
+    "head_sha256": null,
+    "device": "NVIDIA GeForce RTX 3060",
+    "compute": {
+      "context": 4096,
+      "batch": 256,
+      "ubatch": 256,
+      "threads": 8,
+      "flash_attention": "off",
+      "cpu_moe_layers": 18
+    },
+    "execution_mode": "fresh",
+    "parallel_width": 1
+  },
+  "capabilities": {
+    "architecture": "gemma4",
+    "vocabulary_size": 262144,
+    "configured_context": 4096,
+    "training_context": 262144,
+    "recurrent_or_hybrid": false,
+    "exact_full_vocabulary_logits": true,
+    "execution_modes": [
+      "fresh",
+      "prefix_reuse",
+      "state_restore",
+      "parallel"
+    ],
+    "prefix_reuse_fallback": null,
+    "hidden_features": true,
+    "snapshot_limit_bytes": 268435456,
+    "evidence_status": "loaded_metadata; request preflight and measured quality are separate; state_restore is experimental"
+  }
+}
