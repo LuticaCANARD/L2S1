@@ -180,7 +180,7 @@ def run(args):
                             "instruction": instruction,
                             "kind": {"type": "choice", "options": options},
                         }],
-                        "image_base64": base64.b64encode(image).decode("ascii"),
+                        "media": [{"id": "image", "type": "image", "data_base64": base64.b64encode(image).decode("ascii")}],
                     }
                     request = urllib.request.Request(
                         url + "/v1/decisions",
@@ -197,11 +197,11 @@ def run(args):
                     if status != 200:
                         raise RuntimeError(f"image {index}: HTTP {status}: {body[:300]!r}")
                     result = json.loads(body)
-                    backend = result["backend"]
+                    backend = result["backend"]["details"]
                     if not backend["offload_requested"] or "3080" not in backend["offload_device"]:
                         raise RuntimeError("CUDA offload did not match the RTX 3080")
                     decision = result["results"][0]
-                    ranked = sorted(decision["scores"], key=lambda row: row["option_probability"], reverse=True)
+                    ranked = sorted(decision["evidence"]["scores"], key=lambda row: row["option_probability"], reverse=True)
                     if len(ranked) != len(CLASSES):
                         raise RuntimeError("response option count mismatch")
                     raw_top1 = None if ranked[0]["option_probability"] == ranked[1]["option_probability"] else ranked[0]["id"]
@@ -209,10 +209,10 @@ def run(args):
                         "index": index, "image": item["name"], "image_sha256": item["sha256"],
                         "ground_truth": item["label"],
                         "selected": decision["value"]["selected"], "raw_top1": raw_top1,
-                        "candidate_mass": decision["candidate_mass"],
-                        "top_option_probability": decision["top_option_probability"],
+                        "candidate_mass": decision["evidence"]["candidate_mass"],
+                        "top_option_probability": decision["evidence"]["top_option_probability"],
                         "abstention_reasons": decision["abstention_reasons"],
-                        "scores": decision["scores"], "input_tokens": decision["input_tokens"],
+                        "scores": decision["evidence"]["scores"], "input_tokens": decision["usage"]["input_tokens"],
                         "latency_ms": latency_ms,
                     }
                     observations.append(record)

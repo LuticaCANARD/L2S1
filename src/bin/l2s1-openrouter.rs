@@ -20,7 +20,7 @@ struct Args {
     /// One PNG, JPEG, GIF or WebP image for CLI decisions.
     #[arg(long, conflicts_with = "listen")]
     image: Option<PathBuf>,
-    /// Start POST /v1/decisions and GET /healthz at this address.
+    /// Start POST /v1/decisions, GET /v1/capabilities and GET /healthz at this address.
     #[arg(long, conflicts_with = "input")]
     listen: Option<String>,
     /// Maximum remote completion tokens per decision.
@@ -40,7 +40,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         backend.set_reasoning_effort(effort)?;
     }
     if let Some(address) = args.listen {
-        return l2s1::http::serve(&address, &mut backend);
+        return l2s1::http::serve_openrouter(&address, backend);
     }
     let text = if args.input.as_deref().unwrap_or("-") == "-" {
         let mut text = String::new();

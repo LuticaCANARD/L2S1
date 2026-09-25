@@ -10,6 +10,7 @@ use std::{io::Read, time::Duration};
 const ENDPOINT: &str = "https://openrouter.ai/api/v1/chat/completions";
 const MAX_RESPONSE_BYTES: u64 = 1024 * 1024;
 
+#[derive(Clone)]
 pub struct OpenRouterBackend {
     client: Client,
     endpoint: String,
@@ -68,6 +69,9 @@ pub enum RemoteStatus {
 }
 
 impl OpenRouterBackend {
+    pub fn model(&self) -> &str {
+        &self.model
+    }
     pub fn new(model: impl Into<String>, api_key: impl Into<String>) -> Result<Self> {
         let model = model.into();
         let api_key = api_key.into();
@@ -117,61 +121,39 @@ impl OpenRouterBackend {
         request: &DecisionRequest,
         image: Option<&[u8]>,
     ) -> Result<RemoteDecisionResponse> {
+        self.decide_images(request, &image.into_iter().collect::<Vec<_>>())
+    }
+
+    pub fn decide_images(
+        &self,
+        request: &DecisionRequest,
+        images: &[&[u8]],
+    ) -> Result<RemoteDecisionResponse> {
         request.validate()?;
-        let image_url = image.map(image_data_url).transpose()?;
+        if images.len() > 4 {
+            return Err(Error::Invalid("at most four images per decision".into()));
+        }
+        let image_urls = images
+            .iter()
+            .map(|image| image_data_url(image))
+            .collect::<Result<Vec<_>>>()?;
         let mut results = Vec::with_capacity(request.decisions.len());
-        for decision in &request.decisions {
-            let user_content = if let Some(image_url) = &image_url {
-                json!([
-                    {"type":"text","text":crate::prompt::decision_data(&request.state, decision, crate::PromptLayout::Legacy)},
-                    {"type":"image_url","image_url":{"url":image_url}}
-                ])
-            } else {
-                json!(crate::prompt::decision_data(
-                    &request.state,
-                    decision,
-                    crate::PromptLayout::Legacy
-                ))
-            };
-            let mut payload = json!({
-                "model": self.model,
-                "messages": [
-                    {"role":"system","content":crate::prompt::decision_system(decision)},
-                    {"role":"user","content":user_content}
-                ],
-                "temperature": 0,
-                "max_tokens": self.max_tokens,
-                "stream": false
-            });
-            if let Some(effort) = &self.reasoning_effort {
-                payload["reasoning"] = json!({"effort": effort});
-            }
-            let response = self
-                .client
-                .post(&self.endpoint)
-                .bearer_auth(&self.api_key)
-                .json(&payload)
-                .send()
-                .map_err(|e| Error::Upstream(format!("OpenRouter request failed: {e}")))?;
-            let status = response.status();
-            if !status.is_success() {
-                return Err(Error::Upstream(format!(
-                    "OpenRouter returned HTTP {status}"
-                )));
-            }
-            let mut bytes = Vec::new();
-            response
-                .take(MAX_RESPONSE_BYTES + 1)
-                .read_to_end(&mut bytes)
-                .map_err(|e| Error::Upstream(format!("OpenRouter response read failed: {e}")))?;
-            if bytes.len() as u64 > MAX_RESPONSE_BYTES {
-                return Err(Error::Upstream(
-                    "OpenRouter response exceeds size limit".into(),
-                ));
-            }
-            let body: Value = serde_json::from_slice(&bytes)
-                .map_err(|_| Error::Upstream("OpenRouter returned invalid JSON".into()))?;
-            results.push(parse_result(decision, &body)?);
+        for chunk in request.decisions.chunks(4) {
+            std::thread::scope(|scope| -> Result<()> {
+                let jobs = chunk
+                    .iter()
+                    .map(|decision| {
+                        scope.spawn(|| self.decide_one(&request.state, decision, &image_urls))
+                    })
+                    .collect::<Vec<_>>();
+                for job in jobs {
+                    results.push(
+                        job.join()
+                            .map_err(|_| Error::Backend("OpenRouter worker panicked".into()))??,
+                    );
+                }
+                Ok(())
+            })?;
         }
         Ok(RemoteDecisionResponse {
             backend: RemoteBackendInfo {
@@ -181,6 +163,70 @@ impl OpenRouterBackend {
             evidence: "selection_only",
             results,
         })
+    }
+
+    fn decide_one(
+        &self,
+        state: &Value,
+        decision: &crate::Decision,
+        image_urls: &[String],
+    ) -> Result<RemoteDecisionResult> {
+        let user_content = if image_urls.is_empty() {
+            json!(crate::prompt::decision_data(
+                state,
+                decision,
+                crate::PromptLayout::Legacy
+            ))
+        } else {
+            let mut parts = vec![
+                json!({"type":"text","text":crate::prompt::decision_data(state, decision, crate::PromptLayout::Legacy)}),
+            ];
+            parts.extend(
+                image_urls
+                    .iter()
+                    .map(|url| json!({"type":"image_url","image_url":{"url":url}})),
+            );
+            json!(parts)
+        };
+        let mut payload = json!({
+            "model": self.model,
+            "messages": [
+                {"role":"system","content":crate::prompt::decision_system(decision)},
+                {"role":"user","content":user_content}
+            ],
+            "temperature": 0,
+            "max_tokens": self.max_tokens,
+            "stream": false
+        });
+        if let Some(effort) = &self.reasoning_effort {
+            payload["reasoning"] = json!({"effort": effort});
+        }
+        let response = self
+            .client
+            .post(&self.endpoint)
+            .bearer_auth(&self.api_key)
+            .json(&payload)
+            .send()
+            .map_err(|e| Error::Upstream(format!("OpenRouter request failed: {e}")))?;
+        let status = response.status();
+        if !status.is_success() {
+            return Err(Error::Upstream(format!(
+                "OpenRouter returned HTTP {status}"
+            )));
+        }
+        let mut bytes = Vec::new();
+        response
+            .take(MAX_RESPONSE_BYTES + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|e| Error::Upstream(format!("OpenRouter response read failed: {e}")))?;
+        if bytes.len() as u64 > MAX_RESPONSE_BYTES {
+            return Err(Error::Upstream(
+                "OpenRouter response exceeds size limit".into(),
+            ));
+        }
+        let body: Value = serde_json::from_slice(&bytes)
+            .map_err(|_| Error::Upstream("OpenRouter returned invalid JSON".into()))?;
+        parse_result(decision, &body)
     }
 }
 
@@ -380,14 +426,14 @@ mod tests {
     }
 
     #[test]
-    fn sends_text_and_image_to_mock_openrouter() {
+    fn sends_text_and_multiple_images_to_mock_openrouter() {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let endpoint = format!(
             "http://{}/api/v1/chat/completions",
             listener.local_addr().unwrap()
         );
         let server = std::thread::spawn(move || {
-            for image_expected in [false, true] {
+            for image_count in [0, 1, 2] {
                 let (mut stream, _) = listener.accept().unwrap();
                 stream
                     .set_read_timeout(Some(Duration::from_secs(5)))
@@ -419,8 +465,12 @@ mod tests {
                     serde_json::from_slice(&bytes[header_end..header_end + length]).unwrap();
                 assert_eq!(body["model"], "example/model");
                 assert_eq!(body["messages"][0]["role"], "system");
-                if image_expected {
+                if image_count > 0 {
                     assert_eq!(body["reasoning"]["effort"], "none");
+                    assert_eq!(
+                        body["messages"][1]["content"].as_array().unwrap().len(),
+                        image_count + 1
+                    );
                     assert!(
                         body["messages"][1]["content"][1]["image_url"]["url"]
                             .as_str()
@@ -448,6 +498,61 @@ mod tests {
             )
             .unwrap();
         assert_eq!(image.results[0].selected_code.as_deref(), Some("A"));
+        let two = backend
+            .decide_images(
+                &request(),
+                &[
+                    include_bytes!("../tests/fixtures/vision_red_64.png"),
+                    include_bytes!("../tests/fixtures/vision_red_64.png"),
+                ],
+            )
+            .unwrap();
+        assert_eq!(two.results[0].selected_code.as_deref(), Some("A"));
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn decisions_issue_bounded_parallel_provider_calls() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let endpoint = format!(
+            "http://{}/api/v1/chat/completions",
+            listener.local_addr().unwrap()
+        );
+        listener.set_nonblocking(true).unwrap();
+        let server = std::thread::spawn(move || {
+            let deadline = std::time::Instant::now() + Duration::from_secs(3);
+            let mut streams = Vec::new();
+            while streams.len() < 2 && std::time::Instant::now() < deadline {
+                match listener.accept() {
+                    Ok((stream, _)) => streams.push(stream),
+                    Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                        std::thread::sleep(Duration::from_millis(10))
+                    }
+                    Err(e) => panic!("accept: {e}"),
+                }
+            }
+            assert_eq!(streams.len(), 2, "provider calls were serialized");
+            let response = br#"{"choices":[{"finish_reason":"stop","message":{"content":"A"}}]}"#;
+            for mut stream in streams {
+                write!(
+                    stream,
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                    response.len()
+                )
+                .unwrap();
+                stream.write_all(response).unwrap();
+            }
+        });
+        let mut backend = OpenRouterBackend::new("example/model", "test-key").unwrap();
+        backend.endpoint = endpoint;
+        let mut request = request();
+        let mut second = request.decisions[0].clone();
+        second.id = "other".into();
+        request.decisions.push(second);
+        assert_eq!(
+            backend.decide_images(&request, &[]).unwrap().results.len(),
+            2
+        );
         server.join().unwrap();
     }
 }

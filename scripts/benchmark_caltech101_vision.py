@@ -85,7 +85,7 @@ def main():
                         "decisions": [{"id": "object",
                                        "instruction": "Choose the single best object category for the main visible subject in this image. Use only the image, not any filename or metadata.",
                                        "kind": {"type": "choice", "options": options}}],
-                        "image_base64": base64.b64encode(image).decode("ascii"),
+                        "media": [{"id": "image", "type": "image", "data_base64": base64.b64encode(image).decode("ascii")}],
                     }
                     req = urllib.request.Request(
                         url + "/v1/decisions", json.dumps(payload, separators=(",", ":")).encode(),
@@ -102,12 +102,12 @@ def main():
                     if status != 200:
                         raise RuntimeError(f"image {index}: HTTP {status}: {body[:300]!r}")
                     result = json.loads(body)
-                    backend = result["backend"]
+                    backend = result["backend"]["details"]
                     policy = result["policy"]
                     if not backend["offload_requested"] or "3060" not in backend["offload_device"]:
                         raise RuntimeError("GPU offload does not match the intended RTX 3060")
                     decision = result["results"][0]
-                    scores = decision["scores"]
+                    scores = decision["evidence"]["scores"]
                     assert len(scores) == len(classes)
                     ranked = sorted(scores, key=lambda score: score["option_probability"], reverse=True)
                     raw_top1 = None if ranked[0]["option_probability"] == ranked[1]["option_probability"] else ranked[0]["id"]
@@ -115,13 +115,13 @@ def main():
                         "index": index, "image": item["name"], "image_sha256": item["sha256"],
                         "ground_truth": item["label"], "selected": decision["value"]["selected"],
                         "raw_top1": raw_top1, "latency_ms": round(latency_ms, 6),
-                        "candidate_mass": decision["candidate_mass"],
-                        "top_option_probability": decision["top_option_probability"],
+                        "candidate_mass": decision["evidence"]["candidate_mass"],
+                        "top_option_probability": decision["evidence"]["top_option_probability"],
                         "abstention_reasons": decision["abstention_reasons"],
-                        "input_tokens": decision["input_tokens"],
-                        "code_prefix_evaluations": decision["code_prefix_evaluations"],
-                        "code_evaluated_tokens": decision["code_evaluated_tokens"],
-                        "scoring_method": decision["scoring_method"], "scores": scores,
+                        "input_tokens": decision["usage"]["input_tokens"],
+                        "code_prefix_evaluations": decision["evidence"]["code_prefix_evaluations"],
+                        "code_evaluated_tokens": decision["evidence"]["code_evaluated_tokens"],
+                        "scoring_method": decision["evidence"]["scoring_method"], "scores": scores,
                     }
                     observations.append(record)
                     output.write(json.dumps(record, ensure_ascii=False) + "\n")

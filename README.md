@@ -20,7 +20,7 @@ cargo run --release --locked --features wgpu --bin l2s1-wgpu -- \
   --input examples/warehouse.json
 ```
 
-Omit `--image` for text decisions. Add `--listen 127.0.0.1:8080` to serve the same `POST /v1/decisions` and `GET /healthz` API described below; send `image_base64` for vision requests. Images are decoded up to 25 megapixels and resized to at most 432 pixels on the longer side, aligned to the vision encoder's 48-pixel grid. The wgpu path scores full-vocabulary mass and complete multi-token answer codes for binary, choice and ordinal decisions. It uses fresh execution and Gemma 4 prompting. GPU scores may differ from llama.cpp; validate each model and task before treating them as calibrated probabilities.
+Omit `--image` for text decisions. Add `--listen 127.0.0.1:8080` to serve the same `POST /v1/decisions` and `GET /healthz` API described below; send `media` for vision requests. Images are decoded up to 25 megapixels and resized to at most 432 pixels on the longer side, aligned to the vision encoder's 48-pixel grid. The wgpu path scores full-vocabulary mass and complete multi-token answer codes for binary, choice and ordinal decisions. It uses fresh execution and Gemma 4 prompting. GPU scores may differ from llama.cpp; validate each model and task before treating them as calibrated probabilities.
 
 This paired-GGUF adapter is specific to Gemma 4 and rejects Qwen model/projector files. For Qwen, SmolLM and other compatible GGUF chat models on an NVIDIA GPU, use the existing llama.cpp CUDA executable. It reads the selected GGUF's tokenizer and chat template and exposes the same typed decision and HTTP APIs:
 
@@ -50,7 +50,7 @@ flowchart TD
 | [`prompt.rs`](src/prompt.rs) | Compile state, instructions and options into the selected prompt layout |
 | [`llama.rs`](src/llama.rs) | Own the model/context, select the prompt profile, tokenize inputs, dispatch inference and assemble results |
 | [`wgpu.rs`](src/wgpu.rs), [`paired_gguf.rs`](src/wgpu/paired_gguf.rs) | Rust wgpu Gemma 4 text/vision inference and paired GGUF streaming |
-| [`vision.rs`](src/vision.rs), [`http.rs`](src/http.rs) | Shared image validation, backend contract and HTTP request dispatch |
+| [`vision.rs`](src/vision.rs), [`http/contract.rs`](src/http/contract.rs), [`http.rs`](src/http.rs) | Image validation, wire contract and backend mapping, HTTP connection handling |
 | [`openrouter.rs`](src/openrouter.rs) | Remote chat completions and selection-only response mapping |
 | [`l2s1-llama-sys`](crates/l2s1-llama-sys), [`bridge.cpp`](crates/l2s1-llama-sys/native/bridge.cpp), [`chat.cpp`](crates/l2s1-llama-sys/native/chat.cpp) | Call llama.cpp, render GGUF Jinja templates, manage sequence memory and copy inference evidence |
 | [`evidence.rs`](src/evidence.rs) | Validate complete vocabulary logits and preserve semantic option/token mappings |
@@ -73,16 +73,55 @@ cargo run --release --locked --features llama-cuda -- \
   --device cuda --context 4096 --listen 127.0.0.1:8080
 ```
 
-The JSON body contains the ordinary `state` and `decisions` fields. Add `image_base64` with standard base64 of one JPEG, PNG or other still-image format accepted by libmtmd to invoke direct vision scoring. Without that field, the endpoint uses the text path. Vision responses include the projector path and SHA-256 hash. For example, add an image to [`examples/warehouse.json`](examples/warehouse.json):
+The versioned API accepts shared `state`, named `media`, and decisions. Omit `media` for text. Each decision can set `media_ids` to select images; omission selects all images and `[]` selects none. The response always has `api_version`, `request_id`, `backend`, `policy`, and `results`. Every result has `id`, typed `value`, `status`, `abstention_reasons`, `evidence`, and `usage`. Local evidence has `type: "model_scored"` with scores and candidate mass; OpenRouter evidence has `type: "selection_only"` and no invented probabilities. Local `policy` is populated; remote `policy` is `null`. Use `GET /v1/capabilities` to inspect the loaded model, supported image input, evidence type, and limits.
+
+```json
+{
+  "state": {"task": "identify the object"},
+  "media": [
+    {"id": "front", "type": "image", "data_base64": "..."},
+    {"id": "side", "type": "image", "data_base64": "..."}
+  ],
+  "decisions": [{
+    "id": "object", "instruction": "Choose the main object",
+    "kind": {"type": "choice", "options": [
+      {"id": "box", "criterion": "a box"},
+      {"id": "bag", "criterion": "a bag"}
+    ]},
+    "media_ids": ["front"]
+  }]
+}
+```
+
+A selection-only response has the same result envelope as a local response:
+
+```json
+{
+  "api_version": 1,
+  "request_id": "req-1",
+  "backend": {"runtime": "openrouter-chat-completions", "model": "example/model", "details": null},
+  "policy": null,
+  "results": [{
+    "id": "object", "value": {"type": "choice", "selected": "box"},
+    "status": "selected", "abstention_reasons": [],
+    "evidence": {"type": "selection_only", "selected_code": "A", "provider_model": "example/model"},
+    "usage": {"input_tokens": 42, "output_tokens": 1}
+  }]
+}
+```
+
+For an existing text request, this command attaches one image:
 
 ```sh
-jq --arg image "$(base64 -w0 photo.jpg)" '. + {image_base64: $image}' \
+jq --arg image "$(base64 -w0 photo.jpg)" '. + {media: [{id: "photo", type: "image", data_base64: $image}]}' \
   examples/warehouse.json | \
   curl -sS -H 'Content-Type: application/json' --data-binary @- \
   http://127.0.0.1:8080/v1/decisions
 ```
 
-The library also accepts original image bytes without base64. The CLI equivalent is `--mmproj /models/mmproj.gguf --image photo.jpg --input request.json`. One request supports one image and any number of decisions. More than 26 options use the same fixed-width answer codes and complete-code likelihoods as text decisions; each distinct code prefix re-evaluates the image from fresh state, so wide image requests can be slower. Vision uses fresh execution and full-vocabulary scoring; output heads, scalar calibration, and parallel/prefix-reuse modes are currently rejected for image requests. Images are limited to 8 MiB and the HTTP JSON body to 12 MiB. The listener handles one request at a time; bind to loopback or place an authenticated reverse proxy in front of it for remote clients. Check model-specific image prompt behavior and labeled task quality before treating scores as reliable decisions.
+The library still accepts original image bytes without base64. The CLI equivalent is `--mmproj /models/mmproj.gguf --image photo.jpg --input request.json`. The local llama.cpp and wgpu backends accept one image per decision; the OpenRouter adapter accepts up to four images per decision, subject to the selected provider model's own limits. Image bytes are limited to 8 MiB each, each request to 128 decisions, and the HTTP body to 44 MiB. Invalid media references or backend limits fail before inference. More than 26 options use fixed-width answer codes. Local vision uses fresh execution and full-vocabulary scoring; output heads, scalar calibration, and parallel/prefix-reuse modes are currently rejected for image requests. The listener accepts up to 32 connections with a 16-request inference queue and a 192 MiB in-flight body budget. Local GPU inference remains serial; health and capability requests stay responsive while inference is busy when a connection slot remains. Bind to loopback or place an authenticated reverse proxy in front of it for remote clients. Errors have `error.code`, `error.message`, and `error.request_id`.
+
+Additional Rust backends implement `HttpDecisionBackend::capabilities` and `decide_json`. The contract layer validates result IDs and the common result fields before sending any response. A backend can add evidence fields under its `evidence.type` without changing the shared `value` and `status` fields.
 
 Gemma is a possible vision backend: Gemma 3 4B/12B/27B and Gemma 4 E2B/E4B have image-capable variants in llama.cpp. Gemma 3 1B is text-only. Pair a vision checkpoint with its matching `mmproj`; a text-only GGUF file alone cannot accept pixels. See the [llama.cpp multimodal model list](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md) and [Gemma 3 vision guide](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal/gemma3.md).
 
@@ -101,9 +140,9 @@ cargo run --release --locked --no-default-features --features openrouter \
   --input examples/warehouse.json
 ```
 
-For one image, add `--image photo.jpg`. The adapter accepts PNG, JPEG, GIF and WebP up to 8 MiB. To serve the existing HTTP input contract, replace `--input ...` with `--listen 127.0.0.1:8081`. The listener exposes `POST /v1/decisions` and `GET /healthz`; add `image_base64` to the JSON body for image input. It serializes requests and sends one OpenRouter chat completion per decision. `--max-tokens` sets a per-decision completion limit (default 1024, maximum 4096). `--reasoning-effort` is optional and passed through only when requested; use a value supported by the selected model.
+For one image on the CLI, add `--image photo.jpg`. The adapter accepts PNG, JPEG, GIF and WebP up to 8 MiB. To serve HTTP, replace `--input ...` with `--listen 127.0.0.1:8081`. The listener exposes `POST /v1/decisions`, `GET /v1/capabilities`, and `GET /healthz`. It runs up to four remote HTTP requests in parallel; decisions with the same media selection are also sent in batches of up to four parallel completions. `--max-tokens` sets a per-decision completion limit (default 1024, maximum 4096). `--reasoning-effort` is optional and passed through only when requested; use a value supported by the selected model.
 
-OpenRouter responses carry `"evidence":"selection_only"`. Each result contains a typed selected value, the exact option code, a status, the reported model and optional token usage. Codes must match exactly after surrounding whitespace is removed; malformed or incomplete model output abstains. Fixed-width codes support more than 26 options. The remote response has no `scores`, `candidate_mass`, `top_option_probability`, `p_true` or ordinal expected value, and the local probability policy is not applied. An ordinal result has the selected level's `level_value` instead. Provider or transport failures return HTTP 502 from the L2S1 listener. This separates [OpenRouter chat output](https://openrouter.ai/docs/api/api-reference/chat/create-a-chat-completion) from L2S1's full-logit local evidence. The adapter has a loopback mock-server test; a live OpenRouter request requires an API key.
+Codes must match exactly after surrounding whitespace is removed; malformed or incomplete model output abstains. Fixed-width codes support more than 26 options. The remote response has no `scores`, `candidate_mass`, `top_option_probability`, `p_true` or ordinal expected value, and the local probability policy is not applied. An ordinal result has the selected level's `level_value`. Provider or transport failures return HTTP 502. A mock-server test checks the adapter; a live OpenRouter request requires an API key. The provider's image and request limits depend on the selected model, so `GET /v1/capabilities` reports the adapter limits and marks the provider limit as model dependent.
 
 ## The decision contract
 
