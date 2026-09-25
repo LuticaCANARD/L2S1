@@ -158,7 +158,9 @@ impl From<Error> for DecisionFailure {
         Self::new(
             match error {
                 Error::Invalid(_) => FailureKind::InvalidRequest,
-                Error::Backend(_) | Error::Upstream(_) => FailureKind::BackendFailure,
+                Error::Backend(_) | Error::ModelLoad(_) | Error::Upstream(_) => {
+                    FailureKind::BackendFailure
+                }
             },
             "prepare",
             None,

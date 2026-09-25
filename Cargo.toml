@@ -7,6 +7,7 @@ license = "MIT"
 repository = "https://github.com/LuticaCANARD/L2S1"
 exclude = ["/models/**", "**/*.gguf", "**/*.safetensors", "/target/**", "/results/**", "/web/**", "/crates/**", "/scripts/**"]
 build = "build.rs"
+links = "l2s1"
 
 [workspace]
 members = [".", "crates/l2s1-llama-sys", "crates/l2s1-tools"]

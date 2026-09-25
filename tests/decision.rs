@@ -12,6 +12,51 @@ fn binary() -> Decision {
 }
 
 #[test]
+fn typed_ordinal_constructor_preserves_levels_and_validation() {
+    let levels = [
+        Level {
+            id: "low".into(),
+            criterion: "Low priority".into(),
+            value: 1.0,
+        },
+        Level {
+            id: "high".into(),
+            criterion: "High priority".into(),
+            value: 3.0,
+        },
+    ];
+    let decision = Decision::ordinal("priority", "Rate priority", levels);
+    let request = DecisionRequest {
+        state: serde_json::json!({}),
+        decisions: vec![decision],
+    };
+    request.validate().unwrap();
+    assert_eq!(request.decisions[0].id, "priority");
+    assert_eq!(request.decisions[0].options()[1].id, "high");
+    let round_trip: DecisionRequest =
+        serde_json::from_value(serde_json::to_value(&request).unwrap()).unwrap();
+    round_trip.validate().unwrap();
+    assert!(matches!(
+        round_trip.decisions[0].kind,
+        DecisionKind::Ordinal { .. }
+    ));
+}
+
+#[test]
+fn compute_defaults_match_cli() {
+    let options = ComputeOptions::default();
+    options.validate().unwrap();
+    assert_eq!(options.context, 2048);
+    assert_eq!(options.batch, 256);
+    assert_eq!(options.ubatch, 256);
+    assert_eq!(options.threads, 4);
+    assert_eq!(options.flash_attention, FlashAttention::Off);
+    assert_eq!(options.gpu_layers, None);
+    assert_eq!(options.cpu_moe_layers, 0);
+    assert_eq!(options.model_load_mode, ModelLoadMode::Auto);
+}
+
+#[test]
 fn candidate_mass_prevents_false_confidence() {
     let result = score_logits(
         &binary(),

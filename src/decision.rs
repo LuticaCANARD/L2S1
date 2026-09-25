@@ -7,6 +7,8 @@ pub enum Error {
     Invalid(String),
     #[error("inference failed: {0}")]
     Backend(String),
+    #[error("model load failed: {0}")]
+    ModelLoad(String),
     #[error("upstream provider failed: {0}")]
     Upstream(String),
 }
@@ -58,6 +60,22 @@ pub struct Level {
 }
 
 impl Decision {
+    /// Construct an ordinal decision from typed levels. Request validation still
+    /// checks IDs, criteria, and strictly increasing finite values.
+    pub fn ordinal(
+        id: impl Into<String>,
+        instruction: impl Into<String>,
+        levels: impl IntoIterator<Item = Level>,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            instruction: instruction.into(),
+            kind: DecisionKind::Ordinal {
+                levels: levels.into_iter().collect(),
+            },
+        }
+    }
+
     pub fn options(&self) -> Vec<OptionSpec> {
         match &self.kind {
             DecisionKind::Binary {
@@ -325,6 +343,21 @@ pub struct ComputeOptions {
 
 fn zero_u32(value: &u32) -> bool {
     *value == 0
+}
+
+impl Default for ComputeOptions {
+    fn default() -> Self {
+        Self {
+            context: 2048,
+            batch: 256,
+            ubatch: 256,
+            threads: 4,
+            flash_attention: FlashAttention::Off,
+            gpu_layers: None,
+            cpu_moe_layers: 0,
+            model_load_mode: ModelLoadMode::Auto,
+        }
+    }
 }
 
 impl ComputeOptions {

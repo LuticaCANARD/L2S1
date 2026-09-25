@@ -19,6 +19,7 @@ fn main() {
         "src/prompt.rs",
         "src/llama.rs",
         "src/llama/interchange.rs",
+        "src/llama/model_hash.rs",
         "src/llama/prepared_cache.rs",
         "src/llama/shared_state.rs",
         "src/llama/batching.rs",
@@ -62,11 +63,15 @@ fn main() {
         fingerprint.finalize()
     );
 
-    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux") {
+    if matches!(
+        env::var("CARGO_CFG_TARGET_OS").as_deref(),
+        Ok("linux" | "macos")
+    ) {
         let libdir = PathBuf::from(
             env::var_os("DEP_L2S1_LLAMA_LIBDIR")
                 .expect("l2s1-llama-sys library directory unavailable"),
         );
+        println!("cargo::metadata=libdir={}", libdir.display());
         println!("cargo:rustc-link-arg=-Wl,-rpath,{}", libdir.display());
     }
 }
