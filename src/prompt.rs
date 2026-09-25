@@ -107,7 +107,11 @@ pub struct PromptPart {
     pub parse_special: bool,
 }
 
-fn decision_data(state: &serde_json::Value, decision: &Decision, layout: PromptLayout) -> String {
+pub(crate) fn decision_data(
+    state: &serde_json::Value,
+    decision: &Decision,
+    layout: PromptLayout,
+) -> String {
     let count = decision.options().len();
     let options: Vec<_> = decision.options().iter().enumerate().map(|(i, o)| {
         serde_json::json!({"code": crate::option_code(i, count).expect("validated options"), "criterion": o.criterion})

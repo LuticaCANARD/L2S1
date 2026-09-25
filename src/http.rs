@@ -1,5 +1,7 @@
 //! Small synchronous JSON API. One owned backend serializes GPU access.
-use crate::{DecisionRequest, Error, VisionDecisionBackend};
+#[cfg(any(feature = "llama", feature = "wgpu", test))]
+use crate::VisionDecisionBackend;
+use crate::{DecisionRequest, Error};
 use base64::Engine;
 use std::{
     io::{Read, Write},
@@ -11,7 +13,64 @@ const MAX_HEADER: usize = 16 * 1024;
 const MAX_BODY: usize = 12 * 1024 * 1024;
 const MAX_IMAGE_BASE64: usize = 11 * 1024 * 1024;
 
-pub fn serve<B: VisionDecisionBackend>(
+/// HTTP response boundary shared by full-evidence local and selection-only remote backends.
+pub trait HttpDecisionBackend {
+    fn decide_json(
+        &mut self,
+        request: &DecisionRequest,
+        image: Option<&[u8]>,
+    ) -> crate::Result<serde_json::Value>;
+}
+
+#[cfg(any(feature = "llama", feature = "wgpu", test))]
+fn local_decide_json<B: VisionDecisionBackend>(
+    backend: &mut B,
+    request: &DecisionRequest,
+    image: Option<&[u8]>,
+) -> crate::Result<serde_json::Value> {
+    let response = if let Some(image) = image {
+        backend.decide_vision(request, image)?
+    } else {
+        backend.decide(request)?
+    };
+    serde_json::to_value(response).map_err(|e| Error::Backend(e.to_string()))
+}
+
+#[cfg(feature = "llama")]
+impl HttpDecisionBackend for crate::llama::LlamaBackend {
+    fn decide_json(
+        &mut self,
+        request: &DecisionRequest,
+        image: Option<&[u8]>,
+    ) -> crate::Result<serde_json::Value> {
+        local_decide_json(self, request, image)
+    }
+}
+
+#[cfg(feature = "wgpu")]
+impl HttpDecisionBackend for crate::wgpu::WgpuBackend {
+    fn decide_json(
+        &mut self,
+        request: &DecisionRequest,
+        image: Option<&[u8]>,
+    ) -> crate::Result<serde_json::Value> {
+        local_decide_json(self, request, image)
+    }
+}
+
+#[cfg(feature = "openrouter")]
+impl HttpDecisionBackend for crate::openrouter::OpenRouterBackend {
+    fn decide_json(
+        &mut self,
+        request: &DecisionRequest,
+        image: Option<&[u8]>,
+    ) -> crate::Result<serde_json::Value> {
+        serde_json::to_value(self.decide(request, image)?)
+            .map_err(|e| Error::Backend(e.to_string()))
+    }
+}
+
+pub fn serve<B: HttpDecisionBackend>(
     address: &str,
     backend: &mut B,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -32,10 +91,7 @@ pub fn serve<B: VisionDecisionBackend>(
     Ok(())
 }
 
-fn handle<B: VisionDecisionBackend>(
-    stream: &mut TcpStream,
-    backend: &mut B,
-) -> std::io::Result<()> {
+fn handle<B: HttpDecisionBackend>(stream: &mut TcpStream, backend: &mut B) -> std::io::Result<()> {
     let request = match read_request(stream) {
         Ok(request) => request,
         Err((status, message)) => {
@@ -69,10 +125,13 @@ fn handle<B: VisionDecisionBackend>(
         Err(Error::Backend(message)) => {
             respond(stream, 422, &serde_json::json!({"error": message}))
         }
+        Err(Error::Upstream(message)) => {
+            respond(stream, 502, &serde_json::json!({"error": message}))
+        }
     }
 }
 
-fn run_request<B: VisionDecisionBackend>(
+fn run_request<B: HttpDecisionBackend>(
     backend: &mut B,
     body: &[u8],
 ) -> crate::Result<serde_json::Value> {
@@ -84,7 +143,7 @@ fn run_request<B: VisionDecisionBackend>(
     let image = object.remove("image_base64");
     let request: DecisionRequest = serde_json::from_value(value)
         .map_err(|e| Error::Invalid(format!("invalid decision request: {e}")))?;
-    let response = if let Some(image) = image {
+    let image = if let Some(image) = image {
         let encoded = image
             .as_str()
             .ok_or_else(|| Error::Invalid("image_base64 must be a string".into()))?;
@@ -94,11 +153,11 @@ fn run_request<B: VisionDecisionBackend>(
         let decoded = base64::engine::general_purpose::STANDARD
             .decode(encoded)
             .map_err(|_| Error::Invalid("image_base64 is not valid standard base64".into()))?;
-        backend.decide_vision(&request, &decoded)?
+        Some(decoded)
     } else {
-        backend.decide(&request)?
+        None
     };
-    serde_json::to_value(response).map_err(|e| Error::Backend(e.to_string()))
+    backend.decide_json(&request, image.as_deref())
 }
 
 struct HttpRequest {
@@ -196,6 +255,7 @@ fn respond(stream: &mut TcpStream, status: u16, body: &serde_json::Value) -> std
         413 => "Content Too Large",
         415 => "Unsupported Media Type",
         422 => "Unprocessable Content",
+        502 => "Bad Gateway",
         431 => "Request Header Fields Too Large",
         _ => "Error",
     };
@@ -237,6 +297,28 @@ mod tests {
         }
     }
 
+    impl HttpDecisionBackend for DispatchProbe {
+        fn decide_json(
+            &mut self,
+            request: &DecisionRequest,
+            image: Option<&[u8]>,
+        ) -> crate::Result<serde_json::Value> {
+            local_decide_json(self, request, image)
+        }
+    }
+
+    struct UpstreamProbe;
+
+    impl HttpDecisionBackend for UpstreamProbe {
+        fn decide_json(
+            &mut self,
+            _: &DecisionRequest,
+            _: Option<&[u8]>,
+        ) -> crate::Result<serde_json::Value> {
+            Err(Error::Upstream("provider unavailable".into()))
+        }
+    }
+
     #[test]
     fn image_field_selects_vision_backend() {
         let mut probe = DispatchProbe::default();
@@ -269,6 +351,27 @@ mod tests {
             read_request(&mut server),
             Err((400, "duplicate Content-Length"))
         ));
+        client.join().unwrap();
+    }
+
+    #[test]
+    fn upstream_failure_is_bad_gateway() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let client = std::thread::spawn(move || {
+            let mut stream = TcpStream::connect(address).unwrap();
+            let body = serde_json::json!({
+                "state": {},
+                "decisions": [{"id":"flag","instruction":"Choose","kind":{"type":"binary","false_label":"no","true_label":"yes"}}]
+            }).to_string();
+            write!(stream, "POST /v1/decisions HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}", body.len()).unwrap();
+            let mut response = String::new();
+            stream.read_to_string(&mut response).unwrap();
+            assert!(response.starts_with("HTTP/1.1 502 Bad Gateway\r\n"));
+        });
+        let (mut server, _) = listener.accept().unwrap();
+        handle(&mut server, &mut UpstreamProbe).unwrap();
+        drop(server);
         client.join().unwrap();
     }
 }
