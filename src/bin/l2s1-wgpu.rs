@@ -1,7 +1,6 @@
 use clap::Parser;
 use l2s1::{
-    DecisionBackend, DecisionPolicy, DecisionRequest, PromptDetail, PromptLayout,
-    VisionDecisionBackend, wgpu::WgpuBackend,
+    DecisionPolicy, DecisionRequest, ExecutionMode, PromptDetail, PromptLayout, wgpu::WgpuBackend,
 };
 use std::{
     io::{self, Read},
@@ -14,8 +13,8 @@ struct Args {
     #[arg(long)]
     model: PathBuf,
     #[arg(long)]
-    mmproj: PathBuf,
-    #[arg(long)]
+    mmproj: Option<PathBuf>,
+    #[arg(long, requires = "mmproj")]
     image: Option<PathBuf>,
     #[arg(long)]
     listen: Option<String>,
@@ -23,12 +22,20 @@ struct Args {
     input: String,
     #[arg(long)]
     inspect: bool,
+    #[arg(long)]
+    diagnostics: bool,
     #[arg(long, help = "Allow a CPU Vulkan adapter for local development only")]
     allow_software_adapter: bool,
+    #[arg(long, help = "Fail unless wgpu selected the Metal backend")]
+    require_metal: bool,
     #[arg(long, value_enum, default_value_t = PromptLayout::Legacy)]
     prompt_layout: PromptLayout,
     #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
     prompt_detail: PromptDetail,
+    #[arg(long, value_enum, default_value_t = ExecutionMode::Fresh)]
+    execution_mode: ExecutionMode,
+    #[arg(long, default_value_t = 268_435_456)]
+    snapshot_limit_bytes: usize,
     #[arg(long, default_value_t = 0.8)]
     min_top_probability: f64,
     #[arg(long, default_value_t = 0.05)]
@@ -41,14 +48,27 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         min_top_probability: args.min_top_probability,
         min_candidate_mass: args.min_candidate_mass,
     };
-    let mut backend = WgpuBackend::load_with_software_adapter(
-        &args.model,
-        &args.mmproj,
-        policy,
-        args.allow_software_adapter,
-    )?;
+    let mut backend = if let Some(projector) = &args.mmproj {
+        WgpuBackend::load_with_software_adapter(
+            &args.model,
+            projector,
+            policy,
+            args.allow_software_adapter,
+        )?
+    } else {
+        WgpuBackend::load_text(&args.model, policy, args.allow_software_adapter)?
+    };
+    if args.require_metal && backend.adapter_backend() != wgpu::Backend::Metal {
+        return Err(format!(
+            "wgpu selected {:?}, but Metal was required",
+            backend.adapter_backend()
+        )
+        .into());
+    }
     backend.set_prompt_layout(args.prompt_layout);
     backend.set_prompt_detail(args.prompt_detail);
+    backend.set_execution_mode(args.execution_mode)?;
+    backend.set_snapshot_limit_bytes(args.snapshot_limit_bytes);
     if args.inspect {
         serde_json::to_writer_pretty(io::stdout().lock(), backend.inspect())?;
         println!();
@@ -65,12 +85,19 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         std::fs::read_to_string(&args.input)?
     };
     let request: DecisionRequest = serde_json::from_str(&text)?;
-    let response = if let Some(path) = &args.image {
-        backend.decide_vision(&request, &std::fs::read(path)?)?
+    let (response, execution) = if let Some(path) = &args.image {
+        backend.decide_vision_detailed(&request, &std::fs::read(path)?)?
     } else {
-        backend.decide(&request)?
+        backend.decide_detailed(&request)?
     };
-    serde_json::to_writer_pretty(io::stdout().lock(), &response)?;
+    if args.diagnostics {
+        serde_json::to_writer_pretty(
+            io::stdout().lock(),
+            &serde_json::json!({"response":response,"execution":execution}),
+        )?;
+    } else {
+        serde_json::to_writer_pretty(io::stdout().lock(), &response)?;
+    }
     println!();
     Ok(())
 }

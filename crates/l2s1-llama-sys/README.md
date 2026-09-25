@@ -7,8 +7,10 @@ SHA-256 before building. See `cmake/CMakeLists.txt` and `UPSTREAM_COMMIT`.
 The native source is not checked into this repository. The upstream source archive
 contains its license; this crate includes `THIRD_PARTY_LICENSES.txt`.
 
-The default build is CPU-only. Enable `l2s1/llama-cuda` for CUDA; CMake 3.24+,
-a C++17 compiler, and the CUDA toolkit are required for that feature.
+The default build is CPU-only. Enable `l2s1/llama-cuda` for CUDA or
+`l2s1/llama-metal` for Metal on macOS. CMake 3.24+ and a C++17 compiler are
+required; CUDA additionally requires the CUDA toolkit. CUDA and Metal cannot
+be enabled together in one build.
 The CUDA build disables host-specific architecture selection for distributable
 artifacts. Set `L2S1_CUDA_ARCHITECTURES` (for example `86`) to limit the CUDA
 architectures when building for a known target.

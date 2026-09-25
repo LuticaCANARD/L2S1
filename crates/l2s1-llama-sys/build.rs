@@ -70,6 +70,22 @@ fn main() {
     }
 
     let cuda = env::var_os("CARGO_FEATURE_CUDA").is_some();
+    let metal = env::var_os("CARGO_FEATURE_METAL").is_some();
+    let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target OS unavailable");
+    assert!(!(cuda && metal), "CUDA and Metal are mutually exclusive");
+    assert!(!metal || target_os == "macos", "Metal requires macOS");
+    let shared_extension = if target_os == "macos" {
+        ".dylib"
+    } else {
+        ".so"
+    };
+    let backend = if cuda {
+        "cuda"
+    } else if metal {
+        "metal"
+    } else {
+        "cpu"
+    };
     let cuda_architectures = env::var("L2S1_CUDA_ARCHITECTURES").ok();
     let native_launcher = env::var("L2S1_NATIVE_COMPILER_LAUNCHER")
         .ok()
@@ -100,7 +116,7 @@ fn main() {
             .as_bytes(),
     );
     build_key.update(commit.trim().as_bytes());
-    build_key.update(if cuda { "cuda" } else { "cpu" }.as_bytes());
+    build_key.update(backend.as_bytes());
     if let Some(architectures) = &cuda_architectures {
         build_key.update(architectures.as_bytes());
     }
@@ -122,7 +138,8 @@ fn main() {
         .define("MTMD_VIDEO", "OFF")
         .define("LLAMA_BUILD_COMMIT", commit.trim())
         .define("LLAMA_BUILD_NUMBER", "0")
-        .define("GGML_CUDA", if cuda { "ON" } else { "OFF" });
+        .define("GGML_CUDA", if cuda { "ON" } else { "OFF" })
+        .define("GGML_METAL", if metal { "ON" } else { "OFF" });
     if let Some(source) = &selected {
         cmake.define("FETCHCONTENT_SOURCE_DIR_LLAMA_CPP", source);
     }
@@ -140,12 +157,12 @@ fn main() {
     let install = cmake.build();
     let lib = install.join("lib");
     assert!(
-        lib.join("libllama.so").is_file(),
-        "llama.cpp did not install libllama.so"
+        lib.join(format!("libllama{shared_extension}")).is_file(),
+        "llama.cpp did not install the llama shared library"
     );
     assert!(
-        lib.join("libmtmd.so").is_file(),
-        "llama.cpp did not install libmtmd.so"
+        lib.join(format!("libmtmd{shared_extension}")).is_file(),
+        "llama.cpp did not install the mtmd shared library"
     );
     let source = PathBuf::from(
         fs::read_to_string(install.join("build/l2s1-llama-source.txt"))
@@ -186,7 +203,7 @@ fn main() {
 
     let mut fingerprint = Sha256::new();
     fingerprint.update(commit.trim().as_bytes());
-    fingerprint.update(if cuda { "cuda" } else { "cpu" }.as_bytes());
+    fingerprint.update(backend.as_bytes());
     for file in [
         "include/llama.h",
         "src/llama-ext.h",
@@ -208,9 +225,10 @@ fn main() {
         .filter(|path| {
             path.file_name().is_some_and(|name| {
                 let name = name.to_string_lossy();
-                (name.starts_with("libllama.so")
-                    || name.starts_with("libmtmd.so")
+                (name.starts_with("libllama")
+                    || name.starts_with("libmtmd")
                     || name.starts_with("libggml"))
+                    && name.contains(shared_extension)
                     && path.is_file()
             })
         })

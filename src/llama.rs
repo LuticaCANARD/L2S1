@@ -58,7 +58,7 @@ pub struct LlamaBackend {
     context: usize,
     compute: ComputeOptions,
     timings: InferenceTimings,
-    cuda: bool,
+    gpu: bool,
     policy: DecisionPolicy,
     architecture: String,
     profile: PromptProfile,
@@ -201,8 +201,34 @@ impl LlamaBackend {
         policy: DecisionPolicy,
         profile: PromptProfile,
     ) -> Result<Self> {
+        Self::load_with_device_options(path, compute, if cuda { 1 } else { 0 }, policy, profile)
+    }
+
+    /// Load a GGUF through the pinned llama.cpp Metal backend on macOS.
+    pub fn load_with_metal_options(
+        path: &Path,
+        compute: ComputeOptions,
+        policy: DecisionPolicy,
+        profile: PromptProfile,
+    ) -> Result<Self> {
+        if !cfg!(target_os = "macos") || !cfg!(feature = "llama-metal") {
+            return Err(Error::Backend(
+                "Metal requires macOS and --features llama-metal".into(),
+            ));
+        }
+        Self::load_with_device_options(path, compute, 2, policy, profile)
+    }
+
+    fn load_with_device_options(
+        path: &Path,
+        compute: ComputeOptions,
+        device_kind: i32,
+        policy: DecisionPolicy,
+        profile: PromptProfile,
+    ) -> Result<Self> {
         policy.validate()?;
-        compute.validate_device(cuda)?;
+        let gpu = device_kind != 0;
+        compute.validate_device(gpu)?;
         let path = path
             .canonicalize()
             .map_err(|e| Error::Backend(e.to_string()))?;
@@ -227,10 +253,10 @@ impl LlamaBackend {
                     FlashAttention::On => 1,
                 },
                 compute.threads,
-                cuda,
+                device_kind,
                 compute
                     .gpu_layers
-                    .map_or(if cuda { -1 } else { 0 }, |n| n as i32),
+                    .map_or(if gpu { -1 } else { 0 }, |n| n as i32),
                 compute.cpu_moe_layers as i32,
                 match compute.model_load_mode {
                     crate::ModelLoadMode::Auto => -1,
@@ -256,7 +282,7 @@ impl LlamaBackend {
             context: compute.context as usize,
             compute,
             timings: InferenceTimings::default(),
-            cuda,
+            gpu,
             policy,
             architecture: String::new(),
             profile,
@@ -284,7 +310,7 @@ impl LlamaBackend {
             .to_string_lossy();
         if paths.is_empty() {
             return Err(Error::Backend(
-                "verified loaded runtime identity currently requires Linux".into(),
+                "loaded llama.cpp runtime libraries could not be identified".into(),
             ));
         }
         let mut hashes = Vec::new();
@@ -1095,8 +1121,8 @@ impl LlamaBackend {
             } else {
                 1
             },
-            offload_requested: self.cuda,
-            offload_device: self.cuda.then_some(device),
+            offload_requested: self.gpu,
+            offload_device: self.gpu.then_some(device),
         }
     }
 }

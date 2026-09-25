@@ -16,6 +16,7 @@ resolver = "3"
 default = []
 llama = ["dep:l2s1-llama-sys"]
 llama-cuda = ["llama", "l2s1-llama-sys/cuda"]
+llama-metal = ["llama", "l2s1-llama-sys/metal"]
 openrouter = ["dep:reqwest"]
 wgpu = ["dep:rullama-engine", "dep:wgpu", "dep:pollster", "dep:async-trait", "dep:image", "dep:half"]
 

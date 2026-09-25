@@ -61,7 +61,7 @@ unsafe extern "C" {
         ubatch: u32,
         flash_attention: i32,
         threads: i32,
-        cuda: bool,
+        device_kind: i32,
         gpu_layers: i32,
         cpu_moe_layers: i32,
         model_load_mode: i32,
