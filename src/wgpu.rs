@@ -12,8 +12,7 @@ use crate::{
 };
 use image::imageops::FilterType;
 use rullama_engine::api::{ChatMessage, ChatRole, Model};
-use rullama_engine::gguf::FileFetcher;
-use std::{path::Path, sync::Arc};
+use std::path::Path;
 
 const IMAGE_ALIGN: u32 = 48;
 const IMAGE_MAX_SIDE: u32 = 432;
@@ -68,7 +67,7 @@ impl WgpuBackend {
             let fetcher = pollster::block_on(paired_gguf::open(model_path, projector_path))?;
             pollster::block_on(Model::load_streaming(fetcher)).map_err(backend_error)?
         } else {
-            let fetcher = Arc::new(FileFetcher::open(model_path).map_err(backend_error)?);
+            let fetcher = pollster::block_on(paired_gguf::open_text(model_path))?;
             pollster::block_on(Model::load_streaming_text_only(fetcher, 4096))
                 .map_err(backend_error)?
         };
