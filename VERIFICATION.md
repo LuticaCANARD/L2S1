@@ -4,7 +4,7 @@ Run checks for the exact checkpoint, runtime and execution configuration you int
 
 ## Build and general checks
 
-The pinned llama.cpp revision is `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`. CMake FetchContent downloads it on the first default build and verifies the archive hash. The sys dependency builds matching source, headers and shared libraries. The native backend currently requires Linux. Set `L2S1_LLAMA_CPP_SOURCE` to use a local checkout for offline checks or to test another upstream revision.
+The pinned llama.cpp revision is `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`. CMake FetchContent downloads it on the first default build and verifies the archive hash. The sys dependency builds matching source, headers and shared libraries. CPU and CUDA builds run on Linux; `llama-metal` builds the same native API with a Metal device on macOS. Set `L2S1_LLAMA_CPP_SOURCE` to use a local checkout for offline checks or to test another upstream revision.
 
 ```sh
 cargo fmt --all -- --check
@@ -15,6 +15,8 @@ python3 -m unittest discover -s scripts -p 'test_*.py'
 ```
 
 For GPU checks, build with `--features llama-cuda` and use `SKID_CUDA=1` for native tests. A CPU-only build rejects a CUDA request.
+
+On a Mac, build both Metal routes with `cargo build --release --locked --features wgpu --bin l2s1-wgpu` and `cargo build --release --locked --features llama-metal --bin l2s1`. Run the first with `WGPU_BACKEND=metal --require-metal` for Gemma 4 and the second with `--device metal` for general GGUF models. The macOS CI workflow checks compilation; real Metal inference and equivalence need a Mac with the matching GGUF files. For Gemma 4 request-local mode equivalence, set `L2S1_WGPU_GEMMA_MODEL` and `L2S1_WGPU_GEMMA_MMPROJ`, then run `cargo test --release --locked --features wgpu --test wgpu_execution -- --ignored`.
 
 For another GGUF family on CUDA, use the same binary with the new model path. Run `--inspect`, `--preflight --input examples/warehouse.json`, and a real decision request before comparing task quality. The multi-model conformance test below accepts colon-separated GGUF paths and `SKID_CUDA=1`. A successful load or a finite candidate mass establishes compatibility with this decision path, not correctness on labeled tasks.
 

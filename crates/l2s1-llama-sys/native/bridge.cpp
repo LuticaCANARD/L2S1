@@ -7,6 +7,8 @@
 #include <chrono>
 #if defined(__linux__)
 #include <link.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
 #endif
 #include <climits>
 #include <cmath>
@@ -51,15 +53,15 @@ static void report(char * out, size_t cap, const char * message) {
 }
 
 extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_t batch,
-        uint32_t ubatch, int32_t flash_attention, int32_t threads, bool cuda,
+        uint32_t ubatch, int32_t flash_attention, int32_t threads, int32_t device_kind,
         int32_t gpu_layers, int32_t cpu_moe_layers, int32_t model_load_mode,
         char * error, size_t error_cap) noexcept {
     try {
         if (ubatch == 0 || ubatch > batch || flash_attention < -1 || flash_attention > 1)
             throw std::runtime_error("invalid microbatch or FlashAttention option");
-        if (gpu_layers < -1 || cpu_moe_layers < 0 ||
+        if (device_kind < 0 || device_kind > 2 || gpu_layers < -1 || cpu_moe_layers < 0 ||
                 static_cast<size_t>(cpu_moe_layers) >= llama_max_tensor_buft_overrides() ||
-                (!cuda && (gpu_layers != 0 || cpu_moe_layers != 0)))
+                (device_kind == 0 && (gpu_layers != 0 || cpu_moe_layers != 0)))
             throw std::runtime_error("invalid CPU/GPU placement options");
         if (model_load_mode != -1 && model_load_mode != 0)
             throw std::runtime_error("invalid model loading mode");
@@ -67,17 +69,18 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
         std::call_once(init, [] { ggml_backend_load_all(); llama_backend_init(); });
         auto e = std::make_unique<engine>();
         auto mp = llama_model_default_params();
-        if (cuda) {
+        if (device_kind != 0) {
+            const char * requested = device_kind == 1 ? "CUDA" : "MTL";
             for (size_t i = 0; i < ggml_backend_dev_count(); ++i) {
                 auto dev = ggml_backend_dev_get(i);
                 auto reg = ggml_backend_dev_backend_reg(dev);
-                if (std::strcmp(ggml_backend_reg_name(reg), "CUDA") == 0 &&
+                if (std::strcmp(ggml_backend_reg_name(reg), requested) == 0 &&
                     ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_GPU) {
                     e->devices[0] = dev;
                     break;
                 }
             }
-            if (!e->devices[0]) throw std::runtime_error("CUDA device unavailable; select CPU explicitly to use CPU");
+            if (!e->devices[0]) throw std::runtime_error(std::string(requested) + " device unavailable; select CPU explicitly to use CPU");
         }
         mp.devices = e->devices;
         mp.n_gpu_layers = gpu_layers;
@@ -122,8 +125,8 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
         cp.n_threads = threads;
         cp.n_threads_batch = threads;
         cp.embeddings = false;
-        cp.offload_kqv = cuda;
-        cp.op_offload = cuda;
+        cp.offload_kqv = device_kind != 0;
+        cp.op_offload = device_kind != 0;
         cp.flash_attn_type = static_cast<llama_flash_attn_type>(flash_attention);
         e->context_params = cp;
         e->context_size = context;
@@ -144,6 +147,19 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
         }, &libraries);
         std::sort(libraries.begin(), libraries.end());
         for (const auto & library : libraries) e->runtime_libraries += library + "\n";
+#elif defined(__APPLE__)
+        std::vector<std::string> libraries;
+        for (uint32_t i = 0; i < _dyld_image_count(); ++i) {
+            const char * image = _dyld_get_image_name(i);
+            if (!image) continue;
+            const std::string path = image;
+            const auto name = path.substr(path.find_last_of('/') + 1);
+            if ((name.rfind("libllama", 0) == 0 || name.rfind("libmtmd", 0) == 0 ||
+                 name.rfind("libggml", 0) == 0) && name.find(".dylib") != std::string::npos)
+                libraries.push_back(path);
+        }
+        std::sort(libraries.begin(), libraries.end());
+        for (const auto & library : libraries) e->runtime_libraries += library + "\n";
 #endif
         return e.release();
     } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }
@@ -157,7 +173,7 @@ extern "C" engine * sd_open_placement(const char * path, uint32_t context, uint3
         int32_t gpu_layers, int32_t cpu_moe_layers,
         char * error, size_t error_cap) noexcept {
     return sd_open_loading(path, context, batch, ubatch, flash_attention, threads,
-        cuda, gpu_layers, cpu_moe_layers, -1, error, error_cap);
+        cuda ? 1 : 0, gpu_layers, cpu_moe_layers, -1, error, error_cap);
 }
 
 // Keep the original native entry point for existing callers and reference tests.

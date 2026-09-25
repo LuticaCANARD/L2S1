@@ -75,7 +75,7 @@ struct Args {
     code_rotation: u32,
     #[arg(long, default_value = "-")]
     input: String,
-    /// CUDA device is required when selected; no silent CPU fallback.
+    /// The selected GPU device is required; no silent CPU fallback.
     #[arg(long, value_enum, default_value_t = Device::Cpu)]
     device: Device,
     #[arg(long, default_value_t = 2048)]
@@ -108,6 +108,7 @@ struct Args {
 enum Device {
     Cpu,
     Cuda,
+    Metal,
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -116,22 +117,31 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         min_top_probability: args.min_top_probability,
         min_candidate_mass: args.min_candidate_mass,
     };
-    let mut backend = LlamaBackend::load_with_options(
-        &args.model,
-        ComputeOptions {
-            context: args.context,
-            batch: args.batch,
-            ubatch: args.ubatch.unwrap_or(args.batch),
-            threads: args.threads,
-            flash_attention: args.flash_attention,
-            gpu_layers: args.gpu_layers,
-            cpu_moe_layers: args.cpu_moe_layers,
-            model_load_mode: args.model_load_mode,
-        },
-        matches!(args.device, Device::Cuda),
-        policy,
-        args.prompt_profile,
-    )?;
+    let compute = ComputeOptions {
+        context: args.context,
+        batch: args.batch,
+        ubatch: args.ubatch.unwrap_or(args.batch),
+        threads: args.threads,
+        flash_attention: args.flash_attention,
+        gpu_layers: args.gpu_layers,
+        cpu_moe_layers: args.cpu_moe_layers,
+        model_load_mode: args.model_load_mode,
+    };
+    let mut backend = match args.device {
+        Device::Metal => LlamaBackend::load_with_metal_options(
+            &args.model,
+            compute,
+            policy,
+            args.prompt_profile,
+        )?,
+        Device::Cpu | Device::Cuda => LlamaBackend::load_with_options(
+            &args.model,
+            compute,
+            matches!(args.device, Device::Cuda),
+            policy,
+            args.prompt_profile,
+        )?,
+    };
     if let Some(path) = &args.lora {
         backend.load_lora(path)?;
     }

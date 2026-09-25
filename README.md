@@ -10,7 +10,7 @@ The crate is named `l2s1`. The default inference executable uses **llama.cpp and
 
 ## Optional wgpu backend
 
-The `wgpu` feature uses the pinned [rullama-engine](https://github.com/Brainwires/rullama-framework/tree/main/engine/rullama-engine) Gemma 4 text and vision implementation. It accepts the llama.cpp Gemma 4 text GGUF and its matching `mmproj` GGUF. A streaming adapter exposes both files as one virtual GGUF to the engine; model weights are read from the original files. GPU inference and image encoding use Rust wgpu. The feature requires a wgpu GPU adapter and rejects software Vulkan adapters unless `--allow-software-adapter` is explicitly set for development. The Gemma 4 E2B Q8_0 pair has been checked locally through software wgpu; native GPU quality and other checkpoint sizes still need verification.
+The `wgpu` feature uses the pinned [rullama-engine](https://github.com/Brainwires/rullama-framework/tree/main/engine/rullama-engine) Gemma 4 text and vision implementation. It accepts a Gemma 4 text GGUF alone or with its matching `mmproj` GGUF. A streaming adapter exposes paired files as one virtual GGUF to the engine; model weights are read from the original files. GPU inference and image encoding use Rust wgpu. The feature requires a wgpu GPU adapter and rejects software Vulkan adapters unless `--allow-software-adapter` is explicitly set for development. Set `WGPU_BACKEND=metal` and `--require-metal` on macOS to enforce the native Metal adapter. The Gemma 4 E2B Q8_0 pair has been checked locally through software wgpu; native GPU quality and other checkpoint sizes still need verification.
 
 ```sh
 cargo run --release --locked --features wgpu --bin l2s1-wgpu -- \
@@ -20,17 +20,29 @@ cargo run --release --locked --features wgpu --bin l2s1-wgpu -- \
   --input examples/warehouse.json
 ```
 
-Omit `--image` for text decisions. Add `--listen 127.0.0.1:8080` to serve the same `POST /v1/decisions` and `GET /healthz` API described below; send `media` for vision requests. Images are decoded up to 25 megapixels and resized to at most 432 pixels on the longer side, aligned to the vision encoder's 48-pixel grid. The wgpu path scores full-vocabulary mass and complete multi-token answer codes for binary, choice and ordinal decisions. It uses fresh execution and Gemma 4 prompting. GPU scores may differ from llama.cpp; validate each model and task before treating them as calibrated probabilities.
+Omit `--mmproj` and `--image` for text decisions. Add `--listen 127.0.0.1:8080` to serve the same `POST /v1/decisions` and `GET /healthz` API described below; send `media` for vision requests. Images are decoded up to 25 megapixels and resized to at most 432 pixels on the longer side, aligned to the vision encoder's 48-pixel grid. The wgpu path scores full-vocabulary mass and complete multi-token answer codes for binary, choice and ordinal decisions. It supports request-local `fresh`, `prefix-reuse`, and `state-restore` execution, with `--snapshot-limit-bytes` and `--diagnostics` on the CLI. Multi-token answer codes use fresh evaluation. `parallel`, LoRA, output heads, and scalar calibration use the generic llama.cpp path below. GPU scores may differ from llama.cpp; validate each model and task before treating them as calibrated probabilities.
 
-This paired-GGUF adapter is specific to Gemma 4 and rejects Qwen model/projector files. For Qwen, SmolLM and other compatible GGUF chat models on an NVIDIA GPU, use the existing llama.cpp CUDA executable. It reads the selected GGUF's tokenizer and chat template and exposes the same typed decision and HTTP APIs:
+This paired-GGUF adapter is specific to Gemma 4 and rejects Qwen model/projector files. For Bonsai, Qwen, SmolLM and other compatible GGUF chat models, use the existing llama.cpp backend. It reads the selected GGUF's tokenizer and chat template and exposes the same typed decision and HTTP APIs. Its CUDA build supports NVIDIA GPUs; the `llama-metal` build supports Apple Metal on macOS:
 
 ```sh
 cargo run --release --locked --features llama-cuda -- \
   --model /models/Qwen3-0.6B-Q8_0.gguf \
   --device cuda --input examples/warehouse.json
+
+# macOS
+cargo run --release --locked --features llama-metal -- \
+  --model /models/Qwen3-0.6B-Q8_0.gguf \
+  --device metal --input examples/warehouse.json
 ```
 
-Change `--model` to load another compatible GGUF. Text models need only the model file; for a supported vision model, supply its matching `--mmproj` file and send the image through the CLI or HTTP API. Each model needs its own backend instance and task-quality evaluation. This route does not require FlareLLM or a Qwen-specific Rust wgpu adapter. A [two-model CUDA smoke measurement](benchmarks/gguf-cuda-20260925/README.md) records the model identities, decisions, abstentions, and timings.
+Change `--model` to load another compatible GGUF. Text models need only the model file; for a supported vision model, supply its matching `--mmproj` file and send the image through the CLI or HTTP API. The llama.cpp Metal path retains the existing output heads, LoRA, calibration, execution modes, and HTTP contract. Each model needs its own backend instance and task-quality evaluation. This route does not require FlareLLM or a Qwen-specific Rust wgpu adapter. A [two-model CUDA smoke measurement](benchmarks/gguf-cuda-20260925/README.md) records the model identities, decisions, abstentions, and timings; it does not establish Metal performance.
+
+| Metal route | GGUF models | Vision | Execution | Additional features |
+| --- | --- | --- | --- | --- |
+| Rust wgpu | Gemma 4 | Matching Gemma 4 `mmproj` | fresh, prefix-reuse, state-restore; multi-token codes use fresh | Same typed CLI and HTTP decisions |
+| llama.cpp | Models supported by the pinned llama.cpp revision, including compatible Bonsai and Qwen GGUF | Supported model with matching `mmproj` | Existing fresh, prefix-reuse, state-restore, parallel contracts; vision remains fresh | LoRA, calibration, output heads, diagnostics, HTTP |
+
+The `wgpu` executable rejects `parallel`; use the llama.cpp Metal route when it is needed. The macOS CI workflow checks that both executables build. A Mac with compatible model files is still needed to verify actual Metal inference and result equivalence.
 
 ## Architecture
 
@@ -119,7 +131,7 @@ jq --arg image "$(base64 -w0 photo.jpg)" '. + {media: [{id: "photo", type: "imag
   http://127.0.0.1:8080/v1/decisions
 ```
 
-The library still accepts original image bytes without base64. The CLI equivalent is `--mmproj /models/mmproj.gguf --image photo.jpg --input request.json`. The local llama.cpp and wgpu backends accept one image per decision; the OpenRouter adapter accepts up to four images per decision, subject to the selected provider model's own limits. Image bytes are limited to 8 MiB each, each request to 128 decisions, and the HTTP body to 44 MiB. Invalid media references or backend limits fail before inference. More than 26 options use fixed-width answer codes. Local vision uses fresh execution and full-vocabulary scoring; output heads, scalar calibration, and parallel/prefix-reuse modes are currently rejected for image requests. The listener accepts up to 32 connections with a 16-request inference queue and a 192 MiB in-flight body budget. Local GPU inference remains serial; health and capability requests stay responsive while inference is busy when a connection slot remains. Bind to loopback or place an authenticated reverse proxy in front of it for remote clients. Errors have `error.code`, `error.message`, and `error.request_id`.
+The library still accepts original image bytes without base64. The CLI equivalent is `--mmproj /models/mmproj.gguf --image photo.jpg --input request.json`. The local llama.cpp and wgpu backends accept one image per decision; the OpenRouter adapter accepts up to four images per decision, subject to the selected provider model's own limits. Image bytes are limited to 8 MiB each, each request to 128 decisions, and the HTTP body to 44 MiB. Invalid media references or backend limits fail before inference. More than 26 options use fixed-width answer codes. Local vision uses full-vocabulary scoring; llama.cpp vision uses fresh execution and rejects output heads, scalar calibration, and parallel/prefix-reuse modes for image requests. Gemma 4 wgpu vision accepts request-local prefix reuse and state restoration. The listener accepts up to 32 connections with a 16-request inference queue and a 192 MiB in-flight body budget. Local GPU inference remains serial; health and capability requests stay responsive while inference is busy when a connection slot remains. Bind to loopback or place an authenticated reverse proxy in front of it for remote clients. Errors have `error.code`, `error.message`, and `error.request_id`.
 
 Additional Rust backends implement `HttpDecisionBackend::capabilities` and `decide_json`. The contract layer validates result IDs and the common result fields before sending any response. A backend can add evidence fields under its `evidence.type` without changing the shared `value` and `status` fields.
 

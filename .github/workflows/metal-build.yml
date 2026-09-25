@@ -1,0 +1,35 @@
+name: macOS Metal builds
+
+on:
+  pull_request:
+    paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'src/**'
+      - 'crates/l2s1-llama-sys/**'
+      - '.github/workflows/metal-build.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'src/**'
+      - 'crates/l2s1-llama-sys/**'
+      - '.github/workflows/metal-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  metal:
+    runs-on: macos-15
+    env:
+      CARGO_BUILD_JOBS: '4'
+      CMAKE_BUILD_PARALLEL_LEVEL: '4'
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup update stable
+      - name: Build wgpu executable with Metal support
+        run: cargo build --release --locked --features wgpu --bin l2s1-wgpu
+      - name: Build generic GGUF executable with llama.cpp Metal
+        run: cargo build --release --locked --features llama-metal --bin l2s1
