@@ -1,0 +1,404 @@
+{
+  "source_commit": "c41925a92dc59feae30537fd5cc1f71215ba6c5e",
+  "gist_sha256": "8a44930e4233a13795258793cd1a879db0a08df8b25e2a462a8bcce011c102e5",
+  "model_kind": "gemma",
+  "model": "/home/lutica/personal/skid/gemma26-offload-20260923-211926/models/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+  "model_sha256": "f2c28b3dc4776931ac6f879e11f203dec637ea0f14267a86ec8f6165f63f293f",
+  "binary_sha256": "582dcc2be98483aad0e3731dd278dac30b42429041ab52666d70a86ce8bf69fa",
+  "host": "lucatagpu",
+  "gpu_info": "NVIDIA GeForce RTX 3060, 595.71.05, 12288 MiB",
+  "gpu": {
+    "memory_mib": 17.0,
+    "temperature_c": 43.0,
+    "power_w": 21.31
+  },
+  "warmups": 1,
+  "repeats": 3,
+  "request_sha256": {
+    "1": "bae374dac76cac7037800ae9979e124cd58b435a16eb78d86896dca2219724d2",
+    "16": "323c238174203a15d8e5d1aaec4f2ba7a6e2cd3af7b3aa53222f336f2f1841bd"
+  },
+  "modes": {
+    "fresh_full": {
+      "startup_ms": 10337.045380991185,
+      "backend_details": {
+        "compute": {
+          "batch": 256,
+          "context": 4096,
+          "cpu_moe_layers": 18,
+          "flash_attention": "off",
+          "threads": 8,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "gemma4",
+        "model_description": "gemma4 26B.A4B Q4_K - Medium",
+        "model_path": "/home/lutica/personal/skid/gemma26-offload-20260923-211926/models/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3060",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "state_first",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-state-first-v2",
+        "runtime": "local-libllama"
+      },
+      "peak_gpu_memory_mib": 9581.0,
+      "gpu_temperature_c_range": [
+        41.0,
+        59.0
+      ],
+      "counts": {
+        "1": {
+          "latency_ms": {
+            "mean": 1573.1556216666665,
+            "median": 1565.712926,
+            "p95_nearest_rank": 1588.18734,
+            "min": 1565.566599,
+            "max": 1588.18734
+          },
+          "decisions_per_s_at_median": 0.6386866860419597,
+          "accepted": [
+            1,
+            1,
+            1
+          ],
+          "input_tokens": [
+            437,
+            437,
+            437
+          ],
+          "reused_prefix_tokens": [
+            0,
+            0,
+            0
+          ]
+        },
+        "16": {
+          "latency_ms": {
+            "mean": 24961.298286,
+            "median": 24961.040428,
+            "p95_nearest_rank": 24962.814167,
+            "min": 24960.040263,
+            "max": 24962.814167
+          },
+          "decisions_per_s_at_median": 0.640998921745747,
+          "accepted": [
+            16,
+            16,
+            16
+          ],
+          "input_tokens": [
+            6992,
+            6992,
+            6992
+          ],
+          "reused_prefix_tokens": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "parity_vs_fresh": {
+        "1": {
+          "max_option_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "changed_selected": 0,
+          "changed_raw_top1": 0
+        },
+        "16": {
+          "max_option_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "changed_selected": 0,
+          "changed_raw_top1": 0
+        }
+      }
+    },
+    "prefix_full": {
+      "startup_ms": 10429.101182002341,
+      "backend_details": {
+        "compute": {
+          "batch": 256,
+          "context": 4096,
+          "cpu_moe_layers": 18,
+          "flash_attention": "off",
+          "threads": 8,
+          "ubatch": 256
+        },
+        "execution_mode": "prefix_reuse",
+        "model_architecture": "gemma4",
+        "model_description": "gemma4 26B.A4B Q4_K - Medium",
+        "model_path": "/home/lutica/personal/skid/gemma26-offload-20260923-211926/models/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3060",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "state_first",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-state-first-v2",
+        "runtime": "local-libllama"
+      },
+      "peak_gpu_memory_mib": 9581.0,
+      "gpu_temperature_c_range": [
+        44.0,
+        58.0
+      ],
+      "counts": {
+        "1": {
+          "latency_ms": {
+            "mean": 1596.899961,
+            "median": 1600.196985,
+            "p95_nearest_rank": 1614.669522,
+            "min": 1575.833376,
+            "max": 1614.669522
+          },
+          "decisions_per_s_at_median": 0.6249230622066195,
+          "accepted": [
+            1,
+            1,
+            1
+          ],
+          "input_tokens": [
+            437,
+            437,
+            437
+          ],
+          "reused_prefix_tokens": [
+            0,
+            0,
+            0
+          ]
+        },
+        "16": {
+          "latency_ms": {
+            "mean": 12728.081728,
+            "median": 12725.895395,
+            "p95_nearest_rank": 12737.377735,
+            "min": 12720.972054,
+            "max": 12737.377735
+          },
+          "decisions_per_s_at_median": 1.2572789185652424,
+          "accepted": [
+            16,
+            16,
+            16
+          ],
+          "input_tokens": [
+            6992,
+            6992,
+            6992
+          ],
+          "reused_prefix_tokens": [
+            3840,
+            3840,
+            3840
+          ]
+        }
+      },
+      "parity_vs_fresh": {
+        "1": {
+          "max_option_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "changed_selected": 0,
+          "changed_raw_top1": 0
+        },
+        "16": {
+          "max_option_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "changed_selected": 0,
+          "changed_raw_top1": 0
+        }
+      }
+    },
+    "parallel_width2_full": {
+      "startup_ms": 10233.329392998712,
+      "backend_details": {
+        "compute": {
+          "batch": 256,
+          "context": 4096,
+          "cpu_moe_layers": 18,
+          "flash_attention": "off",
+          "threads": 8,
+          "ubatch": 256
+        },
+        "execution_mode": "parallel",
+        "model_architecture": "gemma4",
+        "model_description": "gemma4 26B.A4B Q4_K - Medium",
+        "model_path": "/home/lutica/personal/skid/gemma26-offload-20260923-211926/models/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3060",
+        "offload_requested": true,
+        "parallel_width": 2,
+        "prompt_layout": "state_first",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-state-first-v2",
+        "runtime": "local-libllama"
+      },
+      "peak_gpu_memory_mib": 10513.0,
+      "gpu_temperature_c_range": [
+        43.0,
+        67.0
+      ],
+      "counts": {
+        "1": {
+          "latency_ms": {
+            "mean": 1587.026421,
+            "median": 1591.824452,
+            "p95_nearest_rank": 1595.209053,
+            "min": 1574.045758,
+            "max": 1595.209053
+          },
+          "decisions_per_s_at_median": 0.628209975505515,
+          "accepted": [
+            1,
+            1,
+            1
+          ],
+          "input_tokens": [
+            437,
+            437,
+            437
+          ],
+          "reused_prefix_tokens": [
+            0,
+            0,
+            0
+          ]
+        },
+        "16": {
+          "latency_ms": {
+            "mean": 17059.834045,
+            "median": 17058.949072,
+            "p95_nearest_rank": 17065.256239,
+            "min": 17055.296824,
+            "max": 17065.256239
+          },
+          "decisions_per_s_at_median": 0.9379241319303705,
+          "accepted": [
+            16,
+            16,
+            16
+          ],
+          "input_tokens": [
+            6992,
+            6992,
+            6992
+          ],
+          "reused_prefix_tokens": [
+            2048,
+            2048,
+            2048
+          ]
+        }
+      },
+      "parity_vs_fresh": {
+        "1": {
+          "max_option_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "changed_selected": 0,
+          "changed_raw_top1": 0
+        },
+        "16": {
+          "max_option_probability_delta": 1.8667672407879365e-08,
+          "max_candidate_mass_delta": 6.038083033566011e-08,
+          "changed_selected": 0,
+          "changed_raw_top1": 0
+        }
+      }
+    },
+    "prefix_compact": {
+      "startup_ms": 10327.043617988238,
+      "backend_details": {
+        "compute": {
+          "batch": 256,
+          "context": 4096,
+          "cpu_moe_layers": 18,
+          "flash_attention": "off",
+          "threads": 8,
+          "ubatch": 256
+        },
+        "evidence_transfer": "compact",
+        "execution_mode": "prefix_reuse",
+        "model_architecture": "gemma4",
+        "model_description": "gemma4 26B.A4B Q4_K - Medium",
+        "model_path": "/home/lutica/personal/skid/gemma26-offload-20260923-211926/models/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3060",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "state_first",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-state-first-v2",
+        "runtime": "local-libllama"
+      },
+      "peak_gpu_memory_mib": 9581.0,
+      "gpu_temperature_c_range": [
+        47.0,
+        59.0
+      ],
+      "counts": {
+        "1": {
+          "latency_ms": {
+            "mean": 1574.9417653333333,
+            "median": 1569.258818,
+            "p95_nearest_rank": 1589.482775,
+            "min": 1566.083703,
+            "max": 1589.482775
+          },
+          "decisions_per_s_at_median": 0.6372435117328109,
+          "accepted": [
+            1,
+            1,
+            1
+          ],
+          "input_tokens": [
+            437,
+            437,
+            437
+          ],
+          "reused_prefix_tokens": [
+            0,
+            0,
+            0
+          ]
+        },
+        "16": {
+          "latency_ms": {
+            "mean": 12663.485334666666,
+            "median": 12657.821793,
+            "p95_nearest_rank": 12676.56199,
+            "min": 12656.072221,
+            "max": 12676.56199
+          },
+          "decisions_per_s_at_median": 1.264040548338916,
+          "accepted": [
+            16,
+            16,
+            16
+          ],
+          "input_tokens": [
+            6992,
+            6992,
+            6992
+          ],
+          "reused_prefix_tokens": [
+            3840,
+            3840,
+            3840
+          ]
+        }
+      },
+      "parity_vs_fresh": {
+        "1": {
+          "max_option_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "changed_selected": 0,
+          "changed_raw_top1": 0
+        },
+        "16": {
+          "max_option_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "changed_selected": 0,
+          "changed_raw_top1": 0
+        }
+      }
+    }
+  }
+}

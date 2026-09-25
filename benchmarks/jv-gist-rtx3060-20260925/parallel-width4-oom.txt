@@ -1,0 +1,7 @@
+Gemma 4 26B UD-Q4_K_M, RTX 3060 12 GiB, --cpu-moe-layers 18,
+--execution-mode parallel --parallel-width 4 --context 4096 --batch 256 --ubatch 256.
+The single-decision calls completed; the first 16-decision call returned HTTP 500.
+Relevant server log excerpt:
+ggml_backend_cuda_buffer_type_alloc_buffer: allocating 504.75 MiB on device 0: cudaMalloc failed: out of memory
+ggml_gallocr_reserve_n_impl: failed to allocate CUDA0 buffer of size 529272320
+llama_init_from_model: failed to initialize the context: failed to allocate compute pp buffers
