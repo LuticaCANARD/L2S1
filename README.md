@@ -22,7 +22,15 @@ cargo run --release --locked --features wgpu --bin l2s1-wgpu -- \
 
 Omit `--image` for text decisions. Add `--listen 127.0.0.1:8080` to serve the same `POST /v1/decisions` and `GET /healthz` API described below; send `image_base64` for vision requests. Images are decoded up to 25 megapixels and resized to at most 432 pixels on the longer side, aligned to the vision encoder's 48-pixel grid. The wgpu path scores full-vocabulary mass and complete multi-token answer codes for binary, choice and ordinal decisions. It uses fresh execution and Gemma 4 prompting. GPU scores may differ from llama.cpp; validate each model and task before treating them as calibrated probabilities.
 
-This paired-GGUF adapter is specific to Gemma 4 and rejects Qwen model/projector files. A Qwen wgpu backend needs its own vision encoder, preprocessing, positional encoding, and prompt profile; it can use the shared decision and HTTP interfaces.
+This paired-GGUF adapter is specific to Gemma 4 and rejects Qwen model/projector files. For Qwen, SmolLM and other compatible GGUF chat models on an NVIDIA GPU, use the existing llama.cpp CUDA executable. It reads the selected GGUF's tokenizer and chat template and exposes the same typed decision and HTTP APIs:
+
+```sh
+cargo run --release --locked --features llama-cuda -- \
+  --model /models/Qwen3-0.6B-Q8_0.gguf \
+  --device cuda --input examples/warehouse.json
+```
+
+Change `--model` to load another compatible GGUF. Text models need only the model file; for a supported vision model, supply its matching `--mmproj` file and send the image through the CLI or HTTP API. Each model needs its own backend instance and task-quality evaluation. This route does not require FlareLLM or a Qwen-specific Rust wgpu adapter. A [two-model CUDA smoke measurement](benchmarks/gguf-cuda-20260925/README.md) records the model identities, decisions, abstentions, and timings.
 
 ## Architecture
 
