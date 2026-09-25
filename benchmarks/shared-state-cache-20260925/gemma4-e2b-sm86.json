@@ -1,0 +1,1361 @@
+{
+  "configuration": {
+    "batch": 32,
+    "context": 2048,
+    "cuda": true,
+    "repeats": 5,
+    "threads": 4
+  },
+  "identity": {
+    "adapter_sha256": null,
+    "compute": {
+      "batch": 32,
+      "context": 2048,
+      "flash_attention": "off",
+      "threads": 4,
+      "ubatch": 32
+    },
+    "device": "NVIDIA GeForce RTX 3080",
+    "execution_mode": "fresh",
+    "head_sha256": null,
+    "loaded_runtime_sha256": "a29131966525b02677a8184173da5e221817e13478af3242e97c75d9f6209447",
+    "parallel_width": 1,
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-state-first-v2",
+    "runtime_build_sha256": "08d16d58a56e04cd7ac113ba05e131f9d2bafc2d8b027c78bb0156192d852d09",
+    "template_sha256": "0a2c8073c878ab1da004bee933a998606537bbb62016310352c7285c3f01c5b5",
+    "weights_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a"
+  },
+  "load_ms_excluded": 26224.257784999998,
+  "methodology": {
+    "comparison": "One question per call in both modes; same state-first prompt",
+    "residency": "One resident model; loading and model hash excluded",
+    "scope": "Explicit in-process session, not an automatic cross-request cache; no HTTP, parsing, cache lookup or eviction cost. No labeled quality claims.",
+    "warmup": "One untimed run immediately before each timed mode; order alternates by round",
+    "workload": "Synthetic warehouse state; each question has a distinct instruction and ID"
+  },
+  "model": "models/gemma-4-E2B-it-Q8_0.gguf",
+  "records": [
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 67.52507800000001,
+      "input_tokens": 147,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 0,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 63.961406,
+        "prepare_ms": 1.360366,
+        "score_ms": 1.460671
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 55.604,
+      "input_tokens": 147,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 0,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 51.627707,
+        "prepare_ms": 1.85049,
+        "score_ms": 1.456271
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 55.026571000000004,
+      "input_tokens": 147,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 1,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 51.619406,
+        "prepare_ms": 1.159356,
+        "score_ms": 1.45307
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 56.761356,
+      "input_tokens": 147,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 1,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 53.14028,
+        "prepare_ms": 1.2328599999999998,
+        "score_ms": 1.4342700000000002
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 55.845811000000005,
+      "input_tokens": 147,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 2,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 52.250237,
+        "prepare_ms": 1.294663,
+        "score_ms": 1.432669
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 57.670501,
+      "input_tokens": 147,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 2,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 53.939619,
+        "prepare_ms": 1.622079,
+        "score_ms": 1.467271
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 55.20698,
+      "input_tokens": 147,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 3,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 51.988824,
+        "prepare_ms": 1.220959,
+        "score_ms": 1.44557
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 54.909366,
+      "input_tokens": 147,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 3,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 51.538103,
+        "prepare_ms": 1.286862,
+        "score_ms": 1.490972
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 56.339435,
+      "input_tokens": 147,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 4,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 52.91477,
+        "prepare_ms": 1.202258,
+        "score_ms": 1.490372
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 56.23113,
+      "input_tokens": 147,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 4,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 52.850466,
+        "prepare_ms": 1.2479609999999999,
+        "score_ms": 1.479972
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 261.325489,
+      "input_tokens": 601,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 0,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 247.93133699999998,
+        "prepare_ms": 5.210554,
+        "score_ms": 5.855585
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 204.544332,
+      "input_tokens": 601,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 192,
+      "round": 0,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 192.20263100000003,
+        "prepare_ms": 5.528069,
+        "score_ms": 6.000590999999999
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 212.989441,
+      "input_tokens": 601,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 192,
+      "round": 1,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 201.173969,
+        "prepare_ms": 5.098448,
+        "score_ms": 6.049393
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 274.727039,
+      "input_tokens": 601,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 1,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 261.172982,
+        "prepare_ms": 5.433663,
+        "score_ms": 5.882884
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 264.64504999999997,
+      "input_tokens": 601,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 2,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 248.221953,
+        "prepare_ms": 6.784528,
+        "score_ms": 7.163349
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 203.78589499999998,
+      "input_tokens": 601,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 192,
+      "round": 2,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 192.120429,
+        "prepare_ms": 5.055345,
+        "score_ms": 5.856185
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 214.594819,
+      "input_tokens": 601,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 192,
+      "round": 3,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 202.653739,
+        "prepare_ms": 4.954142000000001,
+        "score_ms": 6.051594
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 271.010659,
+      "input_tokens": 601,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 3,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 257.563705,
+        "prepare_ms": 4.855735,
+        "score_ms": 6.0783949999999995
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 266.805954,
+      "input_tokens": 601,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 4,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 252.73177200000003,
+        "prepare_ms": 4.881036,
+        "score_ms": 6.8815349999999995
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 187.025881,
+      "input_tokens": 601,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 192,
+      "round": 4,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 175.16080499999998,
+        "prepare_ms": 5.16185,
+        "score_ms": 5.873583999999999
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 1112.759792,
+      "input_tokens": 2423,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 0,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 1057.743341,
+        "prepare_ms": 22.015660999999998,
+        "score_ms": 24.108441
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 779.699674,
+      "input_tokens": 2423,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 960,
+      "round": 0,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 734.4323039999999,
+        "prepare_ms": 20.708606,
+        "score_ms": 23.593621
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 810.144864,
+      "input_tokens": 2423,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 960,
+      "round": 1,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 764.652982,
+        "prepare_ms": 20.509503000000002,
+        "score_ms": 24.070141999999993
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 1102.698398,
+      "input_tokens": 2423,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 1,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 1047.332935,
+        "prepare_ms": 21.892155,
+        "score_ms": 23.81783
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 1099.329295,
+      "input_tokens": 2423,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 2,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 1046.273096,
+        "prepare_ms": 20.989589,
+        "score_ms": 23.598312000000004
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 787.1112850000001,
+      "input_tokens": 2423,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 960,
+      "round": 2,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 740.820804,
+        "prepare_ms": 21.600617999999997,
+        "score_ms": 23.875725000000003
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 781.896139,
+      "input_tokens": 2423,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 960,
+      "round": 3,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 734.732417,
+        "prepare_ms": 21.753522,
+        "score_ms": 24.462753
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 1071.332876,
+      "input_tokens": 2423,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 3,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 1017.7610490000001,
+        "prepare_ms": 20.688576,
+        "score_ms": 24.000334
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 1099.7120499999999,
+      "input_tokens": 2423,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 4,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 1048.1260040000002,
+        "prepare_ms": 20.268763000000003,
+        "score_ms": 23.423312000000003
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 776.9447779999999,
+      "input_tokens": 2423,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 960,
+      "round": 4,
+      "state_filler_words": 0,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 728.182559,
+        "prepare_ms": 23.103099,
+        "score_ms": 24.689976
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 154.090434,
+      "input_tokens": 355,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 0,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 148.55607,
+        "prepare_ms": 3.244655,
+        "score_ms": 1.509872
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 157.734407,
+      "input_tokens": 355,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 0,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 151.751822,
+        "prepare_ms": 3.745079,
+        "score_ms": 1.46897
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 169.671375,
+      "input_tokens": 355,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 1,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 164.479228,
+        "prepare_ms": 2.985142,
+        "score_ms": 1.448869
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 154.704364,
+      "input_tokens": 355,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 1,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 149.352308,
+        "prepare_ms": 3.0522449999999997,
+        "score_ms": 1.45687
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 168.877638,
+      "input_tokens": 355,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 2,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 163.649989,
+        "prepare_ms": 2.963641,
+        "score_ms": 1.452269
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 153.3933,
+      "input_tokens": 355,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 2,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 148.206354,
+        "prepare_ms": 3.022144,
+        "score_ms": 1.456969
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 164.83794600000002,
+      "input_tokens": 355,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 3,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 159.417987,
+        "prepare_ms": 2.978242,
+        "score_ms": 1.597376
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 156.979671,
+      "input_tokens": 355,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 3,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 151.443108,
+        "prepare_ms": 3.4048619999999996,
+        "score_ms": 1.459969
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 164.878547,
+      "input_tokens": 355,
+      "mode": "fresh",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 4,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 159.42498799999998,
+        "prepare_ms": 3.350159,
+        "score_ms": 1.452969
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 154.88237099999998,
+      "input_tokens": 355,
+      "mode": "shared_session",
+      "questions": 1,
+      "reused_prefix_tokens": 0,
+      "round": 4,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 1,
+        "native_ms": 149.60712,
+        "prepare_ms": 3.122148,
+        "score_ms": 1.46887
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 658.657748,
+      "input_tokens": 1433,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 0,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 636.260382,
+        "prepare_ms": 13.171826999999999,
+        "score_ms": 6.375204
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 342.68081,
+      "input_tokens": 1433,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 768,
+      "round": 0,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 319.910126,
+        "prepare_ms": 13.634748,
+        "score_ms": 8.334397
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 313.371799,
+      "input_tokens": 1433,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 768,
+      "round": 1,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 294.17628499999995,
+        "prepare_ms": 12.674304,
+        "score_ms": 5.829577
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 697.435382,
+      "input_tokens": 1433,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 1,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 676.96052,
+        "prepare_ms": 12.168572000000001,
+        "score_ms": 5.852473999999999
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 681.888651,
+      "input_tokens": 1433,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 2,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 660.457444,
+        "prepare_ms": 12.806502000000002,
+        "score_ms": 5.889975
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 346.956408,
+      "input_tokens": 1433,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 768,
+      "round": 2,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 326.653253,
+        "prepare_ms": 13.452433,
+        "score_ms": 6.132588
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 310.009172,
+      "input_tokens": 1433,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 768,
+      "round": 3,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 291.297591,
+        "prepare_ms": 12.140172,
+        "score_ms": 5.852876
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 664.790148,
+      "input_tokens": 1433,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 3,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 644.365187,
+        "prepare_ms": 12.012465,
+        "score_ms": 5.861776
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 678.4119880000001,
+      "input_tokens": 1433,
+      "mode": "fresh",
+      "questions": 4,
+      "reused_prefix_tokens": 0,
+      "round": 4,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 656.595564,
+        "prepare_ms": 12.590992,
+        "score_ms": 6.4956059999999995
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 317.084204,
+      "input_tokens": 1433,
+      "mode": "shared_session",
+      "questions": 4,
+      "reused_prefix_tokens": 768,
+      "round": 4,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 4,
+        "native_ms": 297.10526400000003,
+        "prepare_ms": 13.091115000000002,
+        "score_ms": 6.112988
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 2809.254413,
+      "input_tokens": 5751,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 0,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 2723.7545689999997,
+        "prepare_ms": 52.18898200000001,
+        "score_ms": 23.95805
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 985.41985,
+      "input_tokens": 5751,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 3840,
+      "round": 0,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 909.2685140000001,
+        "prepare_ms": 51.359251000000015,
+        "score_ms": 23.585834
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 982.73579,
+      "input_tokens": 5751,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 3840,
+      "round": 1,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 907.2556910000002,
+        "prepare_ms": 50.864022000000006,
+        "score_ms": 23.647131
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 2769.609766,
+      "input_tokens": 5751,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 1,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 2684.2312810000003,
+        "prepare_ms": 51.837278999999995,
+        "score_ms": 23.854640999999997
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 2648.0373369999998,
+      "input_tokens": 5751,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 2,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 2561.5190799999996,
+        "prepare_ms": 52.065601,
+        "score_ms": 24.677786999999995
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 968.846616,
+      "input_tokens": 5751,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 3840,
+      "round": 2,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 891.6848129999997,
+        "prepare_ms": 52.056499,
+        "score_ms": 24.136760000000002
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 1001.821399,
+      "input_tokens": 5751,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 3840,
+      "round": 3,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 923.7744519999999,
+        "prepare_ms": 52.470918000000005,
+        "score_ms": 24.592180999999997
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 2735.538154,
+      "input_tokens": 5751,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 3,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 2651.972551,
+        "prepare_ms": 49.898331000000006,
+        "score_ms": 24.048422000000002
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 2725.9005030000003,
+      "input_tokens": 5751,
+      "mode": "fresh",
+      "questions": 16,
+      "reused_prefix_tokens": 0,
+      "round": 4,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 2641.9795759999997,
+        "prepare_ms": 49.798953,
+        "score_ms": 24.275248
+      }
+    },
+    {
+      "difference": {
+        "changed_abstention_reasons": 0,
+        "changed_values": 0,
+        "max_candidate_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "max_raw_logit_delta": 0.0
+      },
+      "elapsed_ms": 992.168577,
+      "input_tokens": 5751,
+      "mode": "shared_session",
+      "questions": 16,
+      "reused_prefix_tokens": 3840,
+      "round": 4,
+      "state_filler_words": 200,
+      "timings": {
+        "decisions": 16,
+        "native_ms": 917.2462419999999,
+        "prepare_ms": 50.394577999999996,
+        "score_ms": 23.639819000000003
+      }
+    }
+  ],
+  "schema_version": 1
+}
