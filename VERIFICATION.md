@@ -41,6 +41,16 @@ L2S1_CONFORMANCE_MODELS=/path/to/model-a.gguf:/path/to/model-b.gguf \
 
 Set `SKID_CUDA=1` for CUDA. The conformance suite checks semantic IDs, all decision kinds, token mappings, artifact bindings, context failures, recovery, snapshot limits and execution diagnostics. It compares optimized modes with fresh execution using the existing probability/mass tolerance of 0.02, unchanged top choices and unchanged accepted results. Parallel differences are reported separately; a completed report is not automatically an equivalence pass.
 
+For the validated hybrid Bonsai path on a CUDA host, run the real-model state restoration regression:
+
+```sh
+L2S1_BONSAI_MODEL=/path/to/Bonsai-27B-Q1_0.gguf \
+  cargo test --release --locked --features llama-cuda \
+  --test state_restore_bonsai -- --ignored --nocapture
+```
+
+It checks a 16-decision shared-state request against fresh scores and policy decisions, actual reused tokens, the snapshot byte limit, and recovery after a forced fallback. This is execution equivalence on one fixture, not general task accuracy.
+
 Use [prefix-reuse checks](SEMIF_ALGORITHM.md#reproduce) and [parallel contract checks](PARALLEL_EXECUTION.md#validation-and-measurement) for their specific execution paths. Parallel mode has known numerical differences and remains opt-in. A model that loads or passes preflight still needs inference and labeled workload evaluation.
 
 ## Optional optimization checks

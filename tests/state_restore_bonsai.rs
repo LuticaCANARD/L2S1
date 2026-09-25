@@ -47,7 +47,7 @@ fn hybrid_state_restore_reuses_prefix_and_recovers_after_budget_fallback() {
     assert!(backend.inspect().capabilities.recurrent_or_hybrid);
     backend.set_prompt_layout(PromptLayout::StateFirst);
     let request: DecisionRequest = serde_json::from_str(include_str!(
-        "../benchmarks/jv-gist-rtx3060-20260925/request-16.json"
+        "../benchmarks/bonsai-state-restore-20260925/request-16.json"
     ))
     .unwrap();
 
