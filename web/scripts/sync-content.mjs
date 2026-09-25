@@ -2,7 +2,13 @@ import { mkdir, copyFile, readdir, readFile, writeFile } from 'node:fs/promises'
 const root = new URL('../../', import.meta.url);
 const target = new URL('../static/docs/', import.meta.url);
 await mkdir(target, { recursive: true });
-for (const name of ['README.md', 'BENCHMARK.md', 'SEMIF_ALGORITHM.md', 'VERIFICATION.md', 'LICENSING.md', 'LICENSE', 'THIRD_PARTY_LICENSES.txt']) {
+for (const name of [
+  'README.md', 'BENCHMARK.md', 'DECISION_FINETUNE.md', 'INTENT_BENCHMARK.md',
+  'JEVBENCH.md', 'KAGGLE_BENCHMARK.md', 'LAYA_BENCHMARK.md',
+  'MODEL_INTERCHANGEABILITY.md', 'OUTPUT_HEAD.md', 'PARALLEL_EXECUTION.md',
+  'SEMIF_ALGORITHM.md', 'VERIFICATION.md', 'VISION_BENCHMARK.md',
+  'LICENSING.md', 'LICENSE', 'THIRD_PARTY_LICENSES.txt',
+]) {
   await copyFile(new URL(name, root), new URL(name, target));
 }
 await copyFile(new URL('examples/warehouse.json', root), new URL('warehouse.json', target));

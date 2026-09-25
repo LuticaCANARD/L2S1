@@ -341,10 +341,10 @@ pub struct ComputeOptions {
     pub ubatch: u32,
     pub threads: i32,
     pub flash_attention: FlashAttention,
-    /// None preserves the device default; Some(n) puts at most n layers on CUDA.
+    /// None preserves the device default; Some(n) puts at most n layers on the GPU.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gpu_layers: Option<u32>,
-    /// Keep expert weights of the first n MoE layers in CPU RAM (CUDA only).
+    /// Keep expert weights of the first n MoE layers in CPU RAM for GPU loading.
     #[serde(default, skip_serializing_if = "zero_u32")]
     pub cpu_moe_layers: u32,
     #[serde(default, skip_serializing_if = "ModelLoadMode::is_auto")]
@@ -388,11 +388,11 @@ impl ComputeOptions {
         }
         Ok(())
     }
-    pub fn validate_device(&self, cuda: bool) -> Result<()> {
+    pub fn validate_device(&self, gpu: bool) -> Result<()> {
         self.validate()?;
-        if !cuda && (self.gpu_layers.is_some_and(|n| n > 0) || self.cpu_moe_layers > 0) {
+        if !gpu && (self.gpu_layers.is_some_and(|n| n > 0) || self.cpu_moe_layers > 0) {
             return Err(Error::Invalid(
-                "GPU layer placement and CPU MoE splitting require the CUDA device".into(),
+                "GPU layer placement and CPU MoE splitting require a GPU device".into(),
             ));
         }
         Ok(())
