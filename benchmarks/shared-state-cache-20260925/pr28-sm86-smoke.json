@@ -1,0 +1,141 @@
+{
+  "backend": {
+    "compute": {
+      "batch": 256,
+      "context": 2048,
+      "flash_attention": "off",
+      "model_load_mode": "read",
+      "threads": 4,
+      "ubatch": 256
+    },
+    "execution_mode": "fresh",
+    "model_architecture": "qwen3",
+    "model_description": "qwen3 0.6B Q8_0",
+    "model_path": "/home/lutica/personal/skid/skid-desion/models/Qwen3-0.6B-Q8_0.gguf",
+    "offload_device": "NVIDIA GeForce RTX 3080",
+    "offload_requested": true,
+    "parallel_width": 1,
+    "prompt_layout": "legacy",
+    "prompt_profile": "qwen3",
+    "prompt_version": "qwen3-no-thinking-decision-v1",
+    "runtime": "local-libllama"
+  },
+  "policy": {
+    "min_candidate_mass": 0.05,
+    "min_top_probability": 0.8
+  },
+  "results": [
+    {
+      "abstention_reasons": [],
+      "calibration_id": null,
+      "candidate_mass": 0.9964067431866775,
+      "entropy_confidence": 0.923351343419568,
+      "id": "storage_zone",
+      "input_tokens": 139,
+      "reused_prefix_tokens": 0,
+      "scores": [
+        {
+          "code": "A",
+          "id": "ambient",
+          "option_probability": 0.9855978954923729,
+          "raw_logit": 24.981592178344727,
+          "token_id": 32
+        },
+        {
+          "code": "B",
+          "id": "chilled",
+          "option_probability": 0.004369632426769126,
+          "raw_logit": 19.56302261352539,
+          "token_id": 33
+        },
+        {
+          "code": "C",
+          "id": "frozen",
+          "option_probability": 0.010032472080859549,
+          "raw_logit": 20.3941707611084,
+          "token_id": 34
+        }
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "top_option_probability": 0.9855978954923729,
+      "truncated": false,
+      "value": {
+        "selected": "ambient",
+        "type": "choice"
+      }
+    },
+    {
+      "abstention_reasons": [],
+      "calibration_id": null,
+      "candidate_mass": 0.985051465351561,
+      "entropy_confidence": 0.5492345335062079,
+      "id": "cold_chain_required",
+      "input_tokens": 131,
+      "reused_prefix_tokens": 0,
+      "scores": [
+        {
+          "code": "A",
+          "id": "false",
+          "option_probability": 0.9056683212919115,
+          "raw_logit": 24.983707427978516,
+          "token_id": 32
+        },
+        {
+          "code": "B",
+          "id": "true",
+          "option_probability": 0.094331678708089,
+          "raw_logit": 22.721851348876953,
+          "token_id": 33
+        }
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "top_option_probability": 0.9056683212919115,
+      "truncated": false,
+      "value": {
+        "p_true": 0.094331678708089,
+        "type": "binary",
+        "value": false
+      }
+    },
+    {
+      "abstention_reasons": [],
+      "calibration_id": null,
+      "candidate_mass": 0.9990800989150551,
+      "entropy_confidence": 0.9800225902146664,
+      "id": "dispatch_priority",
+      "input_tokens": 158,
+      "reused_prefix_tokens": 0,
+      "scores": [
+        {
+          "code": "A",
+          "id": "low",
+          "option_probability": 0.9969874269897855,
+          "raw_logit": 26.581111907958984,
+          "token_id": 32
+        },
+        {
+          "code": "B",
+          "id": "medium",
+          "option_probability": 0.0005633104781964049,
+          "raw_logit": 19.102449417114258,
+          "token_id": 33
+        },
+        {
+          "code": "C",
+          "id": "high",
+          "option_probability": 0.002449262532019341,
+          "raw_logit": 20.572160720825195,
+          "token_id": 34
+        }
+      ],
+      "scoring_method": "single_token_conditional_softmax_v1",
+      "top_option_probability": 0.9969874269897855,
+      "truncated": false,
+      "value": {
+        "expected_value": 0.0054618355422350875,
+        "selected": "low",
+        "type": "ordinal"
+      }
+    }
+  ]
+}
