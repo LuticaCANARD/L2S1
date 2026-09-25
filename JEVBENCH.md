@@ -9,9 +9,8 @@ The reviewed upstream revision is `f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84`. Pr
 Requirements: a clean upstream checkout at the pinned revision, a compatible GGUF, and a CUDA-enabled project build. The evaluator verifies CUDA offload; use `--expected-gpu 'RTX 3060'` (or the intended device name) to additionally require a specific GPU. The harness and public task files retain their upstream MIT notices; model terms remain separate.
 
 ```bash
-# On the prepared server:
-source ~/.local/opt/skid-desion/skid-test-env.sh
-cd ~/personal/skid/jevbench-20260923/source
+# On a CUDA host with the Rust and native toolchains configured:
+cd /path/to/L2S1
 cargo build --release --locked --features llama-cuda --bin l2s1 --example evaluate_jsonl
 cargo build --release --locked -p l2s1-tools
 
@@ -21,7 +20,7 @@ git -C ../upstream-new checkout --detach f79a1cab94ab9a5879383b7ef9ee1805b9dc2d8
 target/release/l2s1-tools jevbench-public run \
   --jevbench ../upstream-new \
   --evaluator target/release/examples/evaluate_jsonl \
-  --model ~/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf \
+  --model models/gemma-4-E2B-it-Q8_0.gguf \
   --context 8192 --expected-gpu 'RTX 3060' --output ../run-gemma4-new
 ```
 
@@ -79,8 +78,14 @@ The complete report, CSV, raw predictions, model plan, runtime hashes and measur
 
 `l2s1-tools jevbench-matrix download/run` downloads a pinned plan or runs available checkpoints serially through the public evaluator. `l2s1-tools report-jevbench-matrix` recounts saved predictions against gold labels and checks shared request/evaluator hashes before producing the report. Regenerating it requires a local model plan, the full per-model run directories and `matrix-status.json`. Generated reports, run artifacts and host-specific plans remain local rather than being versioned with the source.
 
+## Gemma 4 26B A4B separate run (2026-09-23)
+
+The UD-Q4_K_M checkpoint (SHA-256 `f2c28b3dc4776931ac6f879e11f203dec637ea0f14267a86ec8f6165f63f293f`) ran on an RTX 3060 with 18 CPU expert layers, eight threads, context 8192 and batch/ubatch 256. The pinned public scorer counted 196/231 correct (84.85%): Easy 48/48, Original 70/72, Hard 78/111. The default policy accepted 220 decisions, with 191 correct and 29 wrong; 11 abstained. Brier was 0.278098 and ECE 0.132128. There were no inference errors or truncated inputs.
+
+The measured fresh/legacy inference p50/p95 was 787.01/8814.01 ms, excluding model load and one warmup. This run used the same public task IDs as the matrix but a different evaluator build and request serialization; its latency is not a controlled comparison with the original matrix or the later 31B run. Saved predictions were independently recounted. The local, gitignored `results/jevbench-gemma26-20260923T132214Z/` folder retains the source, model, request, evaluator and prediction hashes plus raw evidence.
+
 ## Gemma 4 rebuild confirmation (2026-09-23)
 
-The current Rust source and native C++ bridge were freshly compiled in a separate directory on `100.66.64.91`, reusing the pinned llama.cpp CUDA libraries. Gemma 4 E2B Q8_0, E4B Q8_0 and E4B Q4_K_M each completed the same public 231 items with the baseline settings above. They scored 157/231 (67.97%), 177/231 (76.62%) and 179/231 (77.49%), respectively. All 693 candidate probability vectors and decision values exactly matched the previous RTX 3060 matrix; no inference errors or truncation occurred.
+The current Rust source and native C++ bridge were freshly compiled in a separate directory on an RTX 3060 host, reusing the pinned llama.cpp CUDA libraries. Gemma 4 E2B Q8_0, E4B Q8_0 and E4B Q4_K_M each completed the same public 231 items with the baseline settings above. They scored 157/231 (67.97%), 177/231 (76.62%) and 179/231 (77.49%), respectively. All 693 candidate probability vectors and decision values exactly matched the previous RTX 3060 matrix; no inference errors or truncation occurred.
 
 The rebuild report (local artifact: `results/gemma4-rebuild-20260923T103912Z/REPORT.md`, not committed) records the before/after comparison, latency, source and binary hashes, and build logs. Default tests passed 49/49; the llama feature suite passed 59 tests with 18 ignored, followed by a separately executed Gemma 4 CUDA integration test and six mapping tests. These results cover the frozen source and baseline path; optional optimization modes were not enabled for this rerun.

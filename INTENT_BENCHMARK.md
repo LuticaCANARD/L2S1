@@ -91,7 +91,7 @@ construction. This measures repeated identical calls, not novel-utterance speed.
 
 The frozen test samples contain 200 English BANKING77 utterances and 200 Korean
 MASSIVE utterances. The same samples are used by Gemma 4 E2B Q8_0, E4B Q8_0 and
-E4B Q4_K_M, plus Qwen3-8B Q8_0, on `100.66.64.91` (RTX 3060 12 GiB). All official 77 or 60 labels are
+E4B Q4_K_M, plus Qwen3-8B Q8_0, on an RTX 3060 12 GiB host. All official 77 or 60 labels are
 present in every respective request. Only raw utterance text enters the state;
 gold labels, scenarios, annotations and judgments remain outside inference.
 
@@ -122,15 +122,27 @@ reported separately. These samples are not full-dataset leaderboard results.
 
 ## Measured results
 
-All four configurations completed both 200-row subsets without inference errors
-or truncation. Every request included the entire official label set.
+The four original configurations and a separate Gemma 4 26B run completed both
+200-row subsets without inference errors or truncation. Every request included
+the entire official label set.
 
 | Model | BANKING77 English | MASSIVE Korean | English / Korean p50 ms |
 | --- | ---: | ---: | ---: |
 | Gemma 4 E2B Q8_0 | 123/200 (61.5%) | 103/200 (51.5%) | 214.15 / 157.52 |
 | Gemma 4 E4B Q8_0 | 130/200 (65.0%) | 143/200 (71.5%) | 371.72 / 277.05 |
 | Gemma 4 E4B Q4_K_M | 130/200 (65.0%) | 138/200 (69.0%) | 383.61 / 287.00 |
+| Gemma 4 26B A4B UD-Q4_K_M † | 152/200 (76.0%) | 156/200 (78.0%) | 2880.52 / 2134.52 |
 | Qwen3-8B Q8_0 | 111/200 (55.5%) | 98/200 (49.0%) | 877.64 / 593.45 |
+
+† The 26B result is a separate RTX 3060 run with 18 CPU expert layers, eight
+threads, context 8192 and batch 256. Its times are first-call medians. The
+default policy accepted 191/200 English decisions (148 correct, 43 wrong) and
+198/200 Korean decisions (156 correct, 42 wrong). One immediate repeated call
+per case measured 669.15/656.70 ms p50 and preserved complete evidence on all
+400 cases. This repeat measures exact request-local cache reuse, not inference
+speed for new utterances. The separate placement and evaluator settings prevent
+a controlled latency comparison with the original four rows. Its local,
+gitignored report is `results/gemma26-offload-20260923-211926/REPORT.md`.
 
 These Gemma checkpoints encode every used two-letter code as one token. Qwen3-8B
 uses two tokens for four BANKING77 codes and two MASSIVE codes, requiring three

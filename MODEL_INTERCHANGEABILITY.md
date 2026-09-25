@@ -236,3 +236,15 @@ while mapped weights are clean file-backed pages. The OS file cache remains
 outside process RSS. Measure loading high-water RSS, steady inference RSS and
 memory pressure separately on the intended host. Do not assume read loading is
 better for every checkpoint or a CPU-only deployment.
+
+On one RTX 3060 host, three alternating warm-cache loads per mode of the same
+Gemma 4 26B A4B Q4 checkpoint, with 18 CPU expert layers, measured median peak
+engine RSS of 16.174 GiB in `auto` and 9.349 GiB in `read` (42.2% lower).
+Median short post-load RSS was 10.332 versus 9.334 GiB; model loading took
+10.361 versus 13.931 seconds. All 231 public JevBench evidence objects from
+the `read` run exactly matched the prior `auto` run. Sampled system
+`MemAvailable` at the engine RSS peak was 28.903 GiB in `auto` and 19.941 GiB
+in `read`, so the lower process RSS is not evidence of lower total physical
+memory demand. This was a local Linux/CUDA measurement, not a Metal result or
+a general load-time guarantee. The full local report and source hashes remain
+gitignored at `results/gemma26-lowrss-20260923T135227Z/REPORT.md`.

@@ -441,11 +441,12 @@ The general test run skips model-dependent tests; invoke them explicitly with lo
 
 The September 23, 2026 JevBench matrix measured **22 GGUF checkpoints on all 231 public items** using the same frozen project build on an RTX 3060 12 GiB. All 5,082 predictions in the completed comparison runs were valid, with no inference errors or truncation. The 23 runtime configurations include one failed default GPT-OSS attempt and its successful CUDA Graphs-disabled recovery.
 
-The original 22 matrix rows use identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration. The explicit GPT-OSS exception is marked below. Rows marked † are separate September 24 runs.
+The original 22 matrix rows use identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration. The explicit GPT-OSS exception is marked below. Rows marked † are separate September 24 runs; ‡ is a separate September 23 run.
 
 | Checkpoint | Argmax accuracy | Hard accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | [Gemma 4 31B Q4_K_M](https://huggingface.co/google/gemma-4-31B-it) † | 89.61% | 78.38% | 22 | 3 | 2287.40 / 24524.56 |
+| Gemma 4 26B A4B UD-Q4_K_M ‡ | 84.85% | 70.27% | 29 | 11 | 787.01 / 8814.01 |
 | Qwen3.5-4B-Q8_0 | 79.65% | 61.26% | 9 | 93 | 86.88 / 1137.30 |
 | Qwen3.5-9B-Q4_K_M | 77.92% | 58.56% | 13 | 64 | 130.55 / 1697.14 |
 | Qwen3.5-9B-Q8_0 | 77.92% | 56.76% | 14 | 66 | 124.68 / 1613.79 |
@@ -475,6 +476,8 @@ The † rows used the same public dataset (SHA-256 `dc3995d8ae1e2fc8e81ce38431ad
 
 These runs used fresh/legacy execution, context 8192, batch/ubatch 256, and no LoRA, output head or learned calibration. The Bonsai runs used an RTX 3080 with full GPU offload and four threads; Gemma 4 31B used an RTX 3060 with 24 GPU layers, read-mode loading and eight threads. Evaluator binaries also differed, so the † latency figures are not a controlled speed comparison with each other or the original matrix. Their local, gitignored evidence is in `results/bonsai-27b-20260924/` and `results/jevbench-gemma31-rust-20260924/`; these artifacts are not included in the repository.
 
+The ‡ 26B run used the same 231 public task IDs on an RTX 3060 with 18 CPU expert layers and eight threads. It used a different request serialization and evaluator build from the original matrix and † reruns, so the table combines task scores from distinct runs, not a controlled latency comparison. All 231 decisions completed without errors or truncation; the default policy accepted 220, including 191 correct. See the [26B measurement details](JEVBENCH.md#gemma-4-26b-a4b-separate-run-2026-09-23). Its raw evidence is local and gitignored.
+
 Qwen3.5-4B Q8_0 had the highest argmax accuracy in the original 22-checkpoint matrix: 184/231 (79.65%), including 68/111 Hard items (61.26%). Its default policy accepted 138 decisions: 129 correct and 9 wrong, for 93.48% accepted accuracy at 59.74% coverage. Qwen3.5-9B Q4_K_M covered 72.29% with 13 accepted errors; Gemma4 E2B covered 90.48% with 58 accepted errors. Accuracy before abstention, accepted accuracy and coverage answer different questions.
 
 GPT-OSS 20B Q4_K_M exhausted GPU memory in `cudaGraphInstantiate` after 129 predictions. With `GGML_CUDA_DISABLE_GRAPHS=1`, it completed all 231 at 64.94% accuracy and a sampled peak of 11,901 MiB. Its first 129 probability distributions were identical to the failed run. Keep this runtime exception when reproducing its result.
@@ -485,14 +488,17 @@ These are public-subset, local inference measurements, not an official full-suit
 
 ## Additional recorded model measurements
 
-The [complete-label intent evaluation](INTENT_BENCHMARK.md#measured-results) used 200 BANKING77 English and 200 MASSIVE Korean examples per checkpoint on the RTX 3060. Each request included all 77 or 60 official labels. Accuracy below is raw top-choice accuracy before the abstention policy; the p50 values are local inference milliseconds. All four configurations completed both samples without inference errors or truncation.
+The [complete-label intent evaluation](INTENT_BENCHMARK.md#measured-results) used 200 BANKING77 English and 200 MASSIVE Korean examples per checkpoint on the RTX 3060. Each request included all 77 or 60 official labels. Accuracy below is raw top-choice accuracy before the abstention policy; the p50 values are local inference milliseconds. The four original configurations and separate 26B run completed both samples without inference errors or truncation.
 
 | Checkpoint | BANKING77 correct / 200 | MASSIVE Korean correct / 200 | English / Korean p50 ms |
 | --- | ---: | ---: | ---: |
 | Gemma 4 E2B Q8_0 | 123 (61.5%) | 103 (51.5%) | 214.15 / 157.52 |
 | Gemma 4 E4B Q8_0 | 130 (65.0%) | 143 (71.5%) | 371.72 / 277.05 |
 | Gemma 4 E4B Q4_K_M | 130 (65.0%) | 138 (69.0%) | 383.61 / 287.00 |
+| Gemma 4 26B A4B UD-Q4_K_M ‡ | 152 (76.0%) | 156 (78.0%) | 2880.52 / 2134.52 |
 | Qwen3-8B Q8_0 | 111 (55.5%) | 98 (49.0%) | 877.64 / 593.45 |
+
+The ‡ 26B row used 18 CPU expert layers, eight threads, and a separate evaluator run. Its p50 values are first-call medians; immediate repeated calls with request-local cache measured 669.15 / 656.70 ms and preserved all 400 result evidence objects. These timings are not controlled comparisons with the four original rows.
 
 The [CPU/GPU cache check](LAYA_BENCHMARK.md) additionally measured one larger checkpoint with 24 GPU layers and eight CPU threads. Times below cover two typed cases and their immediate repeats.
 
