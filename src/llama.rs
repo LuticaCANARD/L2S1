@@ -1039,7 +1039,7 @@ impl LlamaBackend {
         info
     }
 
-    fn info(&self) -> BackendInfo {
+    pub fn info(&self) -> BackendInfo {
         // These strings remain valid until the owned engine is dropped.
         let description = unsafe { CStr::from_ptr(sd_description(self.engine.as_ptr())) }
             .to_string_lossy()

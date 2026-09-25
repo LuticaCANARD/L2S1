@@ -1,163 +1,227 @@
-//! Small synchronous JSON API. One owned backend serializes GPU access.
-#[cfg(any(feature = "llama", feature = "wgpu", test))]
-use crate::VisionDecisionBackend;
-use crate::{DecisionRequest, Error};
-use base64::Engine;
+//! Versioned HTTP decision API. A local model stays on its owning thread.
+use crate::Error;
+use serde_json::{Value, json};
+#[cfg(feature = "openrouter")]
+use std::sync::Mutex;
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
+    sync::{
+        Arc,
+        atomic::{AtomicU64, AtomicUsize, Ordering},
+        mpsc::{self, SyncSender, TrySendError},
+    },
+    thread,
     time::Duration,
 };
 
 const MAX_HEADER: usize = 16 * 1024;
-const MAX_BODY: usize = 12 * 1024 * 1024;
-const MAX_IMAGE_BASE64: usize = 11 * 1024 * 1024;
+const MAX_BODY: usize = 44 * 1024 * 1024;
+const MAX_MEDIA: usize = 4;
+const MAX_DECISIONS: usize = 128;
+const MAX_CONNECTIONS: usize = 32;
+const QUEUE_DEPTH: usize = 16;
+const MAX_INFLIGHT_BODY_BYTES: usize = 192 * 1024 * 1024;
+static NEXT_REQUEST_ID: AtomicU64 = AtomicU64::new(1);
+static INFLIGHT_BODY_BYTES: AtomicUsize = AtomicUsize::new(0);
 
-/// HTTP response boundary shared by full-evidence local and selection-only remote backends.
-pub trait HttpDecisionBackend {
-    fn decide_json(
-        &mut self,
-        request: &DecisionRequest,
-        image: Option<&[u8]>,
-    ) -> crate::Result<serde_json::Value>;
+mod contract;
+pub use contract::HttpDecisionBackend;
+use contract::run_request;
+
+struct Job {
+    body: Vec<u8>,
+    request_id: String,
+    reply: mpsc::Sender<Result<Value, Error>>,
 }
 
-#[cfg(any(feature = "llama", feature = "wgpu", test))]
-fn local_decide_json<B: VisionDecisionBackend>(
-    backend: &mut B,
-    request: &DecisionRequest,
-    image: Option<&[u8]>,
-) -> crate::Result<serde_json::Value> {
-    let response = if let Some(image) = image {
-        backend.decide_vision(request, image)?
-    } else {
-        backend.decide(request)?
-    };
-    serde_json::to_value(response).map_err(|e| Error::Backend(e.to_string()))
-}
-
-#[cfg(feature = "llama")]
-impl HttpDecisionBackend for crate::llama::LlamaBackend {
-    fn decide_json(
-        &mut self,
-        request: &DecisionRequest,
-        image: Option<&[u8]>,
-    ) -> crate::Result<serde_json::Value> {
-        local_decide_json(self, request, image)
-    }
-}
-
-#[cfg(feature = "wgpu")]
-impl HttpDecisionBackend for crate::wgpu::WgpuBackend {
-    fn decide_json(
-        &mut self,
-        request: &DecisionRequest,
-        image: Option<&[u8]>,
-    ) -> crate::Result<serde_json::Value> {
-        local_decide_json(self, request, image)
-    }
-}
-
-#[cfg(feature = "openrouter")]
-impl HttpDecisionBackend for crate::openrouter::OpenRouterBackend {
-    fn decide_json(
-        &mut self,
-        request: &DecisionRequest,
-        image: Option<&[u8]>,
-    ) -> crate::Result<serde_json::Value> {
-        serde_json::to_value(self.decide(request, image)?)
-            .map_err(|e| Error::Backend(e.to_string()))
-    }
-}
-
+/// The backend remains on the caller thread. Connection parsing and health checks continue independently.
 pub fn serve<B: HttpDecisionBackend>(
     address: &str,
     backend: &mut B,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let listener = TcpListener::bind(address)?;
-    eprintln!("l2s1 HTTP listening on {}", listener.local_addr()?);
-    for connection in listener.incoming() {
-        match connection {
-            Ok(mut stream) => {
-                let _ = stream.set_read_timeout(Some(Duration::from_secs(30)));
-                let _ = stream.set_write_timeout(Some(Duration::from_secs(30)));
-                if let Err(error) = handle(&mut stream, backend) {
-                    eprintln!("HTTP connection error: {error}");
-                }
-            }
-            Err(error) => eprintln!("HTTP accept error: {error}"),
-        }
+    let (sender, receiver) = mpsc::sync_channel(QUEUE_DEPTH);
+    let capabilities = backend.capabilities();
+    let _listener = start_listener(address, capabilities, sender)?;
+    for job in receiver {
+        let result = run_request(backend, &job.body);
+        let _ = job.reply.send(result.map(|mut value| {
+            value["request_id"] = json!(job.request_id);
+            value
+        }));
     }
     Ok(())
 }
 
-fn handle<B: HttpDecisionBackend>(stream: &mut TcpStream, backend: &mut B) -> std::io::Result<()> {
-    let request = match read_request(stream) {
+/// Remote adapters may process separate HTTP requests on independent owned workers.
+#[cfg(feature = "openrouter")]
+pub fn serve_openrouter(
+    address: &str,
+    backend: crate::openrouter::OpenRouterBackend,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let (sender, receiver) = mpsc::sync_channel(QUEUE_DEPTH);
+    let receiver = Arc::new(Mutex::new(receiver));
+    let listener = start_listener(address, backend.capabilities(), sender)?;
+    for _ in 0..4 {
+        let receiver = Arc::clone(&receiver);
+        let mut backend = backend.clone();
+        thread::spawn(move || {
+            loop {
+                let job = { receiver.lock().expect("queue lock").recv() };
+                let Ok(job) = job else { break };
+                let result = run_request(&mut backend, &job.body);
+                let _ = job.reply.send(result.map(|mut value| {
+                    value["request_id"] = json!(job.request_id);
+                    value
+                }));
+            }
+        });
+    }
+    listener
+        .join()
+        .map_err(|_| std::io::Error::other("HTTP listener panicked"))?;
+    Ok(())
+}
+
+fn start_listener(
+    address: &str,
+    capabilities: Value,
+    sender: SyncSender<Job>,
+) -> std::io::Result<thread::JoinHandle<()>> {
+    let listener = TcpListener::bind(address)?;
+    eprintln!("l2s1 HTTP listening on {}", listener.local_addr()?);
+    Ok(thread::spawn(move || {
+        let active = Arc::new(AtomicUsize::new(0));
+        for connection in listener.incoming() {
+            match connection {
+                Ok(mut stream) => {
+                    let request_id =
+                        format!("req-{}", NEXT_REQUEST_ID.fetch_add(1, Ordering::Relaxed));
+                    if active.fetch_add(1, Ordering::AcqRel) >= MAX_CONNECTIONS {
+                        active.fetch_sub(1, Ordering::AcqRel);
+                        let _ = respond_error(
+                            &mut stream,
+                            503,
+                            "busy",
+                            "too many connections",
+                            &request_id,
+                        );
+                        continue;
+                    }
+                    let active = Arc::clone(&active);
+                    let sender = sender.clone();
+                    let capabilities = capabilities.clone();
+                    thread::spawn(move || {
+                        let _ = stream.set_read_timeout(Some(Duration::from_secs(30)));
+                        let _ = stream.set_write_timeout(Some(Duration::from_secs(180)));
+                        if let Err(error) = handle(&mut stream, &sender, &capabilities, &request_id)
+                        {
+                            eprintln!("HTTP connection error: {error}");
+                        }
+                        active.fetch_sub(1, Ordering::AcqRel);
+                    });
+                }
+                Err(error) => eprintln!("HTTP accept error: {error}"),
+            }
+        }
+    }))
+}
+
+fn handle(
+    stream: &mut TcpStream,
+    sender: &SyncSender<Job>,
+    capabilities: &Value,
+    request_id: &str,
+) -> std::io::Result<()> {
+    let mut request = match read_request(stream) {
         Ok(request) => request,
         Err((status, message)) => {
-            return respond(stream, status, &serde_json::json!({"error": message}));
+            let code = if status == 503 {
+                "busy"
+            } else {
+                "invalid_http_request"
+            };
+            return respond_error(stream, status, code, message, request_id);
         }
     };
     if request.method == "GET" && request.path == "/healthz" {
-        return respond(stream, 200, &serde_json::json!({"status": "ok"}));
+        return respond(stream, 200, &json!({"status":"ok"}));
+    }
+    if request.method == "GET" && request.path == "/v1/capabilities" {
+        return respond(stream, 200, capabilities);
     }
     if request.method != "POST" || request.path != "/v1/decisions" {
-        return respond(
+        return respond_error(
             stream,
             404,
-            &serde_json::json!({"error": "route not found"}),
+            "route_not_found",
+            "route not found",
+            request_id,
         );
     }
     let content_type = request.content_type.to_ascii_lowercase();
     if content_type != "application/json" && !content_type.starts_with("application/json;") {
-        return respond(
+        return respond_error(
             stream,
             415,
-            &serde_json::json!({"error": "Content-Type must be application/json"}),
+            "unsupported_media_type",
+            "Content-Type must be application/json",
+            request_id,
         );
     }
-    let result = run_request(backend, &request.body);
-    match result {
-        Ok(output) => respond(stream, 200, &output),
-        Err(Error::Invalid(message)) => {
-            respond(stream, 400, &serde_json::json!({"error": message}))
+    let (reply, receiver) = mpsc::channel();
+    match sender.try_send(Job {
+        body: std::mem::take(&mut request.body),
+        request_id: request_id.into(),
+        reply,
+    }) {
+        Ok(()) => {}
+        Err(TrySendError::Full(_)) => {
+            return respond_error(stream, 503, "busy", "inference queue is full", request_id);
         }
-        Err(Error::Backend(message)) => {
-            respond(stream, 422, &serde_json::json!({"error": message}))
+        Err(TrySendError::Disconnected(_)) => {
+            return respond_error(
+                stream,
+                503,
+                "unavailable",
+                "inference worker unavailable",
+                request_id,
+            );
         }
-        Err(Error::Upstream(message)) => {
-            respond(stream, 502, &serde_json::json!({"error": message}))
+    }
+    match receiver.recv() {
+        Ok(Ok(output)) => respond(stream, 200, &output),
+        Ok(Err(Error::Invalid(message))) => {
+            respond_error(stream, 400, "invalid_request", &message, request_id)
         }
+        Ok(Err(Error::Backend(message))) => {
+            respond_error(stream, 500, "backend_error", &message, request_id)
+        }
+        Ok(Err(Error::Upstream(message))) => {
+            respond_error(stream, 502, "upstream_error", &message, request_id)
+        }
+        Err(_) => respond_error(
+            stream,
+            503,
+            "unavailable",
+            "inference worker unavailable",
+            request_id,
+        ),
     }
 }
 
-fn run_request<B: HttpDecisionBackend>(
-    backend: &mut B,
-    body: &[u8],
-) -> crate::Result<serde_json::Value> {
-    let mut value: serde_json::Value =
-        serde_json::from_slice(body).map_err(|e| Error::Invalid(format!("invalid JSON: {e}")))?;
-    let object = value
-        .as_object_mut()
-        .ok_or_else(|| Error::Invalid("request must be a JSON object".into()))?;
-    let image = object.remove("image_base64");
-    let request: DecisionRequest = serde_json::from_value(value)
-        .map_err(|e| Error::Invalid(format!("invalid decision request: {e}")))?;
-    let image = if let Some(image) = image {
-        let encoded = image
-            .as_str()
-            .ok_or_else(|| Error::Invalid("image_base64 must be a string".into()))?;
-        if encoded.len() > MAX_IMAGE_BASE64 {
-            return Err(Error::Invalid("image_base64 exceeds size limit".into()));
-        }
-        let decoded = base64::engine::general_purpose::STANDARD
-            .decode(encoded)
-            .map_err(|_| Error::Invalid("image_base64 is not valid standard base64".into()))?;
-        Some(decoded)
-    } else {
-        None
-    };
-    backend.decide_json(&request, image.as_deref())
+fn respond_error(
+    stream: &mut TcpStream,
+    status: u16,
+    code: &str,
+    message: &str,
+    request_id: &str,
+) -> std::io::Result<()> {
+    respond(
+        stream,
+        status,
+        &json!({"error":{"code":code,"message":message,"request_id":request_id}}),
+    )
 }
 
 struct HttpRequest {
@@ -165,6 +229,25 @@ struct HttpRequest {
     path: String,
     content_type: String,
     body: Vec<u8>,
+    _reservation: BodyReservation,
+}
+
+struct BodyReservation(usize);
+impl BodyReservation {
+    fn acquire(bytes: usize) -> Result<Self, (u16, &'static str)> {
+        INFLIGHT_BODY_BYTES
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |used| {
+                used.checked_add(bytes)
+                    .filter(|total| *total <= MAX_INFLIGHT_BODY_BYTES)
+            })
+            .map_err(|_| (503, "request memory budget exhausted"))?;
+        Ok(Self(bytes))
+    }
+}
+impl Drop for BodyReservation {
+    fn drop(&mut self) {
+        INFLIGHT_BODY_BYTES.fetch_sub(self.0, Ordering::AcqRel);
+    }
 }
 
 fn read_request(stream: &mut TcpStream) -> Result<HttpRequest, (u16, &'static str)> {
@@ -227,6 +310,7 @@ fn read_request(stream: &mut TcpStream) -> Result<HttpRequest, (u16, &'static st
     if length > MAX_BODY {
         return Err((413, "request body too large"));
     }
+    let reservation = BodyReservation::acquire(length)?;
     let mut body = bytes[header_end..].to_vec();
     if body.len() > length {
         body.truncate(length);
@@ -242,10 +326,11 @@ fn read_request(stream: &mut TcpStream) -> Result<HttpRequest, (u16, &'static st
         path: path.into(),
         content_type: content_type.into(),
         body,
+        _reservation: reservation,
     })
 }
 
-fn respond(stream: &mut TcpStream, status: u16, body: &serde_json::Value) -> std::io::Result<()> {
+fn respond(stream: &mut TcpStream, status: u16, body: &Value) -> std::io::Result<()> {
     let json = serde_json::to_vec(body)?;
     let reason = match status {
         200 => "OK",
@@ -254,9 +339,10 @@ fn respond(stream: &mut TcpStream, status: u16, body: &serde_json::Value) -> std
         411 => "Length Required",
         413 => "Content Too Large",
         415 => "Unsupported Media Type",
-        422 => "Unprocessable Content",
-        502 => "Bad Gateway",
+        500 => "Internal Server Error",
         431 => "Request Header Fields Too Large",
+        502 => "Bad Gateway",
+        503 => "Service Unavailable",
         _ => "Error",
     };
     write!(
@@ -270,108 +356,170 @@ fn respond(stream: &mut TcpStream, status: u16, body: &serde_json::Value) -> std
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{DecisionBackend, DecisionResponse};
+    use crate::DecisionRequest;
 
     #[derive(Default)]
-    struct DispatchProbe {
-        text_calls: usize,
-        vision_calls: usize,
+    struct Probe {
+        calls: Vec<(Vec<String>, Vec<Vec<u8>>)>,
+        max_images: usize,
     }
-
-    impl DecisionBackend for DispatchProbe {
-        fn decide(&mut self, _: &DecisionRequest) -> crate::Result<DecisionResponse> {
-            self.text_calls += 1;
-            Err(Error::Backend("probe".into()))
+    impl HttpDecisionBackend for Probe {
+        fn capabilities(&self) -> Value {
+            json!({"media":{"image":{"supported":true,"max_per_decision":self.max_images}}})
         }
-    }
-
-    impl VisionDecisionBackend for DispatchProbe {
-        fn decide_vision(
-            &mut self,
-            _: &DecisionRequest,
-            image: &[u8],
-        ) -> crate::Result<DecisionResponse> {
-            assert_eq!(image, [1, 2, 3]);
-            self.vision_calls += 1;
-            Err(Error::Backend("probe".into()))
-        }
-    }
-
-    impl HttpDecisionBackend for DispatchProbe {
         fn decide_json(
             &mut self,
             request: &DecisionRequest,
-            image: Option<&[u8]>,
-        ) -> crate::Result<serde_json::Value> {
-            local_decide_json(self, request, image)
+            images: &[&[u8]],
+        ) -> crate::Result<Value> {
+            self.calls.push((
+                request.decisions.iter().map(|d| d.id.clone()).collect(),
+                images.iter().map(|image| image.to_vec()).collect(),
+            ));
+            Ok(
+                json!({"backend":{"runtime":"probe","model":"probe"},"policy":null,
+                "results":request.decisions.iter().map(|d| json!({"id":d.id,"value":{"type":"binary","value":true},
+                    "status":"selected","abstention_reasons":[],"evidence":{"type":"selection_only"},"usage":{}})).collect::<Vec<_>>() }),
+            )
         }
     }
-
-    struct UpstreamProbe;
-
-    impl HttpDecisionBackend for UpstreamProbe {
-        fn decide_json(
-            &mut self,
-            _: &DecisionRequest,
-            _: Option<&[u8]>,
-        ) -> crate::Result<serde_json::Value> {
-            Err(Error::Upstream("provider unavailable".into()))
+    fn decision(id: &str, media_ids: Option<Value>) -> Value {
+        let mut d = json!({"id":id,"instruction":"Choose","kind":{"type":"binary","false_label":"no","true_label":"yes"}});
+        if let Some(ids) = media_ids {
+            d["media_ids"] = ids;
         }
+        d
     }
 
     #[test]
-    fn image_field_selects_vision_backend() {
-        let mut probe = DispatchProbe::default();
-        let request = serde_json::json!({
-            "state": {},
-            "decisions": [{"id": "color", "instruction": "Choose a color", "kind": {
-                "type": "choice", "options": [
-                    {"id": "red", "criterion": "red"},
-                    {"id": "blue", "criterion": "blue"}
-                ]
-            }}]
-        });
-        assert!(run_request(&mut probe, request.to_string().as_bytes()).is_err());
-        let mut with_image = request;
-        with_image["image_base64"] = serde_json::json!("AQID");
-        assert!(run_request(&mut probe, with_image.to_string().as_bytes()).is_err());
-        assert_eq!((probe.text_calls, probe.vision_calls), (1, 1));
+    fn media_references_preserve_order_and_batch_matching_decisions() {
+        let mut probe = Probe {
+            max_images: 2,
+            ..Default::default()
+        };
+        let request = json!({"state":{},"media":[
+            {"id":"front","type":"image","data_base64":"AQID"},
+            {"id":"side","type":"image","data_base64":"BAUG"}],
+            "decisions":[decision("a",None), decision("b",None),
+                decision("c",Some(json!(["side"]))),decision("d",Some(json!([])))]});
+        let result = run_request(&mut probe, request.to_string().as_bytes()).unwrap();
+        assert_eq!(result["results"].as_array().unwrap().len(), 4);
+        assert_eq!(
+            probe.calls[0],
+            (
+                vec!["a".into(), "b".into()],
+                vec![vec![1, 2, 3], vec![4, 5, 6]]
+            )
+        );
+        assert_eq!(probe.calls[1], (vec!["c".into()], vec![vec![4, 5, 6]]));
+        assert_eq!(probe.calls[2], (vec!["d".into()], vec![]));
     }
 
     #[test]
-    fn malformed_request_is_rejected_before_inference() {
-        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-        let addr = listener.local_addr().unwrap();
-        let client = std::thread::spawn(move || {
-            let mut stream = TcpStream::connect(addr).unwrap();
-            stream.write_all(b"POST /v1/decisions HTTP/1.1\r\nContent-Length: 0\r\nContent-Length: 0\r\n\r\n").unwrap();
-        });
-        let (mut server, _) = listener.accept().unwrap();
+    fn invalid_media_is_rejected_before_any_inference() {
+        let mut probe = Probe {
+            max_images: 1,
+            ..Default::default()
+        };
+        let request = json!({"state":{},"media":[
+            {"id":"front","type":"image","data_base64":"AQID"},
+            {"id":"side","type":"image","data_base64":"BAUG"}],
+            "decisions":[decision("a",Some(json!([]))),decision("b",None)]});
         assert!(matches!(
-            read_request(&mut server),
-            Err((400, "duplicate Content-Length"))
+            run_request(&mut probe, request.to_string().as_bytes()),
+            Err(Error::Invalid(_))
         ));
-        client.join().unwrap();
+        assert!(probe.calls.is_empty());
     }
 
     #[test]
-    fn upstream_failure_is_bad_gateway() {
+    fn capability_and_health_routes_respond_without_backend() {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let address = listener.local_addr().unwrap();
-        let client = std::thread::spawn(move || {
+        let (sender, _receiver) = mpsc::sync_channel(1);
+        let server = thread::spawn(move || {
+            for _ in 0..2 {
+                let (mut stream, _) = listener.accept().unwrap();
+                handle(&mut stream, &sender, &json!({"api_version":1}), "req-test").unwrap();
+            }
+        });
+        for (path, expected) in [
+            ("/healthz", "\"ok\""),
+            ("/v1/capabilities", "\"api_version\":1"),
+        ] {
             let mut stream = TcpStream::connect(address).unwrap();
-            let body = serde_json::json!({
-                "state": {},
-                "decisions": [{"id":"flag","instruction":"Choose","kind":{"type":"binary","false_label":"no","true_label":"yes"}}]
-            }).to_string();
+            write!(stream, "GET {path} HTTP/1.1\r\n\r\n").unwrap();
+            let mut response = String::new();
+            stream.read_to_string(&mut response).unwrap();
+            assert!(response.contains(expected), "{response}");
+        }
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn health_responds_while_decision_waits_for_backend() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let (sender, receiver) = mpsc::sync_channel(1);
+        let (accepted, first_ready) = mpsc::channel();
+        let server = thread::spawn(move || {
+            let (mut first, _) = listener.accept().unwrap();
+            let first_sender = sender.clone();
+            let first_handle = thread::spawn(move || {
+                handle(&mut first, &first_sender, &json!({}), "req-first").unwrap();
+            });
+            accepted.send(()).unwrap();
+            let (mut second, _) = listener.accept().unwrap();
+            handle(&mut second, &sender, &json!({}), "req-second").unwrap();
+            drop(second);
+            first_handle.join().unwrap();
+        });
+        let body = json!({"state":{},"decisions":[decision("flag",None)]}).to_string();
+        let client = thread::spawn(move || {
+            let mut stream = TcpStream::connect(address).unwrap();
             write!(stream, "POST /v1/decisions HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}", body.len()).unwrap();
             let mut response = String::new();
             stream.read_to_string(&mut response).unwrap();
-            assert!(response.starts_with("HTTP/1.1 502 Bad Gateway\r\n"));
+            response
         });
-        let (mut server, _) = listener.accept().unwrap();
-        handle(&mut server, &mut UpstreamProbe).unwrap();
-        drop(server);
-        client.join().unwrap();
+        first_ready.recv().unwrap();
+        let mut health = TcpStream::connect(address).unwrap();
+        health.write_all(b"GET /healthz HTTP/1.1\r\n\r\n").unwrap();
+        let mut health_response = String::new();
+        health.read_to_string(&mut health_response).unwrap();
+        assert!(health_response.contains("\"status\":\"ok\""));
+        let job = receiver.recv_timeout(Duration::from_secs(2)).unwrap();
+        job.reply
+            .send(Ok(json!({"api_version":1,"results":[]})))
+            .unwrap();
+        assert!(client.join().unwrap().starts_with("HTTP/1.1 200"));
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn malformed_json_has_machine_readable_error_and_request_id() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let (sender, receiver) = mpsc::sync_channel(1);
+        let server = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            handle(&mut stream, &sender, &json!({}), "req-invalid").unwrap();
+        });
+        let mut client = TcpStream::connect(address).unwrap();
+        client.write_all(b"POST /v1/decisions HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 1\r\n\r\n{").unwrap();
+        let job = receiver.recv_timeout(Duration::from_secs(2)).unwrap();
+        let mut backend = Probe {
+            max_images: 1,
+            ..Default::default()
+        };
+        job.reply
+            .send(run_request(&mut backend, &job.body))
+            .unwrap();
+        let mut response = String::new();
+        client.read_to_string(&mut response).unwrap();
+        assert!(response.starts_with("HTTP/1.1 400 Bad Request"));
+        assert!(response.contains("\"code\":\"invalid_request\""));
+        assert!(response.contains("\"request_id\":\"req-invalid\""));
+        server.join().unwrap();
     }
 }

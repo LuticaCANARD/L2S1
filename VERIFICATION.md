@@ -26,7 +26,7 @@ SKID_VISION_MMPROJ=/path/to/mmproj.gguf \
 cargo test --locked --offline --features llama --test vision -- --ignored
 ```
 
-Use `--features llama-cuda` and `SKID_CUDA=1` for the same contract on a permitted CUDA host. The HTTP path additionally needs a live loopback check of `/healthz`, a valid `POST /v1/decisions` with `image_base64`, and a malformed request returning HTTP 400.
+Use `--features llama-cuda` and `SKID_CUDA=1` for the same contract on a permitted CUDA host. The HTTP path additionally needs a live loopback check of `/healthz` and `/v1/capabilities`, a valid `POST /v1/decisions` with named `media`, and a malformed request returning HTTP 400 with `error.code` and `error.request_id`.
 
 Offline Cargo commands also need a previously populated CMake source cache or `L2S1_LLAMA_CPP_SOURCE` set to a local checkout. General test runs skip tests that need model files; they do not download weights or establish real-model compatibility. Upstream C++ helper warnings are separate from Rust lint results.
 
