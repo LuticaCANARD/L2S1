@@ -42,7 +42,7 @@ Change `--model` to load another compatible GGUF. Text models need only the mode
 | Rust wgpu | Gemma 4 | Matching Gemma 4 `mmproj` | fresh, prefix-reuse, state-restore; multi-token codes use fresh | Same typed CLI and HTTP decisions |
 | llama.cpp | Models supported by the pinned llama.cpp revision, including compatible Bonsai and Qwen GGUF | Supported model with matching `mmproj` | Existing fresh, prefix-reuse, state-restore, parallel contracts; vision remains fresh | LoRA, calibration, output heads, diagnostics, HTTP |
 
-The `wgpu` executable rejects `parallel`; use the llama.cpp Metal route when it is needed. The macOS CI workflow checks that both executables build. A Mac with compatible model files is still needed to verify actual Metal inference and result equivalence.
+The `wgpu` executable rejects `parallel`; use the llama.cpp Metal route when it is needed. A Mac with compatible model files is needed to verify actual Metal inference and result equivalence.
 
 ## Architecture
 
