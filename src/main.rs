@@ -90,7 +90,7 @@ struct Args {
     ubatch: Option<u32>,
     #[arg(long, value_enum, default_value_t = FlashAttention::Off)]
     flash_attention: FlashAttention,
-    /// Maximum layers on CUDA; omit to preserve full offload.
+    /// Maximum layers on the selected GPU; omit to preserve full offload.
     #[arg(long)]
     gpu_layers: Option<u32>,
     /// Keep expert weights of the first N MoE layers in CPU RAM.
