@@ -200,6 +200,99 @@ fn real_model_parallel_contract() {
 }
 
 #[test]
+#[ignore = "requires SKID_MODEL; measures native KV reservation and checks context mode switching"]
+fn real_model_dynamic_parallel_context() {
+    let mut backend = load();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_parallel_width(8).unwrap();
+    backend.set_parallel_context_dynamic(true);
+    let small_request = request(8, false);
+    let compact = backend.decide(&small_request).unwrap();
+    let allocated = compact.backend.parallel_context_tokens.unwrap() as usize;
+    let submitted: usize = compact
+        .results
+        .iter()
+        .map(|result| result.input_tokens)
+        .sum();
+    eprintln!(
+        "dynamic context: allocated={allocated}, input_sum={submitted}, legacy={}",
+        2048 * 8
+    );
+    assert!(allocated >= submitted);
+    assert!(
+        allocated < 2048 * 8,
+        "short prompts should avoid the full KV reservation"
+    );
+    assert!(compact.backend.parallel_context_dynamic);
+    assert_same(&compact, &backend.decide(&small_request).unwrap());
+
+    let mut invalid = small_request.clone();
+    invalid.decisions[7].instruction = "overlong ".repeat(4000);
+    assert!(backend.decide(&invalid).is_err());
+    assert_same(&compact, &backend.decide(&small_request).unwrap());
+
+    let larger = request(8, true);
+    let grown = backend.decide(&larger).unwrap();
+    let grown_capacity = grown.backend.parallel_context_tokens.unwrap();
+    assert!(grown_capacity as usize > allocated);
+    let retained = backend.decide(&small_request).unwrap();
+    assert_eq!(
+        retained.backend.parallel_context_tokens,
+        Some(grown_capacity)
+    );
+    assert_same(&retained, &backend.decide(&small_request).unwrap());
+
+    backend.set_parallel_context_dynamic(false);
+    let full = backend.decide(&small_request).unwrap();
+    assert!(!full.backend.parallel_context_dynamic);
+    assert_eq!(full.backend.parallel_context_tokens, None);
+    assert_eq!(full.results.len(), compact.results.len());
+    for (a, b) in full.results.iter().zip(compact.results.iter()) {
+        assert_eq!((&a.id, a.input_tokens), (&b.id, b.input_tokens));
+    }
+}
+
+#[test]
+#[ignore = "requires SKID_MODEL; checks 8 independent requests in one dynamically sized wave"]
+fn real_model_dynamic_request_batch() {
+    let mut backend = load();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_parallel_width(24).unwrap();
+    backend.set_parallel_context_dynamic(true);
+    let requests: Vec<_> = (0..8)
+        .map(|i| {
+            let mut request = request(3, false);
+            request.state["case"] = serde_json::json!(i);
+            request
+        })
+        .collect();
+    let responses = backend.decide_batch(&requests).unwrap();
+    assert_eq!(responses.len(), requests.len());
+    let submitted: usize = responses
+        .iter()
+        .flat_map(|response| response.results.iter())
+        .map(|result| result.input_tokens)
+        .sum();
+    let allocated = responses[0].backend.parallel_context_tokens.unwrap() as usize;
+    eprintln!(
+        "dynamic request batch: allocated={allocated}, input_sum={submitted}, legacy={}",
+        2048 * 24
+    );
+    assert!(allocated >= submitted);
+    assert!(allocated < 2048 * 24);
+    for (request, response) in requests.iter().zip(&responses) {
+        assert_eq!(response.results.len(), request.decisions.len());
+        assert_eq!(
+            response.backend.parallel_context_tokens,
+            Some(allocated as u32)
+        );
+        for (decision, result) in request.decisions.iter().zip(&response.results) {
+            assert_eq!(result.id, decision.id);
+        }
+    }
+}
+
+#[test]
 #[ignore = "requires SKID_MODEL; reports speed and score drift, not an accuracy pass claim"]
 fn real_model_parallel_measurement() {
     let mut backend = load();

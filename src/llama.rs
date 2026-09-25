@@ -66,6 +66,7 @@ pub struct LlamaBackend {
     chat_skeleton: Option<String>,
     execution_mode: ExecutionMode,
     parallel_width: usize,
+    parallel_context_dynamic: bool,
     prompt_layout: PromptLayout,
     _not_send_sync: PhantomData<Rc<()>>,
 }
@@ -319,6 +320,7 @@ impl LlamaBackend {
             failure_stage: ("inference", FailureKind::BackendFailure, None),
             execution_mode: ExecutionMode::Fresh,
             parallel_width: 4,
+            parallel_context_dynamic: false,
             prompt_layout: PromptLayout::Legacy,
             _not_send_sync: PhantomData,
         };
@@ -613,6 +615,14 @@ impl LlamaBackend {
         self.parallel_width = width;
         self.clear_preparation_cache();
         Ok(())
+    }
+
+    /// Opt in to sizing parallel KV memory from the current wave's actual
+    /// token counts. The configured context remains the per-question limit.
+    pub fn set_parallel_context_dynamic(&mut self, enabled: bool) {
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        self.parallel_context_dynamic = enabled;
+        self.clear_preparation_cache();
     }
 
     /// Opt in to evidence-first prompts after validating their workload accuracy.
@@ -995,6 +1005,7 @@ impl LlamaBackend {
                     counts.as_ptr(),
                     decisions.len() as i32,
                     width as u32,
+                    self.parallel_context_dynamic,
                     reused.as_mut_ptr(),
                     logits.as_mut_ptr(),
                     logits.len(),
@@ -1139,6 +1150,11 @@ impl LlamaBackend {
             } else {
                 1
             },
+            parallel_context_dynamic: self.execution_mode == ExecutionMode::Parallel
+                && self.parallel_context_dynamic,
+            parallel_context_tokens: (self.execution_mode == ExecutionMode::Parallel
+                && self.parallel_context_dynamic)
+                .then(|| unsafe { sd_context_tokens(self.engine.as_ptr()) }),
             offload_requested: self.gpu,
             offload_device: self.gpu.then_some(device),
         }

@@ -41,6 +41,8 @@ pub struct ModelIdentity {
     pub compute: ComputeOptions,
     pub execution_mode: ExecutionMode,
     pub parallel_width: usize,
+    #[serde(default, skip_serializing_if = "crate::decision::bool_is_false")]
+    pub parallel_context_dynamic: bool,
 }
 impl ModelIdentity {
     pub fn fingerprint(&self) -> String {

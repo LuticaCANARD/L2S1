@@ -29,6 +29,7 @@ unsafe extern "C" {
         cap: usize,
     ) -> bool;
     pub fn sd_recurrent_or_hybrid(engine: *const c_void) -> bool;
+    pub fn sd_context_tokens(engine: *const c_void) -> u32;
     pub fn sd_training_context(engine: *const c_void) -> u32;
     pub fn sd_forward_restore(
         engine: *mut c_void,
@@ -148,6 +149,7 @@ unsafe extern "C" {
         counts: *const i32,
         sequences: i32,
         capacity: u32,
+        dynamic_context: bool,
         reused: *mut i32,
         logits: *mut f32,
         logits_count: usize,

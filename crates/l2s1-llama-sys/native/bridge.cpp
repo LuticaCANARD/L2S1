@@ -91,6 +91,8 @@ struct engine {
     uint32_t batch_size = 0;
     uint32_t context_size = 0;
     uint32_t sequence_capacity = 1;
+    uint32_t allocated_context_size = 0;
+    bool parallel_context_dynamic = false;
     llama_context_params context_params = {};
     std::string description;
     std::string architecture;
@@ -210,6 +212,7 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
         e->context_size = context;
         e->ctx = llama_init_from_model(e->model, cp);
         if (!e->ctx) throw std::runtime_error("context allocation failed");
+        e->allocated_context_size = context;
         e->batch_size = llama_n_batch(e->ctx);
         char desc[512] = {};
         llama_model_desc(e->model, desc, sizeof(desc));
@@ -374,16 +377,24 @@ extern "C" bool sd_load_lora(engine * e, const char * path, char * error, size_t
 }
 
 // One model allocation; resize only its context when changing execution modes.
-static void ensure_sequences(engine * e, uint32_t capacity) {
+static void ensure_sequences(engine * e, uint32_t capacity,
+        uint32_t requested_context = 0, bool dynamic_context = false) {
     if (capacity < 1 || capacity > 32 || e->context_size > uint32_t(INT_MAX) / capacity)
         throw std::runtime_error("parallel width requires 1..32 and context * width <= INT_MAX");
-    if (e->ctx && e->sequence_capacity == capacity) return;
+    const uint32_t maximum_context = e->context_size * capacity;
+    if (requested_context == 0) requested_context = maximum_context;
+    if (requested_context > maximum_context)
+        throw std::runtime_error("parallel context reservation is outside the configured limits");
+    if (e->ctx && e->sequence_capacity == capacity &&
+            e->parallel_context_dynamic == dynamic_context &&
+            (dynamic_context ? e->allocated_context_size >= requested_context :
+                e->allocated_context_size == requested_context)) return;
     sd_clear(e);
     if (e->ctx) llama_free(e->ctx);
     e->ctx = nullptr;
     auto cp = e->context_params;
     cp.n_seq_max = capacity;
-    cp.n_ctx = e->context_size * capacity;
+    cp.n_ctx = requested_context;
     cp.kv_unified = capacity > 1 ? true : e->context_params.kv_unified;
     e->ctx = llama_init_from_model(e->model, cp);
     if (!e->ctx) throw std::runtime_error("parallel context allocation failed; reduce parallel width");
@@ -397,6 +408,8 @@ static void ensure_sequences(engine * e, uint32_t capacity) {
     }
     llama_set_embeddings_nextn(e->ctx, e->features_enabled, false);
     e->sequence_capacity = capacity;
+    e->allocated_context_size = requested_context;
+    e->parallel_context_dynamic = dynamic_context;
 }
 
 // Both output paths use identical decoding and prefix handling. The returned
@@ -610,7 +623,7 @@ extern "C" bool sd_forward_compact(engine * e, const int32_t * tokens, int32_t c
 // Independent questions share only their exact common token prefix. Sequence
 // IDs isolate suffix attention; logits are copied by original batch token index.
 extern "C" bool sd_forward_parallel(engine * e, const int32_t * const * tokens,
-        const int32_t * counts, int32_t sequences, uint32_t capacity, int32_t * reused,
+        const int32_t * counts, int32_t sequences, uint32_t capacity, bool dynamic_context, int32_t * reused,
         float * logits, size_t logits_count, char * error, size_t error_cap) noexcept {
     try {
         if (sequences < 1 || sequences > int32_t(capacity) || capacity > 32)
@@ -620,12 +633,18 @@ extern "C" bool sd_forward_parallel(engine * e, const int32_t * const * tokens,
         const size_t vocab = size_t(sd_vocab_size(e));
         if (logits_count != vocab * size_t(sequences))
             throw std::runtime_error("wrong parallel logits buffer size");
+        uint64_t total_tokens = 0;
         for (int32_t s = 0; s < sequences; ++s) {
             reused[s] = 0;
             if (counts[s] <= 0 || uint32_t(counts[s]) > e->context_size)
                 throw std::runtime_error("parallel input exceeds per-question context; truncation is disabled");
+            total_tokens += uint32_t(counts[s]);
         }
-        ensure_sequences(e, capacity);
+        const uint64_t maximum_context = uint64_t(e->context_size) * capacity;
+        const uint32_t requested_context = dynamic_context && capacity > 1 ?
+            uint32_t(std::min(maximum_context, total_tokens + e->batch_size)) :
+            uint32_t(maximum_context);
+        ensure_sequences(e, capacity, requested_context, dynamic_context);
         sd_clear(e);
         int32_t common = counts[0] - 1;
         for (int32_t s = 1; s < sequences; ++s) {
@@ -654,7 +673,13 @@ extern "C" bool sd_forward_parallel(engine * e, const int32_t * const * tokens,
         for (int32_t start = 0; start < common;) {
             b.value.n_tokens = 0;
             while (start < common && b.value.n_tokens < int32_t(e->batch_size)) add(0, start++, false);
-            if (llama_decode(e->ctx, b.value) != 0) throw std::runtime_error("shared prefill failed");
+            const int32_t rc = llama_decode(e->ctx, b.value);
+            if (rc != 0) {
+                throw std::runtime_error("parallel shared prefill failed (llama_decode=" + std::to_string(rc) +
+                    ", batch_tokens=" + std::to_string(b.value.n_tokens) +
+                    ", context=" + std::to_string(llama_n_ctx(e->ctx)) +
+                    "; code 1 means no KV slot for this batch; see llama.cpp stderr for other codes)");
+            }
         }
         if (common > 0) {
             auto memory = llama_get_memory(e->ctx);
@@ -680,7 +705,14 @@ extern "C" bool sd_forward_parallel(engine * e, const int32_t * const * tokens,
                 }
             }
             if (b.value.n_tokens == 0) throw std::runtime_error("parallel scheduler made no progress");
-            if (llama_decode(e->ctx, b.value) != 0) throw std::runtime_error("parallel suffix decode failed");
+            const int32_t rc = llama_decode(e->ctx, b.value);
+            if (rc != 0) {
+                throw std::runtime_error("parallel suffix decode failed (llama_decode=" + std::to_string(rc) +
+                    ", batch_tokens=" + std::to_string(b.value.n_tokens) +
+                    ", completed=" + std::to_string(completed) + "/" + std::to_string(sequences) +
+                    ", context=" + std::to_string(llama_n_ctx(e->ctx)) +
+                    "; code 1 means no KV slot for this batch; see llama.cpp stderr for other codes)");
+            }
             for (const auto & item : outputs) {
                 const auto * output = llama_get_logits_ith(e->ctx, item.second);
                 if (!output) throw std::runtime_error("missing parallel final logits");
@@ -698,6 +730,9 @@ extern "C" bool sd_forward_parallel(engine * e, const int32_t * const * tokens,
 
 extern "C" bool sd_recurrent_or_hybrid(const engine * e) noexcept {
     return llama_model_is_recurrent(e->model) || llama_model_is_hybrid(e->model);
+}
+extern "C" uint32_t sd_context_tokens(const engine * e) noexcept {
+    return e->ctx ? llama_n_ctx(e->ctx) : 0;
 }
 extern "C" uint32_t sd_training_context(const engine * e) noexcept { return llama_model_n_ctx_train(e->model); }
 struct restore_metrics {

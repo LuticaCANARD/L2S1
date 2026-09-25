@@ -270,6 +270,12 @@ pub struct BackendInfo {
     /// Configured maximum questions per parallel wave; one for serial modes.
     #[serde(default = "serial_width")]
     pub parallel_width: usize,
+    /// Opt-in context reservation based on the current parallel wave's token counts.
+    #[serde(default, skip_serializing_if = "bool_is_false")]
+    pub parallel_context_dynamic: bool,
+    /// Currently allocated padded KV context capacity in dynamic parallel mode.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parallel_context_tokens: Option<u32>,
     /// Requested compute settings; absent in historical responses.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub compute: Option<ComputeOptions>,
@@ -294,6 +300,10 @@ pub trait DecisionBackend {
 
 fn serial_width() -> usize {
     1
+}
+
+pub(crate) fn bool_is_false(value: &bool) -> bool {
+    !*value
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]

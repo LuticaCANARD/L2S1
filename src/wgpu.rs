@@ -110,6 +110,8 @@ impl WgpuBackend {
             runtime: "rullama-engine-wgpu".into(),
             execution_mode: ExecutionMode::Fresh,
             parallel_width: 1,
+            parallel_context_dynamic: false,
+            parallel_context_tokens: None,
             compute: None,
             offload_requested: !software_adapter,
             offload_device: Some(adapter.name),
@@ -207,10 +209,7 @@ impl WgpuBackend {
                 "tokenizer produced out-of-vocabulary ID".into(),
             ));
         }
-        if tokens
-            .iter()
-            .filter(|&&id| Some(id) == image_begin)
-            .count()
+        if tokens.iter().filter(|&&id| Some(id) == image_begin).count()
             != usize::from(soft.is_some())
         {
             return Err(Error::Backend(
