@@ -49,7 +49,7 @@ impl LlamaBackend {
                 prefix_reuse_fallback: hybrid.then(|| "recurrent_or_hybrid_memory".into()),
                 hidden_features: self.architecture == "gemma4",
                 snapshot_limit_bytes: self.snapshot_limit_bytes,
-                evidence_status: "loaded_metadata; request preflight and measured quality are separate; state_restore is experimental",
+                evidence_status: "loaded_metadata; request preflight and measured quality are separate; state_restore uses bounded request-local sequence state",
             },
         }
     }

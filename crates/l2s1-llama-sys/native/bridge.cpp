@@ -675,13 +675,18 @@ extern "C" bool sd_forward_restore(engine * e, const int32_t * const * tokens,
         }
         metrics->save_ms=elapsed(start);
         for (int32_t s=0; s<sequences; ++s) {
-            start=clock::now();
-            sd_clear(e);
-            if (llama_state_seq_set_data(e->ctx,snapshot.data(),bytes,0)!=bytes) {
-                metrics->fallback=4; metrics->restores=0; return fresh();
+            // The first suffix can use the state left by the common prefill.
+            // Restore only for later, independent suffixes; the counter is the
+            // number of actual state loads, not the number of decisions.
+            if (s > 0) {
+                start=clock::now();
+                sd_clear(e);
+                if (llama_state_seq_set_data(e->ctx,snapshot.data(),bytes,0)!=bytes) {
+                    metrics->fallback=4; metrics->restores=0; return fresh();
+                }
+                metrics->restore_ms+=elapsed(start);
+                ++metrics->restores;
             }
-            metrics->restore_ms+=elapsed(start);
-            ++metrics->restores;
             start=clock::now();
             decode(s,common,counts[s],true);
             const float * output=llama_get_logits_ith(e->ctx,-1);

@@ -46,7 +46,7 @@ struct Args {
     /// Task-scoped scalar calibration; repeat for multiple decision IDs.
     #[arg(long, conflicts_with = "output_head")]
     calibration: Vec<PathBuf>,
-    /// Maximum bytes allocated for an experimental sequence snapshot.
+    /// Maximum bytes allocated for a request-local sequence snapshot.
     #[arg(long, default_value_t = 268435456)]
     snapshot_limit_bytes: usize,
     /// Optional compatible GGUF LoRA adapter, applied at scale 1.

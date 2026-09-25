@@ -121,7 +121,7 @@ fn model_replacement_contract() {
             if mode == ExecutionMode::StateRestore && actual.state_restore.fallback_reason.is_none()
             {
                 assert!(actual.state_restore.snapshot_bytes > 0);
-                assert_eq!(actual.state_restore.restores, 3);
+                assert_eq!(actual.state_restore.restores, 2);
                 assert!(actual.response.results[1].reused_prefix_tokens > 0);
             }
             modes.push(serde_json::json!({"mode":mode,"within_existing_equivalence_tolerance":equivalent,"max_probability_delta":pd,"max_mass_delta":md,"top_changes":top_changes,"accepted_changes":accepted_changes,"diagnostics":actual.decisions,"state_restore":actual.state_restore}));
