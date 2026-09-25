@@ -70,6 +70,29 @@ tier scores, selective accuracy, timing limits and reproduction commands. Raw
 predictions, source snapshots and replay evidence remain beside that report in
 the ignored results directory. This is separate from the RTX 3060 matrix below.
 
+### Prompt-order diagnostics on that RTX 3080 run
+
+Four post-hoc diagnostic streams kept each model, public task set and inference
+settings fixed while changing either the JSON field order (`state-first`) or
+reversing the 139 Choice option lists with their IDs and criteria paired. The
+original model scores are the baseline from the five-model run above. Correct
+answers below are semantic IDs, so a displayed option changing position does
+not itself count as a changed answer.
+
+| Model | Change | Baseline / 231 | New / 231 | Semantic answers changed | Wrong to correct / correct to wrong |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Qwen3 0.6B Q8_0 | State first | 73 | 78 | 73/231 | 29 / 24 |
+| Qwen3 0.6B Q8_0 | Choice order reversed | 73 | 76 | 131/139 | 29 / 26 |
+| Gemma 4 E2B Q8_0 | State first | 159 | 151 | 50/231 | 15 / 23 |
+| Gemma 4 E2B Q8_0 | Choice order reversed | 159 | 157 | 33/139 | 9 / 11 |
+
+All four streams completed without inference errors or truncation. This is
+evidence that prompt and option presentation can change these checkpoints'
+outputs; it is not an independent held-out improvement test or a claim that
+state-first is better for other models. The local, gitignored
+`results/jevbench-diagnosis-20260923/REPORT.md` retains the full diagnosis,
+commands and saved predictions. Legacy ordering remains the default.
+
 ## Multi-model comparison
 
 The [README comparison](README.md#recorded-model-comparison) summarizes the completed September 23 RTX 3060 matrix: 22 GGUF checkpoints each scored all 231 items, with no errors in those completed runs. There were 23 runtime configurations: GPT-OSS failed with CUDA Graphs enabled, then completed with `GGML_CUDA_DISABLE_GRAPHS=1`. The original failed attempt remains in the evidence. Latency values belong to their respective settings and should not be mixed with separate runs.
