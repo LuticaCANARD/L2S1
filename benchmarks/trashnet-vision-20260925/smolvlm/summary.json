@@ -1,0 +1,83 @@
+{
+  "dataset": "garythung/trashnet dataset-resized",
+  "source_commit": "6fa2b878c6c1b4304b91109070ce0edf9279bb31",
+  "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+  "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+  "sample_size": 120,
+  "images_per_class": 20,
+  "binary_sha256": "f01046d5e525d1966ea4a6f394b8d558ef1d8fbce6a8647c2a73f964a2ec94fb",
+  "model_sha256": "2a31195d3769c0b0fd0a4906201666108834848db768af11de1d2cef7cd35e65",
+  "mmproj_sha256": "7e943f7c53f0382a6fc41b6ee0c2def63ba4fded9ab8ed039cc9e2ab905e0edd",
+  "model": "models/SmolVLM-256M-Instruct-Q8_0.gguf",
+  "startup_to_health_ms": 2523.971179,
+  "protocol": "One original JPEG per serial local HTTP request; fixed six-choice material question; label and filename excluded; no warmup; RTX 3080 CUDA; loaded-model latency includes first request",
+  "accepted": 0,
+  "abstained": 120,
+  "accepted_correct": 0,
+  "correct_over_all": 0.0,
+  "accepted_accuracy": null,
+  "coverage": 0.0,
+  "raw_top1_correct": 13,
+  "raw_top1_accuracy": 0.10833333333333334,
+  "latency_ms": {
+    "mean": 110.64027049166667,
+    "p50": 108.7000395,
+    "p95_nearest_rank": 126.013228
+  },
+  "by_class": {
+    "cardboard": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 5,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "glass": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 7,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "metal": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 0,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "paper": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 1,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "plastic": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 0,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "trash": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 0,
+      "predictions": {
+        "abstain": 20
+      }
+    }
+  }
+}

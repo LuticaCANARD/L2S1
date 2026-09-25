@@ -1,0 +1,50 @@
+{
+  "note": "Original server logs are retained in local ignored results, outside this PR. Each run sent 120 images; image_slice_encoded_count may exceed 120 when the projector uses multiple slices.",
+  "runs": {
+    "gemma4": {
+      "server_log_sha256": "cd555efea61228a560534997e2db0356bdc156fe9bd90fdf4176f77bd01c5720",
+      "image_slice_encoded_count": 120,
+      "requests": 120
+    },
+    "qwen3vl": {
+      "server_log_sha256": "c4ce92807676d30ac8fcf5ac3af6a2883073b76a693d2ed8a84bc0daf6ee83ee",
+      "image_slice_encoded_count": 120,
+      "requests": 120
+    },
+    "smolvlm": {
+      "server_log_sha256": "4064dc4c99d6ddc58fe4acb57748d7da7ddbc4d4a25e207d90fc46cc92540285",
+      "image_slice_encoded_count": 240,
+      "requests": 120
+    },
+    "gemma4-traits-v1": {
+      "server_log_sha256": "5fad842042b9b10f67cf693da0e1900c98adf04894972d63d23d41bfcceb38bc",
+      "image_slice_encoded_count": 120,
+      "requests": 120
+    },
+    "qwen3vl-traits-v1": {
+      "server_log_sha256": "f811e36a6ea155387626d0e6bc77952a07e00c7bb178f3954fc5f1eeac0d7f39",
+      "image_slice_encoded_count": 120,
+      "requests": 120
+    },
+    "smolvlm-traits-v1": {
+      "server_log_sha256": "8a0ac58041ea10f45afb41cbf8dcf209268ac32bf92f84e3df68408a5f4f41aa",
+      "image_slice_encoded_count": 240,
+      "requests": 120
+    },
+    "gemma4-traits-v2-p50": {
+      "server_log_sha256": "098c33c45c7a9d0370feb053d34fe85e422b8bc0e0f27bf6c1415557a499e96b",
+      "image_slice_encoded_count": 120,
+      "requests": 120
+    },
+    "qwen3vl-traits-v2-p50": {
+      "server_log_sha256": "6af5a6da0b4dadd616884109794a4dd6997f0d3a7d64156c55612e00b5c820d3",
+      "image_slice_encoded_count": 120,
+      "requests": 120
+    },
+    "smolvlm-traits-v2-p50": {
+      "server_log_sha256": "b4c0ab02ba063d28f8753b783a3a39d0ad23806e0f5c759ec3cd80e92926c234",
+      "image_slice_encoded_count": 240,
+      "requests": 120
+    }
+  }
+}

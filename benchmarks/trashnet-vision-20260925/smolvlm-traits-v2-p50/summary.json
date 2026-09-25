@@ -1,0 +1,114 @@
+{
+  "dataset": "garythung/trashnet dataset-resized",
+  "source_commit": "6fa2b878c6c1b4304b91109070ce0edf9279bb31",
+  "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+  "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+  "sample_size": 120,
+  "images_per_class": 20,
+  "binary_sha256": "f01046d5e525d1966ea4a6f394b8d558ef1d8fbce6a8647c2a73f964a2ec94fb",
+  "model_sha256": "2a31195d3769c0b0fd0a4906201666108834848db768af11de1d2cef7cd35e65",
+  "mmproj_sha256": "7e943f7c53f0382a6fc41b6ee0c2def63ba4fded9ab8ed039cc9e2ab905e0edd",
+  "model": "models/SmolVLM-256M-Instruct-Q8_0.gguf",
+  "prompt_mode": "traits_v2",
+  "instruction": "Classify the primary visible material of the main discarded object. First identify the foreground object; ignore the white background, shadows, printed text, brand, presumed contents, and whether an item is recyclable. Compare several visible physical cues rather than one color, shape, or highlight. The six category guides are: CARDBOARD is thick, relatively stiff paper fiber formed into a box, carton, or packaging panel. A cut edge may reveal layers or corrugation; a printed surface can still be cardboard. Distinguish it from a thin sheet that bends or folds easily. GLASS is hard and rigid, often with thick transparent or colored translucent walls, sharp specular reflections, and a solid bottle or jar rim. A bottle silhouette or transparency by itself does not establish glass. METAL includes cans, lids, sheet metal, and foil. Look for a metallic surface, formed rims or seams, or crumpled reflective foil; paint and printing can hide the sheen. PAPER is a relatively thin, flexible fibrous sheet such as a page, leaflet, newspaper, or paper wrapper. Printing, gloss, and folding do not turn a thin sheet into cardboard. PLASTIC includes molded bottles, tubs, caps, and thin film or wrappers. It can be clear or opaque, stiff or flexible; thin walls, molded seams, and film folds can distinguish it from rigid glass. TRASH is residual waste, visibly soiled material, a mixed or composite item with no clear primary material among the five above, or an object made mainly from another material. Do not use trash merely because a clearly identifiable paper, plastic, metal, glass, or cardboard item is broken or discarded. If several materials appear, choose the material occupying most of the main object; choose trash when none clearly dominates. Return one of the six named classes.",
+  "instruction_sha256": "beb2a5980ae5ec92cdaec1e073f17905871597cac61f5349fd70d32d81880662",
+  "options": [
+    {
+      "id": "cardboard",
+      "criterion": "A piece of corrugated cardboard or cardboard packaging."
+    },
+    {
+      "id": "glass",
+      "criterion": "A glass object, such as a bottle or jar."
+    },
+    {
+      "id": "metal",
+      "criterion": "A metal object, such as a can or metal container."
+    },
+    {
+      "id": "paper",
+      "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+    },
+    {
+      "id": "plastic",
+      "criterion": "A plastic object, such as a bottle or plastic container."
+    },
+    {
+      "id": "trash",
+      "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+    }
+  ],
+  "min_top_probability": 0.5,
+  "min_candidate_mass": 0.05,
+  "startup_to_health_ms": 2526.079233,
+  "protocol": "One original JPEG per serial local HTTP request; fixed six-choice material question; label and filename excluded; no warmup; RTX 3080 CUDA; loaded-model latency includes first request",
+  "accepted": 0,
+  "abstained": 120,
+  "accepted_correct": 0,
+  "correct_over_all": 0.0,
+  "accepted_accuracy": null,
+  "coverage": 0.0,
+  "raw_top1_correct": 21,
+  "raw_top1_accuracy": 0.175,
+  "latency_ms": {
+    "mean": 140.114415175,
+    "p50": 138.100529,
+    "p95_nearest_rank": 157.482888
+  },
+  "by_class": {
+    "cardboard": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 3,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "glass": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 18,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "metal": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 0,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "paper": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 0,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "plastic": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 0,
+      "predictions": {
+        "abstain": 20
+      }
+    },
+    "trash": {
+      "total": 20,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "raw_top1_correct": 0,
+      "predictions": {
+        "abstain": 20
+      }
+    }
+  }
+}

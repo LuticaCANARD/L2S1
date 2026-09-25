@@ -88,6 +88,7 @@ Gemma is a possible vision backend: Gemma 3 4B/12B/27B and Gemma 4 E2B/E4B have 
 
 For CPU/CUDA latency measurements with Gemma 4 and two labeled image fixtures, see the [direct vision benchmark](VISION_BENCHMARK.md).
 For a 30-class, 150-image CUDA run through the HTTP vision API, see the [Caltech-101 benchmark](benchmarks/caltech101-vision-20260924/README.md).
+For six-class waste-material classification and a paired prompt/acceptance-threshold study, see the [TrashNet vision benchmark](benchmarks/trashnet-vision-20260925/REPORT.md).
 
 ## OpenRouter adapter
 
@@ -170,6 +171,8 @@ cargo build --release --locked --features llama
 # CUDA toolkit required for GPU support:
 cargo build --release --locked --features llama-cuda
 ```
+
+To produce independent CUDA builds for particular compute capabilities, run `scripts/build_cuda_arch.sh 86 89`. Each architecture gets a separate Cargo target directory and a `release/run-l2s1` launcher with its matching native libraries. The script requires `readelf` and a CUDA toolkit. The [sm_86 build and shared-state cache measurement](benchmarks/shared-state-cache-20260925/REPORT.md) were checked on an RTX 3080; other architecture builds still need their own verification.
 
 The default CPU build uses CMake FetchContent to download and verify llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`; the first build needs network access. For an offline build or another revision, set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`; the legacy `LLAMA_CPP_DIR` source override also works. `LLAMA_LIB_DIR` is no longer used. Validate custom revisions with the native contract tests. See [verification commands](VERIFICATION.md) and [native dependency details](crates/l2s1-llama-sys/README.md).
 

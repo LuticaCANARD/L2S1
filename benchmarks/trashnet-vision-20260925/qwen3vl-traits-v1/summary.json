@@ -1,0 +1,120 @@
+{
+  "dataset": "garythung/trashnet dataset-resized",
+  "source_commit": "6fa2b878c6c1b4304b91109070ce0edf9279bb31",
+  "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+  "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+  "sample_size": 120,
+  "images_per_class": 20,
+  "binary_sha256": "f01046d5e525d1966ea4a6f394b8d558ef1d8fbce6a8647c2a73f964a2ec94fb",
+  "model_sha256": "b7802e29f71a9e5b5e3f83f613df898a2204342dcea71a231ea501d481813c39",
+  "mmproj_sha256": "69066c8f279ec85ff48ab4059f6ebba0d2932ca57667f2bbdac7d9805bca9e7b",
+  "model": "models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+  "prompt_mode": "traits_v1",
+  "instruction": "Choose the primary material of the main waste item in the photo. Use visible material cues, not the background, printed words, or presumed recyclability. Cardboard: thick, fairly stiff layered paperboard, often a carton or box panel; corrugation may be visible at an edge. Glass: hard, rigid material with a smooth reflective surface, often transparent or translucent with thick edges, as in a bottle or jar. Metal: opaque metallic material, often a can, lid, or foil; it may be rigid or crumpled and show a metallic sheen or formed rim. Paper: thin, flexible fibrous sheets, pages, leaflets, or paper wrapping, even when printed or folded; distinguish it from thick box board. Plastic: molded polymer containers or flexible film and wrappers; it may be clear or opaque, rigid or bendable, so transparency alone does not prove glass. Trash: residual, visibly soiled, mixed-material, or other waste when none of the five named materials is clearly the primary material. For composite objects choose the dominant visible material; use trash if none dominates.",
+  "instruction_sha256": "2f295757f010e5e6a18bdba7d26a79f802e2315a0a17b280cd75df08f341dbc1",
+  "options": [
+    {
+      "id": "cardboard",
+      "criterion": "A piece of corrugated cardboard or cardboard packaging."
+    },
+    {
+      "id": "glass",
+      "criterion": "A glass object, such as a bottle or jar."
+    },
+    {
+      "id": "metal",
+      "criterion": "A metal object, such as a can or metal container."
+    },
+    {
+      "id": "paper",
+      "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+    },
+    {
+      "id": "plastic",
+      "criterion": "A plastic object, such as a bottle or plastic container."
+    },
+    {
+      "id": "trash",
+      "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+    }
+  ],
+  "startup_to_health_ms": 11036.839511,
+  "protocol": "One original JPEG per serial local HTTP request; fixed six-choice material question; label and filename excluded; no warmup; RTX 3080 CUDA; loaded-model latency includes first request",
+  "accepted": 107,
+  "abstained": 13,
+  "accepted_correct": 89,
+  "correct_over_all": 0.7416666666666667,
+  "accepted_accuracy": 0.8317757009345794,
+  "coverage": 0.8916666666666667,
+  "raw_top1_correct": 93,
+  "raw_top1_accuracy": 0.775,
+  "latency_ms": {
+    "mean": 130.64176479166667,
+    "p50": 129.40805699999999,
+    "p95_nearest_rank": 138.878235
+  },
+  "by_class": {
+    "cardboard": {
+      "total": 20,
+      "accepted": 19,
+      "accepted_correct": 19,
+      "raw_top1_correct": 20,
+      "predictions": {
+        "cardboard": 19,
+        "abstain": 1
+      }
+    },
+    "glass": {
+      "total": 20,
+      "accepted": 20,
+      "accepted_correct": 20,
+      "raw_top1_correct": 20,
+      "predictions": {
+        "glass": 20
+      }
+    },
+    "metal": {
+      "total": 20,
+      "accepted": 20,
+      "accepted_correct": 19,
+      "raw_top1_correct": 19,
+      "predictions": {
+        "metal": 19,
+        "glass": 1
+      }
+    },
+    "paper": {
+      "total": 20,
+      "accepted": 15,
+      "accepted_correct": 15,
+      "raw_top1_correct": 17,
+      "predictions": {
+        "paper": 15,
+        "abstain": 5
+      }
+    },
+    "plastic": {
+      "total": 20,
+      "accepted": 19,
+      "accepted_correct": 15,
+      "raw_top1_correct": 15,
+      "predictions": {
+        "plastic": 15,
+        "abstain": 1,
+        "glass": 4
+      }
+    },
+    "trash": {
+      "total": 20,
+      "accepted": 14,
+      "accepted_correct": 1,
+      "raw_top1_correct": 2,
+      "predictions": {
+        "trash": 1,
+        "abstain": 6,
+        "paper": 11,
+        "plastic": 2
+      }
+    }
+  }
+}
