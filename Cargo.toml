@@ -16,6 +16,7 @@ resolver = "3"
 default = []
 llama = ["dep:l2s1-llama-sys"]
 llama-cuda = ["llama", "l2s1-llama-sys/cuda"]
+openrouter = ["dep:reqwest"]
 wgpu = ["dep:rullama-engine", "dep:wgpu", "dep:pollster", "dep:async-trait", "dep:image", "dep:half"]
 
 [dependencies]
@@ -26,6 +27,7 @@ clap = { version = "4", features = ["derive"] }
 sha2 = "0.10"
 base64 = "0.22"
 l2s1-llama-sys = { path = "crates/l2s1-llama-sys", version = "0.1.0", optional = true }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"], optional = true }
 rullama-engine = { git = "https://github.com/Brainwires/rullama-framework", rev = "aef22b62f8a7a398ad5e5bc47b08c932f34f3c92", optional = true }
 wgpu = { version = "29.0.3", optional = true }
 pollster = { version = "0.4", optional = true }
@@ -45,3 +47,8 @@ required-features = ["llama"]
 name = "l2s1-wgpu"
 path = "src/bin/l2s1-wgpu.rs"
 required-features = ["wgpu"]
+
+[[bin]]
+name = "l2s1-openrouter"
+path = "src/bin/l2s1-openrouter.rs"
+required-features = ["openrouter"]

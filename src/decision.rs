@@ -7,6 +7,8 @@ pub enum Error {
     Invalid(String),
     #[error("inference failed: {0}")]
     Backend(String),
+    #[error("upstream provider failed: {0}")]
+    Upstream(String),
 }
 pub type Result<T> = std::result::Result<T, Error>;
 

@@ -17,6 +17,8 @@ pub use prompt::{
 pub mod http;
 #[cfg(feature = "llama")]
 pub mod llama;
+#[cfg(feature = "openrouter")]
+pub mod openrouter;
 mod vision;
 #[cfg(feature = "wgpu")]
 pub mod wgpu;

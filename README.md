@@ -6,7 +6,7 @@ L2S1 is a Rust library and CLI that turns a compatible local GGUF chat model int
 
 Application option IDs, result types, and acceptance rules stay consistent across models. Templates, token IDs, predictions, and calibration are model-specific. Changing a model does not guarantee the same answer or accuracy.
 
-The crate is named `l2s1`. The default inference executable uses **llama.cpp and local GGUF files**. An optional `wgpu` feature provides a separate `l2s1-wgpu` executable for native GPU inference. Model switching currently means loading a new backend or replacing an owned worker; there is no automatic model router or live hot-swap service.
+The crate is named `l2s1`. The default inference executable uses **llama.cpp and local GGUF files**. An optional `wgpu` feature provides a separate `l2s1-wgpu` executable for native GPU inference. An optional `openrouter` feature provides a selection-only remote executable. Model switching currently means loading a new backend or replacing an owned worker; there is no automatic model router or live hot-swap service.
 
 ## Optional wgpu backend
 
@@ -51,6 +51,7 @@ flowchart TD
 | [`llama.rs`](src/llama.rs) | Own the model/context, select the prompt profile, tokenize inputs, dispatch inference and assemble results |
 | [`wgpu.rs`](src/wgpu.rs), [`paired_gguf.rs`](src/wgpu/paired_gguf.rs) | Rust wgpu Gemma 4 text/vision inference and paired GGUF streaming |
 | [`vision.rs`](src/vision.rs), [`http.rs`](src/http.rs) | Shared image validation, backend contract and HTTP request dispatch |
+| [`openrouter.rs`](src/openrouter.rs) | Remote chat completions and selection-only response mapping |
 | [`l2s1-llama-sys`](crates/l2s1-llama-sys), [`bridge.cpp`](crates/l2s1-llama-sys/native/bridge.cpp), [`chat.cpp`](crates/l2s1-llama-sys/native/chat.cpp) | Call llama.cpp, render GGUF Jinja templates, manage sequence memory and copy inference evidence |
 | [`evidence.rs`](src/evidence.rs) | Validate complete vocabulary logits and preserve semantic option/token mappings |
 | [`codes.rs`](src/codes.rs), [`llama/code_sequences.rs`](src/llama/code_sequences.rs) | Size A-Z/AA-ZZ/AAA-ZZZ codes and score complete token paths for larger candidate sets |
@@ -87,6 +88,21 @@ Gemma is a possible vision backend: Gemma 3 4B/12B/27B and Gemma 4 E2B/E4B have 
 
 For CPU/CUDA latency measurements with Gemma 4 and two labeled image fixtures, see the [direct vision benchmark](VISION_BENCHMARK.md).
 For a 30-class, 150-image CUDA run through the HTTP vision API, see the [Caltech-101 benchmark](benchmarks/caltech101-vision-20260924/README.md).
+
+## OpenRouter adapter
+
+Set `OPENROUTER_API_KEY` in the process environment and select an [OpenRouter model](https://openrouter.ai/models) that accepts the requested modality. The optional executable does not build the native llama.cpp backend. For example, `prism-ml/ternary-bonsai-2-27b` accepts text and images; it is a different checkpoint from a local Bonsai 27B Q1_0 GGUF.
+
+```sh
+cargo run --release --locked --no-default-features --features openrouter \
+  --bin l2s1-openrouter -- \
+  --model prism-ml/ternary-bonsai-2-27b --reasoning-effort none \
+  --input examples/warehouse.json
+```
+
+For one image, add `--image photo.jpg`. The adapter accepts PNG, JPEG, GIF and WebP up to 8 MiB. To serve the existing HTTP input contract, replace `--input ...` with `--listen 127.0.0.1:8081`. The listener exposes `POST /v1/decisions` and `GET /healthz`; add `image_base64` to the JSON body for image input. It serializes requests and sends one OpenRouter chat completion per decision. `--max-tokens` sets a per-decision completion limit (default 1024, maximum 4096). `--reasoning-effort` is optional and passed through only when requested; use a value supported by the selected model.
+
+OpenRouter responses carry `"evidence":"selection_only"`. Each result contains a typed selected value, the exact option code, a status, the reported model and optional token usage. Codes must match exactly after surrounding whitespace is removed; malformed or incomplete model output abstains. Fixed-width codes support more than 26 options. The remote response has no `scores`, `candidate_mass`, `top_option_probability`, `p_true` or ordinal expected value, and the local probability policy is not applied. An ordinal result has the selected level's `level_value` instead. Provider or transport failures return HTTP 502 from the L2S1 listener. This separates [OpenRouter chat output](https://openrouter.ai/docs/api/api-reference/chat/create-a-chat-completion) from L2S1's full-logit local evidence. The adapter has a loopback mock-server test; a live OpenRouter request requires an API key.
 
 ## The decision contract
 
