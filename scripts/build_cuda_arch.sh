@@ -8,6 +8,10 @@ Usage: scripts/build_cuda_arch.sh CUDA_ARCH [CUDA_ARCH ...]
 Build one L2S1 CUDA executable per compute capability, for example 86 or 89.
 Each architecture has its own Cargo target directory and matching native libraries.
 Set L2S1_CUDA_TARGET_ROOT to change the output root (default: target/cuda-architectures).
+When available, ccache caches native C/C++/CUDA compilation. Set RUSTC_WRAPPER
+to sccache explicitly to cache Rust compilation.
+Set L2S1_BUILD_CACHE=off to skip automatic detection. Existing RUSTC_WRAPPER and
+L2S1_NATIVE_COMPILER_LAUNCHER settings take precedence.
 EOF
 }
 
@@ -23,6 +27,21 @@ fi
 repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$repo_root"
 target_root=${L2S1_CUDA_TARGET_ROOT:-target/cuda-architectures}
+case ${L2S1_BUILD_CACHE:-auto} in
+  auto)
+    if [[ ! ${L2S1_NATIVE_COMPILER_LAUNCHER+x} ]] && command -v ccache >/dev/null; then
+      export L2S1_NATIVE_COMPILER_LAUNCHER
+      L2S1_NATIVE_COMPILER_LAUNCHER=$(command -v ccache)
+    fi
+    ;;
+  off) ;;
+  *)
+    printf 'L2S1_BUILD_CACHE must be auto or off\n' >&2
+    exit 2
+    ;;
+esac
+printf 'Native compiler launcher: %s; Rust wrapper: %s\n' \
+  "${L2S1_NATIVE_COMPILER_LAUNCHER:-none}" "${RUSTC_WRAPPER:-none}"
 
 for arch in "$@"; do
   if [[ ! $arch =~ ^[0-9]{2,3}$ ]]; then

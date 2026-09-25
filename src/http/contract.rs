@@ -1,7 +1,7 @@
 //! HTTP wire contract and backend-specific evidence mapping.
-use super::{MAX_DECISIONS, MAX_MEDIA};
 #[cfg(any(feature = "llama", feature = "wgpu", feature = "openrouter", test))]
 use super::{MAX_BODY, MAX_CONNECTIONS, MAX_INFLIGHT_BODY_BYTES, QUEUE_DEPTH};
+use super::{MAX_DECISIONS, MAX_MEDIA};
 #[cfg(any(feature = "llama", feature = "wgpu", test))]
 use crate::VisionDecisionBackend;
 use crate::{Decision, DecisionRequest, Error};
@@ -174,7 +174,9 @@ pub(super) fn run_request<B: HttpDecisionBackend>(
         )));
     }
     if wire.decisions.len() > MAX_DECISIONS {
-        return Err(Error::Invalid(format!("at most {MAX_DECISIONS} decisions are supported")));
+        return Err(Error::Invalid(format!(
+            "at most {MAX_DECISIONS} decisions are supported"
+        )));
     }
     let mut media = HashMap::new();
     let mut media_order = Vec::new();

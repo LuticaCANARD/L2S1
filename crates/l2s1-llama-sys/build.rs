@@ -38,6 +38,7 @@ fn main() {
     println!("cargo:rerun-if-env-changed=L2S1_LLAMA_CPP_SOURCE");
     println!("cargo:rerun-if-env-changed=LLAMA_CPP_DIR");
     println!("cargo:rerun-if-env-changed=L2S1_CUDA_ARCHITECTURES");
+    println!("cargo:rerun-if-env-changed=L2S1_NATIVE_COMPILER_LAUNCHER");
     let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let selected = env::var_os("L2S1_LLAMA_CPP_SOURCE")
         .or_else(|| env::var_os("LLAMA_CPP_DIR"))
@@ -70,6 +71,9 @@ fn main() {
 
     let cuda = env::var_os("CARGO_FEATURE_CUDA").is_some();
     let cuda_architectures = env::var("L2S1_CUDA_ARCHITECTURES").ok();
+    let native_launcher = env::var("L2S1_NATIVE_COMPILER_LAUNCHER")
+        .ok()
+        .filter(|launcher| !launcher.is_empty());
     let commit = if let Some(source) = &selected {
         fs::read_to_string(source.join("UPSTREAM_COMMIT")).unwrap_or_else(|_| {
             std::process::Command::new("git")
@@ -121,6 +125,11 @@ fn main() {
         .define("GGML_CUDA", if cuda { "ON" } else { "OFF" });
     if let Some(source) = &selected {
         cmake.define("FETCHCONTENT_SOURCE_DIR_LLAMA_CPP", source);
+    }
+    if let Some(launcher) = &native_launcher {
+        for language in ["C", "CXX", "CUDA"] {
+            cmake.define(format!("CMAKE_{language}_COMPILER_LAUNCHER"), launcher);
+        }
     }
     if cuda {
         cmake.define("GGML_NATIVE", "OFF");
