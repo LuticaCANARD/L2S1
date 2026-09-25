@@ -165,40 +165,7 @@ pub async fn open(model_path: &Path, projector_path: &Path) -> Result<Arc<dyn Te
     );
     metadata.insert("gemma4.vision.num_channels".into(), GgufValue::U32(3));
 
-    let model_data_len = model_file.total_len() - model.data_section_offset();
-    let mut cursor = align(model_data_len, 32);
-    let mut tensors: Vec<_> = model
-        .tensors()
-        .iter()
-        .filter(|tensor| tensor.dtype != GgmlDtype::BF16)
-        .cloned()
-        .collect();
-    let mut segments = vec![Segment {
-        start: 0,
-        end: model_data_len,
-        source_offset: model.data_section_offset(),
-        source: model_file.clone(),
-        conversion: None,
-    }];
-    for original in model
-        .tensors()
-        .iter()
-        .filter(|tensor| tensor.dtype == GgmlDtype::BF16)
-    {
-        let mut converted = original.clone();
-        converted.dtype = GgmlDtype::F16;
-        converted.offset = cursor;
-        let end = cursor + converted.byte_len();
-        segments.push(Segment {
-            start: cursor,
-            end,
-            source_offset: model.data_section_offset() + original.offset,
-            source: model_file.clone(),
-            conversion: Some(Conversion::Bf16ToF16(original.byte_len())),
-        });
-        cursor = align(end, 32);
-        tensors.push(converted);
-    }
+    let (mut tensors, mut segments, mut cursor) = model_parts(&model, model_file);
     for tensor in projector.tensors().iter().filter(|tensor| {
         tensor.name.starts_with("v.") || tensor.name.starts_with("mm.input_projection")
     }) {
@@ -210,11 +177,16 @@ pub async fn open(model_path: &Path, projector_path: &Path) -> Result<Arc<dyn Te
         }
         let mut virtual_tensor = tensor.clone();
         virtual_tensor.offset = cursor;
-        let conversion = if tensor.dtype == GgmlDtype::Q8_0 {
-            virtual_tensor.dtype = GgmlDtype::F16;
-            Some(Conversion::Q8ToF16(tensor.byte_len()))
-        } else {
-            None
+        let conversion = match tensor.dtype {
+            GgmlDtype::Q8_0 => {
+                virtual_tensor.dtype = GgmlDtype::F16;
+                Some(Conversion::Q8ToF16(tensor.byte_len()))
+            }
+            GgmlDtype::BF16 => {
+                virtual_tensor.dtype = GgmlDtype::F16;
+                Some(Conversion::Bf16ToF16(tensor.byte_len()))
+            }
+            _ => None,
         };
         let end = cursor + virtual_tensor.byte_len();
         segments.push(Segment {
@@ -224,7 +196,7 @@ pub async fn open(model_path: &Path, projector_path: &Path) -> Result<Arc<dyn Te
             source: projector_file.clone(),
             conversion,
         });
-        cursor = align(end, 32);
+        cursor = align(end, model.alignment());
         tensors.push(virtual_tensor);
     }
     let clamps = vision_clamps(&projector).await?;
@@ -242,8 +214,75 @@ pub async fn open(model_path: &Path, projector_path: &Path) -> Result<Arc<dyn Te
         source: Arc::new(InMemoryFetcher::new(clamps)),
         conversion: None,
     });
-    cursor = align(cursor + clamp_len, 32);
+    cursor = align(cursor + clamp_len, model.alignment());
 
+    finish_virtual_gguf(metadata, tensors, segments, cursor, model.alignment())
+}
+
+/// Present a text GGUF with BF16 tensors as F16 to the wgpu matmul kernels.
+pub async fn open_text(model_path: &Path) -> Result<Arc<dyn TensorFetcher>> {
+    let file: Arc<dyn TensorFetcher> = Arc::new(FileFetcher::open(model_path).map_err(err)?);
+    let model = GgufReader::new_streaming(file.clone()).await.map_err(err)?;
+    let (tensors, segments, cursor) = model_parts(&model, file);
+    finish_virtual_gguf(
+        model.metadata().clone(),
+        tensors,
+        segments,
+        cursor,
+        model.alignment(),
+    )
+}
+
+fn model_parts(
+    model: &GgufReader,
+    file: Arc<dyn TensorFetcher>,
+) -> (Vec<TensorDesc>, Vec<Segment>, u64) {
+    let model_data_len = file.total_len() - model.data_section_offset();
+    let mut cursor = align(model_data_len, model.alignment());
+    let mut tensors: Vec<_> = model
+        .tensors()
+        .iter()
+        .filter(|tensor| tensor.dtype != GgmlDtype::BF16)
+        .cloned()
+        .collect();
+    let mut segments = vec![Segment {
+        start: 0,
+        end: model_data_len,
+        source_offset: model.data_section_offset(),
+        source: file.clone(),
+        conversion: None,
+    }];
+    for original in model
+        .tensors()
+        .iter()
+        .filter(|tensor| tensor.dtype == GgmlDtype::BF16)
+    {
+        let mut converted = original.clone();
+        converted.dtype = GgmlDtype::F16;
+        converted.offset = cursor;
+        let end = cursor + converted.byte_len();
+        segments.push(Segment {
+            start: cursor,
+            end,
+            source_offset: model.data_section_offset() + original.offset,
+            source: file.clone(),
+            conversion: Some(Conversion::Bf16ToF16(original.byte_len())),
+        });
+        cursor = align(end, model.alignment());
+        tensors.push(converted);
+    }
+    (tensors, segments, cursor)
+}
+
+// TensorFetcher has local-only async methods; the model API still requires Arc.
+#[allow(clippy::arc_with_non_send_sync)]
+fn finish_virtual_gguf(
+    metadata: HashMap<String, GgufValue>,
+    tensors: Vec<TensorDesc>,
+    mut segments: Vec<Segment>,
+    cursor: u64,
+    alignment: u64,
+) -> Result<Arc<dyn TensorFetcher>> {
     let mut header = Vec::new();
     header.extend_from_slice(b"GGUF");
     header.extend_from_slice(&3u32.to_le_bytes());
@@ -259,7 +298,7 @@ pub async fn open(model_path: &Path, projector_path: &Path) -> Result<Arc<dyn Te
         header.extend_from_slice(&(tensor.dtype as u32).to_le_bytes());
         header.extend_from_slice(&tensor.offset.to_le_bytes());
     }
-    header.resize(align(header.len() as u64, 32) as usize, 0);
+    header.resize(align(header.len() as u64, alignment) as usize, 0);
     let base = header.len() as u64;
     for segment in &mut segments {
         segment.start += base;
@@ -347,7 +386,11 @@ async fn vision_clamps(projector: &GgufReader) -> Result<Vec<u8>> {
 }
 
 fn align(n: u64, alignment: u64) -> u64 {
-    (n + alignment - 1) & !(alignment - 1)
+    if alignment <= 1 {
+        n
+    } else {
+        n.div_ceil(alignment) * alignment
+    }
 }
 
 fn write_string(out: &mut Vec<u8>, value: &str) {
@@ -455,6 +498,79 @@ fn converted_vision_and_model_weights_keep_numeric_values() {
         half::f16::from_bits(u16::from_le_bytes(converted.try_into().unwrap())).to_f32(),
         1.5
     );
+}
+
+#[cfg(test)]
+#[test]
+fn text_gguf_exposes_bf16_weights_as_f16() {
+    let original = half::bf16::from_f32(1.5).to_bits().to_le_bytes();
+    let plain = half::f16::from_f32(2.0).to_bits().to_le_bytes();
+    let tensors = [
+        TensorDesc {
+            name: "bf16.weight".into(),
+            dims: vec![1],
+            dtype: GgmlDtype::BF16,
+            offset: 0,
+        },
+        TensorDesc {
+            name: "f16.weight".into(),
+            dims: vec![1],
+            dtype: GgmlDtype::F16,
+            offset: 64,
+        },
+    ];
+    let mut source = Vec::new();
+    source.extend_from_slice(b"GGUF");
+    source.extend_from_slice(&3u32.to_le_bytes());
+    source.extend_from_slice(&2u64.to_le_bytes());
+    source.extend_from_slice(&1u64.to_le_bytes());
+    write_string(&mut source, "general.alignment");
+    write_value(&mut source, &GgufValue::U32(64)).unwrap();
+    for tensor in &tensors {
+        write_string(&mut source, &tensor.name);
+        source.extend_from_slice(&1u32.to_le_bytes());
+        source.extend_from_slice(&1u64.to_le_bytes());
+        source.extend_from_slice(&(tensor.dtype as u32).to_le_bytes());
+        source.extend_from_slice(&tensor.offset.to_le_bytes());
+    }
+    source.resize(align(source.len() as u64, 64) as usize, 0);
+    let data_offset = source.len();
+    source.extend_from_slice(&original);
+    source.resize(data_offset + 64, 0);
+    source.extend_from_slice(&plain);
+
+    let path = test_file("text-bf16", &source);
+    let virtual_file = pollster::block_on(open_text(&path)).unwrap();
+    let virtual_reader = pollster::block_on(GgufReader::new_streaming(virtual_file)).unwrap();
+    assert_eq!(
+        virtual_reader.tensor("bf16.weight").unwrap().dtype,
+        GgmlDtype::F16
+    );
+    assert_eq!(
+        virtual_reader.tensor("f16.weight").unwrap().dtype,
+        GgmlDtype::F16
+    );
+    assert_eq!(
+        pollster::block_on(virtual_reader.fetch_tensor_bytes("bf16.weight")).unwrap(),
+        bf16_to_f16(&original).unwrap()
+    );
+    assert_eq!(
+        pollster::block_on(virtual_reader.fetch_tensor_bytes("f16.weight")).unwrap(),
+        plain
+    );
+    std::fs::remove_file(path).unwrap();
+}
+
+#[cfg(test)]
+fn test_file(name: &str, bytes: &[u8]) -> std::path::PathBuf {
+    let nonce = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let path =
+        std::env::temp_dir().join(format!("l2s1-{name}-{}-{nonce}.gguf", std::process::id()));
+    std::fs::write(&path, bytes).unwrap();
+    path
 }
 
 #[cfg(test)]
