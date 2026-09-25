@@ -1,0 +1,153 @@
+[
+  {
+    "model": {
+      "capabilities": {
+        "architecture": "qwen35",
+        "configured_context": 2048,
+        "evidence_status": "loaded_metadata; request preflight and measured quality are separate; state_restore uses bounded request-local sequence state",
+        "exact_full_vocabulary_logits": true,
+        "execution_modes": [
+          "fresh",
+          "prefix_reuse",
+          "state_restore"
+        ],
+        "hidden_features": false,
+        "prefix_reuse_fallback": "recurrent_or_hybrid_memory",
+        "recurrent_or_hybrid": true,
+        "snapshot_limit_bytes": 268435456,
+        "training_context": 262144,
+        "vocabulary_size": 248320
+      },
+      "identity": {
+        "adapter_sha256": null,
+        "compute": {
+          "batch": 32,
+          "context": 2048,
+          "flash_attention": "off",
+          "threads": 4,
+          "ubatch": 32
+        },
+        "device": "NVIDIA GeForce RTX 3060",
+        "execution_mode": "fresh",
+        "head_sha256": null,
+        "loaded_runtime_sha256": "3c8e89449b5ef60625d298790aa250c27d6bcd539fc8c723f2348d2e419b944f",
+        "parallel_width": 1,
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-state-first-v2",
+        "runtime_build_sha256": "401c26981c0f1e42bbb126e5905c53fe9bf2eaef9ad617be522aedc02662c607",
+        "template_sha256": "e84f32a23fdda27689f868aa4a1a5621f41133e51a48d7f3efcbea2839574259",
+        "weights_sha256": "17ef842e47450caeb8eaa3ebfbbab5d2f2278b62b79be107985fb69a2f819aa0"
+      }
+    },
+    "modes": [
+      {
+        "accepted_changes": 0,
+        "diagnostics": [
+          {
+            "calibration_id": null,
+            "decision_id": "storage_zone",
+            "effective_mode": "fresh",
+            "evidence_kind": "native_full_vocabulary_logits_v1",
+            "fallback_reason": "recurrent_or_hybrid_memory",
+            "prompt_tokens_sha256": "1c37f35d7594e188247fecacf1312b40ccb9aae92bba4e591c9fff984c56c00d",
+            "requested_mode": "prefix_reuse",
+            "reused_prefix_tokens": 0
+          },
+          {
+            "calibration_id": null,
+            "decision_id": "cold_chain_required",
+            "effective_mode": "fresh",
+            "evidence_kind": "native_full_vocabulary_logits_v1",
+            "fallback_reason": "recurrent_or_hybrid_memory",
+            "prompt_tokens_sha256": "fe9c5124397da9af2b20ae7f8b2d728ab749266a9cc2e40e7a8e0c52cf524618",
+            "requested_mode": "prefix_reuse",
+            "reused_prefix_tokens": 0
+          },
+          {
+            "calibration_id": null,
+            "decision_id": "dispatch_priority",
+            "effective_mode": "fresh",
+            "evidence_kind": "native_full_vocabulary_logits_v1",
+            "fallback_reason": "recurrent_or_hybrid_memory",
+            "prompt_tokens_sha256": "17301224846e6a97cc3898dd1f1496d0a0e0bad44dfa7a0da0eae1f7ca779c90",
+            "requested_mode": "prefix_reuse",
+            "reused_prefix_tokens": 0
+          }
+        ],
+        "max_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "mode": "prefix_reuse",
+        "state_restore": {
+          "fallback_reason": null,
+          "prefill_ms": 0.0,
+          "restore_ms": 0.0,
+          "restores": 0,
+          "save_ms": 0.0,
+          "snapshot_bytes": 0,
+          "suffix_ms": 0.0
+        },
+        "top_changes": 0,
+        "within_existing_equivalence_tolerance": true
+      },
+      {
+        "accepted_changes": 0,
+        "diagnostics": [
+          {
+            "calibration_id": null,
+            "decision_id": "storage_zone",
+            "effective_mode": "state_restore",
+            "evidence_kind": "native_full_vocabulary_logits_v1",
+            "fallback_reason": null,
+            "prompt_tokens_sha256": "1c37f35d7594e188247fecacf1312b40ccb9aae92bba4e591c9fff984c56c00d",
+            "requested_mode": "state_restore",
+            "reused_prefix_tokens": 0
+          },
+          {
+            "calibration_id": null,
+            "decision_id": "cold_chain_required",
+            "effective_mode": "state_restore",
+            "evidence_kind": "native_full_vocabulary_logits_v1",
+            "fallback_reason": null,
+            "prompt_tokens_sha256": "fe9c5124397da9af2b20ae7f8b2d728ab749266a9cc2e40e7a8e0c52cf524618",
+            "requested_mode": "state_restore",
+            "reused_prefix_tokens": 160
+          },
+          {
+            "calibration_id": null,
+            "decision_id": "dispatch_priority",
+            "effective_mode": "state_restore",
+            "evidence_kind": "native_full_vocabulary_logits_v1",
+            "fallback_reason": null,
+            "prompt_tokens_sha256": "17301224846e6a97cc3898dd1f1496d0a0e0bad44dfa7a0da0eae1f7ca779c90",
+            "requested_mode": "state_restore",
+            "reused_prefix_tokens": 160
+          }
+        ],
+        "max_mass_delta": 0.0,
+        "max_probability_delta": 0.0,
+        "mode": "state_restore",
+        "state_restore": {
+          "fallback_reason": null,
+          "prefill_ms": 327.767572,
+          "restore_ms": 159.875343,
+          "restores": 2,
+          "save_ms": 172.020398,
+          "snapshot_bytes": 167384364,
+          "suffix_ms": 645.789331
+        },
+        "top_changes": 0,
+        "within_existing_equivalence_tolerance": true
+      }
+    ],
+    "scope": "synthetic real-model contract; not labeled workload quality or production evidence",
+    "snapshot_budget_fallback": {
+      "fallback_reason": "snapshot_memory_budget",
+      "prefill_ms": 326.715769,
+      "restore_ms": 0.0,
+      "restores": 0,
+      "save_ms": 0.0,
+      "snapshot_bytes": 0,
+      "suffix_ms": 1950.248523
+    }
+  }
+]
