@@ -1,0 +1,65 @@
+{
+  "dataset": "https://www.kaggle.com/datasets/marquis03/cats-and-dogs",
+  "archive_sha256": "47ac0f845f65b5f2b9cb8a184d9d17d4345f8bd77bf1ed63e79b426d90c3b99b",
+  "val_csv_sha256": "75f109a3cac1009088b92661790b79baf6e2bd06113e15eb125b75ded1b36a9e",
+  "rows": 70,
+  "label_counts": {
+    "cat": 24,
+    "dog": 46
+  },
+  "protocol": "validation split only; original JPEG bytes; one serial loopback HTTP request per image; no examples or labels in prompts; default abstention policy; no warmup; loaded-model latency includes first request, excludes startup",
+  "option_order": "dog-cat",
+  "binary_sha256": "586574207661e23078899973320c60a139d8f740fb75cd62709f22661fc7f53e",
+  "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+  "mmproj_sha256": "9406f99c16d68cda4f1f0552192dcc99021ea1fc6d2fd50b1dc3ccf30d04b292",
+  "backend": {
+    "compute": {
+      "batch": 256,
+      "context": 2048,
+      "flash_attention": "off",
+      "model_load_mode": "read",
+      "threads": 4,
+      "ubatch": 256
+    },
+    "execution_mode": "fresh",
+    "model_architecture": "gemma4",
+    "model_description": "gemma4 E2B Q8_0",
+    "model_path": "models/gemma-4-E2B-it-Q8_0.gguf",
+    "offload_device": "NVIDIA GeForce RTX 3060",
+    "offload_requested": true,
+    "parallel_width": 1,
+    "prompt_layout": "legacy",
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-decision-v1/vision-image-v1",
+    "runtime": "local-libllama-mtmd",
+    "vision_projector_path": "models/mmproj-gemma-4-E2B-it-Q8_0.gguf",
+    "vision_projector_sha256": "9406f99c16d68cda4f1f0552192dcc99021ea1fc6d2fd50b1dc3ccf30d04b292"
+  },
+  "startup_to_health_ms": 5013.185,
+  "http_200": 70,
+  "errors": 0,
+  "accepted": 70,
+  "abstained": 0,
+  "accepted_correct": 69,
+  "correct_over_all": 0.9857142857142858,
+  "coverage": 1.0,
+  "accepted_accuracy": 0.9857142857142858,
+  "raw_top1_correct": 69,
+  "raw_top1_accuracy_over_all": 0.9857142857142858,
+  "confusion": {
+    "cat": {
+      "cat": 24
+    },
+    "dog": {
+      "dog": 45,
+      "cat": 1
+    }
+  },
+  "latency_ms": {
+    "mean": 101.392,
+    "p50": 98.745,
+    "p95_nearest_rank": 113.744,
+    "min": 93.294,
+    "max": 222.387
+  }
+}

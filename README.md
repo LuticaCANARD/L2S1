@@ -139,6 +139,7 @@ Gemma is a possible vision backend: Gemma 3 4B/12B/27B and Gemma 4 E2B/E4B have 
 
 For CPU/CUDA latency measurements with Gemma 4 and two labeled image fixtures, see the [direct vision benchmark](VISION_BENCHMARK.md).
 For a 30-class, 150-image CUDA run through the HTTP vision API, see the [Caltech-101 benchmark](benchmarks/caltech101-vision-20260924/README.md).
+For a 70-image cat/dog validation with both answer orders, see the [Cats and Dogs vision report](benchmarks/cats-dogs-vision-20260924/REPORT.md); it records a historical HTTP request shape and does not claim general image accuracy.
 For six-class waste-material classification and a paired prompt/acceptance-threshold study, see the [TrashNet vision benchmark](benchmarks/trashnet-vision-20260925/REPORT.md).
 
 ## OpenRouter adapter
