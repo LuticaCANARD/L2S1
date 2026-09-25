@@ -353,7 +353,7 @@ A compatible GGUF LoRA can be loaded with `--lora`. A learned task-specific scor
 | --- | --- | --- |
 | `fresh` | Evaluate every decision from an empty sequence state | Default |
 | `prefix-reuse` | Reuse complete prefill batches from an exact common token prefix within one request | Opt-in; recurrent/hybrid memory falls back to fresh |
-| `state-restore` | Save a common prefix's whole sequence state and restore it before each suffix | Experimental; supports the tested hybrid path |
+| `state-restore` | Save a common prefix's whole sequence state and restore it for later independent suffixes | Supported, opt-in; works with tested hybrid Bonsai GGUF |
 | `parallel` | Batch independent questions into isolated sequences with shared-prefix prefill | Experimental; rejects recurrent/hybrid models and can change scores |
 
 The default prompt layout is `legacy`. `--prompt-layout state-first` places shared state earlier and can expose longer reusable prefixes, but it also changes the prompt and can change predictions.
@@ -365,9 +365,9 @@ The default prompt layout is `legacy`. `--prompt-layout state-first` places shar
   --snapshot-limit-bytes 268435456 --diagnostics
 ```
 
-State restoration limits its snapshot buffer to 256 MiB by default and reports fresh fallback when a snapshot cannot be used. `--parallel-width` bounds questions per parallel wave and increases context memory. Ordinary requests clear native KV state at request boundaries and after errors; snapshots never survive their native call. Neither snapshot limits nor worker reservations are whole-process memory limits.
+State restoration limits its snapshot buffer to 256 MiB by default and reports fresh fallback when a snapshot cannot be used. It requires full evidence transfer; use `state-restore` explicitly for recurrent/hybrid models because `prefix-reuse` still falls back to fresh on those models. `--parallel-width` bounds questions per parallel wave and increases context memory. Ordinary requests clear native KV state at request boundaries and after errors; snapshots never survive their native call. Neither snapshot limits nor worker reservations are whole-process memory limits.
 
-State copying has a cost and does not guarantee a speedup. Parallel execution has measured probability and top-choice differences on some checkpoints. Both remain explicit options; see [execution details](MODEL_INTERCHANGEABILITY.md#experimental-whole-sequence-restore) and [parallel execution](PARALLEL_EXECUTION.md).
+State copying has a cost and does not guarantee a speedup. The [Bonsai RTX 3060 validation](benchmarks/bonsai-state-restore-20260925/REPORT.md) records a real hybrid-model reuse and exact fresh-result parity on a fixed 16-decision fixture. Parallel execution has measured probability and top-choice differences on some checkpoints. Both remain explicit options; see [execution details](MODEL_INTERCHANGEABILITY.md#request-local-state-restoration) and [parallel execution](PARALLEL_EXECUTION.md).
 
 ### Optional preparation and evidence optimizations
 

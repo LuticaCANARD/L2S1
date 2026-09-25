@@ -128,6 +128,7 @@ pub struct StateRestoreMetrics {
     pub restore_ms: f64,
     pub prefill_ms: f64,
     pub suffix_ms: f64,
+    /// Successful state loads; a normal N-decision request needs N-1 loads.
     pub restores: usize,
     pub fallback_reason: Option<String>,
 }

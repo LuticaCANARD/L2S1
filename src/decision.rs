@@ -365,7 +365,8 @@ pub enum ExecutionMode {
     PrefixReuse,
     /// Experimental independent sequence batching with shared-prefix prefill.
     Parallel,
-    /// Experimental request-local whole-sequence snapshot restoration.
+    /// Request-local whole-sequence snapshot restoration for a shared prefix.
+    /// Supports recurrent and hybrid models when their sequence state can be saved.
     StateRestore,
 }
 
