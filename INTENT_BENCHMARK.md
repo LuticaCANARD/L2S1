@@ -87,11 +87,34 @@ actual preparation hits and native reuse separately; a hot repeat alone is not
 proof of a cache hit. Timing excludes model loading, serialization and session
 construction. This measures repeated identical calls, not novel-utterance speed.
 
+### Measured repeated-request cache behavior
+
+A local Gemma 4 E2B Q8_0 run on an RTX 3080/WSL2 host used the same frozen 200
+English and 200 Korean full-label requests. Each case had one first call and
+three immediate repeats. The table gives the median of each case's repeat
+times, then the median across 200 cases; it excludes model loading, session
+construction and serialization. The baseline is an earlier frozen build whose
+wide-code path had zero preparation hits. Source hashes therefore differ.
+
+| Mode | BANKING77 / MASSIVE hot p50 ms | Prompt hits / 1,200 repeats | KV reuse calls / reused tokens |
+| --- | ---: | ---: | ---: |
+| Earlier uncached baseline | 138.70 / 103.61 | 0 | 0 / 0 |
+| Fresh with preparation cache | 131.91 / 97.85 | 1,200 | 0 / 0 |
+| Same-state session with preparation cache | 26.22 / 28.82 | 1,200 | 1,200 / 768,000 |
+
+All saved predictions, scores, candidate masses and policy selections matched
+the baseline exactly; no inference errors or truncation occurred. The measured
+session improvement applies to repeated identical questions on an immutable
+state. Preparation hits alone did not account for it: the fresh cached mode
+had no KV reuse, while the session mode recorded 460,800 reused English and
+307,200 reused Korean prefix tokens. The local, gitignored source report is
+`results/intent-cache-20260923-210112/REPORT.md`.
+
 ## BANKING77 and MASSIVE evaluation
 
 The frozen test samples contain 200 English BANKING77 utterances and 200 Korean
 MASSIVE utterances. The same samples are used by Gemma 4 E2B Q8_0, E4B Q8_0 and
-E4B Q4_K_M, plus Qwen3-8B Q8_0, on `100.66.64.91` (RTX 3060 12 GiB). All official 77 or 60 labels are
+E4B Q4_K_M, plus Qwen3-8B Q8_0, on an RTX 3060 12 GiB host. All official 77 or 60 labels are
 present in every respective request. Only raw utterance text enters the state;
 gold labels, scenarios, annotations and judgments remain outside inference.
 
