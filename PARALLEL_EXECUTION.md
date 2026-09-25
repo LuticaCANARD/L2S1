@@ -18,10 +18,18 @@ Defaults remain `legacy` prompts and `fresh` execution. Prompt layout and execut
 - A common prefix is found by comparing exact token IDs across the whole wave, retaining at least one suffix token per question. It is rounded down to a complete original prefill batch. The first sequence evaluates it; `llama_memory_seq_cp` shares its KV entries with the other sequences.
 - Suffix tokens have independent sequence IDs and original absolute positions. Their attention sees their own sequence and shared prefix, not another question's suffix. Final full-vocabulary logits are copied using each question's final token index in the relevant decode batch.
 - Memory is cleared between waves, API calls, and after failures. There is no persistent cross-request cache. Recurrent/hybrid models are explicitly unsupported in this mode.
-- The model stays loaded once. The context is recreated lazily when sequence capacity changes, with nominal token capacity `context * width`. `context` remains the per-question input limit. Higher widths increase KV/attention memory and may fail allocation; there is no silent CPU fallback or input truncation.
+- The model stays loaded once. By default, the context is recreated lazily when sequence capacity changes, with nominal token capacity `context * width`. `context` remains the per-question input limit. Higher widths increase KV/attention memory and may fail allocation; there is no silent CPU fallback or input truncation.
 - `backend.parallel_width` records the configured wave limit (serial modes report 1). `reused_prefix_tokens` is zero for the wave's first question, which paid for the shared prefix, and the shared token count for its followers. Summed `input_tokens - reused_prefix_tokens` accounts for actual submitted tokens.
 
 This uses the pinned llama.cpp [batch, sequence, memory-copy and per-token logits API](https://github.com/ggml-org/llama.cpp/blob/3d82ef62d47fd74e18f36c5eccbdcf965b617b17/include/llama.h). It is independent sequence batching with serial waves, not a replacement model architecture or calibrated-decision training.
+
+### Dynamic parallel KV context
+
+`--parallel-context-dynamic` is an opt-in memory setting for `parallel` mode. After tokenizing each wave, it reserves at most `sum(input_tokens) + batch` KV slots, capped at the legacy `context * width` reservation. llama.cpp may pad the requested size. The sum counts shared prefixes more than once, so this is conservative. `--context` still validates each individual question; no input is truncated.
+
+The native context grows when a later wave needs more slots. It retains that high-water capacity for later waves with the same effective question count to avoid repeated context rebuilds. Switching between default and dynamic mode recreates the context, and both modes clear request-local KV after inference. `backend.parallel_context_dynamic` identifies the opt-in result; `backend.parallel_context_tokens` reports the currently allocated padded context in dynamic mode. The model weights remain loaded.
+
+This changes the llama.cpp context size and may change logits or decisions. Compare the exact model, prompts, policy and input set against the default parallel mode before using the memory setting for decisions. It is a memory optimization; it does not promise a throughput improvement.
 
 ### Independent request batches
 

@@ -21,6 +21,7 @@ impl LlamaBackend {
             compute: self.compute,
             execution_mode: self.execution_mode,
             parallel_width: info.parallel_width,
+            parallel_context_dynamic: info.parallel_context_dynamic,
         }
     }
     pub fn inspect(&self) -> ModelInspection {

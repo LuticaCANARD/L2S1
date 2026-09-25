@@ -70,6 +70,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         code_rotation: u32,
         #[arg(long, default_value_t = 4, value_parser = clap::value_parser!(u32).range(1..=32))]
         parallel_width: u32,
+        /// Size parallel KV memory from actual input tokens plus one batch.
+        #[arg(long)]
+        parallel_context_dynamic: bool,
         /// Independent article requests per call; prompts/states are never merged.
         #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u32).range(1..=32))]
         request_batch_size: u32,
@@ -139,6 +142,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         backend.load_output_head(path)?;
     }
     backend.set_parallel_width(args.parallel_width as usize)?;
+    backend.set_parallel_context_dynamic(args.parallel_context_dynamic);
     let load_ms = started.elapsed().as_secs_f64() * 1000.0;
     let batch_size = args.request_batch_size as usize;
     if args.warmup {

@@ -26,7 +26,20 @@ fn identity() -> ModelIdentity {
         },
         execution_mode: ExecutionMode::Fresh,
         parallel_width: 1,
+        parallel_context_dynamic: false,
     }
+}
+
+#[test]
+fn dynamic_parallel_context_has_separate_artifact_identity() {
+    let legacy = identity();
+    let serialized = serde_json::to_value(&legacy).unwrap();
+    assert!(serialized.get("parallel_context_dynamic").is_none());
+    let historical: ModelIdentity = serde_json::from_value(serialized).unwrap();
+    assert_eq!(legacy.fingerprint(), historical.fingerprint());
+    let mut dynamic = legacy.clone();
+    dynamic.parallel_context_dynamic = true;
+    assert_ne!(dynamic.fingerprint(), legacy.fingerprint());
 }
 #[test]
 fn exact_evidence_matches_independent_full_softmax_for_all_kinds() {

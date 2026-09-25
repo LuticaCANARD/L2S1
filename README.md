@@ -385,6 +385,8 @@ The default prompt layout is `legacy`. `--prompt-layout state-first` places shar
 
 State restoration limits its snapshot buffer to 256 MiB by default and reports fresh fallback when a snapshot cannot be used. It requires full evidence transfer; use `state-restore` explicitly for recurrent/hybrid models because `prefix-reuse` still falls back to fresh on those models. `--parallel-width` bounds questions per parallel wave and increases context memory. Ordinary requests clear native KV state at request boundaries and after errors; snapshots never survive their native call. Neither snapshot limits nor worker reservations are whole-process memory limits.
 
+`--parallel-context-dynamic` opts into sizing each parallel KV context from that wave's actual input tokens plus one batch of headroom. `--context` remains the per-question input limit. The context grows for larger later waves and retains its largest allocation at the same effective question count. Responses report `backend.parallel_context_tokens`; check decision equivalence on the target model because changing context size can change scores.
+
 State copying has a cost and does not guarantee a speedup. The [Bonsai RTX 3060 validation](benchmarks/bonsai-state-restore-20260925/REPORT.md) records a real hybrid-model reuse and exact fresh-result parity on a fixed 16-decision fixture. Parallel execution has measured probability and top-choice differences on some checkpoints. Both remain explicit options; see [execution details](MODEL_INTERCHANGEABILITY.md#request-local-state-restoration) and [parallel execution](PARALLEL_EXECUTION.md).
 
 ### Optional preparation and evidence optimizations
