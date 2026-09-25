@@ -12,6 +12,12 @@ a C++17 compiler, and the CUDA toolkit are required for that feature.
 The CUDA build disables host-specific architecture selection for distributable
 artifacts. Set `L2S1_CUDA_ARCHITECTURES` (for example `86`) to limit the CUDA
 architectures when building for a known target.
+Set `L2S1_NATIVE_COMPILER_LAUNCHER` to a compiler launcher such as the full
+path to `ccache` to wrap llama.cpp's C, C++, and CUDA compilation. The
+`scripts/build_cuda_arch.sh` entry point detects `ccache` automatically when
+installed. Set `RUSTC_WRAPPER=sccache` explicitly to try Rust caching. The `cc`
+crate also uses `sccache` for the L2S1 C++ bridge when that Rust wrapper is
+selected.
 
 The first default build needs network access to download the pinned source.
 For an offline build or another llama.cpp source checkout, set
