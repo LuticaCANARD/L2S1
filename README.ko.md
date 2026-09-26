@@ -212,6 +212,10 @@ GPU 비전 작업에서 `--vision-optimized`를 사용하면 디코더 스트림
 
 ## 문서
 
+AI Agent용 [L2S1 skill](skills/l2s1/SKILL.md)과 stdio MCP 어댑터를 제공합니다.
+MCP에서 문서 조회, 요청 형식 검증, 상주 HTTP 백엔드의 추론을 사용할 수 있습니다.
+설치와 연결 방법은 [에이전트 연동 가이드](docs/AGENT_INTEGRATION.md)를 참고하세요.
+
 아래 상세 가이드는 영어로 제공됩니다.
 
 | 주제 | 문서 |
