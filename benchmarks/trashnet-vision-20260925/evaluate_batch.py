@@ -45,8 +45,6 @@ def measure(args, mode, groups):
                "--min-top-probability", "0.8", "--min-candidate-mass", "0.05"]
     if mode == "parallel" and args.candidate_vision_optimized:
         command += ["--vision-optimized"]
-    elif mode == "parallel" and args.candidate_vision_preserving:
-        command += ["--vision-preserving"]
     else:
         batch = 256 if mode == "fresh" else args.candidate_batch
         command += ["--execution-mode", execution, "--parallel-width", "4",
@@ -162,7 +160,6 @@ def main():
     parser.add_argument("--baseline-recorded-run", type=Path,
                         help="Reuse a verified earlier fresh run on the same frozen inputs; record its provenance")
     parser.add_argument("--candidate-vision-optimized", action="store_true")
-    parser.add_argument("--candidate-vision-preserving", action="store_true")
     parser.add_argument("--candidate-execution-mode", choices=("fresh", "parallel"), default="parallel")
     parser.add_argument("--candidate-batch", type=int, default=256)
     parser.add_argument("--candidate-ubatch", type=int)
@@ -176,9 +173,6 @@ def main():
         raise ValueError("repetitions must be positive")
     if args.candidate_vision_optimized and args.candidate_execution_mode != "parallel":
         raise ValueError("optimized vision requires parallel execution")
-    if args.candidate_vision_preserving and (
-            args.candidate_vision_optimized or args.candidate_execution_mode != "fresh"):
-        raise ValueError("preserving vision requires fresh execution and no optimized profile")
     selection = json.loads(args.selection.read_text())
     if ev.file_digest(args.source) != selection["source_sha256"] or selection["source_sha256"] != ev.SOURCE_SHA256:
         raise ValueError("source archive identity mismatch")

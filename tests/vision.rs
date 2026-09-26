@@ -395,8 +395,8 @@ fn wide_image_codes_share_text_code_paths_and_leave_narrow_scoring_intact() {
 }
 
 #[test]
-#[ignore = "requires real vision GGUF/projector; exact fresh-preserving profile parity and recovery"]
-fn real_vision_preserving_profile_matches_fresh_and_recovers() {
+#[ignore = "requires real vision GGUF/projector; exact fresh cache/compact parity and recovery"]
+fn real_fresh_vision_cache_and_compact_match_full_and_recover() {
     assert!(
         std::env::var_os("SKID_VISION_OPTIMIZED").is_none(),
         "unset SKID_VISION_OPTIMIZED to use the original batch256/flash-off fixture"
@@ -449,7 +449,15 @@ fn real_vision_preserving_profile_matches_fresh_and_recovers() {
         }
     }
 
-    backend.enable_vision_preserving_optimizations().unwrap();
+    // Isolate the cache and compact components using the original fresh
+    // decoder/projector settings, without enabling the optimized batch profile.
+    backend
+        .set_evidence_transfer(l2s1::EvidenceTransfer::Compact)
+        .unwrap();
+    backend.set_preparation_cache(l2s1::PreparationCacheConfig {
+        max_entries: 128,
+        max_bytes: 8 * 1024 * 1024,
+    });
     let inspection = backend.inspect();
     assert_eq!(inspection.identity.compute, l2s1::ComputeOptions::default());
     assert_eq!(inspection.identity.execution_mode, ExecutionMode::Fresh);
@@ -464,8 +472,8 @@ fn real_vision_preserving_profile_matches_fresh_and_recovers() {
     assert_eq!(info.evidence_transfer, l2s1::EvidenceTransfer::Compact);
     assert!(!info.parallel_context_dynamic);
     assert!(!info.vision_projector_reuse);
-    let preserving = backend.decide_vision_batch(&requests, &images).unwrap();
-    assert_exact_results(&baseline, &preserving);
+    let cache_and_compact = backend.decide_vision_batch(&requests, &images).unwrap();
+    assert_exact_results(&baseline, &cache_and_compact);
     let cache = backend.preparation_cache_stats();
     assert!(cache.vision.entries > 0);
     let repeated = backend.decide_vision_batch(&requests, &images).unwrap();

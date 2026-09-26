@@ -11,7 +11,7 @@ Evaluated on 2026-09-25. Source: [garythung/trashnet](https://github.com/garythu
 
 ## Results
 
-| Model (Q8_0) | Correct / all | Coverage | Correct / accepted | Raw top-1 / all | HTTP latency p50 / p95¹ | Fresh → native batch4 mean/ image² | Native correct / all (accepted)² | Optimized mean/image³ | Optimized correct/all (accepted)³ | Live fresh → preserving mean/image⁴ |
+| Model (Q8_0) | Correct / all | Coverage | Correct / accepted | Raw top-1 / all | HTTP latency p50 / p95¹ | Fresh → native batch4 mean/ image² | Native correct / all (accepted)² | Optimized mean/image³ | Optimized correct/all (accepted)³ | Live fresh → serial cache/compact mean/image⁴ |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Gemma 4 E2B it | 64/120 = 53.3% | 113/120 = 94.2% | 64/113 = 56.6% | 64/120 = 53.3% | 79.1 / 88.9 ms | 77.4 → 69.7 ms (-10.0%) | 63/120 (112) | 51.8 ms (-33.5%) | 62/120 (115) | 79.9 → 81.1 ms (1.6%) |
 | Qwen3-VL 2B Instruct | 91/120 = 75.8% | 115/120 = 95.8% | 91/115 = 79.1% | 95/120 = 79.2% | 101.1 / 116.2 ms | 101.7 → 86.7 ms (-14.7%) | 93/120 (117) | 57.3 ms (-43.6%) | 92/120 (116) | 101.9 → 102.4 ms (0.5%) |
@@ -23,7 +23,7 @@ Evaluated on 2026-09-25. Source: [garythung/trashnet](https://github.com/garythu
 
 ³ Combined profile measured on 2026-09-26, with the same frozen 120 images and three timed passes. Percentages compare the final candidate against validated, earlier fresh baselines of qwen3vl: 101.6 ms/image, gemma4: 77.9 ms/image, smolvlm: 107.8 ms/image. These are amortized four-image group costs on RTX 3080, not per-image response times. Recorded baseline timings are reused explicitly rather than rerun alongside the final candidate. See the combined optimization section.
 
-⁴ Live same-final-binary fresh/full/cache-off versus `--vision-preserving`, one warmup group then three 120-image passes per mode. Batch/microbatch256, Flash Attention off, context4096, threads4 and read loading match. Both execute each image serially; four-image HTTP grouping is not native decoder batching. Scores, complete option rankings, selections, abstentions and token counts match exactly on all images/passes. These fresh timings are newly measured rather than copied from an earlier baseline; compare per-pass ranges below before interpreting small latency changes.
+⁴ Historical live same-binary fresh/full/cache-off versus serial cache/compact components, one warmup group then three 120-image passes per mode. Batch/microbatch256, Flash Attention off, context4096, threads4 and read loading match. Both execute each image serially; four-image HTTP grouping is not native decoder batching. Scores, complete option rankings, selections, abstentions and token counts match exactly on all images/passes. These fresh timings are newly measured rather than copied from an earlier baseline; compare per-pass ranges below before interpreting small latency changes.
 
 The balanced six-class sample has a 16.7% constant-class baseline. Qwen3-VL got 27 more accepted answers right than Gemma: on matched images, Qwen alone was correct on 30, Gemma alone on 3, both on 61, and neither on 26. Qwen's five abstentions were all due to low top-option probability; four had the correct raw top-1. It missed every `trash` image despite performing well on the other five classes. Gemma also had uneven class performance. SmolVLM's 0% correct/all is caused by **120 abstentions**, not by 120 accepted wrong answers. Its six-option candidate mass ranged from 0.00000157 to 0.000980, below the default minimum; 113 responses also had low top-option probability. Candidate mass is coverage of the named options in the model's next-token distribution, not a probability that the answer is correct. Its forced top-1 result is also below the constant-class baseline.
 
@@ -129,7 +129,7 @@ Six real-model optimized vision tests passed across the three checkpoints, cover
 
 `optimized-batch4-summary.json` retains final binary/model/input identities, every pass duration, quality/equivalence results, counter distributions, default-preservation controls and real-model test outcomes. Full real responses and logs remain in ignored `results/vision-optimized-20260926/*-optimized-final/` and `*-fresh-control-final/`. The evaluator can use `--candidate-vision-optimized`; `--baseline-recorded-run` records and validates an earlier fresh baseline against its frozen requests, runtime configuration and raw timing samples.
 
-## Optimization ablation and preserving profile (2026-09-26)
+## Optimization component ablation (2026-09-26)
 
 Eight configurations were screened independently on each model, using the same frozen 120 images, prompts and policy. All cache/compact variants preserved candidate logits, probabilities, candidate mass, complete option ranking, selected values, abstention reasons and input token counts exactly. The stricter `exact_evidence_match` does not enlarge the existing0.02 equivalence threshold.
 
@@ -144,29 +144,33 @@ Eight configurations were screened independently on each model, using the same f
 | Parallel 4, independent encoder chunks | no | no | no |
 | Parallel 4, independent chunks + compact/cache/dynamicKV | no | no | no |
 
-With Flash Attention changed alone, selected outcomes changed on Qwen 1 / Gemma 4 / Smol 0 images and raw top-1 on 0/2/8. With parallel inference changed alone, selected outcomes changed on 2/6/0 images and raw top-1 on 0/5/8. Full option rankings changed as well, including Smol responses that all abstain. Independently encoded unique chunks remove the encoder grouping dependence but do not make the parallel decoder match fresh. Batch 1024 alone matched on this short prompt sample; that result does not establish parity for longer states or different image layouts. The preserving profile therefore retains 256.
+With Flash Attention changed alone, selected outcomes changed on Qwen 1 / Gemma 4 / Smol 0 images and raw top-1 on 0/2/8. With parallel inference changed alone, selected outcomes changed on 2/6/0 images and raw top-1 on 0/5/8. Full option rankings changed as well, including Smol responses that all abstain. Independently encoded unique chunks remove the encoder grouping dependence but do not make the parallel decoder match fresh. Batch 1024 alone matched on this short prompt sample; that result does not establish parity for longer states or different image layouts. The serial component comparison retained 256.
 
-The final `--vision-preserving` / `enable_vision_preserving_optimizations()` profile uses the original serial vision helper with batch/microbatch 256 and Flash Attention off, exact 8 MiB preparation caching and compact evidence. Context, threads, layer placement and model loading remain caller controlled. It supports at most 26 answer options. It does not replay saved predictions or cache image embeddings or KV. The final native binary hash is `aa71c1acd2497174cbda6bbe6e6d49e52d662d1766c3ccc493307d90770930ff`.
+The serial component experiment used the original vision helper with batch/microbatch 256 and Flash Attention off, exact 8 MiB preparation caching and compact evidence. It did not replay saved predictions or cache image embeddings or KV. The measured binary hash was `aa71c1acd2497174cbda6bbe6e6d49e52d662d1766c3ccc493307d90770930ff`. These are constituent optimizations of Final optimized batch4. Its parallel decoder and Flash Attention still alter scores. The separate serial preset was removed after this experiment found no speedup; historical commands and test names in the immutable summary describe the measured revision, not current CLI/API availability.
 
-Three live 120-image passes per mode on this final binary preserved all measured logits/probabilities/mass/rankings/choices/reasons/token counts exactly. Quality and coverage remain fresh: Qwen 91 accepted correct / 115 accepted (raw 95), Gemma 64/113 (raw 64), and Smol 0/0 (raw 13). Each final image call reports one physical KV clear and one skipped clear; the final prepared vision cache reports 4 entries, 4 misses and 360 hits including warmup. These are preparation hits, not decoder KV reuse.
+Three live 120-image passes per mode on that measured binary preserved all measured logits/probabilities/mass/rankings/choices/reasons/token counts exactly. Quality and coverage remain fresh: Qwen 91 accepted correct / 115 accepted (raw 95), Gemma 64/113 (raw 64), and Smol 0/0 (raw 13). Each final image call reports one physical KV clear and one skipped clear; the final prepared vision cache reports 4 entries, 4 misses and 360 hits including warmup. These are preparation hits, not decoder KV reuse.
 
 ### Live per-pass processing costs
 
-| Model | Fresh ms/image by pass | Preserving ms/image by pass | Mean time change |
+| Model | Fresh ms/image by pass | Serial cache/compact ms/image by pass | Mean time change |
 |---|---|---|---:|
 | Qwen3-VL | 101.41, 101.44, 102.70 | 103.10, 102.24, 101.88 | 0.55% |
 | Gemma 4 | 80.65, 79.16, 79.85 | 78.20, 81.36, 83.83 | 1.55% |
 | SmolVLM | 119.86, 124.47, 107.71 | 113.45, 147.19, 113.27 | 6.21% |
 
-The measured means were higher with the preserving profile; no speedup was established. SmolVLM varied substantially by pass in both modes. These are local amortized costs with resident models and one warmup group, not individual image completion latency or a general speed guarantee. Both final modes were executed live using the same binary.
+The measured means were higher with the serial cache/compact components; no speedup was established. SmolVLM varied substantially by pass in both modes. These are local amortized costs with resident models and one warmup group, not individual image completion latency or a general speed guarantee. Both final modes were executed live using the same binary.
 
 ### Isolated physical KV clear check
 
 `L2S1_FORCE_KV_CLEAR=1` is a per-engine benchmark diagnostic. It reproduces physical zeroing even when KV is already clean while retaining the same bridge and wrapper calls. On all 120 images for each model, the forced mode reports 2 physical clears / 0 skips per last native call, and the default mode 1 clear / 1 skip. Logits, probabilities, mass, ranking and decisions matched exactly in all three pairs. One-pass timings are retained as diagnostics; they do not establish a robust isolated speedup or measure the earlier wrapper-call removal.
 
-Three real-model profile tests passed, including different image, state and request order, exact equality of every decision result field, warm cache reuse, cache invalidation, malformed images, late context overflow and recovery. The same request groups also passed the live HTTP shared-metadata contract. Metal remains unverified.
+Three real-model component tests passed, including different image, state and request order, exact equality of every decision result field, warm cache reuse, cache invalidation, malformed images, late context overflow and recovery. The same request groups also passed the live HTTP shared-metadata contract. Metal remains unverified.
 
-`preserving-ablation-summary.json` retains the 24 screening runs, final 3-pass timings, quality/equivalence, diagnostic counter distributions and real-model tests. `ablation-config.json` freezes the eight variant flags; reproduce a model matrix with `python3 benchmarks/trashnet-vision-20260925/evaluate_ablation.py --help`. `evaluate_batch.py --candidate-execution-mode fresh --candidate-vision-preserving` reproduces the live finalist comparison; add `--baseline-force-kv-clear` to a fresh/full candidate comparison for the clear probe. Raw responses/logs remain ignored under `results/vision-ablation-20260926/`.
+`preserving-ablation-summary.json` retains the 24 screening runs, final 3-pass timings, quality/equivalence, diagnostic counter distributions and real-model tests. `ablation-config.json` freezes the eight variant flags; reproduce a model matrix with `python3 benchmarks/trashnet-vision-20260925/evaluate_ablation.py --help`. `evaluate_batch.py --candidate-execution-mode fresh --candidate-evidence-transfer compact --candidate-cache-bytes 8388608` reproduces the serial component comparison; add `--baseline-force-kv-clear` to a fresh/full candidate comparison for the clear probe. Raw responses/logs remain ignored under `results/vision-ablation-20260926/`.
+
+### Component integration verification
+
+After removing the separate serial preset, the sm_86 CUDA build passed 20 library tests and one CLI test. On each of Qwen3-VL, Gemma 4 E2B and SmolVLM, `real_fresh_vision_cache_and_compact_match_full_and_recover` passed exact component equality at original compute settings, and `real_vision_optimizations_preserve_full_evidence_and_recover` passed at optimized compute settings. These six live tests cover cache hits/invalidation, compact/full scoring, duplicate-image reuse, native batch counters and error recovery. CLI help exposes only the combined `--vision-optimized` preset. This functional verification used executable SHA-256 `ff49cff478fc1c9c2e6d5531a31fca4f5d44dd6747595099627ffef15c4d6b0d`; throughput was not remeasured because the inference implementation and optimized settings were unchanged. Logs remain ignored under `results/vision-components-20260926/`.
 
 ## Reproduce and inspect
 

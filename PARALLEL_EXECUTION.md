@@ -100,15 +100,14 @@ equivalence criterion. Selected values or raw rankings changed. Image batching
 is experimental; native batch counters and isolation tests do not establish
 score equivalence or task accuracy.
 
-### Preserving fresh execution
+### Optimization components
 
-`--vision-preserving` keeps the original serial vision helper, batch/microbatch
-256 and Flash Attention off. It enables the exact preparation cache and compact
-evidence copy; model/projector decoding order and batch boundaries stay the same.
-Context, threads, layer placement and loading settings are unchanged. The Rust
-API is `enable_vision_preserving_optimizations()` after loading the projector.
-This profile supports at most 26 answer options, rejects output heads/calibration,
-and cannot be combined with explicit parallel execution or the throughput profile.
+The optimized four-image profile includes exact prompt preparation caching,
+compact evidence transfer and dirty-only physical KV clearing. These components
+are tested separately using the existing setters at an unchanged compute
+configuration. Their score equality does not establish fresh-versus-parallel
+parity. The serial cache/compact comparison did not establish a speedup;
+these components are included in `--vision-optimized`.
 
 Fresh image HTTP responses expose `backend.details.vision_preparation` with a
 backend-lifetime cache snapshot and `vision_kv_clear` for the last native call.
