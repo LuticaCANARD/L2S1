@@ -1,11 +1,9 @@
 name: TypeScript library checks
 
 on:
-  pull_request:
-    paths: ['typescript/**', 'examples/typescript_fixture.rs', 'src/http.rs', 'src/http/**', 'src/decision.rs', 'src/evidence.rs', 'Cargo.toml', 'Cargo.lock', '.github/workflows/typescript-checks.yml']
   push:
-    branches: [main]
-    paths: ['typescript/**', 'examples/typescript_fixture.rs', 'src/http.rs', 'src/http/**', 'src/decision.rs', 'src/evidence.rs', 'Cargo.toml', 'Cargo.lock', '.github/workflows/typescript-checks.yml']
+    tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: read

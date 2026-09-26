@@ -1,37 +1,9 @@
 name: Agent integration checks
 
 on:
-  pull_request:
-    paths:
-      - 'mcp/**'
-      - 'skills/**'
-      - 'examples/warehouse.json'
-      - 'examples/warehouse.rs'
-      - 'examples/http-image.json'
-      - 'docs/**'
-      - 'README.md'
-      - 'src/decision.rs'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'src/http*'
-      - 'src/http/**'
-      - '.github/workflows/agent-checks.yml'
   push:
-    branches: [main]
-    paths:
-      - 'mcp/**'
-      - 'skills/**'
-      - 'examples/warehouse.json'
-      - 'examples/warehouse.rs'
-      - 'examples/http-image.json'
-      - 'docs/**'
-      - 'README.md'
-      - 'src/decision.rs'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'src/http*'
-      - 'src/http/**'
-      - '.github/workflows/agent-checks.yml'
+    tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: read
