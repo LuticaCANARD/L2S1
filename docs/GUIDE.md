@@ -134,7 +134,18 @@ Add `--diagnostics` to receive a separate envelope containing the normal respons
 
 ## Rust integration
 
-Enable the crate's `llama` feature to use `LlamaBackend`. A caller can keep its request unchanged while passing a different model path:
+Enable the crate's `llama` feature to use `LlamaBackend`.
+
+Construct requests directly with `DecisionRequest`, `Decision`, `DecisionKind`,
+`OptionSpec`, and `Level`; JSON file parsing is not required. The complete
+[Rust warehouse example](../examples/warehouse.rs) builds and validates binary,
+choice, and ordinal decisions without a model:
+
+```sh
+cargo run --locked --example warehouse
+```
+
+A caller can keep its request unchanged while passing a different model path:
 
 ```rust
 use std::path::Path;

@@ -53,15 +53,78 @@ no shell commands, file writes, downloads, model loading or automatic retries.
 ## Rust
 
 Enable the matching runtime feature on the `l2s1` dependency and include
-`serde_json`. Load once and retain the backend for multiple decisions:
+`serde_json`. Construct the request directly with Rust types; no input file or JSON
+parsing is needed. Load once and retain the backend for multiple decisions:
 
 ```rust
 use std::path::Path;
-use l2s1::{DecisionBackend, DecisionPolicy, DecisionRequest, llama::LlamaBackend};
+use l2s1::{
+    Decision, DecisionBackend, DecisionKind, DecisionPolicy, DecisionRequest,
+    Level, OptionSpec, llama::LlamaBackend,
+};
+use serde_json::{Map, Value};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let request: DecisionRequest =
-        serde_json::from_str(&std::fs::read_to_string("request.json")?)?;
+    let request = DecisionRequest {
+        state: Value::Object(Map::from_iter([
+            ("shipment_id".into(), Value::from("BOX-103")),
+            ("storage_requirement".into(), Value::from("chilled")),
+            ("hours_until_dispatch".into(), Value::from(4)),
+        ])),
+        decisions: vec![
+            Decision {
+                id: "storage_zone".into(),
+                instruction: "Select the storage zone that matches the shipment's storage_requirement.".into(),
+                kind: DecisionKind::Choice {
+                    options: vec![
+                        OptionSpec {
+                            id: "ambient".into(),
+                            criterion: "The shipment requires ambient storage.".into(),
+                        },
+                        OptionSpec {
+                            id: "chilled".into(),
+                            criterion: "The shipment requires chilled storage.".into(),
+                        },
+                        OptionSpec {
+                            id: "frozen".into(),
+                            criterion: "The shipment requires frozen storage.".into(),
+                        },
+                    ],
+                },
+            },
+            Decision {
+                id: "cold_chain_required".into(),
+                instruction: "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.".into(),
+                kind: DecisionKind::Binary {
+                    false_label: "No temperature control is required.".into(),
+                    true_label: "Temperature control is required.".into(),
+                },
+            },
+            Decision {
+                id: "dispatch_priority".into(),
+                instruction: "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.".into(),
+                kind: DecisionKind::Ordinal {
+                    levels: vec![
+                        Level {
+                            id: "low".into(),
+                            criterion: "More than 24 hours remain until dispatch.".into(),
+                            value: 0.0,
+                        },
+                        Level {
+                            id: "medium".into(),
+                            criterion: "More than 6 hours and at most 24 hours remain until dispatch.".into(),
+                            value: 1.0,
+                        },
+                        Level {
+                            id: "high".into(),
+                            criterion: "At most 6 hours remain until dispatch.".into(),
+                            value: 2.0,
+                        },
+                    ],
+                },
+            },
+        ],
+    };
     request.validate()?;
     let mut backend = LlamaBackend::load(
         Path::new("/path/to/model.gguf"),
