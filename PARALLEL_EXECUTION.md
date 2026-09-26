@@ -48,7 +48,134 @@ completion latency for each article, batch identity, and amortized compute time
 separately. Dividing a batch's elapsed time by its size measures amortized cost,
 not individual response latency.
 
+### Independent image batches
+
+With a matching vision projector loaded, `backend.decide_vision_batch(&requests,
+&images)` scores each request from its own state and one original image. In
+`parallel` mode, decisions enter bounded native waves; `fresh` mode evaluates
+them serially. HTTP exposes the same path when each decision references one
+image via `media_ids` and the listener uses `--execution-mode parallel
+--parallel-width 4`. Four request media items with four independent decisions
+then share native execution instead of merely sharing an HTTP response.
+
+Image decode and multimodal tokenization retain the trusted prompt control-token
+boundary. Compatible projector chunks enter llama.cpp mtmd's batch encoder;
+projector shape and token limits may split these into smaller encoder batches.
+All wave questions use independent decoder sequence IDs and per-sequence image
+positions, with their own full-vocabulary final logits or compact candidate
+scores and full-vocabulary normalizers. Vision currently does
+not share prompt-prefix KV, so `reused_prefix_tokens` remains zero. Noncausal
+image chunks must fit the configured token batch and microbatch in full; an
+unsupported layout or recurrent model returns an error rather than switching to
+serial execution. More than 26 options still require `fresh` vision execution.
+
+Image waves use separate KV streams. Dynamic context sizing reserves the
+longest multimodal input plus one token batch of headroom in each stream,
+bounded by the per-question limit. Both the token count and position span
+are checked against that limit.
+Each question remains bounded by `--context`; memory and image embeddings are
+cleared after the batch or an error. Final partial waves preserve request and
+decision order. Batch failures return no partial responses.
+
+`backend.vision_batch_metrics()` exposes counters for the latest native wave.
+Parallel image HTTP responses also include these under
+`backend.details.vision_batch`, labeled `scope: "last_native_wave"`:
+`projector_encode_calls`, `projector_batch_max`, `decoder_calls`,
+`decoder_batch_max_sequences`, `projector_reused_chunks`, `kv_clear_calls`, and
+`kv_clear_skipped`. The two clear counters have
+`kv_clear_scope: "since_last_native_vision_start"`: subsequent cleanup or configuration calls
+can increment them before the next native vision call resets them.
+Preparation-cache counters alongside them have a separate
+`preparation_cache_scope` covering the backend lifetime since configuration.
+These counters establish the actual encoder and
+decoder batch shapes; the number of images in an HTTP request alone does not.
+Measure total batch completion latency and amortized milliseconds per image
+separately, and compare scores, top choices, abstentions, and task accuracy
+against `fresh` on the same images.
+
+The [120-image TrashNet measurement](benchmarks/trashnet-vision-20260925/REPORT.md#native-four-image-batching-2026-09-26)
+verified four native decoder sequences on RTX 3080, with lower amortized
+processing times, but all three CUDA checkpoints failed the existing numerical
+equivalence criterion. Selected values or raw rankings changed. Image batching
+is experimental; native batch counters and isolation tests do not establish
+score equivalence or task accuracy.
+
+### Optimization components
+
+The optimized four-image profile includes exact prompt preparation caching,
+compact evidence transfer and dirty-only physical KV clearing. These components
+are tested separately using the existing setters at an unchanged compute
+configuration. Their score equality does not establish fresh-versus-parallel
+parity. The serial cache/compact comparison did not establish a speedup;
+these components are included in `--vision-optimized`.
+
+Fresh image HTTP responses expose `backend.details.vision_preparation` with a
+backend-lifetime cache snapshot and `vision_kv_clear` for the last native call.
+All serial media groups receive the same final snapshot so the common response
+metadata remains consistent. These fields do not assert image or KV reuse.
+
+`--vision-projector-reuse` is a separate experimental knob for manual parallel
+ablation: it independently encodes each unique chunk and reuses identical chunks
+within one wave. It does not preserve the serial decoder's numerical execution.
+
+### Combined vision optimizations
+
+`--vision-optimized` requires a matching projector and an explicitly selected
+CUDA or Metal device. It selects parallel width 4, dynamic per-stream context,
+token batch/microbatch 1024, Flash Attention on, compact evidence, an 8 MiB
+preparation cache and identical-image projector reuse. Per-question context
+defaults to 4096. Rust callers construct the backend with
+`ComputeOptions::vision_optimized()`, load the projector, then call
+`enable_vision_optimizations()`.
+
+Native memory tracks writes before entering every decode or snapshot restore,
+including operations that fail after partial writes. `sd_clear` always
+invalidates logical cached tokens, but only zeros physical KV when dirty.
+Successful vision calls own their native cleanup; a Rust guard clears on
+validation/preparation/scoring errors and unwinding. This skips duplicate
+clears while keeping request and session isolation.
+
+The preparation cache retains exact rendered state/decision prompts and answer
+boundary mappings; it stores no image bytes or KV. Images with identical bytes
+and matching ordered chunk/position metadata can share immutable projector
+embeddings inside one wave. In this reuse mode, each unique chunk uses a
+single-chunk encoder batch so changing another image cannot change its encoder
+batch shape or slot. This selects an alternative to projector batching; decoder
+batching is retained. Decoder KV streams and image positions remain
+independent. `backend.vision_projector_reuse` reports the enabled setting and
+`projector_reused_chunks` reports actual reused chunks, which can exceed image
+count for projectors that create a global image and tiles.
+
+Compact transfer copies only each decision's candidates plus its complete
+vocabulary normalizer into Rust. llama.cpp still computes the full vocabulary
+and transfers its output to the host. The optimized profile does not combine
+text-only KV prefix sessions or snapshot restoration with independent vision
+streams. These are alternative execution modes; hybrid/recurrent models and
+wide answer codes are explicitly rejected by this profile.
+
+Both parallel attention and projector batch shapes can change numerical
+results. Keep fresh as the default and compare the combined profile against
+fresh on the original inputs. Full-versus-compact equivalence at an identical
+compute configuration is checked separately from fresh-versus-optimized
+equivalence. Metal execution and performance still require real hardware tests.
+
 ## Validation and measurement
+
+Vision isolation and numerical equivalence are separate tests. Set
+`SKID_VISION_MODEL`, `SKID_VISION_MMPROJ`, and optionally `SKID_CUDA=1`, then run:
+
+```sh
+cargo test --release --locked --features llama-cuda --test vision \
+  real_vision_batch_preserves_image_state_order_and_recovers_after_errors \
+  -- --ignored --test-threads=1
+cargo test --release --locked --features llama-cuda --test vision \
+  real_vision_batch_equivalence_on_color_fixture -- --ignored --test-threads=1
+python3 benchmarks/trashnet-vision-20260925/evaluate_batch.py --help
+```
+
+The equivalence test can fail on CUDA even when the isolation test passes.
+The evaluator retains such failures in its comparison instead of increasing
+the tolerance or replacing the batched result with serial inference.
 
 ```sh
 SKID_MODEL=models/gemma-4-E2B-it-Q8_0.gguf SKID_CUDA=1 \

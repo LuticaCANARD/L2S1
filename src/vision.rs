@@ -19,6 +19,25 @@ pub trait VisionDecisionBackend: DecisionBackend {
         request: &DecisionRequest,
         image: &[u8],
     ) -> Result<DecisionResponse>;
+
+    /// Evaluate independent image requests. Backends may override this to use
+    /// native batching; the default preserves serial execution and metadata.
+    fn decide_vision_batch(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[&[u8]],
+    ) -> Result<Vec<DecisionResponse>> {
+        if requests.len() != images.len() {
+            return Err(Error::Invalid(
+                "one image is required per vision request".into(),
+            ));
+        }
+        requests
+            .iter()
+            .zip(images)
+            .map(|(request, image)| self.decide_vision(request, image))
+            .collect()
+    }
 }
 
 #[cfg(feature = "llama")]
@@ -29,5 +48,13 @@ impl VisionDecisionBackend for crate::llama::LlamaBackend {
         image: &[u8],
     ) -> Result<DecisionResponse> {
         crate::llama::LlamaBackend::decide_vision(self, request, image)
+    }
+
+    fn decide_vision_batch(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[&[u8]],
+    ) -> Result<Vec<DecisionResponse>> {
+        crate::llama::LlamaBackend::decide_vision_batch(self, requests, images)
     }
 }
