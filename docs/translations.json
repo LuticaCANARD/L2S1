@@ -394,6 +394,26 @@
         "ko",
         "ja"
       ]
+    },
+    {
+      "source": "docs/RTX3060_BENCHMARK.md",
+      "path": "RTX3060_BENCHMARK.md",
+      "source_sha256": "dd65e6cb6e9e60fc86e3ec465d4adb29b167ef10670f1dd372da2b219132cbe3",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/MODEL_AUDIT_20260926.md",
+      "path": "MODEL_AUDIT_20260926.md",
+      "source_sha256": "a5016836f421a021e7e3b1b0b8e8d9e4a386ed96528c74e38409b4ba448e125d",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
     }
   ]
 }

@@ -4,7 +4,7 @@
   import { page } from '$app/state';
   import { locale, theme, isLocale, isTheme, preferenceKeys, type Locale, type Theme } from '$lib/i18n';
   import SiteHeader from '$lib/components/SiteHeader.svelte';
-  import '../../theme.css';
+  import '../theme.css';
   let { children } = $props();
   let ready = $state(false);
   function readPreference(key: string): string | null { try { return localStorage.getItem(key); } catch { return null; } }
