@@ -45,6 +45,8 @@ def measure(args, mode, groups):
                "--min-top-probability", "0.8", "--min-candidate-mass", "0.05"]
     if mode == "parallel" and args.candidate_vision_optimized:
         command += ["--vision-optimized"]
+    elif mode == "parallel" and args.candidate_vision_preserving:
+        command += ["--vision-preserving"]
     else:
         batch = 256 if mode == "fresh" else args.candidate_batch
         command += ["--execution-mode", execution, "--parallel-width", "4",
@@ -54,7 +56,11 @@ def measure(args, mode, groups):
                     "--preparation-cache-bytes", str(0 if mode == "fresh" else args.candidate_cache_bytes)]
         if mode == "parallel" and args.candidate_dynamic_context:
             command += ["--parallel-context-dynamic"]
+        if mode == "parallel" and args.candidate_projector_reuse:
+            command += ["--vision-projector-reuse"]
     environment = os.environ.copy()
+    force_clear = args.baseline_force_kv_clear if mode == "fresh" else args.candidate_force_kv_clear
+    environment["L2S1_FORCE_KV_CLEAR"] = "1" if force_clear else "0"
     if mode == "fresh" and args.baseline_runtime_dir:
         environment["LD_LIBRARY_PATH"] = str(args.baseline_runtime_dir.resolve())
     url = "http://" + args.listen
@@ -110,6 +116,7 @@ def measure(args, mode, groups):
     total = sum(latencies)
     summary = {"mode": mode, "images_per_request": 4, "request_count": len(samples),
                "execution_mode": execution, "command": command, "binary_sha256": ev.file_digest(binary),
+               "force_kv_clear": force_clear,
                "runtime_override": str(args.baseline_runtime_dir) if mode == "fresh" and args.baseline_runtime_dir else None,
                "image_evaluations": len(samples) * 4, "startup_to_health_ms": startup_ms,
                "warmup_group_ms": warmup_ms,
@@ -134,6 +141,7 @@ def observations(samples, records):
             rows.append({"index": index, "repetition": sample["repetition"], "label": records[index - 1]["label"],
                          "selected": result["value"]["selected"],
                          "raw_top1": None if ranked[0]["option_probability"] == ranked[1]["option_probability"] else ranked[0]["id"],
+                         "ranking": [score["id"] for score in ranked],
                          "candidate_mass": result["evidence"]["candidate_mass"],
                          "scores": result["evidence"]["scores"], "input_tokens": result["usage"]["input_tokens"],
                          "abstention_reasons": result["abstention_reasons"]})
@@ -149,9 +157,12 @@ def main():
     parser.add_argument("--mode-order", choices=("fresh-first", "parallel-first"), default="fresh-first")
     parser.add_argument("--baseline-binary", type=Path)
     parser.add_argument("--baseline-runtime-dir", type=Path)
+    parser.add_argument("--baseline-force-kv-clear", action="store_true")
+    parser.add_argument("--candidate-force-kv-clear", action="store_true")
     parser.add_argument("--baseline-recorded-run", type=Path,
                         help="Reuse a verified earlier fresh run on the same frozen inputs; record its provenance")
     parser.add_argument("--candidate-vision-optimized", action="store_true")
+    parser.add_argument("--candidate-vision-preserving", action="store_true")
     parser.add_argument("--candidate-execution-mode", choices=("fresh", "parallel"), default="parallel")
     parser.add_argument("--candidate-batch", type=int, default=256)
     parser.add_argument("--candidate-ubatch", type=int)
@@ -159,11 +170,15 @@ def main():
     parser.add_argument("--candidate-evidence-transfer", choices=("full", "compact"), default="full")
     parser.add_argument("--candidate-cache-bytes", type=int, default=0)
     parser.add_argument("--candidate-dynamic-context", action="store_true")
+    parser.add_argument("--candidate-projector-reuse", action="store_true")
     args = parser.parse_args()
     if args.repetitions < 1:
         raise ValueError("repetitions must be positive")
     if args.candidate_vision_optimized and args.candidate_execution_mode != "parallel":
         raise ValueError("optimized vision requires parallel execution")
+    if args.candidate_vision_preserving and (
+            args.candidate_vision_optimized or args.candidate_execution_mode != "fresh"):
+        raise ValueError("preserving vision requires fresh execution and no optimized profile")
     selection = json.loads(args.selection.read_text())
     if ev.file_digest(args.source) != selection["source_sha256"] or selection["source_sha256"] != ev.SOURCE_SHA256:
         raise ValueError("source archive identity mismatch")
@@ -191,6 +206,8 @@ def main():
         recorded = json.loads((args.baseline_recorded_run / "summary.json").read_text())
         if recorded["timing"]["fresh"]["execution_mode"] != "fresh":
             raise ValueError("recorded baseline must use fresh execution")
+        if recorded["timing"]["fresh"].get("force_kv_clear", False) != args.baseline_force_kv_clear:
+            raise ValueError("recorded baseline clear diagnostic mismatch")
         if args.baseline_binary and recorded["timing"]["fresh"]["binary_sha256"] != ev.file_digest(args.baseline_binary):
             raise ValueError("recorded baseline executable identity mismatch")
         for key, path in (("source_sha256", args.source), ("selection_sha256", args.selection),
@@ -241,11 +258,13 @@ def main():
             runs[mode] = measure(args, mode, groups)
     rows = {mode: observations(runs[mode][0], records) for mode in modes}
     comparisons = {"changed_selected": 0, "changed_top1": 0, "changed_abstention": 0,
-                   "changed_input_tokens": 0, "max_probability_delta": 0., "max_candidate_mass_delta": 0.}
-    changed_indices = {"selected": set(), "raw_top1": set(), "abstention_reasons": set()}
+                   "changed_ranking": 0, "changed_input_tokens": 0, "max_raw_logit_delta": 0.,
+                   "max_probability_delta": 0., "max_candidate_mass_delta": 0.}
+    changed_indices = {"selected": set(), "raw_top1": set(), "abstention_reasons": set(), "ranking": set()}
     for serial, batch in zip(rows["fresh"], rows["parallel"]):
         for field, key in (("selected", "changed_selected"), ("raw_top1", "changed_top1"),
-                           ("abstention_reasons", "changed_abstention"), ("input_tokens", "changed_input_tokens")):
+                           ("abstention_reasons", "changed_abstention"), ("ranking", "changed_ranking"),
+                           ("input_tokens", "changed_input_tokens")):
             comparisons[key] += int(serial[field] != batch[field])
             if field in changed_indices and serial[field] != batch[field]:
                 changed_indices[field].add(serial["index"])
@@ -254,12 +273,17 @@ def main():
             if (a["id"], a["token_id"]) != (b["id"], b["token_id"]):
                 raise RuntimeError("answer code identity changed")
             comparisons["max_probability_delta"] = max(comparisons["max_probability_delta"], abs(a["option_probability"] - b["option_probability"]))
+            comparisons["max_raw_logit_delta"] = max(comparisons["max_raw_logit_delta"], abs(a["raw_logit"] - b["raw_logit"]))
     comparisons["image_evaluations"] = len(rows["fresh"])
     comparisons["unique_changed_image_indices"] = {key: sorted(value) for key, value in changed_indices.items()}
     comparisons["within_existing_equivalence_tolerance"] = (
         comparisons["max_probability_delta"] < .02 and comparisons["max_candidate_mass_delta"] < .02
         and comparisons["changed_selected"] == 0 and comparisons["changed_top1"] == 0
         and comparisons["changed_abstention"] == 0 and comparisons["changed_input_tokens"] == 0)
+    comparisons["exact_evidence_match"] = (
+        comparisons["within_existing_equivalence_tolerance"] and comparisons["changed_ranking"] == 0
+        and comparisons["max_raw_logit_delta"] == 0 and comparisons["max_probability_delta"] == 0
+        and comparisons["max_candidate_mass_delta"] == 0)
     quality = {}
     for mode in modes:
         quality[mode] = []

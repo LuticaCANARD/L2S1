@@ -112,6 +112,9 @@ struct engine {
     std::vector<int32_t> cached_tokens;
     vision_batch_metrics vision_metrics;
     bool memory_dirty = false;
+    // Benchmark diagnostic: reproduce unconditional physical clearing while
+    // retaining the same bridge, wrapper calls and numerical execution path.
+    bool force_kv_clear = false;
     bool vision_projector_reuse = false;
     // Own pattern strings for at least the model lifetime; no static leaks.
     std::vector<std::string> cpu_moe_patterns;
@@ -156,6 +159,8 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
             llama_backend_init();
         });
         auto e = std::make_unique<engine>();
+        if (const char * setting = std::getenv("L2S1_FORCE_KV_CLEAR"))
+            e->force_kv_clear = std::strcmp(setting, "1") == 0;
         auto mp = llama_model_default_params();
         if (device_kind != 0) {
             const char * requested = device_kind == 1 ? "CUDA" : "MTL";
@@ -350,7 +355,7 @@ extern "C" void sd_clear(engine * e) noexcept {
     e->last_feature_row = -1;
     // Every operation that can write KV marks it dirty before entering llama.cpp.
     // Failed decodes/restores may have written partial state and still need zeroing.
-    if (!e->memory_dirty) {
+    if (!e->memory_dirty && !e->force_kv_clear) {
         ++e->vision_metrics.kv_clear_skipped;
         return;
     }

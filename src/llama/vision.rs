@@ -356,6 +356,38 @@ impl LlamaBackend {
         Ok(())
     }
 
+    /// Enable preparation and evidence-copy optimizations while retaining the
+    /// original serial native execution, batch/ubatch 256 and flash attention off.
+    /// Exact prompt preparation is cached; inference results, image embeddings
+    /// and KV state are never cached. Compact evidence keeps the full-vocabulary
+    /// normalizer and supports at most 26 single-token answer codes.
+    /// Every compatibility check completes before changing backend settings.
+    pub fn enable_vision_preserving_optimizations(&mut self) -> Result<()> {
+        if self.vision_projector_path.is_none()
+            || self.output_head.is_some()
+            || !self.calibrations.is_empty()
+            || self.collect_features
+        {
+            return Err(Error::Invalid("preserving vision optimizations require a loaded projector without output heads, calibration or feature export".into()));
+        }
+        if self.compute.batch != 256
+            || self.compute.ubatch != 256
+            || self.compute.flash_attention != FlashAttention::Off
+        {
+            return Err(Error::Invalid("preserving vision optimizations require batch 256, ubatch 256 and flash attention off".into()));
+        }
+        self.set_parallel_width(1)?;
+        self.set_execution_mode(ExecutionMode::Fresh);
+        self.set_parallel_context_dynamic(false);
+        self.set_evidence_transfer(EvidenceTransfer::Compact)?;
+        self.set_preparation_cache(PreparationCacheConfig {
+            max_entries: 128,
+            max_bytes: 8 * 1024 * 1024,
+        });
+        self.set_vision_projector_reuse(false);
+        Ok(())
+    }
+
     /// Opt in to reusing identical image embeddings inside one native wave.
     /// Image bytes and ordered projector chunks must match exactly. Different
     /// projector batch shapes can change scores, so this is disabled by default.

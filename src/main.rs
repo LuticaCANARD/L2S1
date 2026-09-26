@@ -20,10 +20,18 @@ struct Args {
     /// Matching multimodal projector GGUF for direct image input.
     #[arg(long)]
     mmproj: Option<PathBuf>,
+    /// Reuse identical image chunks within a native wave, encoding unique chunks
+    /// individually to preserve the single-chunk projector path.
+    #[arg(long, requires = "mmproj", conflicts_with = "vision_optimized")]
+    vision_projector_reuse: bool,
     /// Experimental vision throughput profile: parallel4, dynamic KV, batch1024,
     /// FlashAttention, compact evidence, bounded preparation and image reuse.
     #[arg(long, requires = "mmproj", conflicts_with_all = ["execution_mode", "parallel_width", "parallel_context_dynamic", "batch", "ubatch", "flash_attention", "evidence_transfer", "preparation_cache_bytes", "preparation_cache_entries", "output_head", "calibration"])]
     vision_optimized: bool,
+    /// Retain serial vision inference, batch256 and flash attention off; cache
+    /// exact prompt preparation and copy compact evidence, never inference results.
+    #[arg(long, requires = "mmproj", conflicts_with_all = ["vision_optimized", "execution_mode", "parallel_width", "parallel_context_dynamic", "batch", "ubatch", "flash_attention", "evidence_transfer", "preparation_cache_bytes", "preparation_cache_entries", "vision_projector_reuse", "output_head", "calibration"])]
+    vision_preserving: bool,
     /// Start a JSON HTTP API at this address, for example 127.0.0.1:8080.
     #[arg(long, conflicts_with_all = ["input", "image", "inspect", "preflight", "diagnostics"])]
     listen: Option<String>,
@@ -200,8 +208,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     for path in &args.calibration {
         backend.load_calibration(path)?;
     }
+    if args.vision_projector_reuse {
+        backend.set_vision_projector_reuse(true);
+    }
     if args.vision_optimized {
         backend.enable_vision_optimizations()?;
+    }
+    if args.vision_preserving {
+        backend.enable_vision_preserving_optimizations()?;
     }
     if args.inspect {
         serde_json::to_writer_pretty(io::stdout().lock(), &backend.inspect())?;
@@ -318,5 +332,85 @@ mod tests {
             ])
             .is_err()
         );
+        assert!(
+            Args::try_parse_from(["l2s1", "--model", "m.gguf", "--vision-projector-reuse",])
+                .is_err()
+        );
+        assert!(
+            Args::try_parse_from([
+                "l2s1",
+                "--model",
+                "m.gguf",
+                "--mmproj",
+                "p.gguf",
+                "--vision-optimized",
+                "--vision-projector-reuse",
+            ])
+            .is_err()
+        );
+        let reused = Args::try_parse_from([
+            "l2s1",
+            "--model",
+            "m.gguf",
+            "--mmproj",
+            "p.gguf",
+            "--execution-mode",
+            "parallel",
+            "--vision-projector-reuse",
+        ])
+        .unwrap();
+        assert!(reused.vision_projector_reuse);
+        assert!(!reused.vision_optimized);
+        assert!(
+            !Args::try_parse_from(["l2s1", "--model", "m.gguf", "--mmproj", "p.gguf",])
+                .unwrap()
+                .vision_projector_reuse
+        );
+        assert!(
+            Args::try_parse_from(["l2s1", "--model", "m.gguf", "--vision-preserving",]).is_err()
+        );
+        for extra in [
+            vec!["--vision-optimized"],
+            vec!["--vision-projector-reuse"],
+            vec!["--execution-mode", "fresh"],
+            vec!["--batch", "256"],
+            vec!["--ubatch", "256"],
+            vec!["--flash-attention", "off"],
+            vec!["--evidence-transfer", "compact"],
+            vec!["--preparation-cache-bytes", "8388608"],
+            vec!["--output-head", "h.json"],
+            vec!["--calibration", "c.json"],
+        ] {
+            let mut argv = vec![
+                "l2s1",
+                "--model",
+                "m.gguf",
+                "--mmproj",
+                "p.gguf",
+                "--vision-preserving",
+            ];
+            argv.extend(extra);
+            assert!(Args::try_parse_from(argv).is_err());
+        }
+        let preserving = Args::try_parse_from([
+            "l2s1",
+            "--model",
+            "m.gguf",
+            "--mmproj",
+            "p.gguf",
+            "--vision-preserving",
+            "--context",
+            "8192",
+            "--threads",
+            "8",
+            "--gpu-layers",
+            "24",
+        ])
+        .unwrap();
+        assert!(preserving.vision_preserving);
+        assert!(!preserving.vision_optimized);
+        assert_eq!(preserving.context, Some(8192));
+        assert_eq!(preserving.batch, 256);
+        assert_eq!(preserving.flash_attention, FlashAttention::Off);
     }
 }

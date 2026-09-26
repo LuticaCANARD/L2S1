@@ -8,6 +8,12 @@ Application option IDs, result types, and acceptance rules stay consistent acros
 
 The crate is named `l2s1`. The default inference executable uses **llama.cpp and local GGUF files**. An optional `wgpu` feature provides a separate `l2s1-wgpu` executable for native GPU inference. An optional `openrouter` feature provides a selection-only remote executable. Model switching currently means loading a new backend or replacing an owned worker; there is no automatic model router or live hot-swap service.
 
+## Vision optimizations with fresh execution
+
+Add `--vision-preserving` with `--model` and a matching `--mmproj` to retain the original single-sequence vision execution, token batch/microbatch 256 and Flash Attention off. It enables an 8 MiB bounded cache of exact prepared prompts and compact evidence transfer with the complete-vocabulary normalizer. Context, threads, layer placement and model loading keep their existing defaults and explicit settings. The default context remains 2048. Inference results, image embeddings and KV are not cached by this profile. It supports at most 26 answer options and rejects conflicting execution/evidence/cache flags, output heads and calibration.
+
+Rust callers load with the ordinary `ComputeOptions` and call `backend.enable_vision_preserving_optimizations()?` after attaching the projector. This validates batch/microbatch 256 and Flash Attention off before changing any settings. Compare against fresh using the same model and compute settings on the target hardware; Metal runtime remains unverified. The [TrashNet ablation report](benchmarks/trashnet-vision-20260925/REPORT.md) distinguishes exact preservation, changed predictions and measured latency.
+
 ## Experimental optimized vision
 
 Add `--vision-optimized` to a CUDA or Metal invocation with `--model` and `--mmproj` to enable the compatible vision throughput settings together: four independent decoder/KV streams, dynamic context reservation, token batch/microbatch 1024, Flash Attention, compact evidence, an 8 MiB bounded preparation cache, and request-local reuse of identical projector embeddings. With reuse enabled, each unique image chunk is encoded independently to keep other image scores isolated; the default parallel path can still batch projector chunks. The default context is 4096 per question; `--context`, threads and layer placement can still be adjusted explicitly. Individual optimization flags conflict with this profile to avoid silently selecting a partial profile. GPU/kernel support is required; Metal performance is unverified.

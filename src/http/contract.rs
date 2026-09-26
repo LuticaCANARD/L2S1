@@ -102,7 +102,11 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
             "max_decisions_per_wave": info.parallel_width,
             "max_options_per_decision": 26,
             "isolated_sequences": true,
-            "projector_encoding": "batched_when_compatible",
+            "projector_encoding": if info.vision_projector_reuse {
+                "independent_unique_chunks_with_reuse"
+            } else {
+                "batched_when_compatible"
+            },
         });
         capabilities
     }
@@ -148,11 +152,29 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
                 })
                 .collect()
         } else {
-            requests
+            let mut outputs = requests
                 .iter()
                 .zip(images)
                 .map(|(request, images)| self.decide_json(request, images))
-                .collect()
+                .collect::<crate::Result<Vec<_>>>()?;
+            if !requests.is_empty() && images.iter().all(|images| images.len() == 1) {
+                // Attach one shared snapshot after all serial media groups, so
+                // their backend metadata still agrees in the wire contract.
+                let cache = self.preparation_cache_stats();
+                let metrics = self.vision_batch_metrics()?;
+                for output in &mut outputs {
+                    output["backend"]["details"]["vision_preparation"] = json!({
+                        "scope": "backend_lifetime_since_cache_configuration",
+                        "cache": cache,
+                    });
+                    output["backend"]["details"]["vision_kv_clear"] = json!({
+                        "scope": "since_last_native_vision_start",
+                        "calls": metrics.kv_clear_calls,
+                        "skipped": metrics.kv_clear_skipped,
+                    });
+                }
+            }
+            Ok(outputs)
         }
     }
 }

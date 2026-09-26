@@ -393,3 +393,111 @@ fn wide_image_codes_share_text_code_paths_and_leave_narrow_scoring_intact() {
         assert!((a.raw_logit - b.raw_logit).abs() < 1e-4);
     }
 }
+
+#[test]
+#[ignore = "requires real vision GGUF/projector; exact fresh-preserving profile parity and recovery"]
+fn real_vision_preserving_profile_matches_fresh_and_recovers() {
+    assert!(
+        std::env::var_os("SKID_VISION_OPTIMIZED").is_none(),
+        "unset SKID_VISION_OPTIMIZED to use the original batch256/flash-off fixture"
+    );
+    let (mut backend, requests, images) = batch_fixture();
+    let baseline_info = backend.info();
+    assert_eq!(baseline_info.execution_mode, ExecutionMode::Fresh);
+    assert_eq!(
+        baseline_info.evidence_transfer,
+        l2s1::EvidenceTransfer::Full
+    );
+    assert_eq!(baseline_info.compute, Some(l2s1::ComputeOptions::default()));
+    let baseline: Vec<_> = requests
+        .iter()
+        .zip(&images)
+        .map(|(request, image)| backend.decide_vision(request, image).unwrap())
+        .collect();
+
+    fn assert_exact_results(expected: &[DecisionResponse], actual: &[DecisionResponse]) {
+        assert_eq!(expected.len(), actual.len());
+        for (expected, actual) in expected.iter().zip(actual) {
+            assert_eq!(expected.results.len(), actual.results.len());
+            for (a, b) in expected.results.iter().zip(&actual.results) {
+                assert_eq!((&a.id, a.input_tokens), (&b.id, b.input_tokens));
+                assert_eq!(a.candidate_mass, b.candidate_mass);
+                assert_eq!(a.top_option_probability, b.top_option_probability);
+                assert_eq!(a.entropy_confidence, b.entropy_confidence);
+                assert_eq!(a.scores.len(), b.scores.len());
+                for (a, b) in a.scores.iter().zip(&b.scores) {
+                    assert_eq!((&a.id, &a.code, a.token_id), (&b.id, &b.code, b.token_id));
+                    assert_eq!(a.raw_logit, b.raw_logit);
+                    assert_eq!(a.option_probability, b.option_probability);
+                }
+                let ranking = |result: &l2s1::DecisionResult| {
+                    let mut scores = result.scores.iter().collect::<Vec<_>>();
+                    scores.sort_by(|a, b| b.option_probability.total_cmp(&a.option_probability));
+                    scores
+                        .into_iter()
+                        .map(|score| score.id.clone())
+                        .collect::<Vec<_>>()
+                };
+                assert_eq!(ranking(a), ranking(b));
+                // Includes selected value, abstention reasons, token metadata,
+                // scoring method and every remaining result field exactly.
+                assert_eq!(
+                    serde_json::to_value(a).unwrap(),
+                    serde_json::to_value(b).unwrap()
+                );
+            }
+        }
+    }
+
+    backend.enable_vision_preserving_optimizations().unwrap();
+    let inspection = backend.inspect();
+    assert_eq!(inspection.identity.compute, l2s1::ComputeOptions::default());
+    assert_eq!(inspection.identity.execution_mode, ExecutionMode::Fresh);
+    assert_eq!(
+        inspection.identity.evidence_transfer,
+        l2s1::EvidenceTransfer::Compact
+    );
+    assert!(!inspection.identity.parallel_context_dynamic);
+    let info = backend.info();
+    assert_eq!(info.compute, baseline_info.compute);
+    assert_eq!(info.execution_mode, ExecutionMode::Fresh);
+    assert_eq!(info.evidence_transfer, l2s1::EvidenceTransfer::Compact);
+    assert!(!info.parallel_context_dynamic);
+    assert!(!info.vision_projector_reuse);
+    let preserving = backend.decide_vision_batch(&requests, &images).unwrap();
+    assert_exact_results(&baseline, &preserving);
+    let cache = backend.preparation_cache_stats();
+    assert!(cache.vision.entries > 0);
+    let repeated = backend.decide_vision_batch(&requests, &images).unwrap();
+    assert_exact_results(&baseline, &repeated);
+    let decisions = requests.iter().map(|r| r.decisions.len()).sum::<usize>();
+    assert!(backend.preparation_cache_stats().vision.hits >= cache.vision.hits + decisions as u64);
+
+    let mut invalid_images = images;
+    invalid_images[3] = b"invalid image";
+    assert!(
+        backend
+            .decide_vision_batch(&requests, &invalid_images)
+            .is_err()
+    );
+    assert_exact_results(
+        &baseline,
+        &backend.decide_vision_batch(&requests, &images).unwrap(),
+    );
+    let mut overlong = requests.clone();
+    // Earlier requests complete before this native context-overflow failure.
+    overlong[4].decisions[0].instruction = "context overflow ".repeat(4096);
+    assert!(backend.decide_vision_batch(&overlong, &images).is_err());
+    assert_exact_results(
+        &baseline,
+        &backend.decide_vision_batch(&requests, &images).unwrap(),
+    );
+
+    backend.set_code_rotation(1).unwrap();
+    assert_eq!(backend.preparation_cache_stats().vision.entries, 0);
+    backend.set_code_rotation(0).unwrap();
+    assert_exact_results(
+        &baseline,
+        &backend.decide_vision_batch(&requests, &images).unwrap(),
+    );
+}

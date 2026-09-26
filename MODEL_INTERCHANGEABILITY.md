@@ -248,3 +248,7 @@ in `read`, so the lower process RSS is not evidence of lower total physical
 memory demand. This was a local Linux/CUDA measurement, not a Metal result or
 a general load-time guarantee. The full local report and source hashes remain
 gitignored at `results/gemma26-lowrss-20260923T135227Z/REPORT.md`.
+
+## Vision preparation and throughput profiles
+
+Vision callers can select `--vision-preserving` (or `enable_vision_preserving_optimizations()`) to retain fresh batch256/FlashOff execution while caching exact preparation and copying compact evidence. `--vision-optimized` selects the separate experimental parallel throughput profile. Both require a matching projector and at most 26 answer options; model, compute settings and hardware must match the reference used for numerical validation. Neither profile caches prior inference results.
