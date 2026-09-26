@@ -209,9 +209,13 @@ fn main() {
     let source = PathBuf::from(
         fs::read_to_string(install.join("build/l2s1-llama-source.txt"))
             .expect("CMake did not report its llama.cpp source directory"),
-    )
-    .canonicalize()
-    .expect("llama.cpp source directory unavailable after CMake build");
+    );
+    // CMake reports an absolute source path. Keep that spelling: on Windows,
+    // canonicalize() adds a verbatim prefix that MSVC does not accept for /I.
+    assert!(
+        source.is_absolute() && source.is_dir(),
+        "llama.cpp source directory unavailable after CMake build"
+    );
     for required in [
         "CMakeLists.txt",
         "include/llama.h",
