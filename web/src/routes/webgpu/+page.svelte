@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { resolve } from '$app/paths';
+  import { resolve, asset } from '$app/paths';
   import { locale, translate } from '$lib/i18n';
   import { messages, WebgpuMessageError, type WebgpuMessageKey, type MessageSpec, type MessageParams } from '$lib/i18n/webgpu';
   const t = (key: WebgpuMessageKey, params?: MessageParams) => translate($locale, messages, key, params);
+  import { connectLocal, analyzeLocal, type LocalBackend, type LocalResponse } from '$lib/webgpu/local';
   import warehouse from '$lib/demo/text-request.json';
   import { percent, reasonLabel, selection } from '$lib/demo/types';
   import { CACHE_KEY, MODEL_ID, validateBrowserRequest, type AdapterInfo, type BrowserRequest, type BrowserResponse, type Dtype, type WorkerOutput } from '$lib/webgpu/contract';
@@ -12,6 +13,9 @@
   let decisionsText = $state(JSON.stringify(cat.decisions, null, 2));
   let phase = $state<'checking' | 'idle' | 'unsupported' | 'loading' | 'ready' | 'running'>('checking');
   let loaded = $state(false);
+  let execution = $state<'browser' | 'local'>('browser');
+  let localBackend = $state<LocalBackend | null>(null);
+  let localAbort: AbortController | undefined;
   let capabilityFailure = $state<MessageSpec | string | null>(null);
   let support = $state<AdapterInfo | null>(null);
   let dtype = $state<Dtype>('q4f16');
@@ -20,7 +24,7 @@
   let minTop = $state(0.8);
   let minMass = $state(0.05);
   let targetErrorRate = $state(20);
-  function initialFailureMessages() { return JSON.stringify({ low_top_probability: t('failureLowTop'), low_candidate_mass: t('failureLowMass'), tied_candidates: t('failureTied'), reasoning_limit: t('failureLimit'), reasoning_incomplete: t('failureIncomplete'), unsupported_thinking: t('failureUnsupported'), native_failure: t('failureNative') }, null, 2); }
+  function initialFailureMessages() { return JSON.stringify({ low_top_probability: t('failureLowTop'), low_candidate_mass: t('failureLowMass'), tied_candidates: t('failureTied'), reasoning_limit: t('failureLimit'), reasoning_incomplete: t('failureIncomplete'), unsupported_thinking: t('failureUnsupported'), native_failure: t(execution === 'local' ? 'localFailureNative' : 'failureNative') }, null, 2); }
   let failureText = $state(initialFailureMessages());
   let lastDefaultReasons = initialFailureMessages();
   $effect(() => {
@@ -36,14 +40,15 @@
   let error = $derived(errorMessage ? `${errorMessage.code ? `[${errorMessage.code}] ` : ''}${errorMessage.key ? t(errorMessage.key, errorMessage.params) : errorMessage.raw ?? ''}` : '');
   function showError(cause: unknown) { errorMessage = cause instanceof WebgpuMessageError ? { key: cause.message_key, params: cause.message_params } : { raw: cause instanceof Error ? cause.message : String(cause) }; }
   let userReason = $state('');
-  let response = $state<BrowserResponse | null>(null);
+  let response = $state<BrowserResponse | LocalResponse | null>(null);
   let files = $state<Record<string, { progress: number; loaded: number; total: number }>>({});
   let currentFile = $state('');
   let worker: Worker | undefined;
   let busy = $derived(phase === 'loading' || phase === 'running');
   let loadedBytes = $derived(Object.values(files).reduce((sum, file) => sum + file.loaded, 0));
   let activeProgress = $derived(files[currentFile]?.progress ?? 0);
-  let blockedMessage = $derived(phase === 'checking' ? t('statusChecking')
+  let canAnalyze = $derived(execution === 'local' ? localBackend !== null : loaded);
+  let blockedMessage = $derived(execution === 'local' ? busy ? status : localBackend ? null : t('localBlocked') : phase === 'checking' ? t('statusChecking')
     : capabilityFailure ? typeof capabilityFailure === 'string' ? capabilityFailure : t(capabilityFailure.key, capabilityFailure.params)
     : !loaded && error ? error
     : phase === 'loading' ? status
@@ -59,7 +64,20 @@
     worker?.terminate(); worker = undefined; loaded = false; phase = support ? 'idle' : 'unsupported';
     files = {}; currentFile = ''; response = null;
   }
-  function stop() { stopWorker(); statusMessage = { key: 'statusStopped' }; }
+  function stop() { localAbort?.abort('user_stopped'); stopWorker(); phase = execution === 'local' ? localBackend ? 'ready' : 'idle' : phase; statusMessage = { key: execution === 'local' ? 'localStopped' : 'statusStopped' }; }
+  function changeExecution(event: Event) {
+    stopWorker(); localAbort?.abort(); localBackend = null;
+    execution = (event.currentTarget as HTMLSelectElement).value as 'browser' | 'local';
+    reasoningMode = 'direct'; phase = execution === 'local' ? 'idle' : support ? 'idle' : 'unsupported';
+    statusMessage = { key: execution === 'local' ? 'localBlocked' : 'statusAdapterReady' };
+  }
+  async function connectServer() {
+    if (busy) return; clearResult(); phase = 'loading'; statusMessage = { key: 'localConnecting' };
+    localAbort = new AbortController(); const timeout = window.setTimeout(() => localAbort?.abort(), 10_000);
+    try { localBackend = await connectLocal(localAbort.signal); phase = 'ready'; statusMessage = { key: 'statusReady' }; }
+    catch (cause) { localBackend = null; phase = 'idle'; if (localAbort?.signal.reason !== 'user_stopped') errorMessage = { key: 'localError', params: { error: (cause as Error).message } }; }
+    finally { window.clearTimeout(timeout); localAbort = undefined; }
+  }
   async function clearCache() {
     stopWorker(); clearResult();
     try { if ('caches' in window) await caches.delete(CACHE_KEY); statusMessage = { key: 'statusCacheCleared' }; }
@@ -85,14 +103,21 @@
     worker.postMessage({ type: 'load', dtype, locale: $locale });
   }
   function release() { if (!worker || busy) return; phase = 'loading'; statusMessage = { key: 'statusReleasing' }; worker.postMessage({ type: 'release', locale: $locale }); }
-  function analyze() {
-    if (!loaded || !worker || busy) return;
+  async function analyze() {
+    if (!canAnalyze || busy || (execution === 'browser' && !worker)) return;
     clearResult();
     try {
       const request = { state: JSON.parse(stateText), decisions: JSON.parse(decisionsText), reasoning: { mode: reasoningMode, max_tokens: reasoningTokens }, policy: { min_top_probability: minTop, min_candidate_mass: minMass }, failure_reasons: JSON.parse(failureText) } as BrowserRequest;
       validateBrowserRequest(request, $locale);
       if (!Number.isFinite(targetErrorRate) || targetErrorRate < 0 || targetErrorRate > 100) throw new WebgpuMessageError('errorRateRange', {}, $locale);
-      phase = 'running'; statusMessage = { key: 'statusAnalyzing' }; worker.postMessage({ type: 'analyze', request, locale: $locale });
+      phase = 'running'; statusMessage = { key: 'statusAnalyzing' };
+      if (execution === 'browser') worker!.postMessage({ type: 'analyze', request, locale: $locale });
+      else {
+        localAbort = new AbortController(); const timeout = window.setTimeout(() => localAbort?.abort(), 180_000);
+        try { response = await analyzeLocal(request, localAbort.signal, localBackend?.request_policy_supported); statusMessage = { key: 'statusCompleted' }; }
+        catch (cause) { if (localAbort?.signal.reason !== 'user_stopped') errorMessage = { key: 'localError', params: { error: (cause as Error).message } }; }
+        finally { window.clearTimeout(timeout); localAbort = undefined; phase = 'ready'; }
+      }
     } catch (cause) { if (cause instanceof SyntaxError) errorMessage = { key: 'errorJson' }; else showError(cause); }
   }
   onMount(() => {
@@ -107,26 +132,28 @@
         const info = adapter.info ?? { description: '', vendor: '', architecture: '' };
         if (active) {
           support = { description: info.description || '', vendor: info.vendor, architecture: info.architecture, shaderF16: adapter.features.has('shader-f16'), software: ('isFallbackAdapter' in adapter && adapter.isFallbackAdapter === true) || /swiftshader|software|llvmpipe/i.test(`${info.description} ${info.vendor} ${info.architecture}`), hardwareVerified: false };
-          dtype = support.shaderF16 ? 'q4f16' : 'q4'; phase = 'idle'; statusMessage = { key: 'statusAdapterReady' };
+          dtype = support.shaderF16 ? 'q4f16' : 'q4'; if (execution === 'browser') { phase = 'idle'; statusMessage = { key: 'statusAdapterReady' }; }
         }
-      } catch (cause) { if (active) { phase = 'unsupported'; capabilityFailure = cause instanceof WebgpuMessageError ? { key: cause.message_key, params: cause.message_params } : { key: 'errorAdapterProbe', params: { error: (cause as Error).message } }; statusMessage = capabilityFailure; } }
+      } catch (cause) { if (active) { if (execution === 'browser') phase = 'unsupported'; capabilityFailure = cause instanceof WebgpuMessageError ? { key: cause.message_key, params: cause.message_params } : { key: 'errorAdapterProbe', params: { error: (cause as Error).message } }; if (execution === 'browser') statusMessage = capabilityFailure; } }
     }
-    void probe(); return () => { active = false; worker?.terminate(); };
+    void probe(); return () => { active = false; worker?.terminate(); localAbort?.abort(); };
   });
 </script>
 
-<svelte:head><title>{t('title')}</title><meta name="description" content={t('description')} /></svelte:head>
+<svelte:head><title>{t(execution === 'local' ? 'localTitle' : 'title')}</title><meta name="description" content={t('description')} /></svelte:head>
 <div class="shell" lang={$locale}>
-  <main><p class="eyebrow">{t('eyebrow')}</p><h1>{t('heroStart')}<br /><em>{t('heroEnd')}</em></h1><p class="lead">{t('leadFirst')}<br /> {t('leadSecond')}</p>
-    <section class="load-panel" aria-labelledby="model-heading"><div><h2 id="model-heading">{t('prepare')}</h2><p><a href="https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX" target="_blank" rel="noreferrer external">{MODEL_ID} ↗</a> · Apache 2.0</p></div><div class="model-controls"><label for="dtype">{t('dtype')}</label><select id="dtype" bind:value={dtype} disabled={busy || loaded}><option value="q4f16" disabled={!support?.shaderF16}>q4f16 · fp16 GPU</option><option value="q4">q4 · fp32 GPU</option></select><div class="actions"><button class="primary" onclick={startLoad} disabled={!support || busy || loaded}>{t('load')}</button><button onclick={release} disabled={!loaded || busy}>{t('release')}</button><button onclick={clearCache} disabled={busy}>{t('clearCache')}</button>{#if busy}<button onclick={stop}>{t('stop')}</button>{/if}</div></div>
+  <main><p class="eyebrow">{t(execution === 'local' ? 'localEyebrow' : 'eyebrow')}</p><h1>{t(execution === 'local' ? 'localHeroStart' : 'heroStart')}<br /><em>{t(execution === 'local' ? 'localHeroEnd' : 'heroEnd')}</em></h1><p class="lead">{t(execution === 'local' ? 'localLeadFirst' : 'leadFirst')}<br /> {t(execution === 'local' ? 'localLeadSecond' : 'leadSecond')}</p>
+    <label for="execution">{t('execution')}</label><select id="execution" value={execution} onchange={changeExecution} disabled={busy}><option value="browser">{t('browserExecution')}</option><option value="local">{t('localExecution')}</option></select>
+    {#if execution === 'browser'}<section class="load-panel" aria-labelledby="model-heading"><div><h2 id="model-heading">{t('prepare')}</h2><p><a href="https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX" target="_blank" rel="noreferrer external">{MODEL_ID} ↗</a> · Apache 2.0</p></div><div class="model-controls"><label for="dtype">{t('dtype')}</label><select id="dtype" bind:value={dtype} disabled={busy || loaded}><option value="q4f16" disabled={!support?.shaderF16}>q4f16 · fp16 GPU</option><option value="q4">q4 · fp32 GPU</option></select><div class="actions"><button class="primary" onclick={startLoad} disabled={!support || busy || loaded}>{t('load')}</button><button onclick={release} disabled={!loaded || busy}>{t('release')}</button><button onclick={clearCache} disabled={busy}>{t('clearCache')}</button>{#if busy}<button onclick={stop}>{t('stop')}</button>{/if}</div></div>
       <div class="support" role="status"><strong>{phase === 'unsupported' ? t('unsupported') : support?.software ? t('softwareAdapter') : support ? t('adapterConfirmed') : t('checkingSupport')}</strong><p>{status}</p>{#if support}<p>{support.description || t('adapterUndisclosed')} · fp16 {support.shaderF16 ? t('supported') : t('notSupported')}</p>{/if}</div>
       {#if phase === 'loading' && currentFile}<div class="progress"><label for="download-progress">{currentFile} · {activeProgress.toFixed(1)}%</label><progress id="download-progress" max="100" value={activeProgress}></progress><p class="hint">{t('downloadTotal', { size: size(loadedBytes) })}</p></div>{/if}
     </section>
+    {:else}<section class="load-panel" aria-labelledby="local-heading"><div><h2 id="local-heading">{t('localPrepare')}</h2><p>{t('localHint')} <a href={asset(`/docs/docs/${$locale}/WEBGPU_DEMO.md`)}>{t('guide')} ↗</a></p>{#if localBackend}<p>{t('localConnected', { model: localBackend.model.split(/[\\/]/).at(-1) ?? localBackend.model })} · {localBackend.runtime}</p>{/if}</div><div class="actions"><button class="primary" onclick={connectServer} disabled={busy}>{t('localConnect')}</button>{#if busy}<button onclick={stop}>{t('localStop')}</button>{/if}</div></section>{/if}
     <div class="workspace"><section class="panel"><h2>{t('inputHeading')}</h2><div class="actions"><button onclick={() => example('cat')} disabled={busy}>{t('catExample')}</button><button onclick={() => example('warehouse')} disabled={busy}>{t('warehouseExample')}</button></div><label for="state">{t('stateJson')}</label><textarea id="state" rows="5" bind:value={stateText} oninput={clearResult} disabled={busy} spellcheck="false"></textarea><details><summary>{t('editQuestions')}</summary><p class="hint">{t('questionsHint')}</p><label class="sr-only" for="questions">{t('questionsJson')}</label><textarea id="questions" rows="18" bind:value={decisionsText} oninput={clearResult} disabled={busy} spellcheck="false"></textarea></details>
-      <label for="reasoning">{t('reasoning')}</label><select id="reasoning" bind:value={reasoningMode} onchange={clearResult} disabled={busy}><option value="direct">{t('direct')}</option><option value="thinking">{t('thinking')}</option></select>{#if reasoningMode === 'thinking'}<label for="max-thought">{t('thoughtLimit')}</label><input id="max-thought" type="number" min="1" max="256" bind:value={reasoningTokens} oninput={clearResult} disabled={busy} /><p class="hint">{t('thoughtHint')}</p>{/if}
+      <label for="reasoning">{t('reasoning')}</label><select id="reasoning" bind:value={reasoningMode} onchange={clearResult} disabled={busy}><option value="direct">{t('direct')}</option><option value="thinking" disabled={execution === 'local' && !localBackend?.reasoning_modes.includes('thinking')}>{t('thinking')}</option></select>{#if reasoningMode === 'thinking'}<label for="max-thought">{t('thoughtLimit')}</label><input id="max-thought" type="number" min="1" max="256" bind:value={reasoningTokens} oninput={clearResult} disabled={busy} /><p class="hint">{t('thoughtHint')}</p>{/if}
       <label for="error-rate">{t('errorRate')}</label><input id="error-rate" type="number" min="0" max="100" step="1" bind:value={targetErrorRate} oninput={(event) => { minTop = Number((1-Number(event.currentTarget.value)/100).toFixed(4)); clearResult(); }} disabled={busy} /><p class="hint">{t('errorRateHint')}</p><div class="policy-grid"><div><label for="min-top">{t('minTop')}</label><input id="min-top" type="number" min="0" max="1" step="0.01" bind:value={minTop} oninput={(event) => { targetErrorRate = Number(((1-Number(event.currentTarget.value))*100).toFixed(2)); clearResult(); }} disabled={busy} /></div><div><label for="min-mass">{t('minMass')}</label><input id="min-mass" type="number" min="0" max="1" step="0.01" bind:value={minMass} oninput={clearResult} disabled={busy} /></div></div>
-      <details><summary>{t('customFailures')}</summary><label class="sr-only" for="failure">{t('failureJson')}</label><textarea id="failure" rows="10" bind:value={failureText} oninput={clearResult} disabled={busy} spellcheck="false"></textarea><p class="hint">{t('failureHint')}</p></details><button class="primary run" onclick={analyze} disabled={!loaded || busy} aria-describedby={blockedMessage ? 'analysis-blocked' : undefined}>{phase === 'running' ? t('analyzing') : t('analyze')}</button>{#if blockedMessage}<p id="analysis-blocked" class="hint" role="status" aria-live="polite">{blockedMessage}</p>{/if}{#if error}<div class="error" role="alert"><strong>{error}</strong>{#if userReason}<p>{t('customFailure', { reason: userReason })}</p>{/if}</div>{/if}
-    </section><section class="panel output" aria-busy={phase === 'running'}><h2>{t('resultsHeading')}</h2><div aria-live="polite">{#if response}<div class="evidence-note"><strong>{t('actualOnnx')}</strong><p>{t('inferenceTiming', { dtype: response.backend.dtype, seconds: (response.elapsed_ms/1000).toFixed(2) })}</p><p>{response.backend.adapter.software ? t('softwareRun') : response.backend.adapter.description || t('adapterUndisclosed')}</p></div>{#each response.results as result (result.id)}<article class="result"><div class="result-head"><h3>{result.id}</h3><span class:abstained={result.status === 'abstained'}>{result.value.type} · {result.status === 'abstained' ? t('abstained') : t('selected')}</span></div><p class="value">{selection(result, $locale)}</p>{#if result.usage?.reasoning}<p class="hint">{t('usage', { mode: result.usage.reasoning.mode, tokens: result.usage.reasoning.generated_tokens, completed: result.usage.reasoning.completed ? t('yes') : t('no') })}</p>{/if}{#each result.evidence.scores ?? [] as score (score.id)}<div class="score"><span>{score.id}</span><div class="track"><div style:width={`${score.option_probability*100}%`}></div></div><strong>{percent(score.option_probability, $locale)}</strong></div>{/each}<dl><div><dt>{t('topProbability')}</dt><dd>{percent(result.evidence.top_option_probability, $locale)}</dd></div><div><dt>{t('candidateMass')}</dt><dd>{percent(result.evidence.candidate_mass, $locale)}</dd></div>{#if result.evidence.estimate?.expected_value !== undefined}<div><dt>{t('expectedValue')}</dt><dd>{result.evidence.estimate.expected_value.toFixed(3)}</dd></div>{/if}</dl>{#if result.abstention_reasons.length}<ul>{#each result.abstention_reasons as reason (reason)}<li>{reasonLabel(reason, $locale)} <code>{reason}</code></li>{/each}{#each result.reason_messages ?? [] as message (message.code)}<li>{message.message}</li>{/each}</ul>{/if}</article>{/each}<details><summary>{t('fullJson')}</summary><pre>{JSON.stringify(response,null,2)}</pre></details>{:else}<div class="empty"><span aria-hidden="true">↗</span><h3>{phase === 'running' ? t('waitingScores') : t('loadBeforeAnalysis')}</h3></div>{/if}</div></section></div>
+      <details><summary>{t('customFailures')}</summary><label class="sr-only" for="failure">{t('failureJson')}</label><textarea id="failure" rows="10" bind:value={failureText} oninput={clearResult} disabled={busy} spellcheck="false"></textarea><p class="hint">{t('failureHint')}</p></details><button class="primary run" onclick={analyze} disabled={!canAnalyze || busy} aria-describedby={blockedMessage ? 'analysis-blocked' : undefined}>{phase === 'running' ? t('analyzing') : t(execution === 'local' ? 'localAnalyze' : 'analyze')}</button>{#if blockedMessage}<p id="analysis-blocked" class="hint" role="status" aria-live="polite">{blockedMessage}</p>{/if}{#if error}<div class="error" role="alert"><strong>{error}</strong>{#if userReason}<p>{t('customFailure', { reason: userReason })}</p>{/if}</div>{/if}
+    </section><section class="panel output" aria-busy={phase === 'running'}><h2>{t('resultsHeading')}</h2><div aria-live="polite">{#if response}<div class="evidence-note">{#if 'adapter' in response.backend}<strong>{t('actualOnnx')}</strong><p>{t('inferenceTiming', { dtype: response.backend.dtype, seconds: (response.elapsed_ms/1000).toFixed(2) })}</p><p>{response.backend.adapter.software ? t('softwareRun') : response.backend.adapter.description || t('adapterUndisclosed')}</p>{:else}<strong>{t('actualLocal')}</strong><p>{response.backend.model.split(/[\\/]/).at(-1)} · {response.backend.runtime}</p><p>{t('localTiming', { seconds: (response.elapsed_ms/1000).toFixed(2) })}</p>{/if}</div>{#each response.results as result (result.id)}<article class="result"><div class="result-head"><h3>{result.id}</h3><span class:abstained={result.status === 'abstained'}>{result.value.type} · {result.status === 'abstained' ? t('abstained') : t('selected')}</span></div><p class="value">{selection(result, $locale)}</p>{#if result.usage?.reasoning}<p class="hint">{t('usage', { mode: result.usage.reasoning.mode, tokens: result.usage.reasoning.generated_tokens, completed: result.usage.reasoning.completed ? t('yes') : t('no') })}</p>{/if}{#each result.evidence.scores ?? [] as score (score.id)}<div class="score"><span>{score.id}</span><div class="track"><div style:width={`${score.option_probability*100}%`}></div></div><strong>{percent(score.option_probability, $locale)}</strong></div>{/each}<dl><div><dt>{t('topProbability')}</dt><dd>{percent(result.evidence.top_option_probability, $locale)}</dd></div><div><dt>{t('candidateMass')}</dt><dd>{percent(result.evidence.candidate_mass, $locale)}</dd></div>{#if result.evidence.estimate?.expected_value !== undefined}<div><dt>{t('expectedValue')}</dt><dd>{result.evidence.estimate.expected_value.toFixed(3)}</dd></div>{/if}</dl>{#if result.abstention_reasons.length}<ul>{#each result.abstention_reasons as reason (reason)}<li>{reasonLabel(reason, $locale)} <code>{reason}</code></li>{/each}{#each result.reason_messages ?? [] as message (message.code)}<li>{message.message}</li>{/each}</ul>{/if}</article>{/each}<details><summary>{t('fullJson')}</summary><pre>{JSON.stringify(response,null,2)}</pre></details>{:else}<div class="empty"><span aria-hidden="true">↗</span><h3>{phase === 'running' ? t('waitingScores') : t(execution === 'local' ? 'localWaiting' : 'loadBeforeAnalysis')}</h3></div>{/if}</div></section></div>
   </main><footer><a href={resolve('/')}>{t('back')}</a><a href="/docs/WEB_THIRD_PARTY_LICENSES.txt" rel="external">{t('licenses')}</a></footer>
 </div>
 <style>

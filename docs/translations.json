@@ -18,7 +18,7 @@
     {
       "source": "docs/BENCHMARK.md",
       "path": "BENCHMARK.md",
-      "source_sha256": "d20a695d9029ec675821b8b2e603eb8cb8277b95e4c11a171003c1e4cd599d3b",
+      "source_sha256": "a168e129c09b453e6a88b3eb4994c4c3c4d3b505dbe6c867d917da9c5748e774",
       "languages": [
         "en",
         "ko",
@@ -28,7 +28,7 @@
     {
       "source": "docs/DECISION_FINETUNE.md",
       "path": "DECISION_FINETUNE.md",
-      "source_sha256": "d013337304251491c8a86594281d64ad8eae562ebb6682099434faa052b6c06f",
+      "source_sha256": "b54fa84bb07ec446b8ba71131301adef4d1b093175a39b881a5e898416edb02b",
       "languages": [
         "en",
         "ko",
@@ -68,7 +68,7 @@
     {
       "source": "docs/JEVBENCH.md",
       "path": "JEVBENCH.md",
-      "source_sha256": "45d7905d4d3b485870b3963299088ba1051b0029e8c016c8c1d03c19beaf6368",
+      "source_sha256": "2b579793cdf1c02b8042e3dba987800329ecfa8fa1d9605f327a97af53a26397",
       "languages": [
         "en",
         "ko",
@@ -218,7 +218,7 @@
     {
       "source": "docs/WEBGPU_DEMO.md",
       "path": "WEBGPU_DEMO.md",
-      "source_sha256": "81df341463d6201a35506bfc15d58863c37df1df2cb352b63a15429d9dc9efe4",
+      "source_sha256": "739c050c09d49081eb6a7f51e5570dff11a5dac3e456fab91cc8d2d839f45c00",
       "languages": [
         "en",
         "ko",
@@ -258,7 +258,7 @@
     {
       "source": "benchmarks/cats-dogs-vision-20260924/REPORT.md",
       "path": "benchmarks/cats-dogs-vision-20260924/REPORT.md",
-      "source_sha256": "4122c96697bc9ee7969b87d3a464e76fafbf5b280ca3e646f55b9c601b91f789",
+      "source_sha256": "86734bb96d552734b01411a975f148c11b7f15126a9c2caecdb3e38da1f23b77",
       "languages": [
         "en",
         "ko",
@@ -328,7 +328,7 @@
     {
       "source": "crates/l2s1-tools/README.md",
       "path": "crates/l2s1-tools/README.md",
-      "source_sha256": "fcba92090ef9c28105a104bf8e456a610a8b47791a34b64992e48e3bfd55e8c8",
+      "source_sha256": "6e3df9ccb854d4f6de9f139ab738296b3a59ab9a8fca40edb3e0a11f5dbd333f",
       "languages": [
         "en",
         "ko",
@@ -338,7 +338,7 @@
     {
       "source": "web/README.md",
       "path": "web/README.md",
-      "source_sha256": "155e20caa4e888d6176c39686d91a325990e301bc1e446bbd8c2c24ffc1fae91",
+      "source_sha256": "f849f0c087808c0d91ed1c808a432af6c98ffc556462c16ba3bc81bf6b184eb1",
       "languages": [
         "en",
         "ko",

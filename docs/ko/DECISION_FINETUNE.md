@@ -10,7 +10,7 @@
 <a id="frozen-protocol"></a>
 ## 동결 프로토콜
 
-- 출처: `scripts/kaggle_airline.py`가 준비한 고정된 Kaggle Twitter US Airline Sentiment 아카이브. 데이터 세트 텍스트 및 가중치는 무시된 `results/`에 남아 있습니다. 이 저장소에서는 재배포되지 않습니다.
+- 출처: `target/release/l2s1-tools kaggle-airline`가 준비한 고정된 Kaggle Twitter US Airline Sentiment 아카이브. 데이터 세트 텍스트 및 가중치는 무시된 `results/`에 남아 있습니다. 이 저장소에서는 재배포되지 않습니다.
 - 정규화된 텍스트로 모든 800 이전 보정/평가 예제를 제외합니다. 정확하게 정규화된 중복 항목과 충돌하는 라벨 텍스트 그룹을 제거합니다.
 - Seed 20260923: 900 고유 교육 트윗(클래스당 300),  400 새로운 보정 트윗 및 400 새로운 테스트 트윗. 분할은 정규화된 텍스트에 의해 분리됩니다. 이는 자연적인 클래스 확산이 아닌 의도적으로 균형을 맞춘 단일 도메인 샘플입니다.
 - 각 훈련 트윗은 세 가지 순환 옵션 순서(2,700 훈련 입력) 모두에 나타납니다. 고정된 60 케이스 테스트 하위 집합은 세 가지 순서 모두에서 평가됩니다(180 진단 호출, 이는 추가 독립 케이스가 아님).
@@ -28,10 +28,10 @@
 <a id="entry-points"></a>
 ## 진입점
 
-1. `scripts/prepare_decision_finetune.py`는 데이터와 프로토콜을 동결합니다.
+1. `target/release/l2s1-tools prepare-decision-finetune`는 데이터와 프로토콜을 동결합니다.
 2. `examples/export_decision_tokens.rs`는 운영 환경 입력/후보 ID를 내보냅니다.
 3. `scripts/train_decision_lora.py`는 고정된 모델을 다운로드하고, 스모크 테스트 또는 전체 쌍 실험을 실행하고, 어댑터와 원시 측정값을 저장합니다.
-4. `scripts/report_decision_finetune.py`는 보정 전용 온도에 적합하며 보유 측정항목 및 옵션 주문 진단을 보고합니다.
+4. `target/release/l2s1-tools report-decision-finetune`는 보정 전용 온도에 적합하며 보유 측정항목 및 옵션 주문 진단을 보고합니다.
 
 CLI 및 JSONL 평가자는 `--lora path/to/adapter.gguf`를 허용합니다. 일치하는 llama.cpp `convert_lora_to_gguf.py --base <config-dir>` 도구를 사용하여 PEFT 어댑터를 변환합니다. 1 규모의 백엔드당 하나의 어댑터가 지원됩니다. 병렬 실행으로 인해 컨텍스트 크기가 조정될 때마다 다시 연결됩니다. 응답 메타데이터는 `lora_path`를 기록합니다. 이 옵션이 없으면 기존 기본 모델 경로는 변경되지 않습니다. 어댑터를 로드해도 온도 보정이 자동으로 적용되지 않습니다.
 

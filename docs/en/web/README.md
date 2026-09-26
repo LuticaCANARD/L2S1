@@ -5,7 +5,7 @@
 
 [English index](../README.md) · [한국어 색인](../../ko/README.md) · [日本語索引](../../ja/README.md)
 
-An English SvelteKit introduction site, prerendered with `adapter-static`. It runs no inference and distributes no model weights. The interactive example uses labeled synthetic probabilities. The performance table contains measured summaries from the repository's opt-in model tests.
+The English SvelteKit introduction is prerendered with `adapter-static`. Its contract illustration uses labeled synthetic probabilities; the performance table contains recorded model-test summaries. `/webgpu` offers real Qwen3 0.6B browser inference in English, Korean and Japanese, with an explicit larger local GGUF server option. Browser-mode inputs remain in the worker; local-mode inputs are sent only when analysis is requested. Models download on demand and are not bundled with the site. See the [execution guide](../WEBGPU_DEMO.md).
 
 ```sh
 npm ci
