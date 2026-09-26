@@ -1,0 +1,30 @@
+name: TypeScript library checks
+
+on:
+  pull_request:
+    paths: ['typescript/**', 'examples/typescript_fixture.rs', 'src/http.rs', 'src/http/**', 'src/decision.rs', 'src/evidence.rs', 'Cargo.toml', 'Cargo.lock', '.github/workflows/typescript-checks.yml']
+  push:
+    branches: [main]
+    paths: ['typescript/**', 'examples/typescript_fixture.rs', 'src/http.rs', 'src/http/**', 'src/decision.rs', 'src/evidence.rs', 'Cargo.toml', 'Cargo.lock', '.github/workflows/typescript-checks.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+        working-directory: typescript
+      - run: npm run build && npm run check && npm test && npm run test:rust && npm pack --dry-run
+        working-directory: typescript

@@ -9,6 +9,7 @@ Start with the root README to build L2S1 and run a first decision. This director
 | Document | Contents |
 | --- | --- |
 | [Guide](GUIDE.md) | Build requirements, decision schema, scores, CLI, Rust, HTTP, images, and backend setup |
+| [TypeScript library](../typescript/README.md) | Resident Rust model process from Node.js, typed HTTP client, packaging, and verification |
 | [AI agent integration](AGENT_INTEGRATION.md) | Portable skill, stdio MCP, request validation, documentation resources, and resident inference |
 | [Model interchangeability](MODEL_INTERCHANGEABILITY.md) | Model identity, request preflight, calibration, diagnostics, worker ownership, and memory controls |
 | [Verification](VERIFICATION.md) | Build and model-dependent validation commands |

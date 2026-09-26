@@ -1,0 +1,33 @@
+{
+  "name": "@l2s1/node",
+  "version": "0.1.0",
+  "description": "Typed decisions from the L2S1 Rust inference engine",
+  "type": "module",
+  "license": "MIT",
+  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "repository": { "type": "git", "url": "https://github.com/LuticaCANARD/L2S1.git", "directory": "typescript" },
+  "engines": { "node": ">=22" },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./http": { "types": "./dist/http.d.ts", "default": "./dist/http.js" }
+  },
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "src", "README.md", "PUBLISHING.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.examples.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "test:rust": "cargo build --locked --manifest-path ../Cargo.toml --example typescript_fixture && npm run build && node --test test/rust.integration.mjs",
+    "prepack": "npm run build",
+    "bundle:runtime": "node scripts/bundle-runtime.mjs",
+    "test:package": "node scripts/test-installed-runtime.mjs"
+  },
+  "optionalDependencies": {
+    "@l2s1/runtime-linux-x64": "0.1.0",
+    "@l2s1/runtime-linux-arm64": "0.1.0",
+    "@l2s1/runtime-darwin-x64": "0.1.0",
+    "@l2s1/runtime-darwin-arm64": "0.1.0",
+    "@l2s1/runtime-win32-x64": "0.1.0"
+  },
+  "devDependencies": { "@types/node": "^24", "typescript": "6.0.3" }
+}
