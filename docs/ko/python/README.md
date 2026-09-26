@@ -13,8 +13,10 @@ Python 3.11+ 비동기 SDK입니다. `@l2s1/node`와 같은 Rust 상주 엔진·
 저장소 루트에서 설치하거나 빌드한 wheel을 사용합니다.
 
 ```sh
+python -m pip install l2s1-sdk
+# 소스 저장소에서 설치:
 python -m pip install ./sdks/python
-python -m pip install ./sdks/python/dist/l2s1-0.1.0-py3-none-any.whl
+python -m pip install ./sdks/python/dist/l2s1_sdk-0.1.1-py3-none-any.whl
 ```
 
 wheel은 Python SDK를 포함합니다. Rust 실행 파일과 GGUF는 별도로 제공합니다.

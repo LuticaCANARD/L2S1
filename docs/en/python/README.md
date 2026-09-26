@@ -11,13 +11,15 @@ It is prepared for repository/wheel distribution; it has not been published to P
 From a checkout:
 
 ```sh
+python -m pip install l2s1-sdk
+# From a source checkout:
 python -m pip install ./sdks/python
 ```
 
 From a built package:
 
 ```sh
-python -m pip install ./l2s1-0.1.0-py3-none-any.whl
+python -m pip install ./l2s1_sdk-0.1.1-py3-none-any.whl
 ```
 
 The wheel contains the Python SDK. Supply the Rust engine and GGUF weights

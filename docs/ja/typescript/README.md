@@ -17,7 +17,7 @@ Scope 権限、パッケージ順序、認証、プラットフォームのリ�
 エンド ユーザーの場合は、ビルド ワークフローによって生成されたラッパーとプラットフォーム ランタイム tarball をインストールします。たとえば、Linux x64 の場合は次のようになります。
 
 ```sh
-npm install ./l2s1-node-0.1.0.tgz ./l2s1-runtime-linux-x64-0.1.0.tgz
+npm install ./l2s1-node-0.1.1.tgz ./l2s1-runtime-linux-x64-0.1.1.tgz
 ```
 
 パッケージが公開された後、`npm install @l2s1/node` はオプションの依存関係を通じてランタイムを選択します。オプションの依存関係を有効にしておきます。ランタイムとラッパーのバージョンは一致する必要があります。
@@ -38,7 +38,7 @@ npm ci
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.0.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.1.tgz
 ```
 
 <a id="load-a-local-model"></a>
@@ -226,7 +226,7 @@ cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack
-npm run test:package -- l2s1-node-0.1.0.tgz l2s1-runtime-linux-x64-0.1.0.tgz
+npm run test:package -- l2s1-node-0.1.1.tgz l2s1-runtime-linux-x64-0.1.1.tgz
 ```
 
 ランタイムを再構築するときは、新しい出力ディレクトリを使用します。 `L2S1_PORTABLE_BUILD=1` は、ビルドホスト CPU 命令と OpenMP 依存関係を無効にします。一般的な CPU カーネルは、ホストに最適化されたカスタム ビルドよりも遅い可能性があります。各アーティファクトには、ライセンス通知と SHA-256 マニフェストが含まれています。ベリファイアは、Linux llama.cpp/GGML の依存関係がバンドル ディレクトリから解決されることを確認します。

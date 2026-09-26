@@ -19,7 +19,7 @@ from .http import L2S1Client
 from .stdio import StdioClient
 from .models import Capabilities, DecisionPolicy, DecisionRequest, DecisionResponse
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 Device = Literal["cpu", "cuda", "metal"]
 ExecutionMode = Literal["fresh", "prefix-reuse", "state-restore", "parallel"]
 

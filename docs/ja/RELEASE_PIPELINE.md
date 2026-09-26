@@ -11,7 +11,7 @@ Linux x64/arm64、macOS x64/arm64、Windows x64 の runtime をビルドし Rust
 検査・インストール試験を実行します。Python 3.11/3.14 を 3 OS で検証し native
 Cargo crate を package・検証します。10 archive と runtime 内部 checksum を確認し、
 `SHA256SUMS` と `release.json` を生成してから公開を始めます。npm は 5 runtime →
-`@l2s1/node`、PyPI は `l2s1` wheel/sdist、crates.io は `l2s1-llama-sys` → index 待機 →
+`@l2s1/node`、PyPI は `l2s1-sdk` wheel/sdist、crates.io は `l2s1-llama-sys` → index 待機 →
 `l2s1` の順です。全 registry 成功後に GitHub draft release へ全 asset を添付して
 公開します。公開済み release は上書きしません。
 
@@ -24,7 +24,7 @@ trusted publisher に登録します。registry アカウント・公開権限�
 - npm: **6 package 全て**を登録し直接 `npm publish` を許可します。workflow は npm 11 を
   インストールします。新規 package は environment secret `NPM_TOKEN` で初回公開し、
   OIDC 登録後に token を削除できます。
-- PyPI: `l2s1` に登録します。新規は pending publisher を使え、token は不要です。
+- PyPI: `l2s1-sdk` に登録します。新規は pending publisher を使え、token は不要です。
 - crates.io: 2 crate を登録します。初回は environment secret `CARGO_REGISTRY_TOKEN` を
   使えます。OIDC 登録後に削除すると一時 token を使います。内部 `l2s1-tools` は公開しません。
 - GitHub Release: 最後の job のみ built-in token に contents write を与えます。
@@ -44,10 +44,10 @@ Cargo root/sys manifests、Python pyproject/export/runtime version、npm package
 runtime optional dependencies を同一 version にします。
 
 ```sh
-python scripts/prepare_release.py --tag v0.1.0
+python scripts/prepare_release.py --tag v0.1.1
 python -m unittest discover -s scripts -p test_release_pipeline.py -v
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 registry 間は単一 transaction ではありません。一部成功後に他が失敗したら同じ検証済み

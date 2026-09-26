@@ -26,7 +26,7 @@ flowchart LR
 | 대상 | 배포물 | 인증 |
 | --- | --- | --- |
 | npm | `@l2s1/node` 및 5개 `@l2s1/runtime-*` | OIDC trusted publisher; 최초 게시용 `NPM_TOKEN` 선택 지원 |
-| PyPI | `l2s1` wheel·sdist | OIDC trusted publisher 또는 pending publisher |
+| PyPI | `l2s1-sdk` wheel·sdist | OIDC trusted publisher 또는 pending publisher |
 | crates.io | `l2s1-llama-sys` → `l2s1` | OIDC trusted publisher; 최초 게시용 `CARGO_REGISTRY_TOKEN` 선택 지원 |
 | GitHub Release | 위 10개 파일 + `SHA256SUMS`·`release.json` | 저장소 `GITHUB_TOKEN`, 최종 job에만 contents write |
 
@@ -42,7 +42,7 @@ CPU·Metal, 나머지는 CPU를 번들에 포함합니다. CUDA는 Cargo feature
    `release.yml`, 환경 `npm`으로 trusted publisher를 설정합니다. 직접 `npm publish`를
    허용하는 allowed action을 선택하세요. npm 11+를 workflow에서 설치합니다.
    아직 패키지가 없으면 환경 secret `NPM_TOKEN`으로 최초 게시하고 이후 OIDC를 설정합니다.
-3. PyPI의 `l2s1`에 같은 사용자·저장소·workflow와 환경 `pypi`를 등록합니다.
+3. PyPI의 `l2s1-sdk`에 같은 사용자·저장소·workflow와 환경 `pypi`를 등록합니다.
    신규 프로젝트는 pending publisher를 사용할 수 있어 token secret은 필요 없습니다.
 4. crates.io의 두 crate에 같은 사용자·저장소·workflow와 환경 `crates-io`를 등록합니다.
    신규 crate의 최초 게시에는 환경 secret `CARGO_REGISTRY_TOKEN`을 사용할 수 있습니다.
@@ -60,11 +60,11 @@ CPU·Metal, 나머지는 CPU를 번들에 포함합니다. CUDA는 Cargo feature
 - `sdks/typescript/package.json`, `sdks/typescript/package-lock.json` 및 runtime optional dependency 버전
 
 ```sh
-python scripts/prepare_release.py --tag v0.1.0
+python scripts/prepare_release.py --tag v0.1.1
 python -m unittest discover -s scripts -p test_release_pipeline.py -v
 # 커밋한 새 release revision에서 실행:
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 # 또는 GitHub Actions 수동 실행에 이미 존재하는 버전 태그 입력
 ```
 

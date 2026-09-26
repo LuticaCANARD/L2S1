@@ -12,7 +12,7 @@ runs Rust/TS checks and installation tests, tests Python 3.11/3.14 on all three
 OSes, then packages and verifies native Cargo crates. It validates ten archives,
 including runtime file hashes, and generates `SHA256SUMS` and `release.json`.
 Only then does registry publication start: npm publishes five runtimes before
-`@l2s1/node`; PyPI publishes the `l2s1` wheel/sdist; crates.io publishes
+`@l2s1/node`; PyPI publishes the `l2s1-sdk` wheel/sdist; crates.io publishes
 `l2s1-llama-sys` then waits for the index before `l2s1`. After all three succeed,
 GitHub receives a draft release, all assets are attached, and the release is
 published. An already published release is never overwritten.
@@ -27,7 +27,7 @@ is independent from GitHub. The workflow does not create these external accounts
 - npm: configure **all six packages**. Permit direct `npm publish` in allowed
   actions. The workflow installs npm 11. New packages can bootstrap using the
   environment secret `NPM_TOKEN`; configure OIDC afterwards and remove the token.
-- PyPI: configure `l2s1`, using a pending publisher for a new project. No token is required.
+- PyPI: configure `l2s1-sdk`, using a pending publisher for a new project. No token is required.
 - crates.io: configure both crates. New crates can bootstrap using environment
   secret `CARGO_REGISTRY_TOKEN`. Remove it after configuring OIDC; the action
   issues a temporary token. Internal `l2s1-tools` retains `publish = false`.
@@ -49,10 +49,10 @@ Align versions in root/sys Cargo manifests, Python pyproject/exported/runtime
 versions, npm package/lock and all runtime optional dependencies.
 
 ```sh
-python scripts/prepare_release.py --tag v0.1.0
+python scripts/prepare_release.py --tag v0.1.1
 python -m unittest discover -s scripts -p test_release_pipeline.py -v
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 Registries are not one transaction. If one publishes and another fails, rerun

@@ -13,6 +13,8 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 PLATFORMS = ('linux-x64', 'linux-arm64', 'darwin-x64', 'darwin-arm64', 'win32-x64')
 CRATES = ('l2s1-llama-sys', 'l2s1')
+PYTHON_PACKAGE = 'l2s1-sdk'
+PYTHON_ARCHIVE = 'l2s1_sdk'
 
 
 def versions(root: Path, tag: str) -> str:
@@ -23,6 +25,8 @@ def versions(root: Path, tag: str) -> str:
                       ('sdks/python/pyproject.toml', 'project')]:
         if tomllib.loads((root / path).read_text())[key]['version'] != version:
             raise ValueError(f'Version mismatch in {path}')
+    if tomllib.loads((root / 'sdks/python/pyproject.toml').read_text())['project']['name'] != PYTHON_PACKAGE:
+        raise ValueError('Python distribution name mismatch')
     sdk = json.loads((root / 'sdks/typescript/package.json').read_text())
     lock = json.loads((root / 'sdks/typescript/package-lock.json').read_text())
     if sdk['version'] != version or lock['version'] != version or lock['packages']['']['version'] != version:
@@ -70,7 +74,7 @@ def validate_npm(path: Path, name: str, version: str, platform: str | None) -> N
 
 def validate_assets(directory: Path, version: str) -> list[Path]:
     names = [f'l2s1-node-{version}.tgz', *(f'l2s1-runtime-{p}-{version}.tgz' for p in PLATFORMS),
-             f'l2s1-{version}-py3-none-any.whl', f'l2s1-{version}.tar.gz',
+             f'{PYTHON_ARCHIVE}-{version}-py3-none-any.whl', f'{PYTHON_ARCHIVE}-{version}.tar.gz',
              *(f'{crate}-{version}.crate' for crate in CRATES)]
     expected = set(names)
     actual = {path.name for path in directory.iterdir() if path.is_file()} - {'SHA256SUMS', 'release.json'}
@@ -79,18 +83,18 @@ def validate_assets(directory: Path, version: str) -> list[Path]:
     validate_npm(directory / names[0], '@l2s1/node', version, None)
     for platform in PLATFORMS:
         validate_npm(directory / f'l2s1-runtime-{platform}-{version}.tgz', f'@l2s1/runtime-{platform}', version, platform)
-    wheel = directory / f'l2s1-{version}-py3-none-any.whl'
+    wheel = directory / f'{PYTHON_ARCHIVE}-{version}-py3-none-any.whl'
     with zipfile.ZipFile(wheel) as archive:
-        metadata = Parser().parsestr(archive.read(f'l2s1-{version}.dist-info/METADATA').decode())
-        if metadata['Name'] != 'l2s1' or metadata['Version'] != version:
+        metadata = Parser().parsestr(archive.read(f'{PYTHON_ARCHIVE}-{version}.dist-info/METADATA').decode())
+        if metadata['Name'] != PYTHON_PACKAGE or metadata['Version'] != version:
             raise ValueError('Wheel identity mismatch')
         for name in ('py.typed', 'stdio.py', 'wire.py'):
             archive.getinfo('l2s1/' + name)
-    with tarfile.open(directory / f'l2s1-{version}.tar.gz') as archive:
-        stream = archive.extractfile(f'l2s1-{version}/PKG-INFO')
+    with tarfile.open(directory / f'{PYTHON_ARCHIVE}-{version}.tar.gz') as archive:
+        stream = archive.extractfile(f'{PYTHON_ARCHIVE}-{version}/PKG-INFO')
         assert stream is not None
         metadata = Parser().parsestr(stream.read().decode())
-        if metadata['Name'] != 'l2s1' or metadata['Version'] != version:
+        if metadata['Name'] != PYTHON_PACKAGE or metadata['Version'] != version:
             raise ValueError('Sdist identity mismatch')
     for crate in CRATES:
         with tarfile.open(directory / f'{crate}-{version}.crate') as archive:
