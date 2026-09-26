@@ -22,7 +22,8 @@ fn digest_file(hash: &mut Sha256, path: &Path) {
             .as_encoded_bytes(),
     );
     let mut file = fs::File::open(path).expect("native runtime identity input unavailable");
-    let mut buffer = [0; 1024 * 1024];
+    // Keep build scripts below the Windows main thread's default stack limit.
+    let mut buffer = [0; 64 * 1024];
     loop {
         let n = file
             .read(&mut buffer)
