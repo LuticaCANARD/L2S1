@@ -9,6 +9,7 @@ import subprocess
 from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
+from prepare_release import PYTHON_PACKAGE
 
 
 def registry(url: str) -> dict | None:
@@ -41,7 +42,7 @@ def publish_npm(assets: Path, version: str) -> None:
 
 
 def check_pypi(assets: Path, version: str) -> None:
-    metadata = registry(f'https://pypi.org/pypi/l2s1/{version}/json')
+    metadata = registry(f'https://pypi.org/pypi/{PYTHON_PACKAGE}/{version}/json')
     if metadata is not None:
         expected = {path.name: digest(path) for path in assets.iterdir() if path.suffix == '.whl' or path.name.endswith('.tar.gz')}
         for item in metadata['urls']:
@@ -59,7 +60,9 @@ def publish_cargo(assets: Path, version: str, source: Path) -> None:
             print(f'Already published with matching checksum: {crate}@{version}', flush=True)
             continue
         command = ['cargo', 'publish', '--locked', '--package', crate]
-        subprocess.run([*command, '--dry-run'], cwd=source, check=True)
+        # cargo publish --dry-run uses target/package/tmp-crate on newer Cargo.
+        # cargo package writes the stable path used by the build job.
+        subprocess.run(['cargo', 'package', '--locked', '--package', crate], cwd=source, check=True)
         packaged = source / 'target/package' / path.name
         if digest(packaged) != digest(path):
             raise ValueError('Cargo repackaged archive differs from verified release artifact')

@@ -1,6 +1,6 @@
 [package]
 name = "l2s1-llama-sys"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Pinned llama.cpp native backend for L2S1"
 license = "MIT"

@@ -88,15 +88,16 @@ class ReleasePipeline(unittest.TestCase):
 
     def test_existing_pypi_files_must_match_sealed_assets(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); (root/'l2s1-0.1.0.tar.gz').write_bytes(b'source')
-            matching = {'urls':[{'filename':'l2s1-0.1.0.tar.gz','digests':{'sha256':digest(root/'l2s1-0.1.0.tar.gz')}}]}
-            with patch('publish_packages.registry', return_value=matching):
+            root = Path(directory); (root/'l2s1_sdk-0.1.0.tar.gz').write_bytes(b'source')
+            matching = {'urls':[{'filename':'l2s1_sdk-0.1.0.tar.gz','digests':{'sha256':digest(root/'l2s1_sdk-0.1.0.tar.gz')}}]}
+            with patch('publish_packages.registry', return_value=matching) as lookup:
                 check_pypi(root,'0.1.0')
+                self.assertEqual(lookup.call_args.args[0], 'https://pypi.org/pypi/l2s1-sdk/0.1.0/json')
             matching['urls'][0]['digests']['sha256'] = 'bad'
             with patch('publish_packages.registry', return_value=matching):
                 with self.assertRaises(ValueError):
                     check_pypi(root,'0.1.0')
-            seal(root,[root/'l2s1-0.1.0.tar.gz'],'v0.1.0','a'*40)
+            seal(root,[root/'l2s1_sdk-0.1.0.tar.gz'],'v0.1.0','a'*40)
             self.assertIn('a'*40,(root/'release.json').read_text())
 
     def test_cargo_publication_order_and_repack_hash_guard(self):
@@ -112,13 +113,12 @@ class ReleasePipeline(unittest.TestCase):
                 publish_cargo(assets, '0.1.0', source)
                 commands = [item.args[0] for item in run.call_args_list]
                 self.assertEqual([command[4] for command in commands], ['l2s1-llama-sys']*2+['l2s1']*2)
-                self.assertIn('--dry-run', commands[0])
-                self.assertNotIn('--dry-run', commands[1])
+                self.assertEqual([command[1] for command in commands], ['package', 'publish']*2)
             (packages/'l2s1-llama-sys-0.1.0.crate').write_bytes(b'different')
             with patch('publish_packages.registry', return_value=None), patch('publish_packages.subprocess.run') as run:
                 with self.assertRaisesRegex(ValueError, 'differs'):
                     publish_cargo(assets, '0.1.0', source)
-                self.assertEqual(run.call_count, 1)  # Only dry run, no upload.
+                self.assertEqual(run.call_count, 1)  # Only package verification, no upload.
 
 
 if __name__ == '__main__':

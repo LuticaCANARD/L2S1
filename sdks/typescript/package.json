@@ -1,6 +1,6 @@
 {
   "name": "@l2s1/node",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Typed decisions from the L2S1 Rust inference engine",
   "type": "module",
   "license": "MIT",
@@ -23,11 +23,11 @@
     "test:package": "node scripts/test-installed-runtime.mjs"
   },
   "optionalDependencies": {
-    "@l2s1/runtime-linux-x64": "0.1.0",
-    "@l2s1/runtime-linux-arm64": "0.1.0",
-    "@l2s1/runtime-darwin-x64": "0.1.0",
-    "@l2s1/runtime-darwin-arm64": "0.1.0",
-    "@l2s1/runtime-win32-x64": "0.1.0"
+    "@l2s1/runtime-linux-x64": "0.1.1",
+    "@l2s1/runtime-linux-arm64": "0.1.1",
+    "@l2s1/runtime-darwin-x64": "0.1.1",
+    "@l2s1/runtime-darwin-arm64": "0.1.1",
+    "@l2s1/runtime-win32-x64": "0.1.1"
   },
   "devDependencies": { "@types/node": "^24", "typescript": "6.0.3" }
 }

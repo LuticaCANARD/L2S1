@@ -1369,7 +1369,7 @@ checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
 
 [[package]]
 name = "l2s1"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "base64 0.22.1",
@@ -1389,7 +1389,7 @@ dependencies = [
 
 [[package]]
 name = "l2s1-llama-sys"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "cc",
  "cmake",

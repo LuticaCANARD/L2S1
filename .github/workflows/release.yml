@@ -167,7 +167,7 @@ jobs:
         run: |
           python scripts/publish_packages.py pypi-check --assets release-assets --version "$RELEASE_VERSION"
           mkdir python-dist
-          cp release-assets/*.whl release-assets/l2s1-*.tar.gz python-dist/
+          cp release-assets/*.whl release-assets/l2s1_sdk-*.tar.gz python-dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: python-dist/

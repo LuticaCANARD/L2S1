@@ -13,7 +13,7 @@ from .models import (
 )
 from .native import LoadOptions, RustProcessBackend
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = [
     "BatchDecisionBackend", "BatchCapability", "BatchResponse",
     "L2S1", "PreparedDecision", "L2S1Client", "DecisionBackend", "L2S1Error", "LoadOptions", "RustProcessBackend", "JsonValue",

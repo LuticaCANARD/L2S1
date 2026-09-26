@@ -17,7 +17,7 @@ Scope 접근, 패키지 순서, 인증, 플랫폼 릴리스 조건은 [npm 공�
 최종 사용자의 경우 빌드 워크플로에서 생성된 래퍼와 플랫폼 런타임 tarball을 설치합니다. 예를 들어 Linux x64에서는 다음과 같습니다.
 
 ```sh
-npm install ./l2s1-node-0.1.0.tgz ./l2s1-runtime-linux-x64-0.1.0.tgz
+npm install ./l2s1-node-0.1.1.tgz ./l2s1-runtime-linux-x64-0.1.1.tgz
 ```
 
 패키지가 게시된 후 `npm install @l2s1/node`는 선택적 종속성을 통해 런타임을 선택합니다. 선택적 종속성을 활성화된 상태로 유지하세요. 런타임 및 래퍼 버전이 일치해야 합니다.
@@ -38,7 +38,7 @@ npm ci
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.0.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.1.tgz
 ```
 
 <a id="load-a-local-model"></a>
@@ -226,7 +226,7 @@ cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack
-npm run test:package -- l2s1-node-0.1.0.tgz l2s1-runtime-linux-x64-0.1.0.tgz
+npm run test:package -- l2s1-node-0.1.1.tgz l2s1-runtime-linux-x64-0.1.1.tgz
 ```
 
 런타임을 다시 빌드할 때 새로운 출력 디렉터리를 사용하세요. `L2S1_PORTABLE_BUILD=1`는 빌드 호스트 CPU 지침 및 OpenMP 종속성을 비활성화합니다. 일반 CPU 커널은 호스트 최적화 사용자 정의 빌드보다 느릴 수 있습니다. 각 아티팩트에는 라이선스 알림과 SHA-256 매니페스트가 포함되어 있습니다. 검증자는 Linux llama.cpp/GGML 종속성이 번들 디렉터리에서 해결되는지 확인합니다.

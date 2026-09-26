@@ -13,8 +13,10 @@ HTTP v1 JSON を使い、Pydantic の実行時検証と PEP 561 型情報を提�
 リポジトリのルート、またはビルドした wheel からインストールします。
 
 ```sh
+python -m pip install l2s1-sdk
+# ソースからインストール:
 python -m pip install ./sdks/python
-python -m pip install ./sdks/python/dist/l2s1-0.1.0-py3-none-any.whl
+python -m pip install ./sdks/python/dist/l2s1_sdk-0.1.1-py3-none-any.whl
 ```
 
 wheel は Python SDK を含みます。Rust 実行ファイルと GGUF は別途用意します。

@@ -16,7 +16,7 @@ from l2s1 import (
     BinaryKind, BinaryValue, ChoiceKind, Decision, DecisionRequest, DecisionResponse,
     L2S1, L2S1Client, L2S1Error, Level, LoadOptions, OrdinalKind, SelectionOnlyEvidence,
 )
-from l2s1.native import _resolve_runtime
+from l2s1.native import VERSION, _resolve_runtime
 
 
 def request(state: object = 1) -> DecisionRequest:
@@ -84,7 +84,7 @@ class Models(unittest.TestCase):
             (root / "bin" / executable).write_bytes(content)
             arch = {"x86_64": "x64", "amd64": "x64", "aarch64": "arm64", "arm64": "arm64"}[platform.machine().lower()]
             host = "win32" if os.name == "nt" else "darwin" if platform.system() == "Darwin" else "linux"
-            manifest = {"platform": f"{host}-{arch}", "version": "0.1.0", "devices": ["cpu"], "files": [{
+            manifest = {"platform": f"{host}-{arch}", "version": VERSION, "devices": ["cpu"], "files": [{
                 "path": f"bin/{executable}", "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest(),
             }]}
             (root / "runtime-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
