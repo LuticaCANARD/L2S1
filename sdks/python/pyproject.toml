@@ -28,7 +28,7 @@ l2s1 = ["py.typed"]
 python_version = "3.11"
 strict = true
 plugins = ["pydantic.mypy"]
-cache_dir = "python/.mypy_cache"
+cache_dir = "sdks/python/.mypy_cache"
 
 [tool.pydantic-mypy]
 init_typed = true

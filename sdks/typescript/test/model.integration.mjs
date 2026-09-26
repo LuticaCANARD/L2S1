@@ -7,7 +7,7 @@ test('real local GGUF model returns all warehouse decision kinds across repeated
   skip: !process.env.L2S1_MODEL,
   timeout: 180_000,
 }, async () => {
-  const request = JSON.parse(await readFile(new URL('../../examples/warehouse.json', import.meta.url), 'utf8'));
+  const request = JSON.parse(await readFile(new URL('../../../examples/warehouse.json', import.meta.url), 'utf8'));
   const engine = await L2S1.load({
     binaryPath: process.env.L2S1_BINARY ?? 'l2s1', model: process.env.L2S1_MODEL,
     device: 'cpu', context: 2048, threads: 2,
@@ -35,7 +35,7 @@ test('compiled stdio sends independent states to native parallel waves with shar
   skip: !process.env.L2S1_MODEL,
   timeout: 180_000,
 }, async () => {
-  const request = JSON.parse(await readFile(new URL('../../examples/warehouse.json', import.meta.url), 'utf8'));
+  const request = JSON.parse(await readFile(new URL('../../../examples/warehouse.json', import.meta.url), 'utf8'));
   const fetch = globalThis.fetch;
   globalThis.fetch = () => { throw new Error('native stdio must not call HTTP'); };
   let engine;

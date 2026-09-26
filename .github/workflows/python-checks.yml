@@ -3,13 +3,13 @@ name: Python SDK checks
 on:
   pull_request:
     paths:
-      - "typescript/**"
+      - "sdks/typescript/**"
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
       - "examples/typescript_fixture.rs"
       - ".github/workflows/python-checks.yml"
-      - "python/**"
+      - "sdks/python/**"
       - "scripts/*release*.py"
       - "scripts/publish_packages.py"
   workflow_dispatch:
@@ -26,6 +26,7 @@ jobs:
   python:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python: ['3.11', '3.14']
@@ -40,28 +41,28 @@ jobs:
         with:
           node-version: '24'
       - uses: dtolnay/rust-toolchain@stable
-      - run: python -m pip install "./python[dev]"
-      - run: python -m mypy --config-file python/pyproject.toml python/src python/examples python/tests/typecheck.py
+      - run: python -m pip install "./sdks/python[dev]"
+      - run: python -m mypy --config-file sdks/python/pyproject.toml sdks/python/src sdks/python/examples sdks/python/tests/typecheck.py
       - run: cargo build --locked --example typescript_fixture
       - run: npm ci && npm run build
-        working-directory: typescript
+        working-directory: sdks/typescript
       - name: Test Python and TypeScript against the same resident Rust fixture
         shell: bash
         run: |
           suffix=""
           if [ "$RUNNER_OS" = "Windows" ]; then suffix=".exe"; fi
-          L2S1_TEST_BINARY="$PWD/target/debug/examples/typescript_fixture$suffix" python -m unittest discover -s python/tests -v
-      - run: python -m build python
+          L2S1_TEST_BINARY="$PWD/target/debug/examples/typescript_fixture$suffix" python -m unittest discover -s sdks/python/tests -v
+      - run: python -m build sdks/python
       - name: Verify installed wheel imports outside the checkout
         shell: bash
         run: |
-          python -m pip install --force-reinstall --no-deps python/dist/*.whl
+          python -m pip install --force-reinstall --no-deps sdks/python/dist/*.whl
           cd "$RUNNER_TEMP"
           python -c 'import l2s1; from importlib.resources import files; assert files("l2s1").joinpath("py.typed").is_file(); print(l2s1.__version__)'
       - uses: actions/upload-artifact@v6
         with:
           name: python-sdk-${{ matrix.os }}-${{ matrix.python }}
-          path: python/dist/*
+          path: sdks/python/dist/*
 
   release-configuration:
     runs-on: ubuntu-latest

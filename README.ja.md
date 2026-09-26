@@ -8,7 +8,7 @@ L2S1 は、ローカルのチャットモデルで二値・選択・順序付き
 
 メッセージの分類、リクエストの振り分け、条件の確認、順序付きのレベル評価に使用できます。質問と候補 ID は、アプリケーションがリクエストごとに指定します。互換性のある GGUF モデルに変更しても、リクエストと結果の型を維持できます。
 
-[Python SDK](python/README.md)、[native batch](docs/ja/BATCHING_API_REVIEW.md)、[GitHub Release・npm・PyPI・Cargo 配布パイプライン](docs/ja/RELEASE_PIPELINE.md)を提供します。
+[Python SDK](sdks/python/README.md)、[native batch](docs/ja/BATCHING_API_REVIEW.md)、[GitHub Release・npm・PyPI・Cargo 配布パイプライン](docs/ja/RELEASE_PIPELINE.md)を提供します。
 
 ## クイックスタート
 
@@ -162,18 +162,18 @@ HTTP の画像リクエストでは、名前付きの `media` と判断ごとの
 
 [`@l2s1/node` パッケージ](docs/ja/typescript/README.md)は、現在の OS とアーキテクチャに対応するビルド済みの Rust ランタイムを選択し、型付きの `load()`、`decide()`、`capabilities()`、`close()` を提供します。ビルドワークフローで作成されたラッパーとランタイムの tarball をインストールしてください。npm にはまだ公開されていません。GGUF の重みは別途用意します。同じアプリケーション API で、`connect()` は HTTP サーバーを使い、`fromBackend()` はカスタムバックエンドを受け付けます。
 
-Node.js 24 以上と Bash または Zsh を使い、リポジトリのルートから次のコマンドを実行してください。ローカル CPU ランタイムと TypeScript パッケージをビルドし、例の型を検査してから[倉庫の分類例](typescript/examples/warehouse.ts)を実行します。モデルのパスは、用意した GGUF ファイルの絶対パスに置き換えてください。`npm pack` は `typescript/l2s1-node-0.1.0.tgz` を生成します。
+Node.js 24 以上と Bash または Zsh を使い、リポジトリのルートから次のコマンドを実行してください。ローカル CPU ランタイムと TypeScript パッケージをビルドし、例の型を検査してから[倉庫の分類例](sdks/typescript/examples/warehouse.ts)を実行します。モデルのパスは、用意した GGUF ファイルの絶対パスに置き換えてください。`npm pack` は `sdks/typescript/l2s1-node-0.1.0.tgz` を生成します。
 
 ```sh
 cargo build --release --locked --features llama --bin l2s1
-cd typescript
+cd sdks/typescript
 npm ci
 npm run build
 npm run check
-L2S1_BINARY=../target/release/l2s1 \
+L2S1_BINARY=../../target/release/l2s1 \
   node examples/warehouse.ts /absolute/path/to/chat-model.gguf
 npm pack
-cd ..
+cd ../..
 ```
 
 ```ts
@@ -338,6 +338,7 @@ AI エージェントには、環境をまたいで利用できる [L2S1 スキ�
 | [`crates/l2s1-llama-sys/`](crates/l2s1-llama-sys) | 固定リビジョンの llama.cpp ビルドとネイティブブリッジ |
 | [`crates/l2s1-tools/`](crates/l2s1-tools) | データセットとベンチマークのツール |
 | [`examples/`](examples) | リクエスト、保存済みの出力、統合例 |
+| [`sdks/`](sdks/README.md) | 言語 SDK: TypeScript/Node.js と Python |
 | [`docs/`](docs/README.md) | 詳細ガイド、設計ノート、評価レポート |
 | [`web/`](web) | Svelte のドキュメントサイト |
 

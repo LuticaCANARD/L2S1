@@ -54,8 +54,8 @@ CPU·Metal, 나머지는 CPU를 번들에 포함합니다. CUDA는 Cargo feature
 다음 값을 같은 안정 버전으로 맞춥니다. prerelease 태그는 현재 거부합니다.
 
 - 루트 `Cargo.toml`, `crates/l2s1-llama-sys/Cargo.toml`
-- `python/pyproject.toml`, `python/src/l2s1/__init__.py`, `python/src/l2s1/native.py`
-- `typescript/package.json`, `typescript/package-lock.json` 및 runtime optional dependency 버전
+- `sdks/python/pyproject.toml`, `sdks/python/src/l2s1/__init__.py`, `sdks/python/src/l2s1/native.py`
+- `sdks/typescript/package.json`, `sdks/typescript/package-lock.json` 및 runtime optional dependency 버전
 
 ```sh
 python scripts/prepare_release.py --tag v0.1.0

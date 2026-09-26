@@ -52,28 +52,28 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-          cache-dependency-path: typescript/package-lock.json
+          cache-dependency-path: sdks/typescript/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
       - run: 'cargo test --locked --lib http::'
       - run: cargo build --release --locked --features '${{ matrix.feature }}' --bin l2s1 --message-format=json-render-diagnostics > native-build.jsonl
-      - run: node typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl --devices '${{ matrix.devices }}'
-      - run: node typescript/scripts/verify-runtime.mjs 'typescript/runtime-packages/${{ matrix.platform }}'
+      - run: node sdks/typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl --devices '${{ matrix.devices }}'
+      - run: node sdks/typescript/scripts/verify-runtime.mjs 'sdks/typescript/runtime-packages/${{ matrix.platform }}'
       - run: npm pack --pack-destination ../../ --ignore-scripts
-        working-directory: typescript/runtime-packages/${{ matrix.platform }}
+        working-directory: sdks/typescript/runtime-packages/${{ matrix.platform }}
       - run: npm ci && npm run build && npm run check && npm test && npm run test:rust && npm pack
-        working-directory: typescript
+        working-directory: sdks/typescript
       - run: |
           version=$(node -p "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8')).version")
           npm run test:package -- "l2s1-node-$version.tgz" "l2s1-runtime-${{ matrix.platform }}-$version.tgz"
-        working-directory: typescript
+        working-directory: sdks/typescript
       - uses: actions/upload-artifact@v6
         with:
           name: l2s1-runtime-${{ matrix.platform }}
-          path: typescript/l2s1-runtime-*.tgz
+          path: sdks/typescript/l2s1-runtime-*.tgz
           if-no-files-found: error
       - uses: actions/upload-artifact@v6
         if: matrix.platform == 'linux-x64'
         with:
           name: l2s1-node
-          path: typescript/l2s1-node-*.tgz
+          path: sdks/typescript/l2s1-node-*.tgz
           if-no-files-found: error

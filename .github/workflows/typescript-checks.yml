@@ -3,7 +3,7 @@ name: TypeScript library checks
 on:
   pull_request:
     paths:
-      - "typescript/**"
+      - "sdks/typescript/**"
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
@@ -28,9 +28,9 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-          cache-dependency-path: typescript/package-lock.json
+          cache-dependency-path: sdks/typescript/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
-        working-directory: typescript
+        working-directory: sdks/typescript
       - run: npm run build && npm run check && npm test && npm run test:rust && npm pack --dry-run
-        working-directory: typescript
+        working-directory: sdks/typescript

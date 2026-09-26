@@ -8,7 +8,7 @@ L2S1은 로컬 채팅 모델로 이진·선택·서열 판단을 수행하는 Ru
 
 메시지 분류, 요청 라우팅, 조건 확인, 단계별 수준 평가에 사용할 수 있습니다. 질문과 후보 ID는 애플리케이션이 요청마다 지정합니다. 호환되는 GGUF 모델을 바꿔도 요청과 결과 타입을 유지할 수 있습니다.
 
-[Python SDK](python/README.md), [native 배치](docs/ko/BATCHING_API_REVIEW.md), [GitHub Release·npm·PyPI·Cargo 배포 파이프라인](docs/ko/RELEASE_PIPELINE.md)을 제공합니다.
+[Python SDK](sdks/python/README.md), [native 배치](docs/ko/BATCHING_API_REVIEW.md), [GitHub Release·npm·PyPI·Cargo 배포 파이프라인](docs/ko/RELEASE_PIPELINE.md)을 제공합니다.
 
 ## 빠른 시작
 
@@ -162,18 +162,18 @@ HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 �
 
 [`@l2s1/node`](docs/ko/typescript/README.md)는 현재 OS·CPU에 맞는 사전 빌드 Rust 런타임을 선택하며, 타입이 있는 `load()`, `decide()`, `capabilities()`, `close()`를 제공합니다. 빌드 워크플로가 만드는 래퍼·런타임 tarball을 설치합니다. npm에는 아직 배포하지 않았으며 GGUF 가중치는 별도로 준비합니다. 같은 애플리케이션 API에서 `connect()`는 HTTP 서버를, `fromBackend()`는 사용자 정의 백엔드를 사용합니다.
 
-Node.js 24 이상과 Bash 또는 Zsh에서 저장소 루트를 기준으로 실행합니다. 로컬 CPU 런타임과 TypeScript 패키지를 빌드하고, 예제의 타입을 검사한 뒤 [창고 분류 예제](typescript/examples/warehouse.ts)를 실행합니다. 모델 경로는 준비한 GGUF 파일의 절대 경로로 바꾸세요. `npm pack`은 `typescript/l2s1-node-0.1.0.tgz`를 생성합니다.
+Node.js 24 이상과 Bash 또는 Zsh에서 저장소 루트를 기준으로 실행합니다. 로컬 CPU 런타임과 TypeScript 패키지를 빌드하고, 예제의 타입을 검사한 뒤 [창고 분류 예제](sdks/typescript/examples/warehouse.ts)를 실행합니다. 모델 경로는 준비한 GGUF 파일의 절대 경로로 바꾸세요. `npm pack`은 `sdks/typescript/l2s1-node-0.1.0.tgz`를 생성합니다.
 
 ```sh
 cargo build --release --locked --features llama --bin l2s1
-cd typescript
+cd sdks/typescript
 npm ci
 npm run build
 npm run check
-L2S1_BINARY=../target/release/l2s1 \
+L2S1_BINARY=../../target/release/l2s1 \
   node examples/warehouse.ts /absolute/path/to/chat-model.gguf
 npm pack
-cd ..
+cd ../..
 ```
 
 ```ts
@@ -344,6 +344,7 @@ MCP에서 문서 조회, 요청 형식 검증, 상주 HTTP 백엔드의 추론�
 | [`crates/l2s1-llama-sys/`](crates/l2s1-llama-sys) | 고정된 llama.cpp 빌드와 네이티브 브리지 |
 | [`crates/l2s1-tools/`](crates/l2s1-tools) | 데이터와 벤치마크 도구 |
 | [`examples/`](examples) | 요청, 저장된 출력, 통합 예제 |
+| [`sdks/`](sdks/README.md) | 언어별 SDK: TypeScript/Node.js와 Python |
 | [`docs/`](docs/README.md) | 상세 가이드, 설계 설명, 평가 보고서 |
 | [`web/`](web) | Svelte 문서 사이트 |
 

@@ -1,4 +1,4 @@
-"""python python/examples/repeated.py /path/to/model.gguf --binary /path/to/l2s1"""
+"""python sdks/python/examples/repeated.py /path/to/model.gguf --binary /path/to/l2s1"""
 import argparse
 import asyncio
 

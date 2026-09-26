@@ -89,7 +89,8 @@ class Models(unittest.TestCase):
             }]}
             (root / "runtime-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             binary, _ = _resolve_runtime(LoadOptions(model="fixture", runtime_dir=root))
-            self.assertEqual(Path(binary), root / "bin" / executable)
+            # macOS temporary paths may use /var, which resolves to /private/var.
+            self.assertEqual(Path(binary), (root / "bin" / executable).resolve())
             (root / "bin" / executable).write_bytes(b"tampered")
             with self.assertRaises(L2S1Error) as caught:
                 _resolve_runtime(LoadOptions(model="fixture", runtime_dir=root))

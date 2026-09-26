@@ -20,18 +20,18 @@ def versions(root: Path, tag: str) -> str:
         raise ValueError('Release tag must be vMAJOR.MINOR.PATCH (stable versions only)')
     version = tag[1:]
     for path, key in [('Cargo.toml', 'package'), ('crates/l2s1-llama-sys/Cargo.toml', 'package'),
-                      ('python/pyproject.toml', 'project')]:
+                      ('sdks/python/pyproject.toml', 'project')]:
         if tomllib.loads((root / path).read_text())[key]['version'] != version:
             raise ValueError(f'Version mismatch in {path}')
-    sdk = json.loads((root / 'typescript/package.json').read_text())
-    lock = json.loads((root / 'typescript/package-lock.json').read_text())
+    sdk = json.loads((root / 'sdks/typescript/package.json').read_text())
+    lock = json.loads((root / 'sdks/typescript/package-lock.json').read_text())
     if sdk['version'] != version or lock['version'] != version or lock['packages']['']['version'] != version:
         raise ValueError('TypeScript version/lock mismatch')
     expected = {f'@l2s1/runtime-{platform}': version for platform in PLATFORMS}
     if sdk['optionalDependencies'] != expected or lock['packages']['']['optionalDependencies'] != expected:
         raise ValueError('Native runtime versions do not match wrapper')
-    native = (root / 'python/src/l2s1/native.py').read_text()
-    exported = (root / 'python/src/l2s1/__init__.py').read_text()
+    native = (root / 'sdks/python/src/l2s1/native.py').read_text()
+    exported = (root / 'sdks/python/src/l2s1/__init__.py').read_text()
     if f'VERSION = "{version}"' not in native or f'__version__ = "{version}"' not in exported:
         raise ValueError('Python runtime/exported version mismatch')
     return version

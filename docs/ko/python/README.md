@@ -13,8 +13,8 @@ Python 3.11+ 비동기 SDK입니다. `@l2s1/node`와 같은 Rust 상주 엔진·
 저장소 루트에서 설치하거나 빌드한 wheel을 사용합니다.
 
 ```sh
-python -m pip install ./python
-python -m pip install ./python/dist/l2s1-0.1.0-py3-none-any.whl
+python -m pip install ./sdks/python
+python -m pip install ./sdks/python/dist/l2s1-0.1.0-py3-none-any.whl
 ```
 
 wheel은 Python SDK를 포함합니다. Rust 실행 파일과 GGUF는 별도로 제공합니다.
@@ -131,15 +131,15 @@ stdio는 최대 16개의 미완료 호출을 허용하며 timeout 후에도 nati
 ## 빌드와 검증
 
 ```sh
-python -m pip install './python[dev]'
-python -m mypy --config-file python/pyproject.toml python/src python/examples python/tests/typecheck.py
-python -m unittest discover -s python/tests -v
-python -m build python
+python -m pip install './sdks/python[dev]'
+python -m mypy --config-file sdks/python/pyproject.toml sdks/python/src sdks/python/examples sdks/python/tests/typecheck.py
+python -m unittest discover -s sdks/python/tests -v
+python -m build sdks/python
 cargo build --locked --example typescript_fixture
-npm --prefix typescript ci
-npm --prefix typescript run build
+npm --prefix sdks/typescript ci
+npm --prefix sdks/typescript run build
 L2S1_TEST_BINARY="$PWD/target/debug/examples/typescript_fixture" \
-  python -m unittest discover -s python/tests -v
+  python -m unittest discover -s sdks/python/tests -v
 ```
 
 Windows에서는 실행 파일에 `.exe`를 붙입니다. Rust fixture는 실제 프로세스·stdio/HTTP 배치·

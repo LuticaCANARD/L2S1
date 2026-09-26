@@ -31,12 +31,12 @@ For NVIDIA CUDA use `--features llama-cuda`; for macOS Metal use `--features lla
 Build and pack the TypeScript package:
 
 ```sh
-cd typescript
+cd sdks/typescript
 npm ci
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/typescript/l2s1-node-0.1.0.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.0.tgz
 ```
 
 ## Load a local model
@@ -90,7 +90,7 @@ TypeScript applications supporting explicit resource management can write `await
 
 `LoadOptions` exposes CPU/CUDA/Metal, context/batch/thread counts, a vision projector (`mmproj`), LoRA, execution mode, parallel width, prompt layout/detail and startup policy. Less common Rust flags can be passed in `extraArgs`; `--stdio` and `--listen` are reserved. `startupTimeoutMs` defaults to 120,000 and call `timeoutMs` to 180,000. A startup `signal` cancels loading. `onStderr` receives native log chunks. Calls accept `{ signal, timeoutMs }` as their second argument. Failed inference requests are never automatically retried.
 
-Run the [warehouse example](../../../typescript/examples/warehouse.ts) with Node.js 24's TypeScript support after building:
+Run the [warehouse example](../../../sdks/typescript/examples/warehouse.ts) with Node.js 24's TypeScript support after building:
 
 ```sh
 L2S1_BINARY=/absolute/path/to/l2s1 node examples/warehouse.ts /path/to/chat-model.gguf
@@ -209,7 +209,7 @@ npm pack --dry-run
 Optional real-model smoke (at the repository root, build the native binary first):
 
 ```sh
-cd typescript
+cd sdks/typescript
 L2S1_BINARY=/absolute/path/to/l2s1 L2S1_MODEL=/path/to/chat-model.gguf node --test test/model.integration.mjs
 ```
 
@@ -225,9 +225,9 @@ To build the current platform locally, run at the repository root:
 # On macOS arm64, use llama-metal and --devices cpu,metal to include Metal.
 L2S1_PORTABLE_BUILD=1 cargo build --release --locked --features llama \
   --bin l2s1 --message-format=json-render-diagnostics > native-build.jsonl
-node typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl
-node typescript/scripts/verify-runtime.mjs typescript/runtime-packages/linux-x64
-cd typescript/runtime-packages/linux-x64
+node sdks/typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl
+node sdks/typescript/scripts/verify-runtime.mjs sdks/typescript/runtime-packages/linux-x64
+cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack

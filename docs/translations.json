@@ -306,9 +306,9 @@
       ]
     },
     {
-      "source": "typescript/README.md",
+      "source": "sdks/typescript/README.md",
       "path": "typescript/README.md",
-      "source_sha256": "5fa353c16ba0855497df3766b7379f4360ebd9bef1f3841ebd2a650f63844a4f",
+      "source_sha256": "67a03093d478c6ada714c717c709ed839d9fe711bfe124cd078692179260fc7e",
       "languages": [
         "en",
         "ko",
@@ -356,9 +356,9 @@
       ]
     },
     {
-      "source": "typescript/PUBLISHING.md",
+      "source": "sdks/typescript/PUBLISHING.md",
       "path": "typescript/PUBLISHING.md",
-      "source_sha256": "8910aad12ee987a5f7140c5824031c9ad3f718122c8fdd24dbf5b08763527712",
+      "source_sha256": "61090eebbc1619150cdc409d869f9ee1303e5da96d2bfebb4adcafd14eb4171a",
       "languages": [
         "en",
         "ko",
@@ -428,7 +428,7 @@
     {
       "source": "docs/RELEASE_PIPELINE.md",
       "path": "RELEASE_PIPELINE.md",
-      "source_sha256": "a6d78862a93885d9e168dc2c5c337909bb5a35ebbc928a6d841a62bf96760b18",
+      "source_sha256": "4197637966468ba942ca1e9fed88824f8f5dca898213fe23791595acbac96556",
       "languages": [
         "en",
         "ko",
@@ -436,9 +436,9 @@
       ]
     },
     {
-      "source": "python/README.md",
+      "source": "sdks/python/README.md",
       "path": "python/README.md",
-      "source_sha256": "88fc6d0b01f2149a8cbef4232002aff285e098d49d413851e9de5f979670e6d6",
+      "source_sha256": "59b9dec8822f0d0ea83800c6ba270c203149615aaabce3bb55955834c390ccc2",
       "languages": [
         "en",
         "ko",

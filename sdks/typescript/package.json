@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
-  "repository": { "type": "git", "url": "https://github.com/LuticaCANARD/L2S1.git", "directory": "typescript" },
+  "repository": { "type": "git", "url": "https://github.com/LuticaCANARD/L2S1.git", "directory": "sdks/typescript" },
   "engines": { "node": ">=22" },
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
@@ -17,7 +17,7 @@
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.examples.json",
     "test": "npm run build && node --test test/*.test.mjs",
-    "test:rust": "cargo build --locked --manifest-path ../Cargo.toml --example typescript_fixture && npm run build && node --test test/rust.integration.mjs",
+    "test:rust": "cargo build --locked --manifest-path ../../Cargo.toml --example typescript_fixture && npm run build && node --test test/rust.integration.mjs",
     "prepack": "npm run build",
     "bundle:runtime": "node scripts/bundle-runtime.mjs",
     "test:package": "node scripts/test-installed-runtime.mjs"

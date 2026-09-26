@@ -8,7 +8,7 @@ L2S1 is a Rust library and CLI for binary, choice, and ordinal decisions with lo
 
 Use it to classify messages, route requests, check conditions, or assign ordered levels. Questions and candidate IDs are supplied by your application at request time. You can change the compatible GGUF model while keeping the same request and result types.
 
-[Python SDK](python/README.md), [native batching](docs/en/BATCHING_API_REVIEW.md), and the [GitHub Release/npm/PyPI/Cargo pipeline](docs/en/RELEASE_PIPELINE.md).
+[Python SDK](sdks/python/README.md), [native batching](docs/en/BATCHING_API_REVIEW.md), and the [GitHub Release/npm/PyPI/Cargo pipeline](docs/en/RELEASE_PIPELINE.md).
 
 ## Quick start
 
@@ -162,18 +162,18 @@ HTTP image requests use named `media` and per-decision `media_ids`. Local backen
 
 The [`@l2s1/node` package](docs/en/typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install the wrapper and runtime tarballs from the build workflow; they have not been published to npm. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
 
-With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `typescript/l2s1-node-0.1.0.tgz`.
+With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](sdks/typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `sdks/typescript/l2s1-node-0.1.0.tgz`.
 
 ```sh
 cargo build --release --locked --features llama --bin l2s1
-cd typescript
+cd sdks/typescript
 npm ci
 npm run build
 npm run check
-L2S1_BINARY=../target/release/l2s1 \
+L2S1_BINARY=../../target/release/l2s1 \
   node examples/warehouse.ts /absolute/path/to/chat-model.gguf
 npm pack
-cd ..
+cd ../..
 ```
 
 ```ts
@@ -342,6 +342,7 @@ resident HTTP backend's decisions. See [agent setup](docs/en/AGENT_INTEGRATION.m
 | [`crates/l2s1-llama-sys/`](crates/l2s1-llama-sys) | Pinned llama.cpp build and native bridge |
 | [`crates/l2s1-tools/`](crates/l2s1-tools) | Dataset and benchmark tools |
 | [`examples/`](examples) | Requests, saved outputs, and integration examples |
+| [`sdks/`](sdks/README.md) | Language SDKs: TypeScript/Node.js and Python |
 | [`docs/`](docs/README.md) | Detailed guides, design notes, and evaluation reports |
 | [`web/`](web) | Svelte documentation site |
 

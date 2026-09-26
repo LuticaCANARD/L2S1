@@ -1,8 +1,8 @@
 # npm publishing review
 
-[English](../docs/en/typescript/PUBLISHING.md) · [한국어](../docs/ko/typescript/PUBLISHING.md) · [日本語](../docs/ja/typescript/PUBLISHING.md)
+[English](../../docs/en/typescript/PUBLISHING.md) · [한국어](../../docs/ko/typescript/PUBLISHING.md) · [日本語](../../docs/ja/typescript/PUBLISHING.md)
 
-[English index](../docs/en/README.md) · [한국어 색인](../docs/ko/README.md) · [日本語索引](../docs/ja/README.md)
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
 
 The wrapper and platform runtimes can be distributed as public npm packages. The implementation uses ordinary npm tarballs, ESM exports, TypeScript declarations and optional platform dependencies. End users do not need a Rust/C++ compiler. Publication is still conditional on passing the native platform builds and obtaining npm scope/publishing access.
 
@@ -31,7 +31,7 @@ Both wrapper and generated runtimes use `publishConfig.access = public` and the 
 
 Public scoped publishing needs an npm account, scope permissions and supported publication authentication. As checked on 2026-09-26, the local npm CLI is not authenticated (`npm whoami` returns `ENEEDAUTH`), and an unauthenticated `npm view @l2s1/node` returns 404. No package was published during this review.
 
-For CI publication, npm supports GitHub Actions trusted publishing through OIDC. It requires npm 11.5.1+, Node.js 22.14.0+, the corresponding package trusted-publisher settings and workflow `id-token: write`. The `release.yml` pipeline now publishes verified tarballs to npm (runtimes before wrapper), Python distributions to PyPI and native Cargo crates to crates.io, then publishes GitHub Release. Registry accounts and trusted publisher settings must be configured separately. See [the release pipeline](../docs/RELEASE_PIPELINE.md). [npm trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/)
+For CI publication, npm supports GitHub Actions trusted publishing through OIDC. It requires npm 11.5.1+, Node.js 22.14.0+, the corresponding package trusted-publisher settings and workflow `id-token: write`. The `release.yml` pipeline now publishes verified tarballs to npm (runtimes before wrapper), Python distributions to PyPI and native Cargo crates to crates.io, then publishes GitHub Release. Registry accounts and trusted publisher settings must be configured separately. See [the release pipeline](../../docs/RELEASE_PIPELINE.md). [npm trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/)
 
 ## Binary and license boundaries
 
