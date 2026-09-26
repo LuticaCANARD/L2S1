@@ -16,7 +16,7 @@
 | [AI エージェント統合](AGENT_INTEGRATION.md) | 環境をまたいで使えるスキル、stdio MCP、リクエスト検証、常駐推論 |
 | [ブラウザー WebGPU デモ](WEBGPU_DEMO.md) | ローカル Qwen3 ONNX 推論、WebGPU、上限付きの思考、ポリシー |
 | [画像とテキストのデモ](IMAGE_DEMO.md) | 記録済みの応答、ポリシー、失敗の説明、ローカルサーバー |
-| [Pages デプロイ](PAGES_DEPLOYMENT.md) | Cloudflare Pages と n2s1.luticalab.net の DNS |
+| [Pages デプロイ](PAGES_DEPLOYMENT.md) | Cloudflare Pages と l2s1.luticalab.net の DNS |
 | [モデルの交換](MODEL_INTERCHANGEABILITY.md) | モデル識別、事前検証、校正、診断、ワーカー、メモリ |
 | [検証](VERIFICATION.md) | ビルドとモデル別の検証コマンド |
 | [ライセンス](LICENSING.md) | ソース、依存関係、モデルのライセンスの区分 |

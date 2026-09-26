@@ -313,9 +313,9 @@ For GPU vision workloads, `--vision-optimized` enables four decoder streams, dyn
 
 Parallel execution and the vision profile are supported features with a different numerical execution path from `fresh`: scores and selections can change. Parallel mode rejects recurrent/hybrid models, and parallel vision supports at most 26 options. The vision profile requires CUDA or Metal and compatible GPU kernels; its Metal performance remains unverified. Validate task quality and acceptance coverage on your checkpoint. Model-dependent tests are opt-in and do not download weights. See [execution and memory](docs/en/GUIDE.md#execution-and-memory), [optimized vision](docs/en/GUIDE.md#optimized-vision), and [verification](docs/en/VERIFICATION.md).
 
-[Open the image and text demo](https://n2s1.luticalab.net/demo): inspect actual recorded model responses, choose direct or bounded thinking for supported local text inference, and edit acceptance thresholds and failure messages. [Demo setup](docs/en/IMAGE_DEMO.md) · [Reasoning contract](docs/en/REASONING.md). The Pages site serves recordings; fresh inference requires the documented local native server.
+[Open the image and text demo](https://l2s1.luticalab.net/demo): inspect actual recorded model responses, choose direct or bounded thinking for supported local text inference, and edit acceptance thresholds and failure messages. [Demo setup](docs/en/IMAGE_DEMO.md) · [Reasoning contract](docs/en/REASONING.md). The Pages site serves recordings; fresh inference requires the documented local native server.
 
-[Run the browser WebGPU demo](https://n2s1.luticalab.net/webgpu) to load Qwen3 0.6B ONNX on demand and score your own text locally, with direct/thinking modes, acceptance thresholds and custom failure messages. It requires a WebGPU adapter; model downloads are 543.4 MiB (q4f16) or 876.5 MiB (q4). [Browser setup and runtime scope](docs/en/WEBGPU_DEMO.md).
+[Run the browser WebGPU demo](https://l2s1.luticalab.net/webgpu) to load Qwen3 0.6B ONNX on demand and score your own text locally, with direct/thinking modes, acceptance thresholds and custom failure messages. It requires a WebGPU adapter; model downloads are 543.4 MiB (q4f16) or 876.5 MiB (q4). [Browser setup and runtime scope](docs/en/WEBGPU_DEMO.md).
 
 ## Recorded measurements
 

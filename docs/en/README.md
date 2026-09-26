@@ -16,7 +16,7 @@ Start with the [English README](../../README.md) to build L2S1 and run a first d
 | [AI agent integration](AGENT_INTEGRATION.md) | Portable skill, stdio MCP, request validation, resident inference |
 | [Browser WebGPU demo](WEBGPU_DEMO.md) | Local Qwen3 ONNX inference, WebGPU, bounded thinking, policy |
 | [Image and text demo](IMAGE_DEMO.md) | Recorded responses, policy, failure explanations, local server |
-| [Pages deployment](PAGES_DEPLOYMENT.md) | Cloudflare Pages and n2s1.luticalab.net DNS |
+| [Pages deployment](PAGES_DEPLOYMENT.md) | Cloudflare Pages and l2s1.luticalab.net DNS |
 | [Model interchangeability](MODEL_INTERCHANGEABILITY.md) | Model identity, preflight, calibration, diagnostics, workers, memory |
 | [Verification](VERIFICATION.md) | Build and model-dependent validation commands |
 | [Licensing](LICENSING.md) | Source, dependency, and model license boundaries |

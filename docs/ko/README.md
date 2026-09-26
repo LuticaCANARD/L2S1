@@ -16,7 +16,7 @@
 | [AI 에이전트 통합](AGENT_INTEGRATION.md) | 범용 스킬, stdio MCP, 요청 검증, 상주 추론 |
 | [브라우저 WebGPU 데모](WEBGPU_DEMO.md) | 로컬 Qwen3 ONNX 추론, WebGPU, 제한된 사고, 정책 |
 | [이미지·텍스트 데모](IMAGE_DEMO.md) | 기록된 응답, 정책, 실패 설명, 로컬 서버 |
-| [Pages 배포](PAGES_DEPLOYMENT.md) | Cloudflare Pages와 n2s1.luticalab.net DNS |
+| [Pages 배포](PAGES_DEPLOYMENT.md) | Cloudflare Pages와 l2s1.luticalab.net DNS |
 | [모델 교체](MODEL_INTERCHANGEABILITY.md) | 모델 식별, 사전 검증, 보정, 진단, 워커, 메모리 |
 | [검증](VERIFICATION.md) | 빌드와 모델별 검증 명령 |
 | [라이선스](LICENSING.md) | 소스, 의존성, 모델 라이선스의 구분 |
