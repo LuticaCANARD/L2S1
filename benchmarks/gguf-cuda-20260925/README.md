@@ -1,5 +1,9 @@
 # Generic GGUF CUDA path: two-model smoke measurement
 
+[English](../../docs/en/benchmarks/gguf-cuda-20260925/README.md) · [한국어](../../docs/ko/benchmarks/gguf-cuda-20260925/README.md) · [日本語](../../docs/ja/benchmarks/gguf-cuda-20260925/README.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 This run checks that the existing llama.cpp CUDA executable can produce typed
 decisions from two different GGUF model families. It is one invocation per
 model, without warmup, on the three decisions in [`examples/warehouse.json`](../../examples/warehouse.json)

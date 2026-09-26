@@ -1,5 +1,9 @@
 # Frozen deployment output heads
 
+[English](en/OUTPUT_HEAD.md) · [한국어](ko/OUTPUT_HEAD.md) · [日本語](ja/OUTPUT_HEAD.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 An opt-in `--output-head <JSON>` scores a single explicitly identified choice task with a small learned classifier. The GGUF body stays frozen. No adapter is loaded unless requested; ordinary decisions retain the original scoring path.
 
 Two heads are supported:

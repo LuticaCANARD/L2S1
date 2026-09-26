@@ -2,7 +2,7 @@
 
 **Turn local GGUF model scores into typed decisions.**
 
-English · [한국어](README.ko.md) · [日本語](README.ja.md) · [Documentation](docs/README.md) · [Model results](docs/MODEL_RESULTS.md)
+English · [한국어](README.ko.md) · [日本語](README.ja.md) · [Documentation](docs/en/README.md) · [Model results](docs/en/MODEL_RESULTS.md)
 
 L2S1 is a Rust library and CLI for binary, choice, and ordinal decisions with local chat models. Give it JSON state, a question, and candidate criteria; receive a typed value, model scores, and an explicit abstention when the acceptance policy is not met.
 
@@ -60,7 +60,7 @@ The complete CLI response includes backend information, policy, candidate scores
 - **Direct local scoring.** Read scores at the model's assistant answer boundary. Larger candidate sets use complete answer-code likelihoods when codes span multiple tokens.
 - **Explicit abstention.** Keep the scores and explain why a selection was withheld. The default policy checks both relative option probability and full-vocabulary candidate mass.
 - **Text and images.** Use a supported vision model with its matching `mmproj` GGUF for still-image decisions.
-- **Rust, CLI, and HTTP.** Keep a backend resident in your application, run JSON from a file or stdin, or serve the versioned decision API.
+- **Rust, TypeScript, CLI, and HTTP.** Keep a backend resident in your application, use the [TypeScript package](docs/en/typescript/README.md) from Node.js, run JSON from a file or stdin, or serve the versioned decision API.
 - **Inspectable execution.** Inspect model identity, preflight requests, and record diagnostics. Optional caching, state restoration, parallel execution, LoRA, and task-scoped calibration have explicit contracts.
 
 ## Decision types and scores
@@ -80,7 +80,7 @@ Two scores determine default acceptance:
 
 The default policy requires top-option probability **≥ 0.8**, candidate mass **≥ 0.05**, and no tied top candidates. Otherwise, the selected value is `null`. These are model scores; they are not calibrated probabilities of correctness. Optional calibration is bound to a specific model, configuration, and task.
 
-See the [decision contract](docs/GUIDE.md#the-decision-contract) for formulas, answer codes, and validation rules.
+See the [decision contract](docs/en/GUIDE.md#the-decision-contract) for formulas, answer codes, and validation rules.
 
 ## Backends and hardware
 
@@ -106,9 +106,9 @@ cargo build --release --locked --features llama-metal --bin l2s1
   --device metal --input examples/warehouse.json
 ```
 
-CPU is the default. An explicitly requested GPU must be available. The first build fetches the native source; offline builds can set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`. See the [build guide](docs/GUIDE.md#build) for native libraries, packaging, and separate CUDA architecture builds.
+CPU is the default. An explicitly requested GPU must be available. The first build fetches the native source; offline builds can set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`. See the [build guide](docs/en/GUIDE.md#build) for native libraries, packaging, and separate CUDA architecture builds.
 
-For [wgpu](docs/GUIDE.md#optional-wgpu-backend), use the separate `l2s1-wgpu` executable. For [OpenRouter](docs/GUIDE.md#openrouter-adapter), use `l2s1-openrouter` and supply `OPENROUTER_API_KEY`. OpenRouter responses use the shared typed HTTP envelope with `selection_only` evidence and no local probability policy.
+For [wgpu](docs/en/GUIDE.md#optional-wgpu-backend), use the separate `l2s1-wgpu` executable. For [OpenRouter](docs/en/GUIDE.md#openrouter-adapter), use `l2s1-openrouter` and supply `OPENROUTER_API_KEY`. OpenRouter responses use the shared typed HTTP envelope with `selection_only` evidence and no local probability policy.
 
 ## Inspect and run
 
@@ -125,7 +125,7 @@ For [wgpu](docs/GUIDE.md#optional-wgpu-backend), use the separate `l2s1-wgpu` ex
   --input examples/warehouse.json --diagnostics
 ```
 
-`--input -` reads stdin. Results go to stdout; native logs go to stderr. Inputs that exceed the configured context are rejected without truncation. See [inspection and diagnostics](docs/GUIDE.md#inspect-validate-and-run) for compute settings and structured failures.
+`--input -` reads stdin. Results go to stdout; native logs go to stderr. Inputs that exceed the configured context are rejected without truncation. See [inspection and diagnostics](docs/en/GUIDE.md#inspect-validate-and-run) for compute settings and structured failures.
 
 ## HTTP and image input
 
@@ -154,11 +154,11 @@ For a still image, load the vision model and its matching projector:
   --input examples/warehouse.json
 ```
 
-HTTP image requests use named `media` and per-decision `media_ids`. Local backends accept one image per decision. See the [image and HTTP contract](docs/GUIDE.md#direct-image-input-and-http-api) for payloads, limits, and backend-specific behavior.
+HTTP image requests use named `media` and per-decision `media_ids`. Local backends accept one image per decision. See the [image and HTTP contract](docs/en/GUIDE.md#direct-image-input-and-http-api) for payloads, limits, and backend-specific behavior.
 
 ## Use from TypeScript
 
-The [`@l2s1/node` package](typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install the wrapper and runtime tarballs from the build workflow; they have not been published to npm. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
+The [`@l2s1/node` package](docs/en/typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install the wrapper and runtime tarballs from the build workflow; they have not been published to npm. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
 
 With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `typescript/l2s1-node-0.1.0.tgz`.
 
@@ -190,7 +190,7 @@ try {
 } finally { await engine.close(); }
 ```
 
-For an existing server or a browser application, import `L2S1Client` from `@l2s1/node/http`. See the [package guide](typescript/README.md) for installation, images, reasoning, errors and portability.
+For an existing server or a browser application, import `L2S1Client` from `@l2s1/node/http`. See the [package guide](docs/en/typescript/README.md) for installation, images, reasoning, errors and portability.
 
 ## Use from Rust
 
@@ -276,7 +276,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-Add `serde_json` to your dependencies. The request is constructed directly in Rust; no input file is needed. A model-free [runnable example](examples/warehouse.rs) constructs and validates the same request with `cargo run --locked --example warehouse`. Use `BackendWorker` for dedicated-thread ownership and bounded admission. On Metal, release the backend before process exit; worker users should call `close()` and wait for its owner thread. See [Rust integration](docs/GUIDE.md#rust-integration) for lifecycle and native linking details.
+Add `serde_json` to your dependencies. The request is constructed directly in Rust; no input file is needed. A model-free [runnable example](examples/warehouse.rs) constructs and validates the same request with `cargo run --locked --example warehouse`. Use `BackendWorker` for dedicated-thread ownership and bounded admission. On Metal, release the backend before process exit; worker users should call `close()` and wait for its owner thread. See [Rust integration](docs/en/GUIDE.md#rust-integration) for lifecycle and native linking details.
 
 ## Execution modes and vision throughput
 
@@ -297,33 +297,38 @@ For GPU vision workloads, `--vision-optimized` enables four decoder streams, dyn
   --image photo.jpg --input examples/warehouse.json
 ```
 
-Parallel execution and the vision profile are supported features with a different numerical execution path from `fresh`: scores and selections can change. Parallel mode rejects recurrent/hybrid models, and parallel vision supports at most 26 options. The vision profile requires CUDA or Metal and compatible GPU kernels; its Metal performance remains unverified. Validate task quality and acceptance coverage on your checkpoint. Model-dependent tests are opt-in and do not download weights. See [execution and memory](docs/GUIDE.md#execution-and-memory), [optimized vision](docs/GUIDE.md#optimized-vision), and [verification](docs/VERIFICATION.md).
+Parallel execution and the vision profile are supported features with a different numerical execution path from `fresh`: scores and selections can change. Parallel mode rejects recurrent/hybrid models, and parallel vision supports at most 26 options. The vision profile requires CUDA or Metal and compatible GPU kernels; its Metal performance remains unverified. Validate task quality and acceptance coverage on your checkpoint. Model-dependent tests are opt-in and do not download weights. See [execution and memory](docs/en/GUIDE.md#execution-and-memory), [optimized vision](docs/en/GUIDE.md#optimized-vision), and [verification](docs/en/VERIFICATION.md).
+
+[Open the image and text demo](https://n2s1.luticalab.net/demo): inspect actual recorded model responses, choose direct or bounded thinking for supported local text inference, and edit acceptance thresholds and failure messages. [Demo setup](docs/en/IMAGE_DEMO.md) · [Reasoning contract](docs/en/REASONING.md). The Pages site serves recordings; fresh inference requires the documented local native server.
+
+[Run the browser WebGPU demo](https://n2s1.luticalab.net/webgpu) to load Qwen3 0.6B ONNX on demand and score your own text locally, with direct/thinking modes, acceptance thresholds and custom failure messages. It requires a WebGPU adapter; model downloads are 543.4 MiB (q4f16) or 876.5 MiB (q4). [Browser setup and runtime scope](docs/en/WEBGPU_DEMO.md).
 
 ## Recorded measurements
 
 | Study | Recorded scope | Report |
 | --- | --- | --- |
-| JevBench public subset | Original matrix: 22 checkpoints × 231 items; 5,082 valid predictions | [Model results](docs/MODEL_RESULTS.md), [method](docs/JEVBENCH.md) |
-| Intent classification | 77 English labels and 60 Korean labels; 200 examples per language per checkpoint | [Intent benchmark](docs/INTENT_BENCHMARK.md) |
-| Vision decisions | Still-image classification and execution-mode studies | [Vision benchmark](docs/VISION_BENCHMARK.md), [TrashNet study](benchmarks/trashnet-vision-20260925/REPORT.md) |
+| JevBench public subset | Original matrix: 22 checkpoints × 231 items; 5,082 valid predictions | [Model results](docs/en/MODEL_RESULTS.md), [method](docs/en/JEVBENCH.md) |
+| Intent classification | 77 English labels and 60 Korean labels; 200 examples per language per checkpoint | [Intent benchmark](docs/en/INTENT_BENCHMARK.md) |
+| typed-decisions | Complete test split: 400 cases / 2,000 judgments per model; Gemma 4 E2B 54.30%, Qwen3 0.6B 31.25% raw accuracy | [Protocol and results](docs/en/TYPED_DECISIONS_BENCHMARK.md) |
+| Vision decisions | Still-image classification and execution-mode studies | [Vision benchmark](docs/en/VISION_BENCHMARK.md), [TrashNet study](docs/en/benchmarks/trashnet-vision-20260925/REPORT.md) |
 
 These are recorded local experiments at their stated revisions, hardware, and settings. Report accuracy, accepted accuracy, and coverage separately. Some raw benchmark artifacts remain local and gitignored; the reports identify their locations and reproduction procedures. The JevBench public subset is not an official full-suite score or rank.
 
 ## Documentation
 
-For AI agents, use the portable [L2S1 skill](skills/l2s1/SKILL.md) and optional
+For AI agents, use the portable [L2S1 skill](docs/en/skills/l2s1/SKILL.md) and optional
 stdio MCP adapter. MCP exposes documentation, typed request validation and the
-resident HTTP backend's decisions. See [agent setup](docs/AGENT_INTEGRATION.md).
+resident HTTP backend's decisions. See [agent setup](docs/en/AGENT_INTEGRATION.md).
 
 | Topic | Read |
 | --- | --- |
-| Build, requests, Rust API, HTTP, runtime options | [Guide](docs/GUIDE.md) |
-| Model identity, preflight, calibration, worker ownership | [Model interchangeability](docs/MODEL_INTERCHANGEABILITY.md) |
-| Model-specific test commands | [Verification](docs/VERIFICATION.md) |
-| Prefix reuse and parallel execution | [Prefix algorithm](docs/SEMIF_ALGORITHM.md), [parallel execution](docs/PARALLEL_EXECUTION.md) |
-| Learned specialization | [LoRA training](docs/DECISION_FINETUNE.md), [output heads](docs/OUTPUT_HEAD.md) |
-| Dataset preparation and report tools | [l2s1-tools](crates/l2s1-tools/README.md) |
-| Recorded model comparisons and their limits | [Model results](docs/MODEL_RESULTS.md) |
+| Build, requests, Rust API, HTTP, runtime options | [Guide](docs/en/GUIDE.md) |
+| Model identity, preflight, calibration, worker ownership | [Model interchangeability](docs/en/MODEL_INTERCHANGEABILITY.md) |
+| Model-specific test commands | [Verification](docs/en/VERIFICATION.md) |
+| Prefix reuse and parallel execution | [Prefix algorithm](docs/en/SEMIF_ALGORITHM.md), [parallel execution](docs/en/PARALLEL_EXECUTION.md) |
+| Learned specialization | [LoRA training](docs/en/DECISION_FINETUNE.md), [output heads](docs/en/OUTPUT_HEAD.md) |
+| Dataset preparation and report tools | [l2s1-tools](docs/en/crates/l2s1-tools/README.md) |
+| Recorded model comparisons and their limits | [Model results](docs/en/MODEL_RESULTS.md) |
 
 ## Repository and development
 
@@ -338,8 +343,8 @@ resident HTTP backend's decisions. See [agent setup](docs/AGENT_INTEGRATION.md).
 | [`docs/`](docs/README.md) | Detailed guides, design notes, and evaluation reports |
 | [`web/`](web) | Svelte documentation site |
 
-Run the pure Rust checks with `cargo test --locked`. Native and model-specific checks are documented in [VERIFICATION.md](docs/VERIFICATION.md). For a bug report, open a [GitHub issue](https://github.com/LuticaCANARD/L2S1/issues) with the command, checkpoint/quantization, runtime/device, and error. Keep English, Korean, and Japanese README changes aligned when submitting documentation updates.
+Run the pure Rust checks with `cargo test --locked`. Native and model-specific checks are documented in [VERIFICATION.md](docs/en/VERIFICATION.md). For a bug report, open a [GitHub issue](https://github.com/LuticaCANARD/L2S1/issues) with the command, checkpoint/quantization, runtime/device, and error. Keep English, Korean, and Japanese README changes aligned when submitting documentation updates.
 
 ## License
 
-L2S1 source is [MIT-licensed](LICENSE). Model weights have their own licenses and are not bundled. Preserve the [third-party notices](THIRD_PARTY_LICENSES.txt) when distributing native components; see [LICENSING.md](docs/LICENSING.md).
+L2S1 source is [MIT-licensed](LICENSE). Model weights have their own licenses and are not bundled. Preserve the [third-party notices](THIRD_PARTY_LICENSES.txt) when distributing native components; see [LICENSING.md](docs/en/LICENSING.md).

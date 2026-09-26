@@ -1,5 +1,9 @@
 # L2S1 experiment tools
 
+[English](../../docs/en/crates/l2s1-tools/README.md) · [한국어](../../docs/ko/crates/l2s1-tools/README.md) · [日本語](../../docs/ja/crates/l2s1-tools/README.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 `l2s1-tools` is a repository-only Rust CLI for preparing frozen datasets, running the local GGUF evaluator, and independently recounting saved predictions. It does not link llama.cpp; commands that perform inference launch the repository's `evaluate_jsonl` example. Build it with:
 
 ```sh

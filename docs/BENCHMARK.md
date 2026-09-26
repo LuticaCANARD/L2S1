@@ -1,5 +1,9 @@
 # Local model comparison benchmark
 
+[English](en/BENCHMARK.md) · [한국어](ko/BENCHMARK.md) · [日本語](ja/BENCHMARK.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 The `decision-rules-v1` benchmark compares existing GGUF checkpoints on **12 requests with 36 labeled decisions**. It measures rule-following correctness, abstention, repeated-output consistency, and inference latency. It does not download or distribute models.
 
 The default is the legacy v1 prompt. Optional v2 state-first prompts and optional prefix reuse are documented in [SEMIF_ALGORITHM.md](SEMIF_ALGORITHM.md). Pass `--prompt-layout state-first` for v2, then `--execution-mode fresh` (default) or `--execution-mode prefix-reuse` to the Python runner, using separate output directories for comparisons. Reports record the requested mode, logical input tokens, reused prefix tokens, and actual evaluated tokens. Compare the same prompt version, model, device, and batch setting; changing the prompt can change accuracy independently of cache reuse.

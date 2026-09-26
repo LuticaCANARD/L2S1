@@ -1,5 +1,9 @@
 # JevBench public evaluation
 
+[English](en/JEVBENCH.md) · [한국어](ko/JEVBENCH.md) · [日本語](ja/JEVBENCH.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 The Rust `l2s1-tools jevbench-public` command connects the existing `evaluate_jsonl` example to the public [JevBench](https://github.com/fstandhartinger/jevbench) tasks. Its public scorer follows the reviewed upstream revision. Earlier recorded Gemma 4 E2B Q8_0 and multi-model matrix results came from the historical Python adapter; new runs use Rust.
 
 The reviewed upstream revision is `f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84`. Preparation rejects another revision or a dirty upstream checkout. The three published JSONL files contain 231 decisions: easy 48, original 72, hard 111. This is a public-subset evaluation, not the complete 534-item evaluation or an official leaderboard submission.

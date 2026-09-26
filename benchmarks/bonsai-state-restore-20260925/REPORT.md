@@ -1,5 +1,9 @@
 # Bonsai request-local state restoration on RTX 3060
 
+[English](../../docs/en/benchmarks/bonsai-state-restore-20260925/REPORT.md) · [한국어](../../docs/ko/benchmarks/bonsai-state-restore-20260925/REPORT.md) · [日本語](../../docs/ja/benchmarks/bonsai-state-restore-20260925/REPORT.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 Measured on 2026-09-25 on `lucatagpu`, an NVIDIA GeForce RTX 3060 12 GiB with driver 595.71.05. The hybrid checkpoint falls back to fresh execution in `prefix-reuse` mode. The explicit `state-restore` mode saves the common prefix's complete llama.cpp sequence state, runs the first suffix on that state, and restores it for each later suffix. The state exists only during one native request. If the snapshot cannot be used, execution falls back to fresh.
 
 ## Setup

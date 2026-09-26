@@ -1,5 +1,9 @@
 # Caltech-101: 30-way vision decision benchmark
 
+[English](../../docs/en/benchmarks/caltech101-vision-20260924/README.md) · [한국어](../../docs/ko/benchmarks/caltech101-vision-20260924/README.md) · [日本語](../../docs/ja/benchmarks/caltech101-vision-20260924/README.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 This is an exploratory zero-shot image classification run of the L2S1 HTTP
 vision API. It exercises the 30-option code sequence path introduced in the
 preceding vision PR, beyond the one-token alphabet limit of 26 options.

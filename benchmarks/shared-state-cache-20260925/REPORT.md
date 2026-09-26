@@ -1,5 +1,9 @@
 # Shared-state prefix reuse, changing questions
 
+[English](../../docs/en/benchmarks/shared-state-cache-20260925/REPORT.md) · [한국어](../../docs/ko/benchmarks/shared-state-cache-20260925/REPORT.md) · [日本語](../../docs/ja/benchmarks/shared-state-cache-20260925/REPORT.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 Measured 2026-09-25 on an RTX 3080 (compute capability 8.6), using the current working tree at commit `72fdef3eabaae579d640cb7b51d18a29dc83791e` with uncommitted changes. The release CUDA build targeted `sm_86`. Both models used context 2048, batch/ubatch 32, four CPU threads, full evidence and the same state-first prompt in both paths. Model loading and checksum verification were excluded.
 
 This report records that local snapshot. The pull request containing it is based on a later `main`; the timing numbers below were not taken on that later tree.

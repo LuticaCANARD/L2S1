@@ -1,5 +1,9 @@
 # Supervised decision LoRA pilot
 
+[English](en/DECISION_FINETUNE.md) · [한국어](ko/DECISION_FINETUNE.md) · [日本語](ja/DECISION_FINETUNE.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 This experiment trains Gemma 4 E2B IT for the existing airline sentiment decision
 interface. It follows the public goal of typed probabilistic decisions; it does
 not reproduce TypeSafe's proprietary RLCD or Jev architecture. It adds no new

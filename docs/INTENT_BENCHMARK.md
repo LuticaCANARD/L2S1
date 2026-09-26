@@ -1,5 +1,9 @@
 # Dynamic answer codes and intent evaluation
 
+[English](en/INTENT_BENCHMARK.md) · [한국어](ko/INTENT_BENCHMARK.md) · [日本語](ja/INTENT_BENCHMARK.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 Candidate count determines one shared code width for the entire decision:
 
 | Candidate count | Codes | Width |

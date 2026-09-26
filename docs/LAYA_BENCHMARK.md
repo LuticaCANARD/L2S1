@@ -1,5 +1,9 @@
 # Laya/Jev task adapter and cache evaluation
 
+[English](en/LAYA_BENCHMARK.md) · [한국어](ko/LAYA_BENCHMARK.md) · [日本語](ja/LAYA_BENCHMARK.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 The Rust `l2s1-tools laya-benchmark` command evaluates the public tasks used by
 [Luni/laya-jev-benchmark](https://huggingface.co/datasets/Luni/laya-jev-benchmark)
 with the local L2S1 JSONL evaluator. It does not load Laya, train on evaluation
@@ -57,8 +61,13 @@ its evidence and exits unsuccessfully.
 
 ## Scoring boundaries
 
-- Raw accuracy is computed before abstention. Accepted accuracy, wrong accepted
-  decisions and coverage are separate.
+- `accuracy` / `raw_top1_accuracy` is raw correct divided by all planned labeled
+  decisions, before abstention. `valid_accuracy` excludes failed decisions and
+  must not replace that denominator. `accepted_accuracy` scores the actual native
+  selected answer, not the upstream raw argmax tie rule. `correct_accepted`,
+  `wrong_accepted`, `coverage` (accepted/all) and `accepted_correct_all`
+  (accepted correct/all) are separate. Results include both `by_type`
+  (`binary`/`choice`/`ordinal`) and `by_workflow` with planned denominators.
 - Binary ties use the upstream `p_true >= 0.5` rule. Choice/ordinal ties use the
   original option order. Native acceptance still follows the engine policy.
 - Phishing reports tie-aware AUROC, recall, precision and hard-label Brier.
@@ -66,10 +75,18 @@ its evidence and exits unsuccessfully.
   half credit instead.
 - Typed tasks report hard accuracy, soft-target Brier/TVD/KL/soft accuracy for
   binary and choice questions, and expected-level MAE/within-one for ordinal
-  questions. Rounded soft targets are normalized. Hard-label Brier is separate.
+  questions. Rounded soft targets are normalized. Hard-label Brier is separate
+  and uses the sum over labels, not a per-class average. `nll_hard` is natural-log
+  loss against the hard gold label, averaged over valid labeled decisions,
+  with probability floored at `1e-12` (maximum 27.631 nats). It includes ordinal
+  labels and is not the soft-gold KL or soft-target cross entropy.
 - `ece_hard` uses ten equal-width bins against argmax correctness. It is not a
   measurement of agreement with the soft teacher distribution, and is not assumed
   interchangeable with an unspecified upstream ECE implementation.
+  `ece_hard_15` additionally reports the same definition with fifteen bins;
+  confidence is the largest candidate probability, not entropy confidence.
+  Both use valid labeled decisions only and place exact bin edges in the
+  upper bin, with probability 1 in the final bin.
 - Probe failures are reported per check. The complement and stability tests are
   heuristics: some paired questions are not strict logical complements, and
   routing variants also change rubric wording. Grounding outputs are reused for

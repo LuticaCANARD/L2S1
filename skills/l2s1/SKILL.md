@@ -5,6 +5,10 @@ description: Integrate and use L2S1 (LLM to System 1) for typed binary, choice, 
 
 # L2S1
 
+[English](../../docs/en/skills/l2s1/SKILL.md) · [한국어](../../docs/ko/skills/l2s1/SKILL.md) · [日本語](../../docs/ja/skills/l2s1/SKILL.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 Turn application state and candidate criteria into typed decisions. Find the L2S1
 checkout from the user's project, dependency path, or MCP `l2s1_document` tool;
 do not assume the current directory is the library repository. The references

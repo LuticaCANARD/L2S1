@@ -1,5 +1,9 @@
 # L2S1 llama.cpp native dependency
 
+[English](../../docs/en/crates/l2s1-llama-sys/README.md) · [한국어](../../docs/ko/crates/l2s1-llama-sys/README.md) · [日本語](../../docs/ja/crates/l2s1-llama-sys/README.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 This crate builds llama.cpp and L2S1's C++ bridge from the same source revision.
 CMake FetchContent downloads ggml-org/llama.cpp commit
 `3d82ef62d47fd74e18f36c5eccbdcf965b617b17` and verifies the source archive's

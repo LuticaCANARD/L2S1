@@ -1,5 +1,9 @@
 # Requests and result handling
 
+[English](../../../docs/en/skills/l2s1/references/decisions.md) · [한국어](../../../docs/ko/skills/l2s1/references/decisions.md) · [日本語](../../../docs/ja/skills/l2s1/references/decisions.md)
+
+[English index](../../../docs/en/README.md) · [한국어 색인](../../../docs/ko/README.md) · [日本語索引](../../../docs/ja/README.md)
+
 The text request below works with core Rust, CLI stdin and HTTP v1:
 
 ```json

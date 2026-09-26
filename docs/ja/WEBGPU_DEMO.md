@@ -1,0 +1,71 @@
+<a id="브라우저-webgpu-실제-추론-데모"></a>
+# ブラウザー WebGPU の実推論デモ
+
+[English](../en/WEBGPU_DEMO.md) · [한국어](../ko/WEBGPU_DEMO.md) · [日本語](WEBGPU_DEMO.md)
+
+[English index](../en/README.md) · [한국어 색인](../ko/README.md) · [日本語索引](README.md)
+
+`/webgpu` は Qwen3 0.6B ONNX をブラウザーで実際に実行します。保存された例や合成スコアを推論結果として表示しません。入力と生成された思考トークンは Web Worker 内で処理し、サーバーの推論 API に送りません。ページを開いた時点ではモデルを自動ダウンロードしません。
+
+<a id="사용"></a>
+## 使い方
+
+1. HTTPS サイトまたは localhost で `/webgpu` を開きます。ダウンロードせずに WebGPU アダプターを確認します。
+2. **모델 다운로드·로드（モデルをダウンロード・読み込み）** を押します。固定リビジョンの Hugging Face モデル・トークナイザーと、固定バージョンの jsDelivr 推論ランタイムを取得します。モデル本体は q4f16 が **569,789,750 バイト（543.4 MiB）**、q4 が **919,096,585 バイト（876.5 MiB）**で、ランタイム・メタデータは別途必要です。
+3. 準備完了後、テキスト状態を編集して **이 브라우저에서 분석（このブラウザーで分析）** を押します。初期例はテキストに猫が明記されているかの binary 判断です。物流の例は choice・binary・ordinal の 3 問をまとめて実行します。
+4. 候補確率、候補コードの確率質量、選択または保留理由、完全な JSON を確認します。入力やポリシーを変更すると前の結果は消去されます。
+
+q4f16 にはアダプターの `shader-f16` 対応が必要です。未対応の場合は q4 を選び、実行 provider は WebGPU のままです。WebGPU がないかアダプターを取得できない場合はモデルをダウンロードしません。対応していない実行を WASM バックエンドやサーバー実行に置き換えません。ONNX Runtime のホスト・制御処理には WASM/CPU が使われる場合があり、すべての演算が GPU で行われるという意味ではありません。
+
+ソフトウェアアダプターを検出した場合は画面に明示します。SwiftShader などのソフトウェア WebGPU 実行は、実際の GPU ハードウェアの性能を示しません。モデルの読み込み、シェーダーのコンパイル、推論時間はブラウザー・デバイス・メモリに依存します。
+
+**모델 해제（モデルを解放）** はメモリを解放し、ダウンロードキャッシュを残します。**캐시 삭제（キャッシュを削除）** は、このデモ専用の `l2s1-webgpu-qwen3-da145310` キャッシュだけを削除します。**중단·메모리 해제（中断・メモリ解放）** は worker を終了するため、再実行にはモデルの再読み込みが必要です。他のサイトやアプリのキャッシュは消しません。
+
+<a id="점수와-생각-후-판단"></a>
+## スコアと思考後の判断
+
+Direct は Qwen3 の公式チャットテンプレートで thinking を無効にし、固定の回答境界 `Answer:\n` における実際の最後の logits を評価します。コード A～Z が既存のトークンを変更せず、ちょうど 1 トークンでこの境界を延長するか確認します。重複トークンや複数トークンのコードにはスコアを返しません。
+
+Thinking は同じ入力で、実際の `<think>` トークンから `</think>` トークンまで greedy 生成します。生成上限は 1～256 トークンです。ブラウザーのトークン数には開始・終了 think トークンを含みます。開始トークンがない場合は `unsupported_thinking`、上限を使い切った場合は `reasoning_limit`、上限より前に生成が終了した場合は `reasoning_incomplete` エラーを返します。未完了の思考を任意に閉じたり、direct スコアで置き換えたりしません。完了後、生成トークン列に固定の回答境界を追加し、新しい prefill でスコアを計算します。KV 再利用による高速化は主張しません。思考内容は表示せず、応答 JSON にも含めません。
+
+`option_probability` は候補コード間の条件付き確率です。`candidate_mass` は全語彙 softmax における、これらのコードの確率質量です。異なる log-sum-exp 正規化で、小さな候補質量でも相対スコアを計算します。相対確率や質量は、正解する確率ではありません。
+
+許容エラー率の入力は、スコアの採用基準 `min_top_probability = 1 - 入力比率` に変換します。**実際の正解に対するエラー率を保証しません。** 候補質量の基準も独立して設定します。同点は保留し、選択値は `null` です。カスタムの失敗文言は、標準コードと元のエラーを保持したまま一緒に表示します。
+
+入力と予約トークンの合計は最大 1,024、リクエストごとの質問は 1～8 問、質問ごとの候補は 2～26 個です。各質問を独立して評価します。`usage.input_tokens` は生成前の入力トークン、`usage.scoring_input_tokens` は思考トークンと回答境界を含むスコア計算用 prefill 全体の長さです。
+
+<a id="런타임과-측정-범위"></a>
+## ランタイムと測定範囲
+
+- npm: `@huggingface/transformers` **4.3.0**、lockfile で固定。
+- ONNX Runtime Web: **1.31.0-dev.20260914-8d85527a0**、Transformers.js の依存関係として固定。ランタイムの WASM ファイルは jsDelivr から取得し、同じ専用キャッシュに保存します。モデルの重みや大きな WASM ファイルは Pages に同梱しません。
+- モデル: [onnx-community/Qwen3-0.6B-ONNX](https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX/tree/da1453100cf3ff33ef56d17983fc7a8648706db6)、revision `da1453100cf3ff33ef56d17983fc7a8648706db6`。
+- 候補スコアの実装: `web/src/lib/webgpu/scoring.ts`。実行の実装: `web/src/lib/webgpu/worker.ts`。
+
+このブラウザーの ONNX 経路は、Rust llama.cpp GGUF 経路とはモデルファイル・量子化・ランタイム・プロンプトが異なります。スコア・選択・性能の同等性は主張しません。既存の typed-decisions 表は RTX 3080 GGUF の測定で、このページの WebGPU 測定ではありません。モデルのライセンスは Apache 2.0 で、コード・依存関係の表記は [Web 依存関係のライセンス](../../web/THIRD_PARTY_LICENSES.txt)にあります。
+
+<a id="실제-실행-검증"></a>
+## 実際の実行検証
+
+2026-09-26 のビルドを Chromium で実モデル確認しました。アダプターは **Google SwiftShader ソフトウェア WebGPU**、モデルは q4 です。ハードウェア GPU 性能や q4f16 実行の確認ではありません。
+
+- `The animal is a cat.` の直接判断は `true` を選びました。候補相対確率は **0.9732201940**、全語彙での候補コード質量は **0.9212860617**、実 logits と token id も返しました。思考生成トークンは 0 です。
+- 思考上限 1 で `reasoning_limit` と **WebGPU 지정 오류 문구（WebGPU 指定エラー文言）**を表示し、スコアは返しませんでした。
+- 同じ入力を direct で再実行すると確率差は **0** でした。モデルの解放も成功しました。
+- ブラウザーエラーと推論サーバーへの要求は **0 件**でした。モデル・ランタイムの取得は別です。
+- 別の実 worker 試験で 48 トークンまでの生成進行を確認しましたが、遅いソフトウェア実行のため中断しました。**WebGPU で思考完了後の判断成功は未検証です。** ネイティブ CPU/CUDA の完了確認は[別の推論記録](REASONING.md)にあります。
+
+この 1 入力の確認は品質ベンチマークや性能優位の証明ではありません。ソフトウェアアダプターの最初の直接判断は、モデル読み込みを除き 63.54 秒でした。応答と画面の根拠は gitignore 対象の `results/typed-decisions-20260926/webgpu-ui-real.json`、`webgpu-ui-direct.png`、`webgpu-ui-limit.png` にあります。
+
+<a id="로컬-개발"></a>
+## ローカル開発
+
+```sh
+cd web
+npm ci
+npm run dev
+```
+
+`http://127.0.0.1:5173/webgpu` を開きます。別の L2S1 推論サーバーは不要です。WebGPU モデルの実行には、対応ブラウザー・アダプターと、モデルを取得するネットワークが必要です。
+
+実装の確認には [Hugging Face 公式 Qwen3 WebGPU worker](https://github.com/huggingface/transformers.js-examples/blob/main/qwen3-webgpu/src/worker.js)、[WebGPU ドキュメント](https://huggingface.co/docs/transformers.js/guides/webgpu)、[量子化ドキュメント](https://huggingface.co/docs/transformers.js/guides/dtypes)、固定 npm パッケージのモデル forward・generation・Tensor・ONNX backend ソースを使いました。

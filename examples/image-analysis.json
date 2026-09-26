@@ -1,0 +1,82 @@
+{
+  "state": {
+    "task": "Inspect the visible object for recycling. Use the photograph as evidence; do not infer hidden contents."
+  },
+  "decisions": [
+    {
+      "id": "material",
+      "instruction": "Which material best describes the main object visible in this photograph?",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {
+            "id": "glass",
+            "criterion": "glass object or bottle"
+          },
+          {
+            "id": "paper",
+            "criterion": "thin paper or printed sheets"
+          },
+          {
+            "id": "cardboard",
+            "criterion": "cardboard packaging or box"
+          },
+          {
+            "id": "plastic",
+            "criterion": "plastic container or object"
+          },
+          {
+            "id": "metal",
+            "criterion": "metal can or object"
+          },
+          {
+            "id": "trash",
+            "criterion": "other or mixed non-recyclable material"
+          }
+        ]
+      },
+      "media_ids": [
+        "photo"
+      ]
+    },
+    {
+      "id": "single_object",
+      "instruction": "Is there one distinct main object in the photograph?",
+      "kind": {
+        "type": "binary",
+        "false_label": "No, there are multiple separate main objects or no identifiable main object.",
+        "true_label": "Yes, there is one distinct main object."
+      },
+      "media_ids": [
+        "photo"
+      ]
+    },
+    {
+      "id": "transparency",
+      "instruction": "How transparent is the main object's material, based only on its visible appearance?",
+      "kind": {
+        "type": "ordinal",
+        "levels": [
+          {
+            "id": "opaque",
+            "criterion": "opaque; cannot see through the material",
+            "value": 0
+          },
+          {
+            "id": "partial",
+            "criterion": "partially transparent or translucent",
+            "value": 1
+          },
+          {
+            "id": "transparent",
+            "criterion": "transparent; can clearly see through the material",
+            "value": 2
+          }
+        ]
+      },
+      "media_ids": [
+        "photo"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # L2S1 guide
 
+[English](en/GUIDE.md) · [한국어](ko/GUIDE.md) · [日本語](ja/GUIDE.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 [English introduction](../README.md) · [한국어 소개](../README.ko.md) · [Recorded model results](MODEL_RESULTS.md)
 
 Detailed build instructions, API contracts, runtime options, and validation procedures.
