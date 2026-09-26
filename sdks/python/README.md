@@ -3,15 +3,19 @@
 Python 3.11+ async SDK for the resident Rust engine. Requests and responses use the
 same HTTP v1 field names, decision kinds, policies and evidence as `@l2s1/node`.
 The package includes Pydantic runtime validation and PEP 561 type information.
-It is prepared for repository/wheel distribution; it has not been published to PyPI.
+[l2s1-sdk 0.1.1](https://pypi.org/project/l2s1-sdk/0.1.1/) is published on PyPI; the import remains `import l2s1`.
 
 ## Install
 
-From a checkout:
+From PyPI:
 
 ```sh
-python -m pip install l2s1-sdk
-# From a source checkout:
+pip install l2s1-sdk==0.1.1
+```
+
+From a source checkout:
+
+```sh
 python -m pip install ./sdks/python
 ```
 
@@ -166,7 +170,6 @@ On Windows use `typescript_fixture.exe`. The Rust fixture exercises resident
 process lifetime, stdio/HTTP batch validation and scoring without a model; it is not native
 GGUF, CUDA or Metal quality/performance evidence. The CI matrix targets Python
 3.11 and 3.14 on Linux, macOS and Windows; local verification covers only the
-actual host. Wheel/sdist artifacts are uploaded by CI; registry publishing is
-not enabled.
+actual host. The release pipeline publishes validated wheel/sdist artifacts to PyPI.
 
-The [release pipeline](../../docs/RELEASE_PIPELINE.md) builds and publishes GitHub Release, npm, PyPI and native Cargo packages after validation. External registry account/trusted-publisher setup is required; this local work has not published packages.
+The [release pipeline](../../docs/RELEASE_PIPELINE.md) publishes validated GitHub Release, npm, PyPI and native Cargo packages using configured trusted publishers. [v0.1.1](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.1) is available.

@@ -6,6 +6,11 @@
   import { locale, translate } from '$lib/i18n';
   import { messages } from '$lib/i18n/landing';
   const t = (key: keyof typeof messages.en, params?: Record<string, string | number>) => translate($locale, messages, key, params);
+  const installs = [
+    { name: 'Python 3.11+', command: 'pip install l2s1-sdk==0.1.1', guide: 'python/README.md' },
+    { name: 'TypeScript / Node.js 22+', command: 'npm install @l2s1/node@0.1.1', guide: 'typescript/README.md' },
+    { name: 'Rust', command: 'cargo add l2s1@0.1.1 --features llama', guide: 'GUIDE.md' }
+  ];
 
   type Kind = 'choice' | 'binary' | 'ordinal';
   type BenchmarkRow = { model: string; cpuP50: number; cudaP50: number; cudaDecisionsPerSecond: number; cudaAbstentionRate: number; nativeCpu: boolean; nativeCuda: boolean };
@@ -78,7 +83,7 @@
   <main id="main">
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="status-dot"></span> {t('eyebrowHero')} <span class="version">v0.1</span></p>
+        <p class="eyebrow"><span class="status-dot"></span> {t('eyebrowHero')} <span class="version">v0.1.1</span></p>
         <h1>{t('heroTitle')}<br /><em>{t('heroTitleEmphasis')}</em></h1>
         <p class="hero-description">{t('heroDescription')}<br />{t('heroDescriptionAnswer')}</p>
         <p class="hero-detail">{t('heroDetail')}</p>
@@ -176,6 +181,11 @@
     <section id="get-started" class="start-section">
       <div><p class="eyebrow">{t('startEyebrow')}</p><h2>{t('startTitle')}<br /><em>{t('startTitleEmphasis')}</em></h2><p>{t('startDescription')}</p><a class="text-link" href="/docs/warehouse.json" rel="external" download>{t('downloadExample')} <span aria-hidden="true">↓</span></a></div>
       <div class="command-panel"><div class="command-header"><span>{t('terminalQuickStart')}</span><button onclick={copyCommand}>{t(copied ? 'copied' : 'copyCommand')}</button></div><pre><code>{command}</code></pre>{#if copyError}<p role="status">{t('clipboardError')}</p>{/if}<div class="command-footer"><span>{t('localInference')}</span><span>{t('noDownloads')}</span></div></div>
+      <div class="install-panel" aria-labelledby="install-heading">
+        <div class="install-heading"><h3 id="install-heading">{t('installPackages')}</h3><a href="https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.1" rel="external">{t('releaseFiles')} ↗</a></div>
+        <div class="install-grid">{#each installs as install (install.name)}<article><h4>{install.name}</h4><pre><code>{install.command}</code></pre><a href={`/docs/docs/${$locale}/${install.guide}`} rel="external">{t('packageGuide')} ↗</a></article>{/each}</div>
+        <p class="install-note">{t('installRequirements')}</p>
+      </div>
     </section>
 
     <section class="license-strip"><div class="license-symbol" aria-hidden="true">↗</div><div><h3>{t('licenseTitle')}</h3><p>{t('licenseDescription')}</p></div><a href={`/docs/docs/${$locale}/LICENSING.md`} rel="external">{t('licenseDetails')}</a></section>
@@ -905,6 +915,15 @@
     display: inline-block;
     margin-top: 15px;
   }
+  .install-panel { grid-column: 1 / -1; min-width: 0; }
+  .install-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 18px; }
+  .install-heading h3 { margin: 0; font-size: 20px; }
+  .install-heading a, .install-grid a { font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+  .install-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+  .install-grid article { min-width: 0; padding: 22px; border: 1px solid var(--theme-border, #d6d9ce); border-radius: 5px; }
+  .install-grid h4 { margin: 0 0 15px; font-size: 14px; }
+  .install-grid pre { margin: 0 0 18px; font: 12px/1.8 monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .start-section > .install-panel > .install-note { max-width: none; margin: 18px 0 0; }
   .command-panel {
     background: var(--theme-terminal, #222e24);
     border-radius: 5px;
