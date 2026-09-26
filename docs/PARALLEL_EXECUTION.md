@@ -1,6 +1,6 @@
 # Parallel question execution
 
-The optional `parallel` mode evaluates independent questions using separate llama.cpp sequence IDs. It shares the loaded model, computes an exact common prompt prefix once per wave, and puts suffix tokens from multiple questions into each decode batch. It does not start multiple threads that concurrently mutate one llama context.
+The supported `parallel` mode evaluates independent questions using separate llama.cpp sequence IDs. It shares the loaded model, computes an exact common prompt prefix once per wave, and puts suffix tokens from multiple questions into each decode batch. It does not start multiple threads that concurrently mutate one llama context.
 
 ```sh
 cargo run --release --locked --features llama-cuda -- \
@@ -93,11 +93,11 @@ Measure total batch completion latency and amortized milliseconds per image
 separately, and compare scores, top choices, abstentions, and task accuracy
 against `fresh` on the same images.
 
-The [120-image TrashNet measurement](benchmarks/trashnet-vision-20260925/REPORT.md#native-four-image-batching-2026-09-26)
+The [120-image TrashNet measurement](../benchmarks/trashnet-vision-20260925/REPORT.md#native-four-image-batching-2026-09-26)
 verified four native decoder sequences on RTX 3080, with lower amortized
 processing times, but all three CUDA checkpoints failed the existing numerical
 equivalence criterion. Selected values or raw rankings changed. Image batching
-is experimental; native batch counters and isolation tests do not establish
+is supported within its model and layout limits; native batch counters and isolation tests do not establish
 score equivalence or task accuracy.
 
 ### Optimization components
@@ -114,8 +114,8 @@ backend-lifetime cache snapshot and `vision_kv_clear` for the last native call.
 All serial media groups receive the same final snapshot so the common response
 metadata remains consistent. These fields do not assert image or KV reuse.
 
-`--vision-projector-reuse` is a separate experimental knob for manual parallel
-ablation: it independently encodes each unique chunk and reuses identical chunks
+`--vision-projector-reuse` is a supported setting for explicit projector reuse in parallel
+mode: it independently encodes each unique chunk and reuses identical chunks
 within one wave. It does not preserve the serial decoder's numerical execution.
 
 ### Combined vision optimizations
@@ -195,4 +195,4 @@ These measurements exclude model/context startup from steady-state latency, do n
 
 ## Numerical limitations
 
-Parallel execution changes batch shapes and can change probabilities, top choices and accepted decisions. Previous labeled-fixture checks observed a fresh abstention becoming a wrong accepted answer; the broader fixture failed the existing 0.02 probability/mass tolerance. The mode remains experimental and opt-in. Compare it against fresh execution on your exact checkpoint and workload, preserving the same policy and equivalence thresholds.
+Parallel execution changes batch shapes and can change probabilities, top choices and accepted decisions. Previous labeled-fixture checks observed a fresh abstention becoming a wrong accepted answer; the broader fixture failed the existing 0.02 probability/mass tolerance. The mode is supported and selected explicitly with `--execution-mode parallel`. Compare it against fresh execution on your exact checkpoint and workload, preserving the same policy and equivalence thresholds.

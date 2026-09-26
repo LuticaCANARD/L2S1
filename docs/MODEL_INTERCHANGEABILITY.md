@@ -106,7 +106,7 @@ State restore finds an exact prefix common to all decisions in one request, roun
 
 Snapshots never leave the native call or survive a request, error, context resize, prompt change or adapter change. Only one snapshot buffer exists. Its size is checked against the configured byte limit before allocation (default 256 MiB; zero forces budget fallback when a common prefix exists). Missing save/restore support or a budget excess triggers explicit fresh fallback; native decode failure remains an error. Diagnostics expose snapshot bytes, save/restore/prefill/suffix wall times and restore count. This bounds the snapshot buffer, not total RSS, GPU allocation, logits buffers or llama.cpp's internal scratch memory. Measure whole-process peak RSS separately.
 
-This is serial state restoration, including for hybrid memory. It requires full evidence transfer and does not enable hybrid parallel sequences or persistent shared-state sessions. It is an explicit execution mode; `prefix-reuse` continues to use KV rollback and falls back to fresh on recurrent/hybrid models. No speedup is promised: state copying can cost more than recomputation. Compare exact models/configurations against fresh execution before deployment. State-first prompts also remain opt-in because their changed ordering can change predictions independently of execution mode. The [Bonsai RTX 3060 validation](benchmarks/bonsai-state-restore-20260925/REPORT.md) exercises the hybrid path with real state saves and restores.
+This is serial state restoration, including for hybrid memory. It requires full evidence transfer and does not enable hybrid parallel sequences or persistent shared-state sessions. It is an explicit execution mode; `prefix-reuse` continues to use KV rollback and falls back to fresh on recurrent/hybrid models. No speedup is promised: state copying can cost more than recomputation. Compare exact models/configurations against fresh execution before deployment. State-first prompts also remain opt-in because their changed ordering can change predictions independently of execution mode. The [Bonsai RTX 3060 validation](../benchmarks/bonsai-state-restore-20260925/REPORT.md) exercises the hybrid path with real state saves and restores.
 
 ## Bounded ownership and scheduling
 
@@ -162,7 +162,7 @@ L2S1_CONFORMANCE_MODELS=MODEL_A.gguf:MODEL_B.gguf \
   --test conformance -- --ignored --nocapture
 ```
 
-Use [`examples/benchmark_optimizations.rs`](examples/benchmark_optimizations.rs) to compare the optional paths with local models:
+Use [`examples/benchmark_optimizations.rs`](../examples/benchmark_optimizations.rs) to compare the optional paths with local models:
 
 ```sh
 cargo run --release --locked --offline --features llama \
