@@ -80,6 +80,13 @@ bool log_info_enabled() {
 }
 } // namespace
 
+struct vision_batch_metrics {
+    size_t projector_encode_calls = 0;
+    size_t projector_batch_max = 0;
+    size_t decoder_calls = 0;
+    size_t decoder_batch_max_sequences = 0;
+};
+
 struct engine {
     llama_model * model = nullptr;
     llama_context * ctx = nullptr;
@@ -93,11 +100,13 @@ struct engine {
     uint32_t sequence_capacity = 1;
     uint32_t allocated_context_size = 0;
     bool parallel_context_dynamic = false;
+    bool parallel_shared_kv = true;
     llama_context_params context_params = {};
     std::string description;
     std::string architecture;
     std::string runtime_libraries;
     std::vector<int32_t> cached_tokens;
+    vision_batch_metrics vision_metrics;
     // Own pattern strings for at least the model lifetime; no static leaks.
     std::vector<std::string> cpu_moe_patterns;
     std::vector<llama_model_tensor_buft_override> placement_overrides;
@@ -378,7 +387,8 @@ extern "C" bool sd_load_lora(engine * e, const char * path, char * error, size_t
 
 // One model allocation; resize only its context when changing execution modes.
 static void ensure_sequences(engine * e, uint32_t capacity,
-        uint32_t requested_context = 0, bool dynamic_context = false) {
+        uint32_t requested_context = 0, bool dynamic_context = false,
+        bool shared_kv = true) {
     if (capacity < 1 || capacity > 32 || e->context_size > uint32_t(INT_MAX) / capacity)
         throw std::runtime_error("parallel width requires 1..32 and context * width <= INT_MAX");
     const uint32_t maximum_context = e->context_size * capacity;
@@ -387,6 +397,7 @@ static void ensure_sequences(engine * e, uint32_t capacity,
         throw std::runtime_error("parallel context reservation is outside the configured limits");
     if (e->ctx && e->sequence_capacity == capacity &&
             e->parallel_context_dynamic == dynamic_context &&
+            e->parallel_shared_kv == shared_kv &&
             (dynamic_context ? e->allocated_context_size >= requested_context :
                 e->allocated_context_size == requested_context)) return;
     sd_clear(e);
@@ -395,7 +406,10 @@ static void ensure_sequences(engine * e, uint32_t capacity,
     auto cp = e->context_params;
     cp.n_seq_max = capacity;
     cp.n_ctx = requested_context;
-    cp.kv_unified = capacity > 1 ? true : e->context_params.kv_unified;
+    // Text prefix sharing copies KV cells across sequence IDs and needs one
+    // unified stream. Independent images use separate streams so attention
+    // batches avoid scanning the other images' masked KV entries.
+    cp.kv_unified = capacity > 1 ? shared_kv : e->context_params.kv_unified;
     e->ctx = llama_init_from_model(e->model, cp);
     if (!e->ctx) throw std::runtime_error("parallel context allocation failed; reduce parallel width");
     if (e->adapter) {
@@ -410,6 +424,7 @@ static void ensure_sequences(engine * e, uint32_t capacity,
     e->sequence_capacity = capacity;
     e->allocated_context_size = requested_context;
     e->parallel_context_dynamic = dynamic_context;
+    e->parallel_shared_kv = shared_kv;
 }
 
 // Both output paths use identical decoding and prefix handling. The returned
@@ -560,6 +575,255 @@ extern "C" bool sd_forward_vision(engine * e,
         if (!output) throw std::runtime_error("missing vision final logits");
         std::copy_n(output, logits_count, logits);
         *input_tokens = tokens;
+        sd_clear(e);
+        return true;
+    } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }
+      catch (...) { report(error, error_cap, "unknown native exception"); }
+    if (e) sd_clear(e);
+    return false;
+}
+
+// Independent media inputs retain their own sequence IDs and trust-separated
+// prompt parts. Compatible image chunks share a projector encode; decoder
+// batches mix rows from several sequences without sharing image KV entries.
+struct vision_input {
+    const char * prefix; size_t prefix_len;
+    const char * data_before; size_t before_len;
+    const uint8_t * image; size_t image_len;
+    const char * data_after; size_t after_len;
+    const char * suffix; size_t suffix_len;
+};
+
+extern "C" bool sd_vision_batch_metrics(const engine * e, vision_batch_metrics * out) noexcept {
+    if (!e || !out) return false;
+    *out = e->vision_metrics;
+    return true;
+}
+
+extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inputs,
+        int32_t sequences, uint32_t capacity, bool dynamic_context,
+        float * logits, size_t logits_count, size_t * input_tokens,
+        char * error, size_t error_cap) noexcept {
+    try {
+        if (!e || !e->vision || !inputs || !logits || !input_tokens ||
+                sequences < 1 || sequences > int32_t(capacity) || capacity > 32)
+            throw std::runtime_error("invalid parallel vision arguments");
+        e->vision_metrics = {};
+        if (llama_model_is_recurrent(e->model) || llama_model_is_hybrid(e->model))
+            throw std::runtime_error("parallel vision is unsupported for recurrent/hybrid models");
+        const size_t vocab = size_t(sd_vocab_size(e));
+        if (logits_count != vocab * size_t(sequences))
+            throw std::runtime_error("wrong parallel vision logits buffer size");
+        using chunks_owner = std::unique_ptr<mtmd_input_chunks, decltype(&mtmd_input_chunks_free)>;
+        struct segment {
+            const mtmd_input_chunk * chunk;
+            std::vector<float> embeddings;
+            size_t offset = 0;
+        };
+        struct sequence {
+            chunks_owner chunks{nullptr, mtmd_input_chunks_free};
+            std::vector<segment> segments;
+            size_t current = 0;
+            llama_pos position = 0;
+        };
+        std::vector<sequence> seqs(static_cast<size_t>(sequences));
+        std::vector<segment *> media;
+        size_t maximum_tokens = 0;
+        const size_t n_embd = size_t(llama_model_n_embd_inp(e->model));
+        const bool mrope = mtmd_decode_use_mrope(e->vision);
+        for (int32_t s = 0; s < sequences; ++s) {
+            const auto & in = inputs[s];
+            if (!in.prefix || !in.data_before || !in.image || !in.image_len || !in.data_after || !in.suffix)
+                throw std::runtime_error("invalid parallel vision input");
+            auto opt = mtmd_helper_init_opt_default();
+            auto wrapped = mtmd_helper_bitmap_init_from_buf(e->vision, in.image, in.image_len, false, opt);
+            std::unique_ptr<mtmd_bitmap, decltype(&mtmd_bitmap_free)> bitmap(wrapped.bitmap, mtmd_bitmap_free);
+            if (wrapped.video_ctx) {
+                mtmd_helper_video_free(wrapped.video_ctx);
+                throw std::runtime_error("video input is unsupported; provide still images");
+            }
+            if (!bitmap || mtmd_bitmap_is_audio(bitmap.get()))
+                throw std::runtime_error("image must be a supported still-image format");
+            mtmd_input_text texts[] = {
+                {in.prefix, in.prefix_len, false, true},
+                {in.data_before, in.before_len, false, false},
+                {in.data_after, in.after_len, false, false},
+                {in.suffix, in.suffix_len, false, true},
+            };
+            mtmd_input_part parts[] = {
+                {&texts[0], nullptr}, {&texts[1], nullptr}, {nullptr, bitmap.get()},
+                {&texts[2], nullptr}, {&texts[3], nullptr},
+            };
+            const mtmd_input_part * ptrs[] = {&parts[0], &parts[1], &parts[2], &parts[3], &parts[4]};
+            auto & seq = seqs[size_t(s)];
+            seq.chunks.reset(mtmd_input_chunks_init());
+            if (!seq.chunks || mtmd_tokenize_from_parts(e->vision, seq.chunks.get(), ptrs, 5, true) != 0)
+                throw std::runtime_error("parallel vision prompt tokenization failed");
+            const size_t tokens = mtmd_helper_get_n_tokens(seq.chunks.get());
+            const auto positions = mtmd_helper_get_n_pos(seq.chunks.get());
+            if (!tokens || tokens > e->context_size || positions <= 0 || uint32_t(positions) > e->context_size)
+                throw std::runtime_error("parallel vision input exceeds per-question context; truncation is disabled");
+            input_tokens[s] = tokens;
+            maximum_tokens = std::max(maximum_tokens, tokens);
+            const size_t size = mtmd_input_chunks_size(seq.chunks.get());
+            seq.segments.reserve(size);
+            for (size_t c = 0; c < size; ++c) {
+                auto * chunk = mtmd_input_chunks_get(seq.chunks.get(), c);
+                if (!mtmd_input_chunk_get_n_tokens(chunk)) continue;
+                const auto type = mtmd_input_chunk_get_type(chunk);
+                if (type != MTMD_INPUT_CHUNK_TYPE_TEXT && type != MTMD_INPUT_CHUNK_TYPE_IMAGE)
+                    throw std::runtime_error("parallel vision only supports text and image chunks");
+                seq.segments.push_back({chunk, {}, 0});
+            }
+            if (seq.segments.empty() || mtmd_input_chunk_get_type(seq.segments.back().chunk) != MTMD_INPUT_CHUNK_TYPE_TEXT)
+                throw std::runtime_error("parallel vision requires a final text suffix for decision logits");
+        }
+        // Segment addresses are stable after every sequence has finished building.
+        for (auto & seq : seqs) for (auto & seg : seq.segments)
+            if (mtmd_input_chunk_get_type(seg.chunk) == MTMD_INPUT_CHUNK_TYPE_IMAGE) media.push_back(&seg);
+        const uint64_t maximum = uint64_t(e->context_size) * capacity;
+        if (maximum > uint64_t(INT_MAX)) throw std::runtime_error("parallel vision context exceeds INT_MAX");
+        // Separate streams divide the context evenly. Reserve the longest
+        // image prompt in every stream, rather than the sum of unequal lengths.
+        // Token batch headroom remains within the configured per-image limit.
+        const uint64_t per_sequence = std::min(uint64_t(e->context_size),
+            uint64_t(maximum_tokens) + e->batch_size);
+        const uint32_t requested = dynamic_context && capacity > 1 ?
+            uint32_t(per_sequence * capacity) : uint32_t(maximum);
+        ensure_sequences(e, capacity, requested, dynamic_context, false);
+        sd_clear(e);
+        // Upstream can decline a projector batch for incompatible resolutions or
+        // architectures. Encode those smaller groups, but keep decoder batching.
+        for (size_t start = 0; start < media.size();) {
+            std::unique_ptr<mtmd_batch, decltype(&mtmd_batch_free)> batch(mtmd_batch_init(e->vision), mtmd_batch_free);
+            if (!batch) throw std::runtime_error("vision projector batch allocation failed");
+            size_t end = start;
+            while (end < media.size()) {
+                const int rc = mtmd_batch_add_chunk(batch.get(), media[end]->chunk);
+                if (rc == 0) { ++end; continue; }
+                if (end > start && (rc == 2 || rc == 3)) break;
+                throw std::runtime_error("vision projector batch preparation failed");
+            }
+            if (mtmd_batch_encode(batch.get()) != 0)
+                throw std::runtime_error("vision projector batch encoding failed");
+            ++e->vision_metrics.projector_encode_calls;
+            e->vision_metrics.projector_batch_max = std::max(e->vision_metrics.projector_batch_max, end - start);
+            for (size_t i = start; i < end; ++i) {
+                const auto * embd = mtmd_batch_get_output_embd(batch.get(), media[i]->chunk);
+                if (!embd) throw std::runtime_error("missing batched vision embeddings");
+                const size_t count = mtmd_input_chunk_get_n_tokens(media[i]->chunk) * n_embd;
+                media[i]->embeddings.assign(embd, embd + count);
+            }
+            start = end;
+        }
+        auto advance = [&](sequence & seq) {
+            while (seq.current < seq.segments.size()) {
+                auto & seg = seq.segments[seq.current];
+                if (seg.offset < mtmd_input_chunk_get_n_tokens(seg.chunk)) break;
+                seq.position += mtmd_input_chunk_get_n_pos(seg.chunk);
+                ++seq.current;
+            }
+        };
+        struct row { int32_t seq; segment * seg; size_t offset; llama_pos base; bool output; };
+        int32_t completed = 0;
+        while (completed < sequences) {
+            for (auto & seq : seqs) advance(seq);
+            // Token and embedding inputs cannot coexist in llama_batch. Run all
+            // ready text rows together, then all ready image rows together.
+            bool text_mode = false;
+            for (auto & seq : seqs) if (seq.current < seq.segments.size() &&
+                    mtmd_input_chunk_get_type(seq.segments[seq.current].chunk) == MTMD_INPUT_CHUNK_TYPE_TEXT) text_mode = true;
+            bool non_causal = false;
+            if (!text_mode) for (auto & seq : seqs) if (seq.current < seq.segments.size()) {
+                non_causal = mtmd_decode_use_non_causal(e->vision, seq.segments[seq.current].chunk);
+                break;
+            }
+            std::vector<row> rows;
+            const size_t limit = non_causal ? std::min(e->batch_size, llama_n_ubatch(e->ctx)) : e->batch_size;
+            if (non_causal) {
+                // Bidirectional image attention must see the complete image in
+                // one physical microbatch. Several complete independent images
+                // may share it; sequence IDs keep their masks isolated.
+                for (int32_t s = 0; s < sequences; ++s) {
+                    auto & seq = seqs[size_t(s)];
+                    if (seq.current == seq.segments.size()) continue;
+                    auto & seg = seq.segments[seq.current];
+                    if (!mtmd_decode_use_non_causal(e->vision, seg.chunk)) continue;
+                    const size_t count = mtmd_input_chunk_get_n_tokens(seg.chunk);
+                    if (count > limit) throw std::runtime_error("non-causal vision image requires batch and ubatch >= image tokens");
+                    if (rows.size() + count > limit) continue;
+                    while (seg.offset < count) rows.push_back({s, &seg, seg.offset++, seq.position, false});
+                }
+            } else {
+                bool progress = true;
+                while (progress && rows.size() < limit) {
+                    progress = false;
+                    for (int32_t s = 0; s < sequences && rows.size() < limit; ++s) {
+                        auto & seq = seqs[size_t(s)];
+                        advance(seq);
+                        if (seq.current == seq.segments.size()) continue;
+                        auto & seg = seq.segments[seq.current];
+                        const bool text = mtmd_input_chunk_get_type(seg.chunk) == MTMD_INPUT_CHUNK_TYPE_TEXT;
+                        if (text != text_mode || (!text && mtmd_decode_use_non_causal(e->vision, seg.chunk))) continue;
+                        const bool output = seq.current + 1 == seq.segments.size() &&
+                            seg.offset + 1 == mtmd_input_chunk_get_n_tokens(seg.chunk);
+                        rows.push_back({s, &seg, seg.offset++, seq.position, output});
+                        progress = true;
+                    }
+                }
+            }
+            if (rows.empty()) throw std::runtime_error("parallel vision scheduler made no progress");
+            const size_t count = rows.size();
+            std::vector<llama_token> tokens(text_mode ? count : 0);
+            std::vector<float> embeddings(text_mode ? 0 : count * n_embd);
+            const size_t axes = !text_mode && mrope ? 4 : 1;
+            std::vector<llama_pos> positions(count * axes);
+            std::vector<int32_t> n_seq(count, 1);
+            std::vector<llama_seq_id> ids(count);
+            std::vector<llama_seq_id *> id_ptrs(count);
+            std::vector<int8_t> outputs(count, 0);
+            std::vector<bool> participating(size_t(sequences), false);
+            for (size_t i = 0; i < count; ++i) {
+                const auto & row = rows[i];
+                ids[i] = row.seq; id_ptrs[i] = &ids[i]; outputs[i] = row.output;
+                participating[size_t(row.seq)] = true;
+                if (text_mode) {
+                    size_t size;
+                    const auto * ts = mtmd_input_chunk_get_tokens_text(row.seg->chunk, &size);
+                    tokens[i] = ts[row.offset];
+                    positions[i] = row.base + llama_pos(row.offset);
+                } else {
+                    std::copy_n(row.seg->embeddings.data() + row.offset * n_embd, n_embd, embeddings.data() + i * n_embd);
+                    if (mrope) {
+                        const auto * image = mtmd_input_chunk_get_tokens_image(row.seg->chunk);
+                        if (!image) throw std::runtime_error("missing image position metadata");
+                        const auto pos = mtmd_image_tokens_get_decoder_pos(image, row.base, row.offset);
+                        positions[i] = pos.t;
+                        positions[i + count] = pos.y;
+                        positions[i + count * 2] = pos.x;
+                        positions[i + count * 3] = pos.z;
+                    } else positions[i] = row.base + llama_pos(row.offset);
+                }
+            }
+            llama_batch batch = {int32_t(count), text_mode ? tokens.data() : nullptr,
+                text_mode ? nullptr : embeddings.data(), positions.data(), n_seq.data(), id_ptrs.data(), outputs.data()};
+            struct attention_guard {
+                llama_context * ctx; bool non_causal;
+                ~attention_guard() { if (non_causal) llama_set_causal_attn(ctx, true); }
+            } guard{e->ctx, non_causal};
+            if (non_causal) llama_set_causal_attn(e->ctx, false);
+            const int rc = llama_decode(e->ctx, batch);
+            if (rc != 0) throw std::runtime_error("parallel vision decode failed (llama_decode=" + std::to_string(rc) + ")");
+            ++e->vision_metrics.decoder_calls;
+            const size_t width = size_t(std::count(participating.begin(), participating.end(), true));
+            e->vision_metrics.decoder_batch_max_sequences = std::max(e->vision_metrics.decoder_batch_max_sequences, width);
+            for (size_t i = 0; i < count; ++i) if (rows[i].output) {
+                const auto * output = llama_get_logits_ith(e->ctx, int32_t(i));
+                if (!output) throw std::runtime_error("missing parallel vision final logits");
+                std::copy_n(output, vocab, logits + size_t(rows[i].seq) * vocab);
+                ++completed;
+            }
+        }
         sd_clear(e);
         return true;
     } catch (const std::exception & ex) { report(error, error_cap, ex.what()); }

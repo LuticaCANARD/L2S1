@@ -14,6 +14,25 @@ use std::collections::{HashMap, HashSet};
 pub trait HttpDecisionBackend {
     fn capabilities(&self) -> Value;
     fn decide_json(&mut self, request: &DecisionRequest, images: &[&[u8]]) -> crate::Result<Value>;
+
+    /// Evaluate validated media groups. The default keeps backend calls serial;
+    /// runtimes with native image batching can override this boundary.
+    fn decide_json_batch(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[Vec<&[u8]>],
+    ) -> crate::Result<Vec<Value>> {
+        if requests.len() != images.len() {
+            return Err(Error::Invalid(
+                "media group count does not match requests".into(),
+            ));
+        }
+        requests
+            .iter()
+            .zip(images)
+            .map(|(request, images)| self.decide_json(request, images))
+            .collect()
+    }
 }
 
 #[cfg(any(feature = "llama", feature = "wgpu", test))]
@@ -45,6 +64,11 @@ fn local_decide_json<B: VisionDecisionBackend>(
             ));
         }
     };
+    local_response_json(response)
+}
+
+#[cfg(any(feature = "llama", feature = "wgpu", test))]
+fn local_response_json(response: crate::DecisionResponse) -> crate::Result<Value> {
     let results = response.results.into_iter().map(|result| {
         let (value, estimate) = match result.value {
             crate::DecisionValue::Binary { value, p_true } => (json!({"type":"binary","value":value}), json!({"p_true":p_true})),
@@ -70,10 +94,59 @@ fn local_decide_json<B: VisionDecisionBackend>(
 #[cfg(feature = "llama")]
 impl HttpDecisionBackend for crate::llama::LlamaBackend {
     fn capabilities(&self) -> Value {
-        local_capabilities(&self.info())
+        let info = self.info();
+        let mut capabilities = local_capabilities(&info);
+        capabilities["media"]["image"]["parallel"] = json!({
+            "supported": info.vision_projector_path.is_some(),
+            "enabled": info.execution_mode == crate::ExecutionMode::Parallel,
+            "max_decisions_per_wave": info.parallel_width,
+            "max_options_per_decision": 26,
+            "isolated_sequences": true,
+            "projector_encoding": "batched_when_compatible",
+        });
+        capabilities
     }
     fn decide_json(&mut self, request: &DecisionRequest, images: &[&[u8]]) -> crate::Result<Value> {
         local_decide_json(self, request, images)
+    }
+    fn decide_json_batch(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[Vec<&[u8]>],
+    ) -> crate::Result<Vec<Value>> {
+        if requests.len() != images.len() {
+            return Err(Error::Invalid(
+                "media group count does not match requests".into(),
+            ));
+        }
+        if self.info().execution_mode == crate::ExecutionMode::Parallel
+            && !requests.is_empty()
+            && images.iter().all(|images| images.len() == 1)
+        {
+            let images = images.iter().map(|images| images[0]).collect::<Vec<_>>();
+            let responses = self.decide_vision_batch(requests, &images)?;
+            let metrics = self.vision_batch_metrics()?;
+            responses
+                .into_iter()
+                .map(|response| {
+                    let mut output = local_response_json(response)?;
+                    output["backend"]["details"]["vision_batch"] = json!({
+                        "scope": "last_native_wave",
+                        "projector_encode_calls": metrics.projector_encode_calls,
+                        "projector_batch_max": metrics.projector_batch_max,
+                        "decoder_calls": metrics.decoder_calls,
+                        "decoder_batch_max_sequences": metrics.decoder_batch_max_sequences,
+                    });
+                    Ok(output)
+                })
+                .collect()
+        } else {
+            requests
+                .iter()
+                .zip(images)
+                .map(|(request, images)| self.decide_json(request, images))
+                .collect()
+        }
     }
 }
 
@@ -250,9 +323,8 @@ pub(super) fn run_request<B: HttpDecisionBackend>(
             Ok(selected_ids)
         })
         .collect::<crate::Result<Vec<_>>>()?;
-    let mut results = Vec::with_capacity(request.decisions.len());
-    let mut response_backend = None;
-    let mut response_policy = None;
+    let mut groups = Vec::new();
+    let mut group_images = Vec::new();
     let mut index = 0;
     while index < request.decisions.len() {
         let selected_ids = &selections[index];
@@ -260,15 +332,28 @@ pub(super) fn run_request<B: HttpDecisionBackend>(
         while end < request.decisions.len() && selections[end] == *selected_ids {
             end += 1;
         }
-        let images = selected_ids
-            .iter()
-            .map(|id| media.get(id).expect("validated media ID").as_slice())
-            .collect::<Vec<_>>();
-        let batch = DecisionRequest {
+        group_images.push(
+            selected_ids
+                .iter()
+                .map(|id| media.get(id).expect("validated media ID").as_slice())
+                .collect::<Vec<_>>(),
+        );
+        groups.push(DecisionRequest {
             state: wire.state.clone(),
             decisions: request.decisions[index..end].to_vec(),
-        };
-        let output = backend.decide_json(&batch, &images)?;
+        });
+        index = end;
+    }
+    let outputs = backend.decide_json_batch(&groups, &group_images)?;
+    if outputs.len() != groups.len() {
+        return Err(Error::Backend(
+            "backend returned incorrect media group count".into(),
+        ));
+    }
+    let mut results = Vec::with_capacity(request.decisions.len());
+    let mut response_backend = None;
+    let mut response_policy = None;
+    for (batch, output) in groups.iter().zip(&outputs) {
         let backend_info = output
             .get("backend")
             .filter(|info| {
@@ -325,7 +410,6 @@ pub(super) fn run_request<B: HttpDecisionBackend>(
             ));
         }
         results.extend(batch_results.iter().cloned());
-        index = end;
     }
     Ok(
         json!({"api_version":1,"backend":response_backend,"policy":response_policy,"results":results}),
@@ -385,5 +469,102 @@ mod tests {
             2
         );
         assert_eq!(output["results"][0]["usage"]["input_tokens"], 12);
+    }
+
+    #[derive(Default)]
+    struct BatchProbe {
+        calls: usize,
+        observed: Vec<(Value, Vec<String>, Vec<Vec<u8>>)>,
+    }
+
+    impl HttpDecisionBackend for BatchProbe {
+        fn capabilities(&self) -> Value {
+            json!({"media":{"image":{"supported":true,"max_per_decision":1}}})
+        }
+        fn decide_json(&mut self, _: &DecisionRequest, _: &[&[u8]]) -> crate::Result<Value> {
+            panic!("validated image groups should reach the batch boundary")
+        }
+        fn decide_json_batch(
+            &mut self,
+            requests: &[DecisionRequest],
+            images: &[Vec<&[u8]>],
+        ) -> crate::Result<Vec<Value>> {
+            self.calls += 1;
+            self.observed = requests
+                .iter()
+                .zip(images)
+                .map(|(request, images)| {
+                    (
+                        request.state.clone(),
+                        request
+                            .decisions
+                            .iter()
+                            .map(|decision| decision.id.clone())
+                            .collect(),
+                        images.iter().map(|image| image.to_vec()).collect(),
+                    )
+                })
+                .collect();
+            Ok(requests
+                .iter()
+                .map(|request| {
+                    json!({
+                        "backend":{"runtime":"batch-probe","model":"test"}, "policy":null,
+                        "results":request.decisions.iter().map(|decision| json!({
+                            "id":decision.id,"value":{"type":"binary","value":true},
+                            "status":"selected","abstention_reasons":[],
+                            "evidence":{"type":"model_scored"},"usage":{},
+                        })).collect::<Vec<_>>(),
+                    })
+                })
+                .collect())
+        }
+    }
+
+    #[test]
+    fn validated_media_groups_reach_one_batch_call_in_decision_order() {
+        let mut backend = BatchProbe::default();
+        let body = json!({
+            "state":{"tenant":"alpha"},
+            "media":[{"id":"a","type":"image","data_base64":"Zmlyc3Q="},
+                {"id":"b","type":"image","data_base64":"c2Vjb25k"}],
+            "decisions":([("one","a"),("two","b"),("three","a")].iter()
+                .map(|(id, image)| json!({"id":id,"instruction":"Choose",
+                    "kind":{"type":"binary","false_label":"no","true_label":"yes"},
+                    "media_ids":[image]})).collect::<Vec<_>>()),
+        });
+        let output = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap();
+        assert_eq!(backend.calls, 1);
+        assert_eq!(backend.observed.len(), 3);
+        assert_eq!(backend.observed[0].2, vec![b"first".to_vec()]);
+        assert_eq!(backend.observed[1].2, vec![b"second".to_vec()]);
+        assert_eq!(backend.observed[2].2, vec![b"first".to_vec()]);
+        assert!(
+            backend
+                .observed
+                .iter()
+                .all(|(state, _, _)| state == &body["state"])
+        );
+        assert_eq!(
+            output["results"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|result| result["id"].as_str().unwrap())
+                .collect::<Vec<_>>(),
+            vec!["one", "two", "three"]
+        );
+    }
+
+    #[test]
+    fn invalid_media_reference_fails_before_batch_dispatch() {
+        let mut backend = BatchProbe::default();
+        let body = json!({"state":{},"decisions":[{
+            "id":"one","instruction":"Choose",
+            "kind":{"type":"binary","false_label":"no","true_label":"yes"},
+            "media_ids":["missing"],
+        }]});
+        assert!(run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).is_err());
+        assert_eq!(backend.calls, 0);
     }
 }

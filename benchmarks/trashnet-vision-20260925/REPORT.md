@@ -11,13 +11,15 @@ Evaluated on 2026-09-25. Source: [garythung/trashnet](https://github.com/garythu
 
 ## Results
 
-| Model (Q8_0) | Correct / all | Coverage | Correct / accepted | Raw top-1 / all | HTTP latency p50 / p95¹ |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Gemma 4 E2B it | 64/120 = 53.3% | 113/120 = 94.2% | 64/113 = 56.6% | 64/120 = 53.3% | 79.1 / 88.9 ms |
-| Qwen3-VL 2B Instruct | 91/120 = 75.8% | 115/120 = 95.8% | 91/115 = 79.1% | 95/120 = 79.2% | 101.1 / 116.2 ms |
-| SmolVLM 256M Instruct | 0/120 = 0% | 0/120 = 0% | undefined | 13/120 = 10.8% | 108.7 / 126.0 ms |
+| Model (Q8_0) | Correct / all | Coverage | Correct / accepted | Raw top-1 / all | HTTP latency p50 / p95¹ | Fresh → native batch4 mean/ image² | Native correct / all (accepted)² |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Gemma 4 E2B it | 64/120 = 53.3% | 113/120 = 94.2% | 64/113 = 56.6% | 64/120 = 53.3% | 79.1 / 88.9 ms | 77.4 → 69.7 ms (-10.0%) | 63/120 (112) |
+| Qwen3-VL 2B Instruct | 91/120 = 75.8% | 115/120 = 95.8% | 91/115 = 79.1% | 95/120 = 79.2% | 101.1 / 116.2 ms | 101.7 → 86.7 ms (-14.7%) | 93/120 (117) |
+| SmolVLM 256M Instruct | 0/120 = 0% | 0/120 = 0% | undefined | 13/120 = 10.8% | 108.7 / 126.0 ms | 109.1 → 67.1 ms (-38.5%) | 0/120 (0) |
 
 ¹ Serial request time on this machine, with models already loaded; the first request is included. Startup to HTTP health: Gemma 28.3 s, Qwen3-VL 11.3 s, and SmolVLM 2.5 s. These figures do not represent concurrent throughput or other hardware.
+
+² Measured on 2026-09-26 with the same frozen baseline prompt and images. Both modes use four-image HTTP requests; `fresh` runs them serially and `parallel` uses four independent native sequences/KV streams. One untimed group warms context/graph allocation, then three full 120-image passes are timed in each mode. Mean/image is amortized group completion time, not individual response latency; model startup is excluded. These new columns use a different warmup/repetition protocol from the original single-image latency column. **All three CUDA comparisons fail the existing numerical equivalence criterion; batching remains experimental.** Native accepted counts are in parentheses. SmolVLM still abstains on all images. See the native batch section below.
 
 The balanced six-class sample has a 16.7% constant-class baseline. Qwen3-VL got 27 more accepted answers right than Gemma: on matched images, Qwen alone was correct on 30, Gemma alone on 3, both on 61, and neither on 26. Qwen's five abstentions were all due to low top-option probability; four had the correct raw top-1. It missed every `trash` image despite performing well on the other five classes. Gemma also had uneven class performance. SmolVLM's 0% correct/all is caused by **120 abstentions**, not by 120 accepted wrong answers. Its six-option candidate mass ranged from 0.00000157 to 0.000980, below the default minimum; 113 responses also had low top-option probability. Candidate mass is coverage of the named options in the model's next-token distribution, not a probability that the answer is correct. Its forced top-1 result is also below the constant-class baseline.
 
@@ -82,6 +84,26 @@ The next experiment froze `traits_v2` in `experiment-traits-v2.json` before infe
 For Qwen, lowering the old prompt's threshold alone yields 95 correct, the same total as the detailed prompt at 0.5. The detailed prompt moves Qwen's accepted `trash` results from 0/20 to 13/20, but loses correct answers in cardboard (19→16), metal (19→15), and paper (18→15); plastic rises from 16→17. At 0.8, the detailed prompt accepts fewer answers and scores 85/120. For Gemma, lowering the old threshold adds no correct answers, whereas the detailed prompt increases raw top-1 and accepted correct from 64 to 69. These are different class tradeoffs, not a consistent model-wide gain from detail alone.
 
 The actual `traits_v2`/0.5 HTTP median times were 149.4 ms for Qwen, 145.3 ms for Gemma, and 138.1 ms for SmolVLM; these are single serial runs with a longer prompt. SmolVLM still abstained on all 120: its candidate mass was at most 0.00293, below the unchanged 0.05 floor. A lower top-option threshold cannot resolve that failure mode. Because prompts were revised after inspecting earlier results on this same sample, the observed changes are exploratory and need a fresh held-out sample before treating them as generalizable.
+
+## Native four-image batching (2026-09-26)
+
+The native bridge batches compatible mtmd projector chunks and schedules text/image decoder rows from independent prompts. The decoder uses separate KV streams and preserves each image’s M-RoPE positions. All 90 timed parallel HTTP requests per model reported `decoder_batch_max_sequences=4`; encoder batching is a separate measurement. Qwen’s projector stayed at one image per encode, Gemma reached four, and the exact shape distributions are in `native-batch4-summary.json`.
+
+The same executable SHA-256 was used for all final runs: `78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee`. CUDA architecture 86, context 4096 per question, token batch/microbatch 256, threads 4, flash attention off, width 4, model loading by read, full evidence, and the unchanged 0.8/0.05 policy were used. Modes ran fresh-first for Qwen/SmolVLM and parallel-first for Gemma. All three repetitions gave the same selected values and rankings within each mode.
+
+| Model | Changed selected images /120 | Changed raw top-1 images /120 | Max option probability delta | Max candidate mass delta | Existing equivalence criterion |
+|---|---:|---:|---:|---:|---|
+| Qwen3-VL 2B Instruct | 2 | 0 | 0.086350 | 1.68464e-05 | failed |
+| Gemma 4 E2B it | 6 | 5 | 0.955545 | 0.000122204 | failed |
+| SmolVLM 256M Instruct | 0 | 8 | 0.193323 | 0.0006789 | failed |
+
+Qwen accepted correct answers increased from 91 to 93, while raw top-1 stayed 95/120. Gemma accepted correct answers changed from 64 to 63; raw top-1 stayed 64/120 in aggregate but five individual predictions changed. SmolVLM accepted none in either mode and raw top-1 correct changed 13 → 12. These are task-specific changes from a different numerical execution path, not an accuracy improvement claim. No tolerance was enlarged: equivalence requires probability/mass differences below 0.02 and unchanged selections, rankings, abstention reasons, and token counts. Input token counts matched throughout.
+
+Functional isolation is tested separately: the native color-fixture test passed on all three CUDA models, including changing one image without changing other image logits, request order, partial waves, invalid inputs, and recovery. Fresh-versus-batch numerical parity remains a separate ignored real-model test. A four-image Qwen CPU diagnostic matched serial scores exactly; the corresponding CUDA diagnostic did not. Gemma’s batched projector embeddings also differed from serial embeddings on CUDA, and disabling CUDA fusion reduced but did not eliminate a four-image score difference. Those probes do not establish the cause or full-dataset CPU equivalence.
+
+The measured improvements therefore apply to this machine and this experimental execution mode. The default remains fresh. Metal runtime was not verified for this patch.
+
+Reproduce with `python3 benchmarks/trashnet-vision-20260925/evaluate_batch.py --help`. The script freezes each four-image payload, checks original image hashes and RTX 3080 offload, records full real responses and native counters, and terminates/waits for each server. `native-batch4-summary.json` retains model/projector/binary/sample identities, every pass duration, quality counts, changed image indices, and counter distributions. Full response JSONL and logs remain in the ignored `results/vision-trashnet-20260926-native-batch4-final/` directory.
 
 ## Reproduce and inspect
 

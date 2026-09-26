@@ -1,5 +1,162 @@
 #![cfg(feature = "llama")]
-use l2s1::{DecisionPolicy, DecisionRequest, llama::LlamaBackend};
+use l2s1::{DecisionPolicy, DecisionRequest, DecisionResponse, ExecutionMode, llama::LlamaBackend};
+
+fn assert_vision_equivalent(serial: &DecisionResponse, batched: &DecisionResponse) {
+    assert_eq!(serial.results.len(), batched.results.len());
+    for (a, b) in serial.results.iter().zip(&batched.results) {
+        assert_eq!((&a.id, a.input_tokens), (&b.id, b.input_tokens));
+        assert_eq!(
+            serde_json::to_value(&a.value).unwrap(),
+            serde_json::to_value(&b.value).unwrap()
+        );
+        assert_eq!(
+            serde_json::to_value(&a.abstention_reasons).unwrap(),
+            serde_json::to_value(&b.abstention_reasons).unwrap()
+        );
+        assert!((a.candidate_mass - b.candidate_mass).abs() < 0.02);
+        let top = |result: &l2s1::DecisionResult| {
+            result
+                .scores
+                .iter()
+                .max_by(|x, y| x.option_probability.total_cmp(&y.option_probability))
+                .unwrap()
+                .id
+                .clone()
+        };
+        assert_eq!(top(a), top(b));
+        for (x, y) in a.scores.iter().zip(&b.scores) {
+            assert_eq!((&x.id, x.token_id), (&y.id, y.token_id));
+            assert!((x.option_probability - y.option_probability).abs() < 0.02);
+        }
+    }
+}
+
+fn batch_fixture() -> (LlamaBackend, Vec<DecisionRequest>, [&'static [u8]; 5]) {
+    let model = std::env::var("SKID_VISION_MODEL").expect("set SKID_VISION_MODEL");
+    let projector = std::env::var("SKID_VISION_MMPROJ").expect("set SKID_VISION_MMPROJ");
+    let mut backend = LlamaBackend::load(
+        model.as_ref(),
+        2048,
+        256,
+        4,
+        std::env::var("SKID_CUDA").as_deref() == Ok("1"),
+        DecisionPolicy::default(),
+    )
+    .unwrap();
+    backend.load_vision_projector(projector.as_ref()).unwrap();
+    let red = include_bytes!("fixtures/vision_red_64.png").as_slice();
+    let blue = include_bytes!("fixtures/vision_blue_64.png").as_slice();
+    // Repeated decision IDs are valid across independent requests. Vary state,
+    // image order, prompt length and decision counts to expose regrouping leaks.
+    let requests: Vec<DecisionRequest> = (0..5).map(|i| {
+        serde_json::from_value(serde_json::json!({
+            "state": {"case": i, "reference": if i % 2 == 0 {"red"} else {"blue"}},
+            "decisions": (0..if i == 1 {2} else {1}).map(|j| serde_json::json!({
+                "id": format!("color{j}"),
+                "instruction": if j == 0 {"Which color fills the image?"} else {"Compare the image color to state.reference. Choose whether they match."},
+                "kind": {"type": "choice", "options": [
+                    {"id":"red", "criterion":"The image is red."},
+                    {"id":"blue", "criterion":"The image is blue."}
+                ]}
+            })).collect::<Vec<_>>()
+        })).unwrap()
+    }).collect();
+    let images = [red, blue, blue, red, blue];
+    (backend, requests, images)
+}
+
+#[test]
+#[ignore = "requires SKID_VISION_MODEL and SKID_VISION_MMPROJ; native image sequence batching"]
+fn real_vision_batch_preserves_image_state_order_and_recovers_after_errors() {
+    let (mut backend, requests, images) = batch_fixture();
+    let serial: Vec<_> = requests
+        .iter()
+        .zip(&images)
+        .map(|(r, i)| backend.decide_vision(r, i).unwrap())
+        .collect();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_parallel_width(4).unwrap();
+    let batched = backend.decide_vision_batch(&requests, &images).unwrap();
+    let metrics = backend.vision_batch_metrics().unwrap();
+    assert!(metrics.projector_encode_calls > 0);
+    assert!(metrics.decoder_batch_max_sequences > 1);
+    assert_eq!(batched.len(), requests.len());
+    for (a, b) in serial.iter().zip(&batched) {
+        assert_eq!(a.results.len(), b.results.len());
+        for (a, b) in a.results.iter().zip(&b.results) {
+            assert_eq!((&a.id, a.input_tokens), (&b.id, b.input_tokens));
+        }
+    }
+    // Changing one image must affect its own logits while leaving the other
+    // independent requests intact. The two fixtures have the same dimensions.
+    let mut changed_images = images;
+    changed_images[0] = images[1];
+    let changed = backend
+        .decide_vision_batch(&requests, &changed_images)
+        .unwrap();
+    assert!(
+        batched[0].results[0]
+            .scores
+            .iter()
+            .zip(&changed[0].results[0].scores)
+            .any(|(a, b)| (a.raw_logit - b.raw_logit).abs() > 1e-4)
+    );
+    for (a, b) in batched.iter().zip(&changed).skip(1) {
+        assert_vision_equivalent(a, b);
+        for (a, b) in a.results.iter().zip(&b.results) {
+            for (a, b) in a.scores.iter().zip(&b.scores) {
+                assert!((a.raw_logit - b.raw_logit).abs() < 1e-3);
+            }
+        }
+    }
+    let mut broken = images;
+    broken[3] = b"not an image";
+    assert!(backend.decide_vision_batch(&requests, &broken).is_err());
+    assert!(
+        backend
+            .decide_vision_batch(&requests, &images[..4])
+            .is_err()
+    );
+    let mut invalid = requests.clone();
+    invalid[4].decisions[0].instruction = "overlong input ".repeat(4096);
+    assert!(backend.decide_vision_batch(&invalid, &images).is_err());
+    for (a, b) in batched
+        .iter()
+        .zip(backend.decide_vision_batch(&requests, &images).unwrap())
+    {
+        assert_vision_equivalent(a, &b);
+    }
+    assert!(backend.decide_vision_batch(&[], &[]).unwrap().is_empty());
+    backend.set_parallel_width(1).unwrap();
+    for (a, b) in serial
+        .iter()
+        .zip(backend.decide_vision_batch(&requests, &images).unwrap())
+    {
+        assert_vision_equivalent(a, &b);
+    }
+    backend.set_execution_mode(ExecutionMode::Fresh);
+    assert_vision_equivalent(
+        &serial[0],
+        &backend.decide_vision(&requests[0], images[0]).unwrap(),
+    );
+}
+
+#[test]
+#[ignore = "requires vision model/projector; numerical parity is separate from isolation and can fail on CUDA"]
+fn real_vision_batch_equivalence_on_color_fixture() {
+    let (mut backend, requests, images) = batch_fixture();
+    let serial: Vec<_> = requests
+        .iter()
+        .zip(&images)
+        .map(|(request, image)| backend.decide_vision(request, image).unwrap())
+        .collect();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_parallel_width(4).unwrap();
+    let batched = backend.decide_vision_batch(&requests, &images).unwrap();
+    for (a, b) in serial.iter().zip(&batched) {
+        assert_vision_equivalent(a, b);
+    }
+}
 
 #[test]
 #[ignore = "requires SKID_VISION_MODEL and SKID_VISION_MMPROJ"]

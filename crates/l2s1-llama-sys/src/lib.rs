@@ -2,6 +2,29 @@
 use std::ffi::{c_char, c_void};
 
 #[repr(C)]
+pub struct NativeVisionInput {
+    pub prefix: *const c_char,
+    pub prefix_len: usize,
+    pub data_before: *const c_char,
+    pub before_len: usize,
+    pub image: *const u8,
+    pub image_len: usize,
+    pub data_after: *const c_char,
+    pub after_len: usize,
+    pub suffix: *const c_char,
+    pub suffix_len: usize,
+}
+
+#[repr(C)]
+#[derive(Default, Clone, Copy, Debug)]
+pub struct NativeVisionBatchMetrics {
+    pub projector_encode_calls: usize,
+    pub projector_batch_max: usize,
+    pub decoder_calls: usize,
+    pub decoder_batch_max_sequences: usize,
+}
+
+#[repr(C)]
 #[derive(Default)]
 pub struct NativeRestoreMetrics {
     pub snapshot_bytes: usize,
@@ -13,6 +36,22 @@ pub struct NativeRestoreMetrics {
     pub fallback: i32,
 }
 unsafe extern "C" {
+    pub fn sd_forward_vision_parallel(
+        engine: *mut c_void,
+        inputs: *const NativeVisionInput,
+        sequences: i32,
+        capacity: u32,
+        dynamic_context: bool,
+        logits: *mut f32,
+        logits_count: usize,
+        input_tokens: *mut usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+    pub fn sd_vision_batch_metrics(
+        engine: *const c_void,
+        metrics: *mut NativeVisionBatchMetrics,
+    ) -> bool;
     pub fn sd_forward_compact(
         engine: *mut c_void,
         tokens: *const i32,
