@@ -2,7 +2,7 @@
 
 **로컬 GGUF 모델의 점수를 타입이 있는 판단으로 바꿉니다.**
 
-[English](README.md) · 한국어 · [문서 색인](docs/README.md) · [모델 측정 결과](docs/MODEL_RESULTS.md)
+[English](README.md) · 한국어 · [日本語](README.ja.md) · [문서 색인](docs/README.md) · [모델 측정 결과](docs/MODEL_RESULTS.md)
 
 L2S1은 로컬 채팅 모델로 이진·선택·서열 판단을 수행하는 Rust 라이브러리와 CLI입니다. JSON 상태, 질문, 후보별 판단 기준을 전달하면 타입이 있는 결과와 모델 점수를 반환합니다. 수락 정책을 충족하지 못하면 판단을 보류하고 그 이유를 알려줍니다.
 
@@ -159,6 +159,20 @@ HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 �
 ## TypeScript에서 사용하기
 
 [`@l2s1/node`](typescript/README.md)는 현재 OS·CPU에 맞는 사전 빌드 Rust 런타임을 선택하며, 타입이 있는 `load()`, `decide()`, `capabilities()`, `close()`를 제공합니다. 빌드 워크플로가 만드는 래퍼·런타임 tarball을 설치합니다. npm에는 아직 배포하지 않았으며 GGUF 가중치는 별도로 준비합니다. 같은 애플리케이션 API에서 `connect()`는 HTTP 서버를, `fromBackend()`는 사용자 정의 백엔드를 사용합니다.
+
+Node.js 24 이상과 Bash 또는 Zsh에서 저장소 루트를 기준으로 실행합니다. 로컬 CPU 런타임과 TypeScript 패키지를 빌드하고, 예제의 타입을 검사한 뒤 [창고 분류 예제](typescript/examples/warehouse.ts)를 실행합니다. 모델 경로는 준비한 GGUF 파일의 절대 경로로 바꾸세요. `npm pack`은 `typescript/l2s1-node-0.1.0.tgz`를 생성합니다.
+
+```sh
+cargo build --release --locked --features llama --bin l2s1
+cd typescript
+npm ci
+npm run build
+npm run check
+L2S1_BINARY=../target/release/l2s1 \
+  node examples/warehouse.ts /absolute/path/to/chat-model.gguf
+npm pack
+cd ..
+```
 
 ```ts
 import { L2S1 } from '@l2s1/node';
@@ -326,7 +340,7 @@ MCP에서 문서 조회, 요청 형식 검증, 상주 HTTP 백엔드의 추론�
 | [`docs/`](docs/README.md) | 상세 가이드, 설계 설명, 평가 보고서 |
 | [`web/`](web) | Svelte 문서 사이트 |
 
-순수 Rust 검증은 `cargo test --locked`로 실행합니다. 네이티브와 모델별 검증은 [VERIFICATION.md](docs/VERIFICATION.md)에 정리되어 있습니다. 버그를 보고할 때는 실행 명령, 체크포인트·양자화, 런타임·장치, 오류 내용을 포함해 [GitHub 이슈](https://github.com/LuticaCANARD/L2S1/issues)를 작성하세요. 문서를 수정할 때는 영어와 한국어 README의 내용을 함께 맞춰주세요.
+순수 Rust 검증은 `cargo test --locked`로 실행합니다. 네이티브와 모델별 검증은 [VERIFICATION.md](docs/VERIFICATION.md)에 정리되어 있습니다. 버그를 보고할 때는 실행 명령, 체크포인트·양자화, 런타임·장치, 오류 내용을 포함해 [GitHub 이슈](https://github.com/LuticaCANARD/L2S1/issues)를 작성하세요. 문서를 수정할 때는 영어·한국어·일본어 README의 내용을 함께 맞춰주세요.
 
 ## 라이선스
 

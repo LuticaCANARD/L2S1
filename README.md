@@ -2,7 +2,7 @@
 
 **Turn local GGUF model scores into typed decisions.**
 
-English · [한국어](README.ko.md) · [Documentation](docs/README.md) · [Model results](docs/MODEL_RESULTS.md)
+English · [한국어](README.ko.md) · [日本語](README.ja.md) · [Documentation](docs/README.md) · [Model results](docs/MODEL_RESULTS.md)
 
 L2S1 is a Rust library and CLI for binary, choice, and ordinal decisions with local chat models. Give it JSON state, a question, and candidate criteria; receive a typed value, model scores, and an explicit abstention when the acceptance policy is not met.
 
@@ -159,6 +159,20 @@ HTTP image requests use named `media` and per-decision `media_ids`. Local backen
 ## Use from TypeScript
 
 The [`@l2s1/node` package](typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install the wrapper and runtime tarballs from the build workflow; they have not been published to npm. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
+
+With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `typescript/l2s1-node-0.1.0.tgz`.
+
+```sh
+cargo build --release --locked --features llama --bin l2s1
+cd typescript
+npm ci
+npm run build
+npm run check
+L2S1_BINARY=../target/release/l2s1 \
+  node examples/warehouse.ts /absolute/path/to/chat-model.gguf
+npm pack
+cd ..
+```
 
 ```ts
 import { L2S1 } from '@l2s1/node';
@@ -324,7 +338,7 @@ resident HTTP backend's decisions. See [agent setup](docs/AGENT_INTEGRATION.md).
 | [`docs/`](docs/README.md) | Detailed guides, design notes, and evaluation reports |
 | [`web/`](web) | Svelte documentation site |
 
-Run the pure Rust checks with `cargo test --locked`. Native and model-specific checks are documented in [VERIFICATION.md](docs/VERIFICATION.md). For a bug report, open a [GitHub issue](https://github.com/LuticaCANARD/L2S1/issues) with the command, checkpoint/quantization, runtime/device, and error. Keep English and Korean README changes aligned when submitting documentation updates.
+Run the pure Rust checks with `cargo test --locked`. Native and model-specific checks are documented in [VERIFICATION.md](docs/VERIFICATION.md). For a bug report, open a [GitHub issue](https://github.com/LuticaCANARD/L2S1/issues) with the command, checkpoint/quantization, runtime/device, and error. Keep English, Korean, and Japanese README changes aligned when submitting documentation updates.
 
 ## License
 
