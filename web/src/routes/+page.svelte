@@ -183,7 +183,11 @@
       <div class="command-panel"><div class="command-header"><span>{t('terminalQuickStart')}</span><button onclick={copyCommand}>{t(copied ? 'copied' : 'copyCommand')}</button></div><pre><code>{command}</code></pre>{#if copyError}<p role="status">{t('clipboardError')}</p>{/if}<div class="command-footer"><span>{t('localInference')}</span><span>{t('noDownloads')}</span></div></div>
       <div class="install-panel" aria-labelledby="install-heading">
         <div class="install-heading"><h3 id="install-heading">{t('installPackages')}</h3><a href="https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.1" rel="external">{t('releaseFiles')} ↗</a></div>
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- Static Cloudflare marker; no user HTML. -->
+        {@html '<!--email_off-->'}
         <div class="install-grid">{#each installs as install (install.name)}<article><h4>{install.name}</h4><pre><code>{install.command}</code></pre><a href={`/docs/docs/${$locale}/${install.guide}`} rel="external">{t('packageGuide')} ↗</a></article>{/each}</div>
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- Static Cloudflare marker; no user HTML. -->
+        {@html '<!--/email_off-->'}
         <p class="install-note">{t('installRequirements')}</p>
       </div>
     </section>
