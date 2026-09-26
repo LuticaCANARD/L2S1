@@ -1,0 +1,237 @@
+name: Publish SDKs and native runtimes
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing stable version tag (vMAJOR.MINOR.PATCH)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sdk-release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+      commit: ${{ steps.version.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - id: version
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          version=$(python scripts/prepare_release.py --tag "$RELEASE_TAG")
+          commit=$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")
+          test "$commit" = "$(git rev-parse HEAD)"
+          printf 'tag=%s\nversion=%s\ncommit=%s\n' "$RELEASE_TAG" "$version" "$commit" >> "$GITHUB_OUTPUT"
+      - run: python -m unittest discover -s scripts -p 'test_release_pipeline.py' -v
+
+  runtimes:
+    needs: validate
+    uses: ./.github/workflows/typescript-runtimes.yml
+    with:
+      ref: ${{ needs.validate.outputs.commit }}
+
+  python:
+    needs: validate
+    uses: ./.github/workflows/python-checks.yml
+    with:
+      ref: ${{ needs.validate.outputs.commit }}
+
+  cargo:
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DISABLE: '1'
+      L2S1_PORTABLE_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.validate.outputs.commit }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - uses: dtolnay/rust-toolchain@stable
+      - run: |
+          python scripts/prepare_cargo_release.py --output "$RUNNER_TEMP/cargo-source"
+          cargo package --manifest-path "$RUNNER_TEMP/cargo-source/Cargo.toml" -p l2s1-llama-sys -p l2s1 --features llama
+          tar --exclude=target -czf "$RUNNER_TEMP/cargo-source.tar.gz" -C "$RUNNER_TEMP/cargo-source" .
+      - uses: actions/upload-artifact@v6
+        with:
+          name: l2s1-cargo
+          path: ${{ runner.temp }}/cargo-source/target/package/*.crate
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v6
+        with:
+          name: cargo-source
+          path: ${{ runner.temp }}/cargo-source.tar.gz
+          if-no-files-found: error
+
+  assemble:
+    needs: [validate, runtimes, python, cargo]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.validate.outputs.commit }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: l2s1-*
+          path: release-assets
+          merge-multiple: true
+      - uses: actions/download-artifact@v7
+        with:
+          name: python-sdk-ubuntu-latest-3.11
+          path: release-assets
+      - name: Verify every package and seal one release set
+        env:
+          RELEASE_TAG: ${{ needs.validate.outputs.tag }}
+          RELEASE_COMMIT: ${{ needs.validate.outputs.commit }}
+        run: python scripts/prepare_release.py --tag "$RELEASE_TAG" --assets release-assets --commit "$RELEASE_COMMIT"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: release-assets
+          path: release-assets/*
+          if-no-files-found: error
+
+  npm-publish:
+    needs: [validate, assemble]
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.validate.outputs.commit }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm install --global npm@11
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - uses: actions/download-artifact@v7
+        with:
+          name: release-assets
+          path: release-assets
+      - name: Publish runtimes first, then wrapper (OIDC or bootstrap token)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_VERSION: ${{ needs.validate.outputs.version }}
+        run: python scripts/publish_packages.py npm --assets release-assets --version "$RELEASE_VERSION"
+
+  pypi-publish:
+    needs: [validate, assemble]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.validate.outputs.commit }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - uses: actions/download-artifact@v7
+        with:
+          name: release-assets
+          path: release-assets
+      - name: Check existing PyPI files and select Python distributions
+        env:
+          RELEASE_VERSION: ${{ needs.validate.outputs.version }}
+        run: |
+          python scripts/publish_packages.py pypi-check --assets release-assets --version "$RELEASE_VERSION"
+          mkdir python-dist
+          cp release-assets/*.whl release-assets/l2s1-*.tar.gz python-dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python-dist/
+          skip-existing: true
+
+  cargo-publish:
+    needs: [validate, assemble]
+    runs-on: ubuntu-latest
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CARGO_BOOTSTRAP: ${{ secrets.CARGO_REGISTRY_TOKEN != '' }}
+      CCACHE_DISABLE: '1'
+      L2S1_PORTABLE_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.validate.outputs.commit }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/download-artifact@v7
+        with:
+          name: release-assets
+          path: release-assets
+      - uses: actions/download-artifact@v7
+        with:
+          name: cargo-source
+          path: cargo-input
+      - run: mkdir cargo-source && tar -xzf cargo-input/cargo-source.tar.gz -C cargo-source
+      - id: auth
+        if: env.CARGO_BOOTSTRAP != 'true'
+        uses: rust-lang/crates-io-auth-action@v1
+      - name: Publish native sys crate, wait for index, then core crate
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || steps.auth.outputs.token }}
+          RELEASE_VERSION: ${{ needs.validate.outputs.version }}
+        run: python scripts/publish_packages.py cargo --assets release-assets --version "$RELEASE_VERSION" --source cargo-source
+
+  github-release:
+    needs: [validate, assemble, npm-publish, pypi-publish, cargo-publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: release-assets
+          path: release-assets
+      - name: Upload all assets to a draft, then publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.validate.outputs.tag }}
+        run: |
+          set -euo pipefail
+          (cd release-assets && sha256sum --check SHA256SUMS)
+          if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' > draft-state; then
+            test "$(cat draft-state)" = true || { echo 'Published release already exists; assets will not be overwritten.'; exit 1; }
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "L2S1 $RELEASE_TAG" --notes 'Python, TypeScript, native runtimes and Cargo packages. See SHA256SUMS and release.json for asset checksums, commit and Cargo feature scope.'
+          fi
+          gh release upload "$RELEASE_TAG" release-assets/* --clobber
+          gh release edit "$RELEASE_TAG" --draft=false

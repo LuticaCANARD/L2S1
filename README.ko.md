@@ -8,6 +8,8 @@ L2S1은 로컬 채팅 모델로 이진·선택·서열 판단을 수행하는 Ru
 
 메시지 분류, 요청 라우팅, 조건 확인, 단계별 수준 평가에 사용할 수 있습니다. 질문과 후보 ID는 애플리케이션이 요청마다 지정합니다. 호환되는 GGUF 모델을 바꿔도 요청과 결과 타입을 유지할 수 있습니다.
 
+[Python SDK](python/README.md), [native 배치](docs/ko/BATCHING_API_REVIEW.md), [GitHub Release·npm·PyPI·Cargo 배포 파이프라인](docs/ko/RELEASE_PIPELINE.md)을 제공합니다.
+
 ## 빠른 시작
 
 Rust 2024 에디션을 지원하는 최신 stable 툴체인, CMake 3.24 이상, C++17 컴파일러, 호환되는 chat/instruct GGUF가 필요합니다. 첫 네이티브 빌드에서는 고정된 llama.cpp 소스를 내려받습니다. 모델 가중치는 별도로 준비합니다.

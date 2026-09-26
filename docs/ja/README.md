@@ -10,6 +10,9 @@
 | --- | --- |
 | [利用ガイド](GUIDE.md) | ビルド、スキーマ、スコア、CLI、Rust、HTTP、画像、バックエンド |
 | [TypeScript ライブラリ](typescript/README.md) | 常駐モデルプロセス、HTTP クライアント、配布、検証 |
+| [Python SDK](python/README.md) | 型付き非同期呼び出し、固定定義再利用、wheel、共通 Rust ランタイム |
+| [バッチ API の検討](BATCHING_API_REVIEW.md) | 反復 state 入力、native batch の境界と HTTP 接続案 |
+| [配布パイプライン](RELEASE_PIPELINE.md) | GitHub Release・npm・PyPI・native Cargo 公開 |
 | [AI エージェント統合](AGENT_INTEGRATION.md) | 環境をまたいで使えるスキル、stdio MCP、リクエスト検証、常駐推論 |
 | [ブラウザー WebGPU デモ](WEBGPU_DEMO.md) | ローカル Qwen3 ONNX 推論、WebGPU、上限付きの思考、ポリシー |
 | [画像とテキストのデモ](IMAGE_DEMO.md) | 記録済みの応答、ポリシー、失敗の説明、ローカルサーバー |

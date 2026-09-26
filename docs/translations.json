@@ -308,7 +308,7 @@
     {
       "source": "typescript/README.md",
       "path": "typescript/README.md",
-      "source_sha256": "d3bd09cf069a88cb2051124c1fc573bea46ab81cd06fff0749eb332fa2e4d2cb",
+      "source_sha256": "5fa353c16ba0855497df3766b7379f4360ebd9bef1f3841ebd2a650f63844a4f",
       "languages": [
         "en",
         "ko",
@@ -358,7 +358,7 @@
     {
       "source": "typescript/PUBLISHING.md",
       "path": "typescript/PUBLISHING.md",
-      "source_sha256": "34c6776f7324053f423f27158f1120815b86bead525fc9327702bc9b2720764e",
+      "source_sha256": "8910aad12ee987a5f7140c5824031c9ad3f718122c8fdd24dbf5b08763527712",
       "languages": [
         "en",
         "ko",
@@ -409,6 +409,36 @@
       "source": "docs/MODEL_AUDIT_20260926.md",
       "path": "MODEL_AUDIT_20260926.md",
       "source_sha256": "a5016836f421a021e7e3b1b0b8e8d9e4a386ed96528c74e38409b4ba448e125d",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/BATCHING_API_REVIEW.md",
+      "path": "BATCHING_API_REVIEW.md",
+      "source_sha256": "bf2b989fe93308ccf74f9a5722df9d0da2d1c14d4b1d46651a0cfddf04fdea87",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/RELEASE_PIPELINE.md",
+      "path": "RELEASE_PIPELINE.md",
+      "source_sha256": "a6d78862a93885d9e168dc2c5c337909bb5a35ebbc928a6d841a62bf96760b18",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "python/README.md",
+      "path": "python/README.md",
+      "source_sha256": "88fc6d0b01f2149a8cbef4232002aff285e098d49d413851e9de5f979670e6d6",
       "languages": [
         "en",
         "ko",

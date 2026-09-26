@@ -75,13 +75,18 @@ try {
 }
 ```
 
-`load()` は、現在の OS/アーキテクチャにインストールされているランタイムを選択します。これをオーバーライドするには、`binaryPath: '/path/to/l2s1'` または `binaryPath: 'l2s1'` を渡して PATH を使用します。 `load()` はシェルなしで生成され、自動的に割り当てられたポート上の `127.0.0.1` にのみバインドされ、ヘルス応答を待ちます。スペースを含むパスは機能します。リクエストは同じプロセスを再利用します。 Rust はシリアル実行かパラレル実行かを判断します。 `close()` はべき等であり、保留中のローカル HTTP 呼び出しを中止し、所有されているプロセスを終了して終了を待ちます。 HTTP リクエストを閉じるかタイムアウトするだけでは、Rust 推論が停止したことは保証されません。他の呼び出し元と共有し続ける必要があるプロセスは、代わりに以下の HTTP クライアントを使用する必要があります。
+`load()` はインストール済み OS/CPU ランタイムまたは `binaryPath` を使います。既定の
+`transport: 'stdio'` はビルド済み Rust 実行ファイルと stdin/stdout JSON で通信し、
+ポートを開きません。同一プロセスの N-API binding ではありません。明示的な
+`transport: 'http'` は loopback サーバーを開きます。モデルプロセスを再利用し、
+`close()` で終了を待ちます。単一呼び出しの timeout・キャンセルは native 推論停止を
+保証しません。stdio は最大 16 未完了呼び出しで、timeout 後も native 応答までスロットを保持します。
 
 ビルド ワークフローは、Linux x64/arm64 (glibc)、macOS x64/arm64、および Windows x64 をカバーします。 Linux および Windows パッケージは CPU を公開します。 macOS arm64 は、CPU および Metal を公開します。 CUDA およびその他のカスタム ビルドは `binaryPath` を使用します。 Linux パッケージにはシステム glibc/C++ ランタイムが必要です。 Windows パッケージには Microsoft Visual C++ x64 ランタイムが必要です。サポートされていないプラットフォームでは、明らかなエラーが発生します。これらはワークフローのターゲットです。 1 つのプラットフォームでのローカル検証では、他のプラットフォームのアーティファクトが CI に合格したことは確立されません。
 
 明示的なリソース管理をサポートする TypeScript アプリケーションは、`await using engine = await L2S1.load(...)` を書き込むことができます。これはスコープの終了時に `close()` を呼び出します。パッケージはESMです。
 
-`LoadOptions` は、CPU/CUDA/Metal、コンテキスト/バッチ/スレッド数、ビジョン プロジェクター (`mmproj`)、LoRA、実行モード、並列幅、プロンプト レイアウト/詳細、および起動ポリシーを公開します。あまり一般的ではない Rust フラグは `extraArgs` で渡すことができます。 `--listen` は予約されています。 `startupTimeoutMs` のデフォルトは 120,000 および HTTP `timeoutMs` から 180,000 です。 `signal` を起動するとロードがキャンセルされます。 `onStderr` は、ネイティブ ログ チャンクを受信します。呼び出しでは、2 番目の引数として `{ signal, timeoutMs }` を受け入れます。失敗した推論リクエストが自動的に再試行されることはありません。
+`LoadOptions` は、CPU/CUDA/Metal、コンテキスト/バッチ/スレッド数、ビジョン プロジェクター (`mmproj`)、LoRA、実行モード、並列幅、プロンプト レイアウト/詳細、および起動ポリシーを公開します。あまり一般的ではない Rust フラグは `extraArgs` で渡すことができます。 `--stdio` / `--listen` は予約されています。 `startupTimeoutMs` のデフォルトは 120,000 および `timeoutMs` から 180,000 です。 `signal` を起動するとロードがキャンセルされます。 `onStderr` は、ネイティブ ログ チャンクを受信します。呼び出しでは、2 番目の引数として `{ signal, timeoutMs }` を受け入れます。失敗した推論リクエストが自動的に再試行されることはありません。
 
 ビルド後に、Node.js 24 の TypeScript サポートを使用して、[warehouse サンプル ](../../../typescript/examples/warehouse.ts) を実行します。
 
@@ -109,6 +114,41 @@ function useCustomBackend(backend: DecisionBackend) {
 
 `DecisionBackend` には、エクスポートされた応答タイプを返す非同期 `decide(request, options)` メソッドと `capabilities(options)` メソッドが必要です。オプションの `close()` フックは、所有されているリソースを解放します。これにより、アプリケーションの 判断 コードを変更せずに、カスタム IPC、RPC、またはその他のランタイム アダプターが許可されます。 `fromBackend()` は、ライフサイクル所有権をファサードに転送します。 HTTP 接続を閉じると、このクライアントの要求がキャンセルされ、共有リモート サーバーは実行されたままになります。
 
+<a id="repeat-fixed-decisions-with-new-state"></a>
+## 入力だけを変えて固定した判断を繰り返す
+
+```ts
+const batchEngine = await L2S1.load({
+  model: '/path/to/model.gguf', executionMode: 'parallel', parallelWidth: 4,
+});
+type Temperature = { temperature_c: number };
+const plan = batchEngine.prepare<Temperature>([{
+  id: 'cold', instruction: 'Is temperature_c below 10?',
+  kind: { type: 'binary', false_label: 'At least 10.', true_label: 'Below 10.' },
+}]);
+const first = await plan.decide({ temperature_c: 6 });
+const second = await plan.decide({ temperature_c: 15 });
+const responses = await plan.decideBatch([{ temperature_c: 2 }, { temperature_c: 20 }]);
+// Different definitions per item: await batchEngine.decideBatch(requests).
+await batchEngine.close();
+```
+
+`prepare()` は固定定義と state 型を再利用します。token コンパイルや永続 KV 再利用では
+ありません。`decideBatch()` は stdio または HTTP `/v1/decision-batches` で配列全体を
+一度渡し、native parallel を実行します。`executionMode: 'parallel'` と `parallelWidth` を
+指定します。state・ID・media・ポリシーは独立し結果は入力順です。timeout はバッチ全体に
+適用します。直列 fallback・自動再試行はなく、`batch_unsupported` または
+`batch_not_enabled` を返します。カスタム backend は任意の `decideBatch()` を実装します。
+
+最大 128 要求・合計 128 判断で、direct reasoning と判断ごとに最大 26 選択肢です。
+全て text、または各判断に画像が一つと対応する projector が必要です。text/image 混在は
+拒否します。全 wire 入力を実行前に検証し、実行失敗はバッチ全体の失敗です。実行済み
+wave を巻き戻し・再実行しません。`capabilities().batch` を確認してください。
+`Promise.all(decide(...))` は自動バッチではありません。
+[バッチ API の検討](../BATCHING_API_REVIEW.md)と [Python SDK](../python/README.md)を参照してください。
+
+
+
 既存の Rust サーバーには `@l2s1/node/http` を使用します。このサブパスにはノードの組み込みインポートがなく、ブラウザー用にバンドルすることもできます。ブラウザ呼び出しには、CORS を提供する同一オリジン プロキシまたはリバース プロキシが必要です。 Rust サーバーは CORS ヘッダーを追加しません。これにより、ブラウザ内で ネイティブ 推論は実行されません。
 
 ```ts
@@ -130,7 +170,7 @@ const capabilities = await client.capabilities();
 
 リクエスト `policy` は `{ min_top_probability, min_candidate_mass }` を使用します。両方を指定する必要があります。 `target_error_rate` は `min_top_probability = 1 - rate` にマップされます。正確性を保証するものではありません。 `failure_reasons` は、既知の 判断保留/障害コードのメッセージを提供します。 `reasoning: { mode: 'thinking', max_tokens: 128 }` には、バックエンド とモデル広告のサポートが必要です。サポートされていないリクエストは Rust で失敗します。オプション機能を選択する前に、`capabilities()` をお読みください。
 
-現在の main ブランチ v1 サーバーは `state`、`decisions`、任意の `media` を受け付けます。リクエストのポリシー、エラー予算、失敗文言、reasoning は、対応を宣言したサーバーの拡張です。古いサーバーは HTTP 400 で拒否します。同梱の main エンジンのポリシーは `L2S1.load()` に `policy` を渡し、既存の Rust CLI が起動時に適用します。クライアントは要求された制御を黙って無視しません。
+同梱の v1 エンジンは要求ごとの policy、エラー予算、失敗メッセージを受け付けます。reasoning は direct のみを宣言し、thinking 要求は明示的に拒否します。古いサーバーは未対応フィールドに HTTP 400 を返します。`L2S1.load({ policy })` で起動時の既定 policy も設定できます。クライアントは要求された制御を黙って無視しません。
 
 画像は、データ URL プレフィックスのない標準の Base64 を使用します。
 
@@ -190,3 +230,5 @@ npm run test:package -- l2s1-node-0.1.0.tgz l2s1-runtime-linux-x64-0.1.0.tgz
 ```
 
 ランタイムを再構築するときは、新しい出力ディレクトリを使用します。 `L2S1_PORTABLE_BUILD=1` は、ビルドホスト CPU 命令と OpenMP 依存関係を無効にします。一般的な CPU カーネルは、ホストに最適化されたカスタム ビルドよりも遅い可能性があります。各アーティファクトには、ライセンス通知と SHA-256 マニフェストが含まれています。ベリファイアは、Linux llama.cpp/GGML の依存関係がバンドル ディレクトリから解決されることを確認します。
+
+[配布パイプライン](../RELEASE_PIPELINE.md)で SDK と native runtime の自動公開・認証設定を確認してください。

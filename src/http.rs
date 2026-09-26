@@ -19,6 +19,7 @@ const MAX_HEADER: usize = 16 * 1024;
 const MAX_BODY: usize = 44 * 1024 * 1024;
 const MAX_MEDIA: usize = 4;
 const MAX_DECISIONS: usize = 128;
+const MAX_BATCH_REQUESTS: usize = 128;
 const MAX_CONNECTIONS: usize = 32;
 const QUEUE_DEPTH: usize = 16;
 const MAX_INFLIGHT_BODY_BYTES: usize = 192 * 1024 * 1024;
@@ -28,10 +29,12 @@ static INFLIGHT_BODY_BYTES: AtomicUsize = AtomicUsize::new(0);
 mod contract;
 pub use contract::HttpDecisionBackend;
 use contract::run_request;
+pub(crate) use contract::user_failure_messages;
 
 struct Job {
     body: Vec<u8>,
     request_id: String,
+    batch: bool,
     reply: mpsc::Sender<Result<Value, Error>>,
 }
 
@@ -44,7 +47,7 @@ pub fn serve<B: HttpDecisionBackend>(
     let capabilities = backend.capabilities();
     let _listener = start_listener(address, capabilities, sender)?;
     for job in receiver {
-        let result = run_request(backend, &job.body);
+        let result = execute_job(backend, &job);
         let _ = job.reply.send(result.map(|mut value| {
             value["request_id"] = json!(job.request_id);
             value
@@ -69,7 +72,7 @@ pub fn serve_openrouter(
             loop {
                 let job = { receiver.lock().expect("queue lock").recv() };
                 let Ok(job) = job else { break };
-                let result = run_request(&mut backend, &job.body);
+                let result = execute_job(&mut backend, &job);
                 let _ = job.reply.send(result.map(|mut value| {
                     value["request_id"] = json!(job.request_id);
                     value
@@ -81,6 +84,29 @@ pub fn serve_openrouter(
         .join()
         .map_err(|_| std::io::Error::other("HTTP listener panicked"))?;
     Ok(())
+}
+
+fn execute_job<B: HttpDecisionBackend>(backend: &mut B, job: &Job) -> Result<Value, Error> {
+    dispatch_wire(backend, &job.body, job.batch, &job.request_id)
+}
+
+pub(crate) fn dispatch_wire<B: HttpDecisionBackend>(
+    backend: &mut B,
+    body: &[u8],
+    batch: bool,
+    request_id: &str,
+) -> Result<Value, Error> {
+    if body.len() > MAX_BODY {
+        return Err(Error::Invalid("decision body exceeds 44 MiB limit".into()));
+    }
+    if batch {
+        contract::run_batch(backend, body, request_id)
+    } else {
+        run_request(backend, body).map(|mut response| {
+            response["request_id"] = json!(request_id);
+            response
+        })
+    }
 }
 
 fn start_listener(
@@ -150,7 +176,8 @@ fn handle(
     if request.method == "GET" && request.path == "/v1/capabilities" {
         return respond(stream, 200, capabilities);
     }
-    if request.method != "POST" || request.path != "/v1/decisions" {
+    let batch = request.path == "/v1/decision-batches";
+    if request.method != "POST" || !(request.path == "/v1/decisions" || batch) {
         return respond_error(
             stream,
             404,
@@ -170,9 +197,11 @@ fn handle(
         );
     }
     let (reply, receiver) = mpsc::channel();
+    let failure_messages = contract::user_failure_messages(&request.body);
     match sender.try_send(Job {
         body: std::mem::take(&mut request.body),
         request_id: request_id.into(),
+        batch,
         reply,
     }) {
         Ok(()) => {}
@@ -192,10 +221,30 @@ fn handle(
     match receiver.recv() {
         Ok(Ok(output)) => respond(stream, 200, &output),
         Ok(Err(Error::Invalid(message))) => {
-            respond_error(stream, 400, "invalid_request", &message, request_id)
+            let code = if message.starts_with("batch_unsupported:") {
+                "batch_unsupported"
+            } else if message.starts_with("batch_not_enabled:") {
+                "batch_not_enabled"
+            } else {
+                "invalid_request"
+            };
+            respond_error(stream, 400, code, &message, request_id)
         }
         Ok(Err(Error::Backend(message))) => {
-            respond_error(stream, 500, "backend_error", &message, request_id)
+            let (status, code, user_reason) = if message.starts_with("reasoning_limit:") {
+                (
+                    422,
+                    "reasoning_limit",
+                    failure_messages.get("reasoning_limit").map(String::as_str),
+                )
+            } else {
+                (
+                    500,
+                    "backend_error",
+                    failure_messages.get("native_failure").map(String::as_str),
+                )
+            };
+            respond_error_with_reason(stream, status, code, &message, request_id, user_reason)
         }
         Ok(Err(Error::ModelLoad(message))) => {
             respond_error(stream, 500, "model_load_failed", &message, request_id)
@@ -220,11 +269,22 @@ fn respond_error(
     message: &str,
     request_id: &str,
 ) -> std::io::Result<()> {
-    respond(
-        stream,
-        status,
-        &json!({"error":{"code":code,"message":message,"request_id":request_id}}),
-    )
+    respond_error_with_reason(stream, status, code, message, request_id, None)
+}
+
+fn respond_error_with_reason(
+    stream: &mut TcpStream,
+    status: u16,
+    code: &str,
+    message: &str,
+    request_id: &str,
+    user_reason: Option<&str>,
+) -> std::io::Result<()> {
+    let mut body = json!({"error":{"code":code,"message":message,"request_id":request_id}});
+    if let Some(reason) = user_reason {
+        body["error"]["user_reason"] = json!(reason);
+    }
+    respond(stream, status, &body)
 }
 
 struct HttpRequest {
@@ -524,5 +584,55 @@ mod tests {
         assert!(response.contains("\"code\":\"invalid_request\""));
         assert!(response.contains("\"request_id\":\"req-invalid\""));
         server.join().unwrap();
+    }
+
+    #[test]
+    fn custom_failure_text_keeps_status_code_and_native_diagnostics() {
+        for (native_message, status, code, reason_code) in [
+            (
+                "reasoning_limit: incomplete; generated=1 max_tokens=1",
+                422,
+                "reasoning_limit",
+                "reasoning_limit",
+            ),
+            (
+                "llama_decode failed",
+                500,
+                "backend_error",
+                "native_failure",
+            ),
+        ] {
+            let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+            let address = listener.local_addr().unwrap();
+            let (sender, receiver) = mpsc::sync_channel(1);
+            let server = thread::spawn(move || {
+                let (mut stream, _) = listener.accept().unwrap();
+                handle(&mut stream, &sender, &json!({}), "req-custom").unwrap();
+            });
+            let mut reasons = serde_json::Map::new();
+            reasons.insert(reason_code.into(), json!("요청에 지정한 실패 안내"));
+            let body =
+                json!({"state":{},"decisions":[decision("flag",None)],"failure_reasons":reasons})
+                    .to_string();
+            let mut client = TcpStream::connect(address).unwrap();
+            write!(client,"POST /v1/decisions HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",body.len()).unwrap();
+            let job = receiver.recv_timeout(Duration::from_secs(2)).unwrap();
+            job.reply
+                .send(Err(Error::Backend(native_message.into())))
+                .unwrap();
+            let mut response = String::new();
+            client.read_to_string(&mut response).unwrap();
+            assert!(
+                response.starts_with(&format!("HTTP/1.1 {status}")),
+                "{response}"
+            );
+            let (_, body) = response.split_once("\r\n\r\n").unwrap();
+            let output: Value = serde_json::from_str(body).unwrap();
+            assert_eq!(output["error"]["code"], code);
+            assert_eq!(output["error"]["message"], native_message);
+            assert_eq!(output["error"]["request_id"], "req-custom");
+            assert_eq!(output["error"]["user_reason"], "요청에 지정한 실패 안내");
+            server.join().unwrap();
+        }
     }
 }

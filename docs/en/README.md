@@ -10,6 +10,9 @@ Start with the [English README](../../README.md) to build L2S1 and run a first d
 | --- | --- |
 | [Guide](GUIDE.md) | Build, schema, scores, CLI, Rust, HTTP, images, backends |
 | [TypeScript library](typescript/README.md) | Resident model process, HTTP client, packaging, verification |
+| [Python SDK](python/README.md) | Typed async calls, reusable decisions, wheels, shared Rust runtimes |
+| [Batching API review](BATCHING_API_REVIEW.md) | Repeated state inputs, native batch boundaries and HTTP integration |
+| [Release pipeline](RELEASE_PIPELINE.md) | GitHub Release, npm, PyPI and native Cargo publication |
 | [AI agent integration](AGENT_INTEGRATION.md) | Portable skill, stdio MCP, request validation, resident inference |
 | [Browser WebGPU demo](WEBGPU_DEMO.md) | Local Qwen3 ONNX inference, WebGPU, bounded thinking, policy |
 | [Image and text demo](IMAGE_DEMO.md) | Recorded responses, policy, failure explanations, local server |

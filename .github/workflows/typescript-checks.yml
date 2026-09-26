@@ -1,6 +1,14 @@
 name: TypeScript library checks
 
 on:
+  pull_request:
+    paths:
+      - "typescript/**"
+      - "src/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "examples/typescript_fixture.rs"
+      - ".github/workflows/typescript-checks.yml"
   push:
     tags: ['v*']
   workflow_dispatch:

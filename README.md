@@ -8,6 +8,8 @@ L2S1 is a Rust library and CLI for binary, choice, and ordinal decisions with lo
 
 Use it to classify messages, route requests, check conditions, or assign ordered levels. Questions and candidate IDs are supplied by your application at request time. You can change the compatible GGUF model while keeping the same request and result types.
 
+[Python SDK](python/README.md), [native batching](docs/en/BATCHING_API_REVIEW.md), and the [GitHub Release/npm/PyPI/Cargo pipeline](docs/en/RELEASE_PIPELINE.md).
+
 ## Quick start
 
 You need a current stable Rust toolchain with edition 2024 support, CMake 3.24+, a C++17 compiler, and a compatible chat/instruct GGUF. The first native build downloads the pinned llama.cpp source. Model weights are supplied separately.

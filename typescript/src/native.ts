@@ -3,9 +3,12 @@ import { L2S1Client, L2S1Error, positiveTimeout } from './http.js';
 import type { CallOptions } from './http.js';
 import type { Capabilities, DecisionPolicy, DecisionRequest, DecisionResponse } from './types.js';
 import { resolveRuntime } from './runtime.js';
+import { StdioClient } from './stdio.js';
 
 export interface LoadOptions {
   model: string;
+  /** Local compiled process RPC. Default stdio; HTTP is an explicit option. */
+  transport?: 'stdio' | 'http';
   /** Override the platform package with a custom Rust executable or a name on PATH. */
   binaryPath?: string;
   device?: 'cpu' | 'cuda' | 'metal';
@@ -23,10 +26,10 @@ export interface LoadOptions {
   policy?: DecisionPolicy;
   /** Model startup timeout; defaults to 120 seconds. */
   startupTimeoutMs?: number;
-  /** Per HTTP request timeout; defaults to 180 seconds. */
+  /** Per call timeout, including the whole batch; defaults to 180 seconds. */
   timeoutMs?: number;
   signal?: AbortSignal;
-  /** Additional Rust CLI flags. --listen is reserved for process ownership. */
+  /** Additional Rust CLI flags. --stdio and --listen are reserved. */
   extraArgs?: string[];
   /** Native diagnostic chunks. Kept draining even when no callback is supplied. */
   onStderr?: (chunk: string) => void;
@@ -35,8 +38,8 @@ export interface LoadOptions {
 function argumentsFor(options: LoadOptions): string[] {
   if (!options.model?.trim()) throw new TypeError('model is required');
   const extra = options.extraArgs ?? [];
-  if (extra.some((arg) => arg === '--listen' || arg.startsWith('--listen='))) {
-    throw new TypeError('--listen is managed by L2S1.load');
+  if (extra.some((arg) => arg === '--stdio' || arg.startsWith('--stdio=') || arg === '--listen' || arg.startsWith('--listen='))) {
+    throw new TypeError('--stdio/--listen are managed by L2S1.load');
   }
   const args = ['--model', options.model];
   const flags: [string, string | number | undefined][] = [
@@ -48,17 +51,18 @@ function argumentsFor(options: LoadOptions): string[] {
   ];
   for (const [key, value] of flags) if (value !== undefined) args.push(`--${key}`, String(value));
   // Port 0 lets Rust bind an available port atomically, without a port reservation race.
-  args.push(...extra, '--listen', '127.0.0.1:0');
+  if (options.transport !== undefined && !['stdio', 'http'].includes(options.transport)) throw new TypeError('Invalid transport');
+  args.push(...extra, ...(options.transport === 'http' ? ['--listen', '127.0.0.1:0'] : ['--stdio']));
   return args;
 }
 
-/** Owns one resident Rust model process. Requests use the existing HTTP v1 API. */
+/** Owns one resident compiled Rust model process with typed JSON requests. */
 export class RustProcessBackend implements AsyncDisposable {
   private closing: Promise<void> | undefined;
   private exited = false;
   private readonly exit: Promise<void>;
   private readonly lifetime = new AbortController();
-  private client: L2S1Client | undefined;
+  private client: L2S1Client | StdioClient | undefined;
   private constructor(private readonly child: ChildProcess) {
     this.exit = new Promise((resolve) => {
       child.once('close', () => {
@@ -74,7 +78,8 @@ export class RustProcessBackend implements AsyncDisposable {
     const startupTimeout = positiveTimeout(options.startupTimeoutMs ?? 120_000);
     positiveTimeout(options.timeoutMs ?? 180_000);
     const runtime = resolveRuntime(options.binaryPath, options.device);
-    const child = spawn(runtime.binaryPath, args, { env: runtime.env, stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true, shell: false });
+    const stdio = options.transport !== 'http';
+    const child = spawn(runtime.binaryPath, args, { env: runtime.env, stdio: stdio ? ['pipe', 'pipe', 'pipe'] : ['ignore', 'ignore', 'pipe'], windowsHide: true, shell: false });
     const engine = new RustProcessBackend(child);
     let diagnosticTail = '';
     let pending = '';
@@ -96,6 +101,11 @@ export class RustProcessBackend implements AsyncDisposable {
       const lines = pending.split('\n');
       pending = lines.pop()!.slice(-8192);
       for (const line of lines) {
+        if (stdio && line.trim() === 'l2s1 stdio ready') {
+          announced = true;
+          reportReady('stdio');
+          break;
+        }
         const match = /^l2s1 HTTP listening on 127\.0\.0\.1:(\d+)\s*$/.exec(line);
         if (match && Number(match[1]) > 0 && Number(match[1]) <= 65535) {
           announced = true;
@@ -111,8 +121,9 @@ export class RustProcessBackend implements AsyncDisposable {
     signal.addEventListener('abort', onAbort, { once: true });
     try {
       const baseUrl = await ready;
-      engine.client = new L2S1Client({ baseUrl, timeoutMs: options.timeoutMs ?? 180_000 });
-      // A listening announcement follows bind; health confirms the API responds.
+      engine.client = stdio ? new StdioClient(child, options.timeoutMs ?? 180_000)
+        : new L2S1Client({ baseUrl, timeoutMs: options.timeoutMs ?? 180_000 });
+      // Health confirms that the selected transport responds after startup.
       await engine.client.health({ signal: AbortSignal.any([signal, engine.lifetime.signal]) });
       signal.throwIfAborted();
       return engine;
@@ -131,13 +142,17 @@ export class RustProcessBackend implements AsyncDisposable {
   decide(request: DecisionRequest, options: CallOptions = {}): Promise<DecisionResponse> {
     return this.client!.decide(request, this.callOptions(options));
   }
+  decideBatch(requests: readonly DecisionRequest[], options: CallOptions = {}): Promise<DecisionResponse[]> {
+    return this.client!.decideBatch(requests, this.callOptions(options));
+  }
   capabilities(options: CallOptions = {}): Promise<Capabilities> {
     return this.client!.capabilities(this.callOptions(options));
   }
-  /** Idempotent. Aborts local HTTP calls, terminates the owned child and waits for exit. */
+  /** Idempotent. Aborts local calls, terminates the owned child and waits for exit. */
   close(): Promise<void> {
     if (!this.closing) {
       this.lifetime.abort(new L2S1Error('Rust process closed', 'process_closed'));
+      this.client?.close();
       this.closing = (async () => {
         if (this.exited) return;
         this.child.kill('SIGTERM');

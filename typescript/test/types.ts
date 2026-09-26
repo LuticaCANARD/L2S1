@@ -21,6 +21,13 @@ const custom = L2S1.fromBackend(backend);
 const remote = L2S1.connect({ baseUrl: 'https://example.com/l2s1' });
 void custom.decide(request);
 void remote.decide(request);
+
+const plan = custom.prepare<{ temperature_c: number }>(request.decisions);
+void plan.decide({ temperature_c: 6 });
+void plan.decideBatch([{ temperature_c: 6 }, { temperature_c: 15 }]);
+void custom.decideBatch([request]);
+// @ts-expect-error prepared state is checked at the application boundary
+void plan.decide({ temperature_c: 'cold' });
 // @ts-expect-error Unknown decision kinds are rejected by TypeScript.
 const invalid: DecisionRequest = { state: null, decisions: [{ id: 'q', instruction: 'q', kind: { type: 'free_text' } }] };
 void invalid;

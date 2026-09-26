@@ -8,6 +8,8 @@ L2S1 は、ローカルのチャットモデルで二値・選択・順序付き
 
 メッセージの分類、リクエストの振り分け、条件の確認、順序付きのレベル評価に使用できます。質問と候補 ID は、アプリケーションがリクエストごとに指定します。互換性のある GGUF モデルに変更しても、リクエストと結果の型を維持できます。
 
+[Python SDK](python/README.md)、[native batch](docs/ja/BATCHING_API_REVIEW.md)、[GitHub Release・npm・PyPI・Cargo 配布パイプライン](docs/ja/RELEASE_PIPELINE.md)を提供します。
+
 ## クイックスタート
 
 Rust 2024 エディションに対応した最新の stable ツールチェーン、CMake 3.24 以上、C++17 コンパイラ、互換性のある chat/instruct GGUF が必要です。初回のネイティブビルドでは、固定されたリビジョンの llama.cpp ソースをダウンロードします。モデルの重みは別途用意してください。

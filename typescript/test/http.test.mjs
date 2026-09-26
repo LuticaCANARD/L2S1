@@ -8,6 +8,20 @@ const output = () => ({ api_version: 1, request_id: 'req-1', backend: { runtime:
     evidence: { type: 'selection_only', selected_code: 'B', provider_model: null }, usage: { input_tokens: null, output_tokens: null } }] });
 function client(fetch, options = {}) { return new L2S1Client({ baseUrl: 'http://localhost:8080/proxy/', fetch, ...options }); }
 
+test('native batch sends one request, validates ordered responses and never falls back', async () => {
+  let calls = 0;
+  const api = client(async (url, init) => {
+    calls++;
+    assert.ok(url.endsWith('/v1/decision-batches'));
+    assert.deepEqual(JSON.parse(init.body), { requests: [request, request] });
+    return Response.json({ api_version: 1, request_id: 'batch', execution: 'native_parallel', responses: [output(), output()] });
+  });
+  assert.equal((await api.decideBatch([request, request])).length, 2);
+  assert.equal(calls, 1);
+  await assert.rejects(client(async () => Response.json({ error: { code: 'batch_not_enabled', message: 'use parallel' } }, { status: 400 })).decideBatch([request]), { code: 'batch_not_enabled' });
+  await assert.rejects(client(async () => Response.json({ api_version: 1, request_id: 'batch', execution: 'serial', responses: [output()] })).decideBatch([request]), { code: 'invalid_response' });
+});
+
 test('HTTP subpath imports without Node runtime dependencies', async () => {
   const { readFile } = await import('node:fs/promises');
   const code = await readFile(new URL('../dist/http.js', import.meta.url), 'utf8');

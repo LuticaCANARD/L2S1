@@ -34,7 +34,6 @@
 
 공개 scoped 배포에는 npm 계정, scope 권한, 지원되는 배포 인증이 필요합니다. 2026-09-26 확인 기준 로컬 npm CLI는 인증되지 않았고(`npm whoami`는 `ENEEDAUTH`), 인증 없는 `npm view @l2s1/node`는 404를 반환합니다. 이 검토에서 패키지를 공개하지 않았습니다.
 
-CI 배포에서는 npm이 OIDC 기반 GitHub Actions trusted publishing을 지원합니다. npm 11.5.1 이상, Node.js 22.14.0 이상, 해당 패키지의 trusted-publisher 설정, 워크플로의 `id-token: write`가 필요합니다. 이 PR은 검토 가능한 아티팩트만 빌드하며 자동 배포 트리거를 추가하거나 npm 계정을 설정하지 않습니다. [npm trusted publishing 문서](https://docs.npmjs.com/trusted-publishers/)
 
 <a id="binary-and-license-boundaries"></a>
 ## 실행 파일과 라이선스 범위
@@ -51,3 +50,5 @@ Linux 빌드 작업은 Ubuntu 22.04를 사용합니다. 대응하는 glibc·C++ 
 릴리스 CI는 TypeScript와 예제 타입, HTTP 전송, 사용자 정의 백엔드 라우팅, 시작 실패·취소·정리, 실제 Rust HTTP 검증·점수 계산, 압축한 래퍼·런타임 tarball의 오프라인 설치를 확인합니다. 네이티브 패키지 검증은 파일 해시, 실행 파일 버전, 번들 내부 Linux 공유 라이브러리 탐색을 확인합니다. 플랫폼 CI는 잘못된 모델로 시작을 테스트하며 모델을 다운로드하지 않습니다. 이는 실행 파일 로딩 확인이며 추론 품질 확인이 아닙니다.
 
 실제 GGUF 스모크 테스트에는 별도 가중치가 필요합니다. 판단 보류를 포함한 타입 결과와 점수 구조를 검증하며 작업 정답률이나 GPU 동작을 입증하지 않습니다.
+
+`release.yml`은 검증된 npm·PyPI·Cargo 설치 패키지를 게시한 뒤 GitHub Release를 공개합니다. 계정·trusted publisher 설정은 별도로 해야 합니다. [배포 파이프라인](../RELEASE_PIPELINE.md)을 참고하세요.

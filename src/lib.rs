@@ -6,6 +6,7 @@ mod decision;
 pub use codes::{option_code, option_code_width};
 mod output_head;
 mod prompt;
+mod reasoning;
 pub use decision::*;
 pub use output_head::*;
 pub use prompt::{
@@ -14,7 +15,9 @@ pub use prompt::{
     STATE_FIRST_MODEL_PROMPT_VERSION, STATE_FIRST_PROMPT_VERSION, compile_prompt,
     compile_prompt_with_detail, compile_prompt_with_layout,
 };
+pub use reasoning::{ReasoningMode, ReasoningOptions};
 pub mod http;
+pub mod stdio;
 #[cfg(feature = "llama")]
 pub mod llama;
 #[cfg(feature = "openrouter")]

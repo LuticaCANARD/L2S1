@@ -89,6 +89,27 @@ export class L2S1Client {
   }
   async decide(request: DecisionRequest, options: CallOptions = {}): Promise<DecisionResponse> {
     const value = await this.request('/v1/decisions', request, options);
+    return decisionResponse(value, request);
+  }
+  async decideBatch(requests: readonly DecisionRequest[], options: CallOptions = {}): Promise<DecisionResponse[]> {
+    this.lifetime.signal.throwIfAborted();
+    const snapshots = structuredClone(requests);
+    if (!snapshots.length) return [];
+    const value = await this.request('/v1/decision-batches', { requests: snapshots }, options);
+    if (!object(value) || value.api_version !== 1 || typeof value.request_id !== 'string'
+      || value.execution !== 'native_parallel' || !Array.isArray(value.responses)
+      || value.responses.length !== snapshots.length) {
+      throw new L2S1Error('Invalid native batch response', 'invalid_response');
+    }
+    return value.responses.map((response, index) => decisionResponse(response, snapshots[index]!));
+  }
+  /** Cancels this client's HTTP calls; the remote server remains running. */
+  close(): void {
+    this.lifetime.abort(new L2S1Error('HTTP client is closed', 'backend_closed'));
+  }
+}
+
+export function decisionResponse(value: unknown, request: DecisionRequest): DecisionResponse {
     if (!object(value) || value.api_version !== 1 || typeof value.request_id !== 'string'
       || !object(value.backend) || typeof value.backend.runtime !== 'string' || typeof value.backend.model !== 'string'
       || !('policy' in value) || !Array.isArray(value.results) || value.results.length !== request.decisions.length
@@ -101,8 +122,3 @@ export class L2S1Client {
     }
     return value as unknown as DecisionResponse;
   }
-  /** Cancels this client's HTTP calls; the remote server remains running. */
-  close(): void {
-    this.lifetime.abort(new L2S1Error('HTTP client is closed', 'backend_closed'));
-  }
-}
