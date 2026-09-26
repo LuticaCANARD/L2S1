@@ -1,0 +1,64 @@
+name: TypeScript prebuilt runtimes
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['typescript/**', 'crates/l2s1-llama-sys/**', 'src/**', 'build.rs', 'Cargo.toml', 'Cargo.lock', '.github/workflows/typescript-runtimes.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  runtime:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            platform: linux-x64
+            feature: llama
+            devices: cpu
+          - runner: ubuntu-22.04-arm
+            platform: linux-arm64
+            feature: llama
+            devices: cpu
+          - runner: macos-15-intel
+            platform: darwin-x64
+            feature: llama
+            devices: cpu
+          - runner: macos-14
+            platform: darwin-arm64
+            feature: llama-metal
+            devices: cpu,metal
+          - runner: windows-latest
+            platform: win32-x64
+            feature: llama
+            devices: cpu
+    runs-on: ${{ matrix.runner }}
+    env:
+      L2S1_PORTABLE_BUILD: '1'
+      CCACHE_DISABLE: '1'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release --locked --features '${{ matrix.feature }}' --bin l2s1 --message-format=json-render-diagnostics > native-build.jsonl
+      - run: node typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl --devices '${{ matrix.devices }}'
+      - run: node typescript/scripts/verify-runtime.mjs 'typescript/runtime-packages/${{ matrix.platform }}'
+      - run: npm pack --pack-destination ../../ --ignore-scripts
+        working-directory: typescript/runtime-packages/${{ matrix.platform }}
+      - run: npm ci && npm run build && npm run check && npm test && npm run test:rust && npm pack
+        working-directory: typescript
+      - run: npm run test:package -- l2s1-node-0.1.0.tgz l2s1-runtime-${{ matrix.platform }}-0.1.0.tgz
+        working-directory: typescript
+      - uses: actions/upload-artifact@v6
+        with:
+          name: l2s1-node-${{ matrix.platform }}
+          path: typescript/*.tgz

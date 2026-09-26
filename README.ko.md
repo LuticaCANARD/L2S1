@@ -156,6 +156,28 @@ curl -sS -H 'Content-Type: application/json' \
 
 HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 사용합니다. 로컬 백엔드는 질문 하나당 이미지 한 장을 받습니다. 요청 구조, 제한, 백엔드별 동작은 [이미지와 HTTP 계약](docs/GUIDE.md#direct-image-input-and-http-api)에 설명되어 있습니다.
 
+## TypeScript에서 사용하기
+
+[`@l2s1/node`](typescript/README.md)는 현재 OS·CPU에 맞는 사전 빌드 Rust 런타임을 선택하며, 타입이 있는 `load()`, `decide()`, `capabilities()`, `close()`를 제공합니다. 빌드 워크플로가 만드는 래퍼·런타임 tarball을 설치합니다. npm에는 아직 배포하지 않았으며 GGUF 가중치는 별도로 준비합니다. 같은 애플리케이션 API에서 `connect()`는 HTTP 서버를, `fromBackend()`는 사용자 정의 백엔드를 사용합니다.
+
+```ts
+import { L2S1 } from '@l2s1/node';
+
+const engine = await L2S1.load({
+  model: '/path/to/chat-model.gguf',
+});
+try {
+  const response = await engine.decide({
+    state: { x: 1 },
+    decisions: [{ id: 'positive', instruction: 'Is x positive?',
+      kind: { type: 'binary', false_label: 'x <= 0', true_label: 'x > 0' } }],
+  });
+  console.log(response.results);
+} finally { await engine.close(); }
+```
+
+실행 중인 서버나 브라우저 앱에서는 `@l2s1/node/http`의 `L2S1Client`를 사용합니다. 설치, 이미지, 추론 모드, 오류, 배포 조건은 [패키지 안내](typescript/README.md)를 참고하세요.
+
 ## Rust에서 사용하기
 
 `l2s1` 의존성의 `llama` feature를 활성화합니다. 모델은 한 번 로드하고 반복 요청에 재사용합니다.

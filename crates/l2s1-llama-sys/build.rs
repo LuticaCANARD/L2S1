@@ -22,7 +22,8 @@ fn digest_file(hash: &mut Sha256, path: &Path) {
             .as_encoded_bytes(),
     );
     let mut file = fs::File::open(path).expect("native runtime identity input unavailable");
-    let mut buffer = [0; 1024 * 1024];
+    // Keep build scripts below the Windows main thread's default stack limit.
+    let mut buffer = [0; 64 * 1024];
     loop {
         let n = file
             .read(&mut buffer)
@@ -39,6 +40,7 @@ fn main() {
     println!("cargo:rerun-if-env-changed=LLAMA_CPP_DIR");
     println!("cargo:rerun-if-env-changed=L2S1_CUDA_ARCHITECTURES");
     println!("cargo:rerun-if-env-changed=L2S1_NATIVE_COMPILER_LAUNCHER");
+    println!("cargo:rerun-if-env-changed=L2S1_PORTABLE_BUILD");
     let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let selected = env::var_os("L2S1_LLAMA_CPP_SOURCE")
         .or_else(|| env::var_os("LLAMA_CPP_DIR"))
@@ -74,11 +76,12 @@ fn main() {
     let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target OS unavailable");
     assert!(!(cuda && metal), "CUDA and Metal are mutually exclusive");
     assert!(!metal || target_os == "macos", "Metal requires macOS");
-    let shared_extension = if target_os == "macos" {
-        ".dylib"
-    } else {
-        ".so"
+    let shared_extension = match target_os.as_str() {
+        "macos" => ".dylib",
+        "windows" => ".dll",
+        _ => ".so",
     };
+    let portable = env::var_os("L2S1_PORTABLE_BUILD").is_some_and(|v| v == "1");
     let backend = if cuda {
         "cuda"
     } else if metal {
@@ -117,6 +120,9 @@ fn main() {
     );
     build_key.update(commit.trim().as_bytes());
     build_key.update(backend.as_bytes());
+    if portable {
+        build_key.update(b"portable");
+    }
     if let Some(architectures) = &cuda_architectures {
         build_key.update(architectures.as_bytes());
     }
@@ -164,22 +170,53 @@ fn main() {
             cmake.define("CMAKE_CUDA_ARCHITECTURES", architectures);
         }
     }
+    if portable {
+        // Published CPU packages must not require the build host's CPU ISA or
+        // a separately installed OpenMP runtime.
+        for option in [
+            "GGML_NATIVE",
+            "GGML_SSE42",
+            "GGML_BMI2",
+            "GGML_AVX",
+            "GGML_AVX2",
+            "GGML_FMA",
+            "GGML_F16C",
+            "GGML_AVX512",
+            "GGML_OPENMP",
+        ] {
+            cmake.define(option, "OFF");
+        }
+    }
     let install = cmake.build();
     let lib = install.join("lib");
+    let runtime_lib = if target_os == "windows" {
+        install.join("bin")
+    } else {
+        lib.clone()
+    };
+    let prefix = if target_os == "windows" { "" } else { "lib" };
     assert!(
-        lib.join(format!("libllama{shared_extension}")).is_file(),
+        runtime_lib
+            .join(format!("{prefix}llama{shared_extension}"))
+            .is_file(),
         "llama.cpp did not install the llama shared library"
     );
     assert!(
-        lib.join(format!("libmtmd{shared_extension}")).is_file(),
+        runtime_lib
+            .join(format!("{prefix}mtmd{shared_extension}"))
+            .is_file(),
         "llama.cpp did not install the mtmd shared library"
     );
     let source = PathBuf::from(
         fs::read_to_string(install.join("build/l2s1-llama-source.txt"))
             .expect("CMake did not report its llama.cpp source directory"),
-    )
-    .canonicalize()
-    .expect("llama.cpp source directory unavailable after CMake build");
+    );
+    // CMake reports an absolute source path. Keep that spelling: on Windows,
+    // canonicalize() adds a verbatim prefix that MSVC does not accept for /I.
+    assert!(
+        source.is_absolute() && source.is_dir(),
+        "llama.cpp source directory unavailable after CMake build"
+    );
     for required in [
         "CMakeLists.txt",
         "include/llama.h",
@@ -227,17 +264,23 @@ fn main() {
     }
     digest_file(&mut fingerprint, &manifest.join("native/bridge.cpp"));
     digest_file(&mut fingerprint, &manifest.join("native/chat.cpp"));
-    let archive = out_dir.join("libl2s1_bridge.a");
+    let archive = out_dir.join(
+        if env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc") {
+            "l2s1_bridge.lib"
+        } else {
+            "libl2s1_bridge.a"
+        },
+    );
     digest_file(&mut fingerprint, &archive);
-    let mut libraries = fs::read_dir(&lib)
+    let mut libraries = fs::read_dir(&runtime_lib)
         .expect("read installed llama.cpp libraries")
         .map(|entry| entry.expect("library entry").path())
         .filter(|path| {
             path.file_name().is_some_and(|name| {
                 let name = name.to_string_lossy();
-                (name.starts_with("libllama")
-                    || name.starts_with("libmtmd")
-                    || name.starts_with("libggml"))
+                (name.starts_with(&format!("{prefix}llama"))
+                    || name.starts_with(&format!("{prefix}mtmd"))
+                    || name.starts_with(&format!("{prefix}ggml")))
                     && name.contains(shared_extension)
                     && path.is_file()
             })
@@ -252,6 +295,7 @@ fn main() {
         fingerprint.finalize()
     );
     println!("cargo::metadata=libdir={}", lib.display());
+    println!("cargo::metadata=runtime_libdir={}", runtime_lib.display());
     println!("cargo:rustc-link-search=native={}", lib.display());
     println!("cargo:rustc-link-lib=dylib=llama");
     println!("cargo:rustc-link-lib=dylib=mtmd");

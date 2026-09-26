@@ -35,7 +35,8 @@ fn main() {
     ] {
         println!("cargo:rerun-if-changed={path}");
         let mut file = File::open(path).expect("runtime identity input unavailable");
-        let mut buffer = [0; 1024 * 1024];
+        // Keep build scripts below the Windows main thread's default stack limit.
+        let mut buffer = [0; 64 * 1024];
         loop {
             let n = file.read(&mut buffer).expect("read runtime identity");
             if n == 0 {

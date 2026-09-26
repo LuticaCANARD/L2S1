@@ -156,6 +156,28 @@ For a still image, load the vision model and its matching projector:
 
 HTTP image requests use named `media` and per-decision `media_ids`. Local backends accept one image per decision. See the [image and HTTP contract](docs/GUIDE.md#direct-image-input-and-http-api) for payloads, limits, and backend-specific behavior.
 
+## Use from TypeScript
+
+The [`@l2s1/node` package](typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install the wrapper and runtime tarballs from the build workflow; they have not been published to npm. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
+
+```ts
+import { L2S1 } from '@l2s1/node';
+
+const engine = await L2S1.load({
+  model: '/path/to/chat-model.gguf',
+});
+try {
+  const response = await engine.decide({
+    state: { x: 1 },
+    decisions: [{ id: 'positive', instruction: 'Is x positive?',
+      kind: { type: 'binary', false_label: 'x <= 0', true_label: 'x > 0' } }],
+  });
+  console.log(response.results);
+} finally { await engine.close(); }
+```
+
+For an existing server or a browser application, import `L2S1Client` from `@l2s1/node/http`. See the [package guide](typescript/README.md) for installation, images, reasoning, errors and portability.
+
 ## Use from Rust
 
 Enable the `llama` feature on the `l2s1` dependency. Load once and keep the backend for repeated requests:
