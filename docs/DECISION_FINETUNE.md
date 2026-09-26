@@ -12,7 +12,7 @@ parallel attention architecture and makes no claim of general decision ability.
 ## Frozen protocol
 
 - Source: the pinned Kaggle Twitter US Airline Sentiment archive prepared by
-  `scripts/kaggle_airline.py`. Dataset text and weights remain in ignored
+  `target/release/l2s1-tools kaggle-airline`. Dataset text and weights remain in ignored
   `results/`; they are not redistributed by this repository.
 - Exclude all 800 previous calibration/evaluation examples by normalized text.
   Remove exact normalized duplicates and conflicting-label text groups.
@@ -54,11 +54,11 @@ artifact and is not silently applied to application responses.
 
 ## Entry points
 
-1. `scripts/prepare_decision_finetune.py` freezes the data and protocol.
+1. `target/release/l2s1-tools prepare-decision-finetune` freezes the data and protocol.
 2. `examples/export_decision_tokens.rs` exports production input/candidate IDs.
 3. `scripts/train_decision_lora.py` downloads the pinned model, runs a smoke test
    or the full paired experiment, and saves the adapter and raw measurements.
-4. `scripts/report_decision_finetune.py` fits calibration-only temperatures and
+4. `target/release/l2s1-tools report-decision-finetune` fits calibration-only temperatures and
    reports held-out metrics and option-order diagnostics.
 
 The CLI and JSONL evaluator accept `--lora path/to/adapter.gguf`. Convert a PEFT

@@ -54,7 +54,7 @@ Outputs include the exact inference requests, original tasks with gold, raw pred
 Mapping tests:
 
 ```bash
-python3 -m unittest discover -s scripts -p 'test_jevbench_public.py'
+cargo test --locked --offline -p l2s1-tools jevbench_public::tests
 ```
 
 ## Local RTX 3080 rerun (2026-09-23)

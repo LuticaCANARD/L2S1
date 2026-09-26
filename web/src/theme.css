@@ -1,0 +1,69 @@
+:root {
+  color-scheme: light;
+  --site-background: #e7eef4;
+  --site-text: #173247;
+  --site-border: #718ca1;
+  --site-control: #ffffff;
+  --site-focus: #003153;
+  --theme-page: #e7eef4;
+  --theme-panel: #ffffff;
+  --theme-surface: #dbe7f0;
+  --theme-tint: #d4e3ef;
+  --theme-terminal: #003153;
+  --theme-primary: #003153;
+  --theme-chart: #397fa9;
+  --theme-text: #173247;
+  --theme-muted: #415c70;
+  --theme-accent: #003153;
+  --theme-on-primary: #f4faff;
+  --theme-border: #718ca1;
+  --theme-warning-bg: #f8eedc;
+  --theme-warning-text: #77501f;
+  --theme-warning-border: #d9bf91;
+  --theme-error-bg: #fbece9;
+  --theme-error-text: #963e32;
+  --theme-error-border: #dba79d;
+  --theme-shadow: #0031532e;
+  --theme-panel-shadow: 0 8px 24px #00315314, 0 1px 3px #00315312;
+}
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --site-background: #05070a;
+  --site-text: #e5f2fb;
+  --site-border: #526d82;
+  --site-control: #0e1720;
+  --site-focus: #9cd5f5;
+  --theme-page: #05070a;
+  --theme-panel: #0e1720;
+  --theme-surface: #172430;
+  --theme-tint: #1c2d3b;
+  --theme-terminal: #06121c;
+  --theme-primary: #003153;
+  --theme-chart: #79bde5;
+  --theme-text: #e5f2fb;
+  --theme-muted: #abc4d7;
+  --theme-accent: #9cd5f5;
+  --theme-on-primary: #f4faff;
+  --theme-border: #526d82;
+  --theme-warning-bg: #352d20;
+  --theme-warning-text: #f2d29a;
+  --theme-warning-border: #82643d;
+  --theme-error-bg: #382723;
+  --theme-error-text: #ffc6b6;
+  --theme-error-border: #8c594b;
+  --theme-shadow: #00000099;
+  --theme-panel-shadow: 0 12px 30px #00000070, 0 1px 2px #00000080;
+}
+/* Terminal panels retain readable blue accents in either appearance. */
+.brand-symbol, .decision-window, .demo-result, .command-panel {
+  --theme-muted: #abc8db;
+  --theme-accent: #9cd5f5;
+  --theme-border: #517b99;
+}
+.window-offset { --theme-muted: var(--site-text); }
+html, body { background-color: var(--site-background); color: var(--site-text); }
+:where(a, button, select, textarea, input, summary):focus-visible { outline: 2px solid var(--site-focus); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto !important; } }
+
+/* Raised panels distinguish editable inputs and results from the page canvas. */
+.input-panel, .output-panel, .load-panel, .workspace > .panel { box-shadow: var(--theme-panel-shadow); }

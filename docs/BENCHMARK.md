@@ -6,7 +6,7 @@
 
 The `decision-rules-v1` benchmark compares existing GGUF checkpoints on **12 requests with 36 labeled decisions**. It measures rule-following correctness, abstention, repeated-output consistency, and inference latency. It does not download or distribute models.
 
-The default is the legacy v1 prompt. Optional v2 state-first prompts and optional prefix reuse are documented in [SEMIF_ALGORITHM.md](SEMIF_ALGORITHM.md). Pass `--prompt-layout state-first` for v2, then `--execution-mode fresh` (default) or `--execution-mode prefix-reuse` to the Python runner, using separate output directories for comparisons. Reports record the requested mode, logical input tokens, reused prefix tokens, and actual evaluated tokens. Compare the same prompt version, model, device, and batch setting; changing the prompt can change accuracy independently of cache reuse.
+The default is the legacy v1 prompt. Optional v2 state-first prompts and optional prefix reuse are documented in [SEMIF_ALGORITHM.md](SEMIF_ALGORITHM.md). Pass `--prompt-layout state-first` for v2, then `--execution-mode fresh` (default) or `--execution-mode prefix-reuse` to the Rust runner, using separate output directories for comparisons. Reports record the requested mode, logical input tokens, reused prefix tokens, and actual evaluated tokens. Compare the same prompt version, model, device, and batch setting; changing the prompt can change accuracy independently of cache reuse.
 
 The English fixture in `tests/fixtures/decision_benchmark.json` covers two domains:
 
@@ -85,7 +85,7 @@ Loading and the first request are reported separately. Timings include prompt pr
 
 ```sh
 cargo test --locked --offline --test benchmark
-python3 -m unittest discover -s scripts -p 'test_benchmark_models.py'
+cargo test --locked --offline -p l2s1-tools
 ```
 
 These validate fixture labels and metric denominators, including ties and all-abstaining output, plus manifest validation and failure-preserving reports. They do not establish real inference correctness.
@@ -102,4 +102,4 @@ SKID_BENCH_OUTPUT=results/benchmark/single-model.json \
   native::model_decision_benchmark -- --exact --ignored --nocapture
 ```
 
-Direct runs accept `SKID_CONTEXT`, `SKID_BATCH`, `SKID_THREADS`, `SKID_MIN_TOP_PROBABILITY`, and `SKID_MIN_CANDIDATE_MASS`. The Python runner adds checkpoint hashes and the comparison table. The earlier `tests/performance.rs` remains available for repeated measurements of the single warehouse example.
+Direct runs accept `SKID_CONTEXT`, `SKID_BATCH`, `SKID_THREADS`, `SKID_MIN_TOP_PROBABILITY`, and `SKID_MIN_CANDIDATE_MASS`. The Rust runner adds checkpoint hashes and the comparison table. The earlier `tests/performance.rs` remains available for repeated measurements of the single warehouse example.

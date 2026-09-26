@@ -5,7 +5,7 @@
 
 [English index](README.md) · [한국어 색인](../ko/README.md) · [日本語索引](../ja/README.md)
 
-`/webgpu` runs Qwen3 0.6B ONNX in the browser. It does not present stored examples or synthetic scores as inference results. Inputs and generated thought tokens are processed inside a Web Worker and are not sent to a server inference API. Opening the page does not automatically download the model.
+`/webgpu` runs Qwen3 0.6B ONNX in the browser. It does not present stored examples or synthetic scores as inference results. In browser mode, inputs and generated thought tokens are processed inside a Web Worker and are not sent to a server inference API. Opening the page does not automatically download the model.
 
 <a id="사용"></a>
 ## Usage
@@ -57,7 +57,29 @@ The September 26, 2026 build was tested with the real model in Chromium using **
 
 This single input is not a quality benchmark or proof of superior performance. The first software-adapter direct decision took 63.54 seconds excluding model load. Local response and screenshots are gitignored under `results/typed-decisions-20260926/webgpu-ui-real.json`, `webgpu-ui-direct.png`, and `webgpu-ui-limit.png`.
 
+<a id="로컬-큰-모델로-판단"></a>
+## Decisions with a larger local model
+
+Select **Local server · larger GGUF model** as the inference location. The same state, questions, and acceptance policy are used; inputs are sent to the local server when you press analyze. Connecting only queries capabilities. Results show the actual server model and runtime, and responses with a different acceptance policy are rejected. Thinking is available only when the server supports it. Custom failure messages are sent only for codes supported by the local HTTP API.
+
+This option requires the web app and model server running on localhost. Start the server with the path to an existing GGUF file. Model files are not included in the repository.
+
+```sh
+cargo build --release --features llama
+target/release/l2s1 --model models/Qwen3.8-27B-UD-IQ2_XXS.gguf --device cpu --context 2048 --listen 127.0.0.1:8082
+```
+
+In another terminal, start the local development server in `web`. On `/webgpu`, select the local server, then **Connect local model** and **Analyze with local model**. The default model server address is `http://127.0.0.1:8082`; set `L2S1_QUALITY_URL` when starting the web app to change it. **Stop waiting** cancels the browser's wait for the response.
+
+Additional diagnostics on September 26, 2026 found that browser 0.6B q4 ranked `medium` highest and abstained for the four-hour warehouse input. Removing the answer boundary, JSON prompts, comparison guidance, and q8 execution did not resolve the wrong answer and were not adopted. A local GGUF whose metadata identifies it as `qwen35 27B IQ2_XXS` selected `chilled`, `true`, and `high` for all three questions on the same input. Dispatch priority had candidate probability **0.9788991935** and candidate-code mass **0.9848324846**. The default policy **0.8 / 0.05** was preserved, using CPU execution. The local filename is shown in the command above; its actual architecture is `qwen35`.
+
+Additional boundary checks ranked the correct candidate highest at 6, 7, 24, and 25 hours. Exactly 6 and 24 hours abstained because relative probability was below 0.8; 7 and 25 hours selected the correct answer. Reordering the choice candidates also selected `chilled`.
+
+This reproduces a specific warehouse example, not general accuracy or production quality. Different models, quantization, runtimes, and prompts prevent a controlled model comparison or speedup claim. Tiny browser candidate mass is displayed as `<0.01%` rather than rounded to `0.00%`.
+
 <a id="로컬-개발"></a>
+The current native HTTP server accepts state and decisions only and applies its startup policy. This client uses that contract when request-policy support is not advertised, disables thinking and rejects responses whose policy differs from the UI. To change its policy, start the server with matching `--min-top-probability` and `--min-candidate-mass` values. Newer servers that advertise `request_policy.supported` receive the requested policy and supported failure messages. Custom failure text for the current server is rendered in the client while retaining the original reason codes.
+
 ## Local development
 
 ```sh
@@ -66,6 +88,6 @@ npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173/webgpu`. No separate L2S1 inference server is needed. Executing the WebGPU model requires a supported browser/adapter and network access for downloads.
+Open `http://127.0.0.1:5173/webgpu`. A separate L2S1 server is required only for local-server mode. Executing the WebGPU model requires a supported browser/adapter and network access for downloads.
 
 Implementation references were the [official Hugging Face Qwen3 WebGPU worker](https://github.com/huggingface/transformers.js-examples/blob/main/qwen3-webgpu/src/worker.js), [WebGPU guide](https://huggingface.co/docs/transformers.js/guides/webgpu), [quantization guide](https://huggingface.co/docs/transformers.js/guides/dtypes), and the pinned npm package's model forward, generation, Tensor, and ONNX backend sources.
