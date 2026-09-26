@@ -9,7 +9,9 @@ struct Args {
     #[arg(long)]
     model: String,
     #[arg(long)]
-    listen: String,
+    listen: Option<String>,
+    #[arg(long)]
+    stdio: bool,
 }
 struct Fixture;
 impl HttpDecisionBackend for Fixture {
@@ -17,7 +19,20 @@ impl HttpDecisionBackend for Fixture {
         json!({"api_version":1,"backend":{"runtime":"rust-fixture","model":"synthetic"},
             "decision_types":["binary","choice","ordinal"],"evidence":"model_scored",
             "media":{"image":{"supported":false,"max_per_decision":0,"max_bytes_each":8388608}},
-            "limits":{"max_decisions":128,"max_media":4}})
+            "limits":{"max_decisions":128,"max_media":4},
+            "batch":{"supported":true,"enabled":true,"execution":"native_parallel","max_requests":128,"max_decisions":128,"max_decisions_per_wave":4,"text":true,"image":false,"mixed_media":false,"reasoning_modes":["direct"]},
+            "request_policy":{"supported":true,"target_error_rate":"model-score threshold; not a guaranteed correctness error rate"}})
+    }
+    fn decide_native_batch_json(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[Vec<&[u8]>],
+    ) -> l2s1::Result<Vec<Value>> {
+        requests
+            .iter()
+            .zip(images)
+            .map(|(request, images)| self.decide_json(request, images))
+            .collect()
     }
     fn decide_json(&mut self, request: &DecisionRequest, images: &[&[u8]]) -> l2s1::Result<Value> {
         if !images.is_empty() {
@@ -51,5 +66,12 @@ impl HttpDecisionBackend for Fixture {
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    l2s1::http::serve(&args.listen, &mut Fixture)
+    if args.stdio {
+        l2s1::stdio::serve(&mut Fixture)
+    } else {
+        l2s1::http::serve(
+            args.listen.as_deref().expect("--listen or --stdio"),
+            &mut Fixture,
+        )
+    }
 }

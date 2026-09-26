@@ -24,14 +24,14 @@ Both wrapper and generated runtimes use `publishConfig.access = public` and the 
 ## Release conditions
 
 1. Confirm ownership or publishing rights for the npm `@l2s1` user/organization scope. A GitHub repository owner is not automatically the owner of an npm scope. An unauthenticated registry 404 does not prove the scope is available.
-2. Start release checks by pushing the release commit with a `v*` version tag or manually dispatching the workflows for that commit. All four workflows run only on version-tag pushes or manual dispatch; PRs and branch pushes do not start CI. Pass the five native build/install jobs in `typescript-runtimes.yml`. A local Linux build is not verification of macOS, Windows or arm64 artifacts.
+2. Start release checks by pushing the release commit with a `v*` version tag or manually dispatching the workflows for that commit. `release.yml` invokes reusable runtime and Python checks for that exact tag commit. PRs and branch pushes do not publish packages. Pass the five native build/install jobs in `typescript-runtimes.yml`. A local Linux build is not verification of macOS, Windows or arm64 artifacts.
 3. Check all tarballs using `npm publish --dry-run --access public --ignore-scripts`. Verify the version, files, licenses, absence of model weights and absence of install scripts.
 4. Publish the five runtime tarballs first at the matching version, then publish the wrapper. Publishing the wrapper before its runtimes would allow npm's optional dependency handling to leave local inference unavailable.
 5. Install the wrapper by registry name into a clean project and verify automatic runtime selection and a real-model decision. This final registry test requires actual publication; local tarball installation is preparation evidence.
 
 Public scoped publishing needs an npm account, scope permissions and supported publication authentication. As checked on 2026-09-26, the local npm CLI is not authenticated (`npm whoami` returns `ENEEDAUTH`), and an unauthenticated `npm view @l2s1/node` returns 404. No package was published during this review.
 
-For CI publication, npm supports GitHub Actions trusted publishing through OIDC. It requires npm 11.5.1+, Node.js 22.14.0+, the corresponding package trusted-publisher settings and workflow `id-token: write`. This PR builds reviewable artifacts only; it does not add an automatic publish trigger or configure an npm account. [npm trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/)
+For CI publication, npm supports GitHub Actions trusted publishing through OIDC. It requires npm 11.5.1+, Node.js 22.14.0+, the corresponding package trusted-publisher settings and workflow `id-token: write`. The `release.yml` pipeline now publishes verified tarballs to npm (runtimes before wrapper), Python distributions to PyPI and native Cargo crates to crates.io, then publishes GitHub Release. Registry accounts and trusted publisher settings must be configured separately. See [the release pipeline](../docs/RELEASE_PIPELINE.md). [npm trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/)
 
 ## Binary and license boundaries
 

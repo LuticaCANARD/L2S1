@@ -10,6 +10,9 @@
 | --- | --- |
 | [사용 가이드](GUIDE.md) | 빌드, 스키마, 점수, CLI, Rust, HTTP, 이미지, 백엔드 |
 | [TypeScript 라이브러리](typescript/README.md) | 상주 모델 프로세스, HTTP 클라이언트, 패키징, 검증 |
+| [Python SDK](python/README.md) | 타입이 있는 비동기 호출, 고정 질문 재사용, wheel, 공통 Rust 런타임 |
+| [배치 API 검토](BATCHING_API_REVIEW.md) | 반복 상태 입력, native 배치 경계와 HTTP 연결 방안 |
+| [배포 파이프라인](RELEASE_PIPELINE.md) | GitHub Release·npm·PyPI·native Cargo 자동 게시 |
 | [AI 에이전트 통합](AGENT_INTEGRATION.md) | 범용 스킬, stdio MCP, 요청 검증, 상주 추론 |
 | [브라우저 WebGPU 데모](WEBGPU_DEMO.md) | 로컬 Qwen3 ONNX 추론, WebGPU, 제한된 사고, 정책 |
 | [이미지·텍스트 데모](IMAGE_DEMO.md) | 기록된 응답, 정책, 실패 설명, 로컬 서버 |

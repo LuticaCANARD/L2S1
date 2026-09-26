@@ -3,7 +3,7 @@ import { L2S1Client, L2S1Error } from './http.js';
 import type { CallOptions, ClientOptions } from './http.js';
 import { RustProcessBackend } from './native.js';
 import type { LoadOptions } from './native.js';
-import type { Capabilities, DecisionRequest, DecisionResponse } from './types.js';
+import type { Capabilities, Decision, DecisionRequest, DecisionResponse, JsonValue } from './types.js';
 
 /** One application API for a bundled engine, HTTP server, or custom backend. */
 export class L2S1 implements AsyncDisposable {
@@ -26,6 +26,21 @@ export class L2S1 implements AsyncDisposable {
     this.checkOpen();
     return this.backend.decide(request, options);
   }
+  /** One native batch call. Timeout applies to the entire batch; no replay. */
+  async decideBatch(requests: readonly DecisionRequest[], options: CallOptions = {}): Promise<DecisionResponse[]> {
+    this.checkOpen();
+    const snapshots = structuredClone(requests);
+    if (!snapshots.length) return [];
+    if (!this.backend.decideBatch) throw new L2S1Error('Backend does not support native batching', 'batch_unsupported');
+    return this.backend.decideBatch(snapshots, options);
+  }
+  /** Snapshot fixed questions; each invocation supplies independent state.
+   * This is an application template, not model token compilation or KV reuse.
+   */
+  prepare<State extends JsonValue = JsonValue>(decisions: readonly Decision[]): PreparedDecision<State> {
+    this.checkOpen();
+    return new PreparedDecision<State>(this, decisions);
+  }
   capabilities(options: CallOptions = {}): Promise<Capabilities> {
     this.checkOpen();
     return this.backend.capabilities(options);
@@ -36,4 +51,16 @@ export class L2S1 implements AsyncDisposable {
     return this.closing;
   }
   [Symbol.asyncDispose](): Promise<void> { return this.close(); }
+}
+export class PreparedDecision<State extends JsonValue = JsonValue> {
+  private readonly decisions: Decision[];
+  constructor(private readonly engine: L2S1, decisions: readonly Decision[]) {
+    this.decisions = structuredClone([...decisions]);
+  }
+  decide(state: State, options: CallOptions = {}): Promise<DecisionResponse> {
+    return this.engine.decide({ state: structuredClone(state), decisions: structuredClone(this.decisions) }, options);
+  }
+  decideBatch(states: readonly State[], options: CallOptions = {}): Promise<DecisionResponse[]> {
+    return this.engine.decideBatch(states.map((state) => ({ state, decisions: this.decisions })), options);
+  }
 }

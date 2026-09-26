@@ -72,13 +72,23 @@ try {
 }
 ```
 
-`load()` selects the installed runtime for the current OS/architecture. To override it, pass `binaryPath: '/path/to/l2s1'` or `binaryPath: 'l2s1'` to use PATH. `load()` spawns without a shell, binds only to `127.0.0.1` on an automatically assigned port, and waits for a health response. Paths containing spaces work. Requests reuse the same process; Rust determines serial or parallel execution. `close()` is idempotent, aborts pending local HTTP calls, terminates the owned process and waits for exit. Closing or timing out an HTTP request alone does not guarantee that Rust inference has stopped. Processes that must stay shared with other callers should instead use the HTTP client below.
+`load()` selects the installed runtime for the current OS/architecture. Override it
+with `binaryPath: '/path/to/l2s1'` or a name on PATH. The default
+`transport: 'stdio'` starts the compiled Rust executable once and exchanges JSON
+lines through stdin/stdout; no HTTP server or port is opened. This is a resident
+native process, not an in-process N-API binding. Paths with spaces work.
+`transport: 'http'` explicitly starts a loopback server on an OS-selected port.
+Both transports wait for health and reuse the same model process. `close()` is
+idempotent, cancels local calls, terminates the owned process and waits for exit.
+A single call's timeout/cancellation does not guarantee native inference stopped.
+Use `connect()` below for a shared server. Stdio admits at most 16 outstanding
+calls; timed-out calls occupy their slot until the native reply arrives.
 
 The build workflow covers Linux x64/arm64 (glibc), macOS x64/arm64 and Windows x64. Linux and Windows packages expose CPU; macOS arm64 exposes CPU and Metal. CUDA and other custom builds use `binaryPath`. Linux packages require the system glibc/C++ runtime; Windows packages require the Microsoft Visual C++ x64 runtime. Unsupported platforms produce a clear error. These are workflow targets; local verification on one platform does not establish that the other platform artifacts have passed CI.
 
 TypeScript applications supporting explicit resource management can write `await using engine = await L2S1.load(...)`; this calls `close()` on scope exit. The package is ESM.
 
-`LoadOptions` exposes CPU/CUDA/Metal, context/batch/thread counts, a vision projector (`mmproj`), LoRA, execution mode, parallel width, prompt layout/detail and startup policy. Less common Rust flags can be passed in `extraArgs`; `--listen` is reserved. `startupTimeoutMs` defaults to 120,000 and HTTP `timeoutMs` to 180,000. A startup `signal` cancels loading. `onStderr` receives native log chunks. Calls accept `{ signal, timeoutMs }` as their second argument. Failed inference requests are never automatically retried.
+`LoadOptions` exposes CPU/CUDA/Metal, context/batch/thread counts, a vision projector (`mmproj`), LoRA, execution mode, parallel width, prompt layout/detail and startup policy. Less common Rust flags can be passed in `extraArgs`; `--stdio` and `--listen` are reserved. `startupTimeoutMs` defaults to 120,000 and call `timeoutMs` to 180,000. A startup `signal` cancels loading. `onStderr` receives native log chunks. Calls accept `{ signal, timeoutMs }` as their second argument. Failed inference requests are never automatically retried.
 
 Run the [warehouse example](examples/warehouse.ts) with Node.js 24's TypeScript support after building:
 
@@ -105,6 +115,48 @@ function useCustomBackend(backend: DecisionBackend) {
 
 `DecisionBackend` requires async `decide(request, options)` and `capabilities(options)` methods returning the exported response types. An optional `close()` hook releases owned resources. This permits custom IPC, RPC or other runtime adapters without changing application decision code. `fromBackend()` transfers lifecycle ownership to the facade. Closing an HTTP connection cancels this client's requests and leaves the shared remote server running.
 
+## Repeat fixed decisions with new state
+
+```ts
+const batchEngine = await L2S1.load({
+  model: '/path/to/model.gguf', executionMode: 'parallel', parallelWidth: 4,
+});
+type Temperature = { temperature_c: number };
+const plan = batchEngine.prepare<Temperature>([{
+  id: 'cold', instruction: 'Is temperature_c below 10?',
+  kind: { type: 'binary', false_label: 'At least 10.', true_label: 'Below 10.' },
+}]);
+const first = await plan.decide({ temperature_c: 6 });
+const second = await plan.decide({ temperature_c: 15 });
+const responses = await plan.decideBatch([{ temperature_c: 2 }, { temperature_c: 20 }]);
+// Different definitions per item: await batchEngine.decideBatch(requests).
+await batchEngine.close();
+```
+
+`prepare()` snapshots fixed definitions and supplies a typed state input. It does
+not compile model tokens or retain KV state across requests. `decideBatch()`
+sends one array to Rust's native parallel execution path through stdio, or one
+`POST /v1/decision-batches` for HTTP. Load with `executionMode: 'parallel'`;
+`parallelWidth` controls the wave width. Request state, media, ID and policy remain
+independent; response order follows input order. The envelope reports
+`execution: 'native_parallel'`. `timeoutMs` applies to the whole batch.
+There is no serial fallback or automatic retry, including after an inference
+failure. `batch_unsupported` and `batch_not_enabled` are explicit errors.
+A custom `DecisionBackend` can implement optional `decideBatch()` for native batching.
+
+Wire batches allow 128 requests and 128 total decisions. Current native parallel
+execution supports direct reasoning and at most 26 options per decision. Use
+all text, or one image for every decision with a matching projector; mixed text
+and image groups are rejected. All wire requests are validated before inference;
+an execution failure fails the whole batch without rolling back executed waves.
+Check `capabilities().batch`. `Promise.all(engine.decide(...))` queues separate
+requests; it does not combine them into a native batch. See the
+[batching review](../docs/BATCHING_API_REVIEW.md).
+
+The [Python SDK](../python/README.md) exposes the same lifecycle and HTTP v1 JSON
+contract, with `prepare(..., state_type=State)` and `decide_batch()` equivalents.
+Both SDKs can use the same extracted runtime bundle, Rust server and GGUF files.
+
 Use `@l2s1/node/http` for an existing Rust server. This subpath has no Node built-in imports and can also be bundled for browsers. Browser calls need a same-origin proxy or a reverse proxy that provides CORS; the Rust server does not add CORS headers. This does not run native inference inside the browser.
 
 ```ts
@@ -125,7 +177,7 @@ const capabilities = await client.capabilities();
 
 Request `policy` uses `{ min_top_probability, min_candidate_mass }`. Both must be supplied. `target_error_rate` maps to `min_top_probability = 1 - rate`; it is not a correctness guarantee. `failure_reasons` supplies messages for known abstention/failure codes. `reasoning: { mode: 'thinking', max_tokens: 128 }` requires a backend and model advertising support; unsupported requests fail in Rust. Read `capabilities()` before selecting optional features.
 
-The current main-branch v1 server accepts `state`, `decisions` and optional `media`. Request policy, error budget, failure messages and reasoning are protocol extensions for servers that advertise them; older servers reject these fields with HTTP 400. To set policy on the bundled main-branch engine, pass `policy` to `L2S1.load()` so the existing Rust CLI applies it at startup. The client never silently ignores a requested control.
+The bundled v1 engine accepts request-local policy, error budgets and failure messages. It advertises direct reasoning only; thinking requests fail explicitly. Older servers reject unsupported fields with HTTP 400. `L2S1.load({ policy })` also sets the default startup policy. The client never silently ignores a requested control.
 
 Images use standard base64 without a data URL prefix:
 
@@ -152,7 +204,7 @@ npm run test:rust
 npm pack --dry-run
 ```
 
-`test:rust` builds a small deterministic Rust backend and exercises the actual Rust scoring, validation and HTTP envelope through managed Node calls. It needs a Rust toolchain but no model or C++ toolchain. It is fixture evidence, not model quality evidence.
+`test:rust` builds a small deterministic Rust backend and exercises the actual Rust scoring, validation and stdio/HTTP batch envelopes through managed Node calls. It needs a Rust toolchain but no model or C++ toolchain. It is fixture evidence, not model quality evidence.
 
 Optional real-model smoke (at the repository root, build the native binary first):
 
@@ -183,3 +235,5 @@ npm run test:package -- l2s1-node-0.1.0.tgz l2s1-runtime-linux-x64-0.1.0.tgz
 ```
 
 Use a fresh output directory when rebuilding a runtime. `L2S1_PORTABLE_BUILD=1` disables build-host CPU instructions and OpenMP dependencies; its general CPU kernels may be slower than a host-optimized custom build. Each artifact includes license notices and a SHA-256 manifest. The verifier checks that Linux llama.cpp/GGML dependencies resolve from the bundle directory.
+
+The [release pipeline](../docs/RELEASE_PIPELINE.md) publishes verified GitHub Release, npm, PyPI and native Cargo artifacts. Configure registry publishers before pushing a stable version tag.

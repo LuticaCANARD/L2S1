@@ -69,4 +69,9 @@ export interface Capabilities {
   limits: { [key: string]: number };
   reasoning?: { modes: string[]; thinking_supported: boolean; [key: string]: JsonValue };
   request_policy?: { supported: boolean; target_error_rate: string };
+  batch?: {
+    supported: boolean; enabled: boolean; execution: 'native_parallel';
+    max_requests: number; max_decisions: number; max_decisions_per_wave: number;
+    text: boolean; image: boolean; mixed_media: boolean; reasoning_modes: string[];
+  };
 }

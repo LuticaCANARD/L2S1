@@ -34,7 +34,6 @@
 
 公開 scoped パッケージには npm アカウント、scope 権限、対応する公開認証が必要です。2026-09-26 の確認ではローカル npm CLI は未認証（`npm whoami` は `ENEEDAUTH`）、未認証の `npm view @l2s1/node` は 404 でした。この検討でパッケージは公開していません。
 
-CI 公開には npm が OIDC による GitHub Actions trusted publishing を提供します。npm 11.5.1 以上、Node.js 22.14.0 以上、対象パッケージの trusted-publisher 設定、ワークフローの `id-token: write` が必要です。この PR は検討可能な成果物だけをビルドし、自動公開トリガーや npm アカウントの設定は追加しません。[npm trusted publishing の文書](https://docs.npmjs.com/trusted-publishers/)
 
 <a id="binary-and-license-boundaries"></a>
 ## バイナリーとライセンスの範囲
@@ -51,3 +50,5 @@ Linux ビルドは Ubuntu 22.04 を使います。対応する glibc・C++ ラ�
 リリース CI は TypeScript と例の型、HTTP 転送、カスタムバックエンドの経路、起動失敗・取消・終了処理、実際の Rust HTTP の検証とスコア計算、梱包したラッパー・ランタイム tarball のオフラインインストールを確認します。ネイティブパッケージ検証はファイルハッシュ、実行ファイルの版、バンドル内での Linux 共有ライブラリ解決を確認します。プラットフォーム CI は不正モデルで起動を確認し、モデルはダウンロードしません。これは実行ファイルの読み込み確認で、推論品質の確認ではありません。
 
 実際の GGUF スモークテストには別途重みが必要です。保留を含む型付き結果とスコア構造を検証し、タスク正解率や GPU 動作は実証しません。
+
+`release.yml` は検証済み npm・PyPI・Cargo パッケージを公開し、その後 GitHub Release を公開します。アカウントと trusted publisher は別途設定します。[配布パイプライン](../RELEASE_PIPELINE.md)を参照してください。

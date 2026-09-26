@@ -18,11 +18,15 @@ try {
     import { L2S1Client } from '@l2s1/node/http';
     assert.equal(typeof L2S1Client, 'function');
     if (process.env.L2S1_MODEL) {
-      const engine = await L2S1.load({ model: process.env.L2S1_MODEL, device: 'cpu', threads: 2 });
+      const engine = await L2S1.load({ model: process.env.L2S1_MODEL, device: 'cpu', threads: 2, executionMode: 'parallel', parallelWidth: 2, batch: 32 });
       try {
         assert.equal((await engine.capabilities()).evidence, 'model_scored');
         const response = await engine.decide({ state: { x: 1 }, decisions: [{ id: 'positive', instruction: 'Is x positive?', kind: { type: 'binary', false_label: 'x <= 0', true_label: 'x > 0' } }] });
         assert.equal(response.results[0].evidence.type, 'model_scored');
+        const plan = engine.prepare([{ id: 'positive', instruction: 'Is x positive?', kind: { type: 'binary', false_label: 'x <= 0', true_label: 'x > 0' } }]);
+        const responses = await plan.decideBatch([{ x: 1 }, { x: -1 }]);
+        assert.equal(responses.length, 2);
+        assert.ok(responses.every((response) => response.backend.details.execution_mode === 'parallel'));
         console.log('Installed bundle real-model result:', JSON.stringify(response.results[0].value));
       } finally { await engine.close(); }
     } else {

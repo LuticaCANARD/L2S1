@@ -75,13 +75,18 @@ try {
 }
 ```
 
-`load()`는 현재 OS/아키텍처에 설치된 런타임을 선택합니다. 이를 재정의하려면 `binaryPath: '/path/to/l2s1'` 또는 `binaryPath: 'l2s1'`를 전달하여 PATH를 사용하세요. `load()`는 셸 없이 생성되고 자동으로 할당된 포트의 `127.0.0.1`에만 바인딩되며 상태 응답을 기다립니다. 공백이 포함된 경로가 작동합니다. 요청은 동일한 프로세스를 재사용합니다. Rust는 직렬 또는 병렬 실행을 판단합니다. `close()`는 멱등성이 있으며, 보류 중인 로컬 HTTP 호출을 중단하고, 소유한 프로세스를 종료하고 종료를 기다립니다. HTTP 요청을 닫거나 시간 초과한다고 해서 Rust 추론이 중지되었다고 보장할 수는 없습니다. 다른 호출자와 공유되어야 하는 프로세스는 대신 아래 HTTP 클라이언트를 사용해야 합니다.
+`load()`는 설치된 OS/CPU 런타임이나 `binaryPath`를 사용합니다. 기본 `transport: 'stdio'`는
+빌드된 Rust 실행 파일과 stdin/stdout JSON으로 통신하며 포트를 열지 않습니다.
+같은 프로세스의 N-API 바인딩은 아닙니다. `transport: 'http'`를 명시하면 loopback
+서버를 엽니다. 모델 프로세스는 재사용하며 `close()`로 종료하고 기다립니다.
+단일 호출의 timeout·취소는 native 추론 중단을 보장하지 않습니다. stdio는 최대
+16개 미완료 호출을 허용하고 timeout 후에도 native 응답까지 슬롯을 유지합니다.
 
 빌드 워크플로에는 Linux x64/arm64(glibc), macOS x64/arm64 및 Windows x64가 포함됩니다. Linux 및 Windows 패키지는 CPU를 노출합니다. macOS arm64는 CPU 및 Metal를 노출합니다. CUDA 및 기타 사용자 정의 빌드는 `binaryPath`를 사용합니다. Linux 패키지에는 시스템 glibc/C++ 런타임이 필요합니다. Windows 패키지에는 Microsoft Visual C++ x64 런타임이 필요합니다. 지원되지 않는 플랫폼에서는 명확한 오류가 발생합니다. 이는 워크플로 대상입니다. 한 플랫폼의 로컬 검증에서는 다른 플랫폼 아티팩트가 CI를 통과했는지 확인하지 않습니다.
 
 명시적 리소스 관리를 지원하는 TypeScript 애플리케이션은 `await using engine = await L2S1.load(...)`를 작성할 수 있습니다. 이는 범위 종료 시 `close()`를 호출합니다. 패키지는 ESM입니다.
 
-`LoadOptions`는 CPU/CUDA/Metal, 컨텍스트/배치/스레드 수, 비전 프로젝터(`mmproj`), LoRA, 실행 모드, 병렬 너비, 프롬프트 레이아웃/세부 정보를 노출합니다. 그리고 시작 정책. 덜 일반적인 Rust 플래그는 `extraArgs`에서 전달될 수 있습니다. `--listen`는 예약되어 있습니다. `startupTimeoutMs`의 기본값은 120,000이고 HTTP `timeoutMs`는 180,000입니다. 시작 `signal`가 로드를 취소합니다. `onStderr`는 네이티브 로그 청크를 수신합니다. 호출에서는 `{ signal, timeoutMs }`를 두 번째 인수로 허용합니다. 실패한 추론 요청은 자동으로 재시도되지 않습니다.
+`LoadOptions`는 CPU/CUDA/Metal, 컨텍스트/배치/스레드 수, 비전 프로젝터(`mmproj`), LoRA, 실행 모드, 병렬 너비, 프롬프트 레이아웃/세부 정보를 노출합니다. 그리고 시작 정책. 덜 일반적인 Rust 플래그는 `extraArgs`에서 전달될 수 있습니다. `--stdio` / `--listen`는 예약되어 있습니다. `startupTimeoutMs`의 기본값은 120,000이고 `timeoutMs`는 180,000입니다. 시작 `signal`가 로드를 취소합니다. `onStderr`는 네이티브 로그 청크를 수신합니다. 호출에서는 `{ signal, timeoutMs }`를 두 번째 인수로 허용합니다. 실패한 추론 요청은 자동으로 재시도되지 않습니다.
 
 빌드 후 Node.js 24의 TypeScript 지원을 사용하여 [warehouse example](../../../typescript/examples/warehouse.ts)를 실행합니다.
 
@@ -109,6 +114,41 @@ function useCustomBackend(backend: DecisionBackend) {
 
 `DecisionBackend`에는 내보낸 응답 유형을 반환하는 비동기 `decide(request, options)` 및 `capabilities(options)` 메서드가 필요합니다. 선택적 `close()` 후크는 소유한 리소스를 해제합니다. 이는 애플리케이션 판단 코드를 변경하지 않고도 사용자 정의 IPC, RPC 또는 기타 런타임 어댑터를 허용합니다. `fromBackend()`는 라이프사이클 소유권을 Facade로 이전합니다. HTTP 연결을 닫으면 이 클라이언트의 요청이 취소되고 공유 원격 서버는 계속 실행됩니다.
 
+<a id="repeat-fixed-decisions-with-new-state"></a>
+## 데이터만 바꿔 고정 질문 반복 호출
+
+```ts
+const batchEngine = await L2S1.load({
+  model: '/path/to/model.gguf', executionMode: 'parallel', parallelWidth: 4,
+});
+type Temperature = { temperature_c: number };
+const plan = batchEngine.prepare<Temperature>([{
+  id: 'cold', instruction: 'Is temperature_c below 10?',
+  kind: { type: 'binary', false_label: 'At least 10.', true_label: 'Below 10.' },
+}]);
+const first = await plan.decide({ temperature_c: 6 });
+const second = await plan.decide({ temperature_c: 15 });
+const responses = await plan.decideBatch([{ temperature_c: 2 }, { temperature_c: 20 }]);
+// Different definitions per item: await batchEngine.decideBatch(requests).
+await batchEngine.close();
+```
+
+`prepare()`는 고정 질문과 state 타입을 재사용합니다. 토큰 컴파일이나 영속 KV 재사용은
+아닙니다. `decideBatch()`는 stdio 또는 HTTP `/v1/decision-batches`로 배열 전체를 한 번
+전달하고 native parallel을 실행합니다. `executionMode: 'parallel'`과 `parallelWidth`를
+지정하세요. state·ID·media·정책은 독립적이며 결과는 입력 순서입니다. timeout은 배치
+전체에 적용합니다. 직렬 fallback·자동 재시도 없이 `batch_unsupported` 또는
+`batch_not_enabled`를 명시합니다. 사용자 backend는 선택적 `decideBatch()`를 구현합니다.
+
+최대 128개 요청·총 128개 판단, direct reasoning·판단별 최대 26개 선택지를 지원합니다.
+모두 text이거나 모든 판단에 이미지가 하나씩 있는 배치와 일치하는 projector를 사용합니다.
+text/image 혼합은 거부합니다. 실행 전에 모든 wire 입력을 검증하며 실행 오류는 전체
+배치의 실패입니다. 완료된 wave는 되돌리거나 재실행하지 않습니다. `capabilities().batch`를
+확인하세요. `Promise.all(decide(...))`는 자동 배치가 아닙니다.
+[배치 API 검토](../BATCHING_API_REVIEW.md)와 [Python SDK](../python/README.md)를 참고하세요.
+
+
+
 기존 Rust 서버에는 `@l2s1/node/http`를 사용합니다. 이 하위 경로에는 Node 내장 가져오기가 없으며 브라우저용으로 번들로 제공될 수도 있습니다. 브라우저 호출에는 CORS를 제공하는 동일 출처 프록시 또는 역방향 프록시가 필요합니다. Rust 서버는 CORS 헤더를 추가하지 않습니다. 이는 브라우저 내부에서 네이티브 추론을 실행하지 않습니다.
 
 ```ts
@@ -130,7 +170,7 @@ const capabilities = await client.capabilities();
 
 `policy` 요청은 `{ min_top_probability, min_candidate_mass }`를 사용합니다. 둘 다 공급되어야 합니다. `target_error_rate`는 `min_top_probability = 1 - rate`에 매핑됩니다. 이는 정확성을 보장하지 않습니다. `failure_reasons`는 알려진 판단 보류/오류 코드에 대한 메시지를 제공합니다. `reasoning: { mode: 'thinking', max_tokens: 128 }`에는 백엔드 및 모델 광고 지원이 필요합니다. 지원되지 않는 요청은 Rust에서 실패합니다. 옵션 기능을 선택하기 전에 `capabilities()`를 읽어보세요.
 
-현재 main 브랜치 v1 서버는 `state`, `decisions`, 선택적 `media`를 받습니다. 요청 정책, 오류 예산, 실패 문구, reasoning은 이를 지원한다고 알리는 서버용 프로토콜 확장입니다. 오래된 서버는 이 필드에 HTTP 400을 반환합니다. 포함된 main 브랜치 엔진의 정책은 `L2S1.load()`에 `policy`를 전달해 기존 Rust CLI가 시작할 때 적용하게 합니다. 클라이언트는 요청한 제어를 조용히 무시하지 않습니다.
+동봉된 v1 엔진은 요청별 정책, 오류 예산, 실패 문구를 지원합니다. reasoning은 direct만 지원하며 thinking 요청은 명시적으로 거절합니다. 오래된 서버는 지원하지 않는 필드에 HTTP 400을 반환합니다. `L2S1.load({ policy })`로 시작 시 기본 정책도 설정할 수 있습니다. 클라이언트는 요청한 제어를 조용히 무시하지 않습니다.
 
 이미지는 데이터 URL 접두사 없이 표준 base64를 사용합니다.
 
@@ -190,3 +230,5 @@ npm run test:package -- l2s1-node-0.1.0.tgz l2s1-runtime-linux-x64-0.1.0.tgz
 ```
 
 런타임을 다시 빌드할 때 새로운 출력 디렉터리를 사용하세요. `L2S1_PORTABLE_BUILD=1`는 빌드 호스트 CPU 지침 및 OpenMP 종속성을 비활성화합니다. 일반 CPU 커널은 호스트 최적화 사용자 정의 빌드보다 느릴 수 있습니다. 각 아티팩트에는 라이선스 알림과 SHA-256 매니페스트가 포함되어 있습니다. 검증자는 Linux llama.cpp/GGML 종속성이 번들 디렉터리에서 해결되는지 확인합니다.
+
+[배포 파이프라인](../RELEASE_PIPELINE.md)에서 SDK와 native runtime의 자동 게시·인증 설정을 확인하세요.

@@ -31,6 +31,9 @@ struct Args {
     /// Start a JSON HTTP API at this address, for example 127.0.0.1:8080.
     #[arg(long, conflicts_with_all = ["input", "image", "inspect", "preflight", "diagnostics"])]
     listen: Option<String>,
+    /// Resident stdin/stdout RPC without opening a network listener.
+    #[arg(long, conflicts_with_all = ["listen", "input", "image", "inspect", "preflight", "diagnostics"])]
+    stdio: bool,
     /// One still image for CLI decisions; requires --mmproj.
     #[arg(long, requires = "mmproj", conflicts_with_all = ["inspect", "preflight", "diagnostics"])]
     image: Option<PathBuf>,
@@ -217,6 +220,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
     if let Some(address) = &args.listen {
         return l2s1::http::serve(address, &mut backend);
+    }
+    if args.stdio {
+        return l2s1::stdio::serve(&mut backend);
     }
     let text = if args.input == "-" {
         let mut text = String::new();

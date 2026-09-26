@@ -15,6 +15,17 @@ pub trait HttpDecisionBackend {
     fn capabilities(&self) -> Value;
     fn decide_json(&mut self, request: &DecisionRequest, images: &[&[u8]]) -> crate::Result<Value>;
 
+    /// Cross-request native batching. No serial default or replay is permitted.
+    fn decide_native_batch_json(
+        &mut self,
+        _requests: &[DecisionRequest],
+        _images: &[Vec<&[u8]>],
+    ) -> crate::Result<Vec<Value>> {
+        Err(Error::Invalid(
+            "batch_unsupported: this backend does not support native batching".into(),
+        ))
+    }
+
     /// Evaluate validated media groups. The default keeps backend calls serial;
     /// runtimes with native image batching can override this boundary.
     fn decide_json_batch(
@@ -32,6 +43,24 @@ pub trait HttpDecisionBackend {
             .zip(images)
             .map(|(request, images)| self.decide_json(request, images))
             .collect()
+    }
+
+    /// Optional request-local reasoning. Unsupported engines must refuse it.
+    fn decide_json_batch_with_reasoning(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[Vec<&[u8]>],
+        reasoning: Option<&crate::ReasoningOptions>,
+    ) -> crate::Result<Vec<Value>> {
+        if let Some(options) = reasoning {
+            options.validate()?;
+            if options.mode == crate::ReasoningMode::Thinking {
+                return Err(Error::Invalid(
+                    "thinking mode is not supported by this backend".into(),
+                ));
+            }
+        }
+        self.decide_json_batch(requests, images)
     }
 }
 
@@ -82,8 +111,9 @@ fn local_response_json(response: crate::DecisionResponse) -> crate::Result<Value
             "calibration_id":result.calibration_id,"truncated":result.truncated,
             "code_prefix_evaluations":result.code_prefix_evaluations,"code_evaluated_tokens":result.code_evaluated_tokens,
             "estimate":estimate});
-        json!({"id":result.id,"value":value,"status":status,"abstention_reasons":result.abstention_reasons,
-            "evidence":evidence,"usage":{"input_tokens":result.input_tokens,"reused_prefix_tokens":result.reused_prefix_tokens}})
+        let output = json!({"id":result.id,"value":value,"status":status,"abstention_reasons":result.abstention_reasons,
+            "evidence":evidence,"usage":{"input_tokens":result.input_tokens,"reused_prefix_tokens":result.reused_prefix_tokens}});
+        output
     }).collect::<Vec<_>>();
     Ok(
         json!({"backend":{"runtime":response.backend.runtime,"model":response.backend.model_path,
@@ -108,8 +138,45 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
                 "batched_when_compatible"
             },
         });
+        capabilities["reasoning"] = json!({"modes":["direct"],"thinking_supported":false});
+        capabilities["request_policy"] = json!({"supported":true,
+            "target_error_rate":"maps to a model-score threshold; not a guaranteed correctness error rate"});
+        capabilities["batch"] = json!({"supported":true,"enabled":info.execution_mode == crate::ExecutionMode::Parallel,
+            "execution":"native_parallel","max_requests":super::MAX_BATCH_REQUESTS,
+            "max_decisions":MAX_DECISIONS,"max_decisions_per_wave":info.parallel_width,
+            "text":true,"image":info.vision_projector_path.is_some(),"mixed_media":false,"reasoning_modes":["direct"]});
         capabilities
     }
+
+    fn decide_native_batch_json(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[Vec<&[u8]>],
+    ) -> crate::Result<Vec<Value>> {
+        if self.info().execution_mode != crate::ExecutionMode::Parallel {
+            return Err(Error::Invalid(
+                "batch_not_enabled: load with execution_mode parallel for native batching".into(),
+            ));
+        }
+        if requests.len() != images.len() {
+            return Err(Error::Invalid(
+                "media group count does not match requests".into(),
+            ));
+        }
+        if images.iter().all(Vec::is_empty) {
+            return self
+                .decide_batch(requests)?
+                .into_iter()
+                .map(local_response_json)
+                .collect();
+        }
+        if images.iter().all(|images| images.len() == 1) {
+            // Existing native projector/decoder path, including execution counters.
+            return self.decide_json_batch(requests, images);
+        }
+        Err(Error::Invalid("native batches require either all text or one image per decision; mixed media is unsupported".into()))
+    }
+
     fn decide_json(&mut self, request: &DecisionRequest, images: &[&[u8]]) -> crate::Result<Value> {
         local_decide_json(self, request, images)
     }
@@ -247,6 +314,31 @@ struct WireRequest {
     #[serde(default)]
     media: Vec<WireMedia>,
     decisions: Vec<WireDecision>,
+    #[serde(default)]
+    reasoning: Option<crate::ReasoningOptions>,
+    #[serde(default, deserialize_with = "strict_request_policy")]
+    policy: Option<crate::DecisionPolicy>,
+    #[serde(default)]
+    target_error_rate: Option<f64>,
+    #[serde(default)]
+    failure_reasons: HashMap<String, String>,
+}
+
+fn strict_request_policy<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<crate::DecisionPolicy>, D::Error> {
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Policy {
+        min_top_probability: f64,
+        min_candidate_mass: f64,
+    }
+    Option::<Policy>::deserialize(deserializer).map(|policy| {
+        policy.map(|policy| crate::DecisionPolicy {
+            min_top_probability: policy.min_top_probability,
+            min_candidate_mass: policy.min_candidate_mass,
+        })
+    })
 }
 #[derive(Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
@@ -264,12 +356,159 @@ struct WireDecision {
     media_ids: Option<Vec<String>>,
 }
 
+struct PreparedRequest {
+    request: DecisionRequest,
+    groups: Vec<DecisionRequest>,
+    media: HashMap<String, Vec<u8>>,
+    group_images: Vec<Vec<String>>,
+    reasoning: Option<crate::ReasoningOptions>,
+    policy: Option<crate::DecisionPolicy>,
+    target_error_rate: Option<f64>,
+    failure_reasons: HashMap<String, String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WireBatch {
+    requests: Vec<Box<serde_json::value::RawValue>>,
+}
+
+pub(super) fn run_batch<B: HttpDecisionBackend>(
+    backend: &mut B,
+    body: &[u8],
+    request_id: &str,
+) -> crate::Result<Value> {
+    let wire: WireBatch = serde_json::from_slice(body)
+        .map_err(|error| Error::Invalid(format!("invalid decision batch: {error}")))?;
+    if wire.requests.is_empty() || wire.requests.len() > super::MAX_BATCH_REQUESTS {
+        return Err(Error::Invalid(format!(
+            "native batch requires 1..{} requests",
+            super::MAX_BATCH_REQUESTS
+        )));
+    }
+    let capabilities = backend.capabilities();
+    if capabilities
+        .pointer("/batch/supported")
+        .and_then(Value::as_bool)
+        != Some(true)
+    {
+        return Err(Error::Invalid(
+            "batch_unsupported: this backend does not support native batching".into(),
+        ));
+    }
+    if capabilities
+        .pointer("/batch/enabled")
+        .and_then(Value::as_bool)
+        != Some(true)
+    {
+        return Err(Error::Invalid(
+            "batch_not_enabled: load with execution_mode parallel for native batching".into(),
+        ));
+    }
+    // Validate every independent wire request before any model execution.
+    let prepared = wire
+        .requests
+        .iter()
+        .map(|item| prepare_request(backend, item.get().as_bytes()))
+        .collect::<crate::Result<Vec<_>>>()?;
+    let total_decisions: usize = prepared
+        .iter()
+        .map(|item| item.request.decisions.len())
+        .sum();
+    if total_decisions > MAX_DECISIONS {
+        return Err(Error::Invalid(format!(
+            "at most {MAX_DECISIONS} total decisions are supported in a native batch"
+        )));
+    }
+    if prepared.iter().any(|item| {
+        item.reasoning
+            .as_ref()
+            .is_some_and(|r| r.mode == crate::ReasoningMode::Thinking)
+    }) {
+        return Err(Error::Invalid(
+            "native parallel batches support direct reasoning only".into(),
+        ));
+    }
+    let groups = prepared
+        .iter()
+        .flat_map(|item| item.groups.iter().cloned())
+        .collect::<Vec<_>>();
+    let images = prepared
+        .iter()
+        .flat_map(PreparedRequest::images)
+        .collect::<Vec<_>>();
+    let outputs = backend.decide_native_batch_json(&groups, &images)?;
+    if outputs.len() != groups.len() {
+        return Err(Error::Backend(
+            "native batch returned incorrect result count".into(),
+        ));
+    }
+    let mut outputs = outputs.into_iter();
+    let mut responses = Vec::with_capacity(prepared.len());
+    for (index, item) in prepared.into_iter().enumerate() {
+        let count = item.groups.len();
+        let mut response = finish_request(item, outputs.by_ref().take(count).collect())?;
+        response["request_id"] = json!(format!("{request_id}/{index}"));
+        responses.push(response);
+    }
+    Ok(
+        json!({"api_version":1,"request_id":request_id,"execution":"native_parallel","responses":responses}),
+    )
+}
+impl PreparedRequest {
+    fn images(&self) -> Vec<Vec<&[u8]>> {
+        self.group_images
+            .iter()
+            .map(|ids| ids.iter().map(|id| self.media[id].as_slice()).collect())
+            .collect()
+    }
+}
+
 pub(super) fn run_request<B: HttpDecisionBackend>(
     backend: &mut B,
     body: &[u8],
 ) -> crate::Result<Value> {
+    let prepared = prepare_request(backend, body)?;
+    let outputs = backend.decide_json_batch_with_reasoning(
+        &prepared.groups,
+        &prepared.images(),
+        prepared.reasoning.as_ref(),
+    )?;
+    finish_request(prepared, outputs)
+}
+
+fn prepare_request<B: HttpDecisionBackend>(
+    backend: &B,
+    body: &[u8],
+) -> crate::Result<PreparedRequest> {
     let wire: WireRequest = serde_json::from_slice(body)
         .map_err(|e| Error::Invalid(format!("invalid decision request: {e}")))?;
+    if let Some(policy) = &wire.policy {
+        policy.validate()?;
+    }
+    if let Some(reasoning) = &wire.reasoning {
+        reasoning.validate()?;
+    }
+    if wire
+        .target_error_rate
+        .is_some_and(|rate| !rate.is_finite() || !(0.0..=1.0).contains(&rate))
+    {
+        return Err(Error::Invalid(
+            "target_error_rate must be a finite fraction in [0, 1]".into(),
+        ));
+    }
+    validate_failure_reasons(&wire.failure_reasons)?;
+    if (wire.policy.is_some() || wire.target_error_rate.is_some())
+        && backend
+            .capabilities()
+            .get("evidence")
+            .and_then(Value::as_str)
+            == Some("selection_only")
+    {
+        return Err(Error::Invalid(
+            "this backend returns no scores for a request acceptance policy".into(),
+        ));
+    }
     if wire.media.len() > MAX_MEDIA {
         return Err(Error::Invalid(format!(
             "at most {MAX_MEDIA} media items are supported"
@@ -361,19 +600,67 @@ pub(super) fn run_request<B: HttpDecisionBackend>(
         while end < request.decisions.len() && selections[end] == *selected_ids {
             end += 1;
         }
-        group_images.push(
-            selected_ids
-                .iter()
-                .map(|id| media.get(id).expect("validated media ID").as_slice())
-                .collect::<Vec<_>>(),
-        );
+        group_images.push(selected_ids.clone());
         groups.push(DecisionRequest {
             state: wire.state.clone(),
             decisions: request.decisions[index..end].to_vec(),
         });
         index = end;
     }
-    let outputs = backend.decide_json_batch(&groups, &group_images)?;
+    Ok(PreparedRequest {
+        request,
+        groups,
+        media,
+        group_images,
+        reasoning: wire.reasoning,
+        policy: wire.policy,
+        target_error_rate: wire.target_error_rate,
+        failure_reasons: wire.failure_reasons,
+    })
+}
+
+fn finish_request(prepared: PreparedRequest, mut outputs: Vec<Value>) -> crate::Result<Value> {
+    let PreparedRequest {
+        request,
+        groups,
+        policy,
+        reasoning,
+        target_error_rate,
+        failure_reasons,
+        ..
+    } = prepared;
+    for (group, output) in groups.iter().zip(&mut outputs) {
+        if policy.is_some() || target_error_rate.is_some() {
+            let mut policy = match &policy {
+                Some(policy) => policy.clone(),
+                None => serde_json::from_value(output["policy"].clone()).map_err(|_| {
+                    Error::Invalid("backend has no scored acceptance policy".into())
+                })?,
+            };
+            if let Some(rate) = target_error_rate {
+                policy.min_top_probability = 1.0 - rate;
+            }
+            apply_request_policy(output, group, &policy)?;
+        }
+        if let Some(results) = output["results"].as_array_mut() {
+            for result in results {
+                let messages = result["abstention_reasons"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .filter_map(|reason| reason.as_str())
+                    .filter_map(|code| {
+                        failure_reasons.get(code).map(
+                            |message| json!({"code":code,"message":message,"user_defined":true}),
+                        )
+                    })
+                    .collect::<Vec<_>>();
+                if !messages.is_empty() {
+                    result["reason_messages"] = json!(messages);
+                }
+            }
+        }
+    }
     if outputs.len() != groups.len() {
         return Err(Error::Backend(
             "backend returned incorrect media group count".into(),
@@ -440,9 +727,160 @@ pub(super) fn run_request<B: HttpDecisionBackend>(
         }
         results.extend(batch_results.iter().cloned());
     }
-    Ok(
-        json!({"api_version":1,"backend":response_backend,"policy":response_policy,"results":results}),
-    )
+    let mut output = json!({"api_version":1,"backend":response_backend,"policy":response_policy,"results":results});
+    if let Some(rate) = target_error_rate {
+        output["error_budget"] = json!({"requested_rate":rate,"guaranteed":false,
+            "interpretation":"model_score_threshold","min_top_probability":1.0-rate});
+    }
+    if let Some(reasoning) = reasoning {
+        output["reasoning"] = json!(reasoning);
+    }
+    Ok(output)
+}
+
+const FAILURE_REASON_CODES: &[&str] = &[
+    "low_top_probability",
+    "low_candidate_mass",
+    "tied_candidates",
+    "reasoning_limit",
+    "native_failure",
+];
+
+fn validate_failure_reasons(reasons: &HashMap<String, String>) -> crate::Result<()> {
+    for (code, message) in reasons {
+        if !FAILURE_REASON_CODES.contains(&code.as_str())
+            || message.trim().is_empty()
+            || message.len() > 512
+        {
+            return Err(Error::Invalid("failure_reasons must use known codes and nonempty messages of at most 512 UTF-8 bytes".into()));
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn user_failure_messages(body: &[u8]) -> HashMap<String, String> {
+    // Unknown fields are consumed as IgnoredAny by serde rather than allocating
+    // a second Value tree containing a potentially 44 MiB base64 image body.
+    #[derive(Deserialize)]
+    struct Messages {
+        #[serde(default)]
+        failure_reasons: HashMap<String, String>,
+    }
+    let Ok(messages) = serde_json::from_slice::<Messages>(body) else {
+        return HashMap::new();
+    };
+    if validate_failure_reasons(&messages.failure_reasons).is_err() {
+        return HashMap::new();
+    }
+    messages.failure_reasons
+}
+
+/// Change acceptance after scoring; model evidence and ordinal estimates are retained.
+fn apply_request_policy(
+    output: &mut Value,
+    request: &DecisionRequest,
+    policy: &crate::DecisionPolicy,
+) -> crate::Result<()> {
+    policy.validate()?;
+    let results = output["results"]
+        .as_array_mut()
+        .ok_or_else(|| Error::Backend("missing scored results".into()))?;
+    if results.len() != request.decisions.len() {
+        return Err(Error::Backend("incorrect policy result count".into()));
+    }
+    for (result, decision) in results.iter_mut().zip(&request.decisions) {
+        if result.pointer("/evidence/type").and_then(Value::as_str) != Some("model_scored") {
+            return Err(Error::Invalid(
+                "request policy requires model-scored evidence".into(),
+            ));
+        }
+        let scores: Vec<crate::OptionScore> =
+            serde_json::from_value(result["evidence"]["scores"].clone())
+                .map_err(|_| Error::Backend("invalid candidate scores".into()))?;
+        let expected_ids = decision
+            .options()
+            .into_iter()
+            .map(|option| option.id)
+            .collect::<Vec<_>>();
+        let score_ids = scores
+            .iter()
+            .map(|score| score.id.clone())
+            .collect::<Vec<_>>();
+        let mass = result["evidence"]["candidate_mass"]
+            .as_f64()
+            .ok_or_else(|| Error::Backend("missing candidate mass".into()))?;
+        if scores.is_empty()
+            || scores.len() != expected_ids.len()
+            || score_ids != expected_ids
+            || !mass.is_finite()
+            || !(0.0..=1.0).contains(&mass)
+            || scores.iter().any(|s| {
+                !s.option_probability.is_finite() || !(0.0..=1.0).contains(&s.option_probability)
+            })
+            || (scores
+                .iter()
+                .map(|score| score.option_probability)
+                .sum::<f64>()
+                - 1.0)
+                .abs()
+                > 1e-6
+        {
+            return Err(Error::Backend("invalid scored policy evidence".into()));
+        }
+        let best = scores.iter().fold(&scores[0], |best, s| {
+            if s.option_probability > best.option_probability {
+                s
+            } else {
+                best
+            }
+        });
+        if result["id"] != decision.id
+            || result["value"]["type"]
+                != match decision.kind {
+                    crate::DecisionKind::Binary { .. } => "binary",
+                    crate::DecisionKind::Choice { .. } => "choice",
+                    crate::DecisionKind::Ordinal { .. } => "ordinal",
+                }
+            || result["evidence"]["top_option_probability"]
+                .as_f64()
+                .is_none_or(|probability| {
+                    !probability.is_finite() || (probability - best.option_probability).abs() > 1e-6
+                })
+        {
+            return Err(Error::Backend("inconsistent scored policy metadata".into()));
+        }
+        let mut reasons = Vec::new();
+        if mass < policy.min_candidate_mass {
+            reasons.push("low_candidate_mass");
+        }
+        if best.option_probability < policy.min_top_probability {
+            reasons.push("low_top_probability");
+        }
+        if scores
+            .iter()
+            .filter(|s| (s.option_probability - best.option_probability).abs() < 1e-12)
+            .count()
+            > 1
+        {
+            reasons.push("tied_candidates");
+        }
+        let accepted = reasons.is_empty();
+        result["value"] = match decision.kind {
+            crate::DecisionKind::Binary { .. } => {
+                json!({"type":"binary","value":accepted.then_some(best.id=="true")})
+            }
+            crate::DecisionKind::Choice { .. } => {
+                json!({"type":"choice","selected":accepted.then_some(best.id.as_str())})
+            }
+            crate::DecisionKind::Ordinal { .. } => {
+                json!({"type":"ordinal","selected":accepted.then_some(best.id.as_str())})
+            }
+        };
+        result["status"] = json!(if accepted { "selected" } else { "abstained" });
+        result["abstention_reasons"] = json!(reasons);
+    }
+    output["policy"] = json!(policy);
+    Ok(())
 }
 
 #[cfg(test)]
@@ -595,5 +1033,408 @@ mod tests {
         }]});
         assert!(run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).is_err());
         assert_eq!(backend.calls, 0);
+    }
+
+    struct ScoredProbe {
+        calls: usize,
+        output: Value,
+        selection_only: bool,
+    }
+    impl HttpDecisionBackend for ScoredProbe {
+        fn capabilities(&self) -> Value {
+            json!({"evidence":if self.selection_only {"selection_only"} else {"model_scored"},
+                "media":{"image":{"supported":false,"max_per_decision":0}}})
+        }
+        fn decide_json(&mut self, _: &DecisionRequest, _: &[&[u8]]) -> crate::Result<Value> {
+            self.calls += 1;
+            Ok(self.output.clone())
+        }
+    }
+    fn policy_fixture() -> (ScoredProbe, Value) {
+        let body = json!({"state":{},"decisions":[{"id":"flag","instruction":"Choose",
+            "kind":{"type":"binary","false_label":"no","true_label":"yes"}}]});
+        let request: DecisionRequest = serde_json::from_value(body.clone()).unwrap();
+        let output = local_decide_json(&mut LocalProbe, &request, &[]).unwrap();
+        (
+            ScoredProbe {
+                calls: 0,
+                output,
+                selection_only: false,
+            },
+            body,
+        )
+    }
+
+    #[derive(Default)]
+    struct NativeProbe {
+        calls: usize,
+        states: Vec<Value>,
+        image_bytes: Vec<Vec<Vec<u8>>>,
+        fail: bool,
+        short_output: bool,
+    }
+    impl HttpDecisionBackend for NativeProbe {
+        fn capabilities(&self) -> Value {
+            json!({"batch":{"supported":true,"enabled":true},"evidence":"model_scored",
+                "media":{"image":{"supported":true,"max_per_decision":1}}})
+        }
+        fn decide_json(&mut self, _: &DecisionRequest, _: &[&[u8]]) -> crate::Result<Value> {
+            panic!("native request batches must never invoke a serial fallback")
+        }
+        fn decide_native_batch_json(
+            &mut self,
+            requests: &[DecisionRequest],
+            images: &[Vec<&[u8]>],
+        ) -> crate::Result<Vec<Value>> {
+            self.calls += 1;
+            self.states = requests.iter().map(|r| r.state.clone()).collect();
+            self.image_bytes = images
+                .iter()
+                .map(|group| group.iter().map(|image| image.to_vec()).collect())
+                .collect();
+            if self.fail {
+                return Err(Error::Backend("native test failure".into()));
+            }
+            let mut outputs = requests
+                .iter()
+                .zip(images)
+                .map(|(r, images)| local_decide_json(&mut LocalProbe, r, images))
+                .collect::<crate::Result<Vec<_>>>()?;
+            if self.short_output {
+                outputs.pop();
+            }
+            Ok(outputs)
+        }
+    }
+
+    #[test]
+    fn native_batch_preserves_independent_states_policies_and_duplicate_ids_across_requests() {
+        let (_, mut first) = policy_fixture();
+        first["state"] = json!({"tenant":"first"});
+        first["policy"] = json!({"min_top_probability":0.95,"min_candidate_mass":0.05});
+        first["failure_reasons"] = json!({"low_top_probability":"review first"});
+        let (_, mut second) = policy_fixture();
+        second["state"] = json!({"tenant":"second"});
+        second["policy"] = json!({"min_top_probability":0.5,"min_candidate_mass":0.05});
+        let mut backend = NativeProbe::default();
+        let output = run_batch(
+            &mut backend,
+            &serde_json::to_vec(&json!({"requests":[first,second]})).unwrap(),
+            "batch-1",
+        )
+        .unwrap();
+        assert_eq!(backend.calls, 1);
+        assert_eq!(
+            backend.states,
+            vec![json!({"tenant":"first"}), json!({"tenant":"second"})]
+        );
+        let responses = &output["responses"];
+        assert_eq!(output["execution"], "native_parallel");
+        assert_eq!(responses[0]["request_id"], "batch-1/0");
+        assert_eq!(responses[1]["request_id"], "batch-1/1");
+        assert_eq!(responses[0]["results"][0]["id"], "flag");
+        assert_eq!(responses[1]["results"][0]["id"], "flag");
+        assert_eq!(responses[0]["results"][0]["value"]["value"], Value::Null);
+        assert_eq!(responses[1]["results"][0]["value"]["value"], true);
+        assert_eq!(
+            responses[0]["results"][0]["reason_messages"][0]["message"],
+            "review first"
+        );
+        assert_eq!(
+            responses[0]["results"][0]["evidence"],
+            responses[1]["results"][0]["evidence"]
+        );
+    }
+
+    #[test]
+    fn native_batch_validates_all_requests_and_limits_before_dispatch() {
+        let (_, body) = policy_fixture();
+        let mut backend = NativeProbe::default();
+        let mut invalid = body.clone();
+        invalid["decisions"] = json!([body["decisions"][0], body["decisions"][0]]);
+        let mut missing = body.clone();
+        missing["decisions"][0]["media_ids"] = json!(["missing"]);
+        let mut thinking = body.clone();
+        thinking["reasoning"] = json!({"mode":"thinking"});
+        for last in [invalid, missing, thinking] {
+            assert!(
+                run_batch(
+                    &mut backend,
+                    &serde_json::to_vec(&json!({"requests":[body,last]})).unwrap(),
+                    "test"
+                )
+                .is_err()
+            );
+        }
+        for requests in [vec![], vec![body.clone(); 129]] {
+            assert!(
+                run_batch(
+                    &mut backend,
+                    &serde_json::to_vec(&json!({"requests":requests})).unwrap(),
+                    "test"
+                )
+                .is_err()
+            );
+        }
+        let mut many = body.clone();
+        many["decisions"] = json!(
+            (0..65)
+                .map(|i| {
+                    let mut decision = body["decisions"][0].clone();
+                    decision["id"] = json!(format!("d-{i}"));
+                    decision
+                })
+                .collect::<Vec<_>>()
+        );
+        assert!(
+            run_batch(
+                &mut backend,
+                &serde_json::to_vec(&json!({"requests":[many,many]})).unwrap(),
+                "test"
+            )
+            .is_err()
+        );
+        assert_eq!(backend.calls, 0);
+        let (mut unsupported, _) = policy_fixture();
+        assert!(
+            run_batch(
+                &mut unsupported,
+                &serde_json::to_vec(&json!({"requests":[body]})).unwrap(),
+                "test"
+            )
+            .unwrap_err()
+            .to_string()
+            .contains("batch_unsupported")
+        );
+        assert_eq!(unsupported.calls, 0);
+    }
+
+    #[test]
+    fn native_batch_keeps_request_local_media_and_never_replays_failures() {
+        let (_, mut first) = policy_fixture();
+        first["media"] = json!([{"id":"same","type":"image","data_base64":"Zmlyc3Q="}]);
+        let mut second = first.clone();
+        second["media"][0]["data_base64"] = json!("c2Vjb25k");
+        let body = serde_json::to_vec(&json!({"requests":[first,second]})).unwrap();
+        let mut backend = NativeProbe::default();
+        run_batch(&mut backend, &body, "test").unwrap();
+        assert_eq!(
+            backend.image_bytes,
+            vec![vec![b"first".to_vec()], vec![b"second".to_vec()]]
+        );
+        backend.fail = true;
+        assert!(run_batch(&mut backend, &body, "test").is_err());
+        assert_eq!(backend.calls, 2);
+        backend.fail = false;
+        backend.short_output = true;
+        assert!(
+            run_batch(&mut backend, &body, "test")
+                .unwrap_err()
+                .to_string()
+                .contains("incorrect result count")
+        );
+        assert_eq!(backend.calls, 3);
+    }
+
+    #[test]
+    fn compiled_stdio_dispatches_one_native_batch_without_a_listener_and_survives_request_error() {
+        let (_, body) = policy_fixture();
+        let calls = [
+            json!({"id":"bad","op":"decide","body":{}}),
+            json!({"id":"local","op":"decide_batch","body":{"requests":[body,body]}}),
+            json!({"id":"health","op":"health"}),
+        ];
+        let input = calls.iter().map(|v| format!("{v}\n")).collect::<String>();
+        let mut output = Vec::new();
+        let mut backend = NativeProbe::default();
+        crate::stdio::serve_stream(&mut backend, std::io::Cursor::new(input), &mut output).unwrap();
+        let envelopes = String::from_utf8(output)
+            .unwrap()
+            .lines()
+            .map(|line| serde_json::from_str::<Value>(line).unwrap())
+            .collect::<Vec<_>>();
+        assert_eq!(backend.calls, 1);
+        assert_eq!(envelopes[0]["error"]["code"], "invalid_request");
+        assert_eq!(envelopes[1]["result"]["execution"], "native_parallel");
+        assert_eq!(
+            envelopes[1]["result"]["responses"]
+                .as_array()
+                .unwrap()
+                .len(),
+            2
+        );
+        assert_eq!(envelopes[2]["result"]["status"], "ok");
+    }
+    #[test]
+    fn request_thresholds_preserve_raw_evidence_and_do_not_persist() {
+        let (mut backend, mut body) = policy_fixture();
+        let original = backend.output["results"][0].clone();
+        body["policy"] = json!({"min_top_probability":0.95,"min_candidate_mass":0.05});
+        body["failure_reasons"] = json!({"low_top_probability":"검토 담당자에게 전달하세요."});
+        let output = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap();
+        let result = &output["results"][0];
+        assert_eq!(result["status"], "abstained");
+        assert_eq!(result["value"]["value"], Value::Null);
+        assert_eq!(result["abstention_reasons"], json!(["low_top_probability"]));
+        assert_eq!(
+            result["reason_messages"][0],
+            json!({"code":"low_top_probability","message":"검토 담당자에게 전달하세요.","user_defined":true})
+        );
+        assert_eq!(result["evidence"], original["evidence"]);
+        assert_eq!(result["usage"], original["usage"]);
+        assert_eq!(output["policy"]["min_top_probability"], 0.95);
+        body["policy"] = json!({"min_top_probability":0.5,"min_candidate_mass":0.05});
+        let lower = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap();
+        assert_eq!(lower["results"][0]["value"]["value"], true);
+        assert_eq!(lower["results"][0]["evidence"], original["evidence"]);
+        body.as_object_mut().unwrap().remove("policy");
+        body.as_object_mut().unwrap().remove("failure_reasons");
+        let restored = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap();
+        assert_eq!(restored["results"][0], original);
+        assert_eq!(restored["policy"]["min_top_probability"], 0.8);
+    }
+    #[test]
+    fn target_error_rate_maps_to_a_threshold_without_correctness_guarantee() {
+        let (mut backend, mut body) = policy_fixture();
+        body["policy"] = json!({"min_top_probability":0.3,"min_candidate_mass":0.8});
+        body["target_error_rate"] = json!(0.03);
+        let output = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap();
+        assert_eq!(output["policy"]["min_top_probability"], 0.97);
+        assert_eq!(output["policy"]["min_candidate_mass"], 0.8);
+        assert_eq!(output["error_budget"]["guaranteed"], false);
+        assert_eq!(
+            output["error_budget"]["interpretation"],
+            "model_score_threshold"
+        );
+        assert_eq!(
+            output["results"][0]["abstention_reasons"],
+            json!(["low_candidate_mass", "low_top_probability"])
+        );
+        assert_eq!(
+            output["results"][0]["evidence"],
+            backend.output["results"][0]["evidence"]
+        );
+    }
+    #[test]
+    fn invalid_request_controls_are_rejected_before_inference() {
+        let (mut backend, body) = policy_fixture();
+        for (field, value) in [
+            (
+                "policy",
+                json!({"min_top_probability":-0.1,"min_candidate_mass":0.05}),
+            ),
+            (
+                "policy",
+                json!({"min_top_probability":0.9,"min_candidate_mass":1.1}),
+            ),
+            (
+                "policy",
+                json!({"min_top_probability":0.9,"min_candidate_mass":0.05,"misspelled_threshold":1}),
+            ),
+            ("target_error_rate", json!(-0.01)),
+            ("target_error_rate", json!(1.01)),
+            ("failure_reasons", json!({"unknown":"x"})),
+            ("failure_reasons", json!({"low_top_probability":"  "})),
+            (
+                "failure_reasons",
+                json!({"low_top_probability":"가".repeat(171)}),
+            ),
+            ("reasoning", json!({"mode":"thinking","max_tokens":0})),
+            ("reasoning", json!({"mode":"thinking","max_tokens":1025})),
+        ] {
+            let mut invalid = body.clone();
+            invalid[field] = value;
+            assert!(
+                matches!(
+                    run_request(&mut backend, &serde_json::to_vec(&invalid).unwrap()),
+                    Err(Error::Invalid(_))
+                ),
+                "{invalid}"
+            );
+        }
+        assert_eq!(backend.calls, 0);
+        backend.selection_only = true;
+        let mut unsupported = body;
+        unsupported["target_error_rate"] = json!(0.1);
+        assert!(run_request(&mut backend, &serde_json::to_vec(&unsupported).unwrap()).is_err());
+        assert_eq!(backend.calls, 0);
+    }
+    #[test]
+    fn unsupported_backend_refuses_thinking_before_inference() {
+        let (mut backend, mut body) = policy_fixture();
+        body["reasoning"] = json!({"mode":"thinking","max_tokens":128});
+        let error = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap_err();
+        assert!(error.to_string().contains("thinking mode is not supported"));
+        assert_eq!(backend.calls, 0);
+        body["reasoning"] = json!({"mode":"direct","max_tokens":128});
+        let output = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap();
+        assert_eq!(output["reasoning"]["mode"], "direct");
+        assert_eq!(backend.calls, 1);
+    }
+    #[test]
+    fn policy_overlay_rejects_malformed_probabilities_and_preserves_estimates() {
+        let (backend, body) = policy_fixture();
+        let request: DecisionRequest = serde_json::from_value(body).unwrap();
+        let policy = crate::DecisionPolicy::default();
+        for mutation in 0..5 {
+            let mut output = backend.output.clone();
+            match mutation {
+                0 => {
+                    output["results"][0]["evidence"]["scores"][0]["option_probability"] =
+                        json!(0.8);
+                }
+                1 => {
+                    output["results"][0]["evidence"]["scores"]
+                        .as_array_mut()
+                        .unwrap()
+                        .reverse();
+                }
+                2 => {
+                    output["results"][0]["evidence"]["top_option_probability"] = json!(0.5);
+                }
+                3 => {
+                    output["results"][0]["value"]["type"] = json!("choice");
+                }
+                _ => {
+                    output["results"][0]["evidence"]["candidate_mass"] = json!(1.1);
+                }
+            }
+            assert!(apply_request_policy(&mut output, &request, &policy).is_err());
+        }
+        let ordinal: DecisionRequest=serde_json::from_value(json!({"state":{},"decisions":[{
+            "id":"flag","instruction":"Rate","kind":{"type":"ordinal","levels":[
+                {"id":"low","criterion":"Low","value":10},{"id":"high","criterion":"High","value":20}]}}]})).unwrap();
+        let mut output = backend.output.clone();
+        output["results"][0]["value"] = json!({"type":"ordinal","selected":"high"});
+        output["results"][0]["evidence"]["scores"][0]["id"] = json!("low");
+        output["results"][0]["evidence"]["scores"][1]["id"] = json!("high");
+        output["results"][0]["evidence"]["estimate"] = json!({"expected_value":19.0});
+        let evidence = output["results"][0]["evidence"].clone();
+        apply_request_policy(
+            &mut output,
+            &ordinal,
+            &crate::DecisionPolicy {
+                min_top_probability: 0.95,
+                min_candidate_mass: 0.05,
+            },
+        )
+        .unwrap();
+        assert_eq!(output["results"][0]["value"]["selected"], Value::Null);
+        assert_eq!(output["results"][0]["evidence"], evidence);
+    }
+    #[test]
+    fn failure_message_extraction_validates_codes_and_skips_large_unused_data() {
+        let body = json!({"media":[{"data_base64":"a".repeat(1024*1024)}],"state":{"unused":[1,2,3]},
+            "failure_reasons":{"reasoning_limit":"추론 한도를 늘리세요.","native_failure":"다시 시도하세요."}});
+        let messages = user_failure_messages(&serde_json::to_vec(&body).unwrap());
+        assert_eq!(messages["reasoning_limit"], "추론 한도를 늘리세요.");
+        assert_eq!(messages.len(), 2);
+        for body in [
+            b"{".as_slice(),
+            b"{\"failure_reasons\":{\"unknown\":\"x\"}}".as_slice(),
+            b"{}".as_slice(),
+        ] {
+            assert!(user_failure_messages(body).is_empty());
+        }
     }
 }

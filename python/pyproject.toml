@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "l2s1"
+version = "0.1.0"
+description = "Typed async decisions from the resident L2S1 Rust engine"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["httpx>=0.27,<1", "pydantic>=2.12,<3"]
+
+[project.urls]
+Repository = "https://github.com/LuticaCANARD/L2S1"
+
+[project.optional-dependencies]
+dev = ["build>=1", "mypy>=1.15,<2"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+l2s1 = ["py.typed"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+cache_dir = "python/.mypy_cache"
+
+[tool.pydantic-mypy]
+init_typed = true
+init_forbid_extra = true

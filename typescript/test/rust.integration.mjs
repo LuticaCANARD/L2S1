@@ -10,9 +10,30 @@ const request = { state: { x: 1 }, decisions: [
   { id: 'ordinal', instruction: 'Rate x.', kind: { type: 'ordinal', levels: [{ id: 'low', criterion: 'Low', value: 10 }, { id: 'high', criterion: 'High', value: 30 }] } },
 ] };
 
+test('compiled Rust stdio engine supports native batch RPC without HTTP or fetch', async () => {
+  let logs = '';
+  const fetch = globalThis.fetch;
+  globalThis.fetch = () => { assert.fail('stdio must not use HTTP'); };
+  const engine = await L2S1.load({ model: 'fixture path with spaces', binaryPath, onStderr: (chunk) => { logs += chunk; } });
+  try {
+    assert.match(logs, /l2s1 stdio ready/);
+    assert.doesNotMatch(logs, /HTTP listening/);
+    const plan = engine.prepare(request.decisions);
+    const responses = await plan.decideBatch([{ x: 1 }, { x: 2 }]);
+    assert.equal(responses.length, 2);
+    assert.notEqual(responses[0].request_id, responses[1].request_id);
+    await assert.rejects(engine.decideBatch([{ ...request, reasoning: { mode: 'thinking' } }]), { code: 'invalid_request' });
+    const single = await plan.decide({ x: 3 });
+    assert.deepEqual(single.results.map((item) => item.value), responses[0].results.map((item) => item.value));
+  } finally {
+    await engine.close();
+    globalThis.fetch = fetch;
+  }
+});
+
 test('Node managed lifecycle crosses the real Rust HTTP/scoring boundary', async () => {
   let logs = '';
-  const engine = await L2S1.load({ model: 'fixture path with spaces', binaryPath, onStderr: (chunk) => { logs += chunk; } });
+  const engine = await L2S1.load({ model: 'fixture path with spaces', binaryPath, transport: 'http', onStderr: (chunk) => { logs += chunk; } });
   try {
     assert.match(logs, /l2s1 HTTP listening on 127\.0\.0\.1:\d+/);
     const capabilities = await engine.capabilities();
