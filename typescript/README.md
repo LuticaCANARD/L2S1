@@ -163,7 +163,7 @@ WASM is a separate runtime port. Compiling the Rust wrapper for WASM does not pa
 
 ## Build distribution artifacts
 
-The [runtime workflow](../.github/workflows/typescript-runtimes.yml) builds all five platforms and uploads wrapper/runtime `.tgz` files as workflow artifacts. It does not publish packages. Publish all runtime packages at the matching version before publishing the wrapper. The workflow verifies checksums, executable startup, installation into a fresh npm project and automatic runtime resolution. Invalid-model startup in CI is not model inference validation.
+The [runtime workflow](../.github/workflows/typescript-runtimes.yml) runs on `v*` version-tag pushes or manual dispatch, and builds all five platforms and uploads wrapper/runtime `.tgz` files as workflow artifacts. It does not publish packages. Publish all runtime packages at the matching version before publishing the wrapper. The workflow verifies checksums, executable startup, installation into a fresh npm project and automatic runtime resolution. Invalid-model startup in CI is not model inference validation.
 
 To build the current platform locally, run at the repository root:
 

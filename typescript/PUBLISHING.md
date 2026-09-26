@@ -20,7 +20,7 @@ Both wrapper and generated runtimes use `publishConfig.access = public` and the 
 ## Release conditions
 
 1. Confirm ownership or publishing rights for the npm `@l2s1` user/organization scope. A GitHub repository owner is not automatically the owner of an npm scope. An unauthenticated registry 404 does not prove the scope is available.
-2. Pass the five native build/install jobs in `typescript-runtimes.yml`. A local Linux build is not verification of macOS, Windows or arm64 artifacts.
+2. Start release checks by pushing the release commit with a `v*` version tag or manually dispatching the workflows for that commit. All four workflows run only on version-tag pushes or manual dispatch; PRs and branch pushes do not start CI. Pass the five native build/install jobs in `typescript-runtimes.yml`. A local Linux build is not verification of macOS, Windows or arm64 artifacts.
 3. Check all tarballs using `npm publish --dry-run --access public --ignore-scripts`. Verify the version, files, licenses, absence of model weights and absence of install scripts.
 4. Publish the five runtime tarballs first at the matching version, then publish the wrapper. Publishing the wrapper before its runtimes would allow npm's optional dependency handling to leave local inference unavailable.
 5. Install the wrapper by registry name into a clean project and verify automatic runtime selection and a real-model decision. This final registry test requires actual publication; local tarball installation is preparation evidence.
@@ -39,6 +39,6 @@ The base main-branch HTTP contract supports state, decisions and media. Optional
 
 ## Verification scope
 
-The PR checks TypeScript and example types, HTTP transport, custom backend routing, startup failure/cancellation/cleanup, real Rust HTTP validation/scoring and offline installation of packed wrapper/runtime tarballs. Native package verification checks file hashes, executable version and Linux shared-library resolution from the bundle. The platform CI tests startup with an invalid model and has no model download; that confirms executable loading rather than inference quality.
+Release CI checks TypeScript and example types, HTTP transport, custom backend routing, startup failure/cancellation/cleanup, real Rust HTTP validation/scoring and offline installation of packed wrapper/runtime tarballs. Native package verification checks file hashes, executable version and Linux shared-library resolution from the bundle. The platform CI tests startup with an invalid model and has no model download; that confirms executable loading rather than inference quality.
 
 Real GGUF smoke tests require separately supplied weights. They verify typed results and score structure, including abstentions, and do not establish task accuracy or GPU behavior.
