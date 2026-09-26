@@ -207,7 +207,7 @@ def report(folder):
     summary = json.loads((folder / 'summary.json').read_text())
     pct = lambda x: 'n/a' if x is None else f'{100*x:.2f}%'
     lines = ['# Kaggle AG News results', '',
-             'Date: 2026-09-21. Same frozen 400-article sample, 100 per category; one CUDA pass per model. See [protocol and reproduction](KAGGLE_BENCHMARK.md).', '',
+             'Date: 2026-09-21. Same frozen 400-article sample, 100 per category; one CUDA pass per model. See [protocol and reproduction](https://github.com/LuticaCANARD/L2S1/blob/main/docs/KAGGLE_BENCHMARK.md).', '',
              '| Model | Correct | Wrong | Abstained | Errors / missing | Correct / all | Accepted accuracy | Coverage | Raw top-1 |',
              '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
     for run in summary['runs']:

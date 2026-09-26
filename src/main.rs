@@ -24,7 +24,7 @@ struct Args {
     /// individually to preserve the single-chunk projector path.
     #[arg(long, requires = "mmproj", conflicts_with = "vision_optimized")]
     vision_projector_reuse: bool,
-    /// Experimental vision throughput profile: parallel4, dynamic KV, batch1024,
+    /// Vision throughput profile: parallel4, dynamic KV, batch1024,
     /// FlashAttention, compact evidence, bounded preparation and image reuse.
     #[arg(long, requires = "mmproj", conflicts_with_all = ["execution_mode", "parallel_width", "parallel_context_dynamic", "batch", "ubatch", "flash_attention", "evidence_transfer", "preparation_cache_bytes", "preparation_cache_entries", "output_head", "calibration"])]
     vision_optimized: bool,
@@ -66,7 +66,7 @@ struct Args {
     /// Auto selects GPT-OSS final prefill, Qwen3 non-thinking, or the GGUF template.
     #[arg(long, value_enum, default_value_t = PromptProfile::Auto)]
     prompt_profile: PromptProfile,
-    /// Fresh, prefix reuse, or experimental parallel questions; validate score drift first.
+    /// Fresh, prefix-reuse, state-restore, or parallel questions; validate score differences.
     #[arg(long, value_enum, default_value_t = ExecutionMode::Fresh)]
     execution_mode: ExecutionMode,
     /// Maximum questions per parallel wave (1..32); increases KV memory use.

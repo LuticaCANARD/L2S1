@@ -1,15 +1,35 @@
-import { mkdir, copyFile, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, copyFile, readdir, readFile, writeFile, rm } from 'node:fs/promises';
 const root = new URL('../../', import.meta.url);
 const target = new URL('../static/docs/', import.meta.url);
+// This directory is generated; remove obsolete paths after documentation moves.
+await rm(target, { recursive: true, force: true });
 await mkdir(target, { recursive: true });
 for (const name of [
-  'README.md', 'BENCHMARK.md', 'DECISION_FINETUNE.md', 'INTENT_BENCHMARK.md',
-  'JEVBENCH.md', 'KAGGLE_BENCHMARK.md', 'LAYA_BENCHMARK.md',
-  'MODEL_INTERCHANGEABILITY.md', 'OUTPUT_HEAD.md', 'PARALLEL_EXECUTION.md',
-  'SEMIF_ALGORITHM.md', 'VERIFICATION.md', 'VISION_BENCHMARK.md',
-  'LICENSING.md', 'LICENSE', 'THIRD_PARTY_LICENSES.txt',
+  'README.md', 'README.ko.md', 'LICENSE', 'THIRD_PARTY_LICENSES.txt',
 ]) {
   await copyFile(new URL(name, root), new URL(name, target));
+}
+
+// Mirror documentation paths so README language links and guide links resolve.
+const documents = new URL('docs/', root);
+const documentTarget = new URL('docs/', target);
+await mkdir(documentTarget, { recursive: true });
+for (const entry of await readdir(documents, { withFileTypes: true })) {
+  if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
+  await copyFile(new URL(entry.name, documents), new URL(entry.name, documentTarget));
+}
+
+// Publish reports without copying raw observations, local results, or model files.
+const benchmarks = new URL('benchmarks/', root);
+for (const entry of await readdir(benchmarks, { withFileTypes: true })) {
+  if (!entry.isDirectory()) continue;
+  const source = new URL(`${entry.name}/`, benchmarks);
+  const destination = new URL(`benchmarks/${entry.name}/`, target);
+  for (const report of await readdir(source, { withFileTypes: true })) {
+    if (!report.isFile() || !/^(README|REPORT)\.md$/.test(report.name)) continue;
+    await mkdir(destination, { recursive: true });
+    await copyFile(new URL(report.name, source), new URL(report.name, destination));
+  }
 }
 await copyFile(new URL('examples/warehouse.json', root), new URL('warehouse.json', target));
 

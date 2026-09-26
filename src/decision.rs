@@ -374,7 +374,7 @@ impl Default for ComputeOptions {
 }
 
 impl ComputeOptions {
-    /// Experimental GPU vision throughput profile. Pair with
+    /// GPU vision throughput profile. Pair with
     /// `LlamaBackend::enable_vision_optimizations` after loading a projector.
     /// Different token batches/attention kernels can change model scores.
     pub fn vision_optimized() -> Self {
@@ -423,7 +423,7 @@ pub enum ExecutionMode {
     #[default]
     Fresh,
     PrefixReuse,
-    /// Experimental independent sequence batching with shared-prefix prefill.
+    /// Independent sequence batching with shared-prefix prefill.
     Parallel,
     /// Request-local whole-sequence snapshot restoration for a shared prefix.
     /// Supports recurrent and hybrid models when their sequence state can be saved.

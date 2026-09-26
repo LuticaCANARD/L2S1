@@ -22,6 +22,6 @@ npm test
 
 `PLAYWRIGHT_CHROMIUM_EXECUTABLE` can select an already installed compatible Chromium. Browser tests cover prerendering without JavaScript, keyboard-controlled abstention, all decision types, clipboard feedback, document downloads, and desktop/mobile overflow. Screenshots are saved under `test-results/`.
 
-`scripts/sync-content.mjs` copies only the named documentation files and JSON examples into the static site. It does not traverse or serve model directories. `src/lib/benchmarks.json` is a selected, path-free summary of actual measurements; update it only from newly completed performance runs.
+`scripts/sync-content.mjs` mirrors the root English/Korean READMEs, licenses, Markdown files in `docs/`, benchmark README/report files, and warehouse JSON examples into `static/docs/`. Repository-relative documentation links retain their paths. It does not copy model directories or raw benchmark observations. `src/lib/benchmarks.json` is a selected, path-free summary of actual measurements; update it only from newly completed performance runs.
 
 The site source follows the repository's MIT license. Framework and dependency notices are recorded separately in `THIRD_PARTY_LICENSES.txt` and copied into the static build. Build tools and tests are not part of the shipped client runtime.

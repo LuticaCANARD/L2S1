@@ -95,7 +95,7 @@ commands and saved predictions. Legacy ordering remains the default.
 
 ## Multi-model comparison
 
-The [README comparison](README.md#recorded-model-comparison) summarizes the completed September 23 RTX 3060 matrix: 22 GGUF checkpoints each scored all 231 items, with no errors in those completed runs. There were 23 runtime configurations: GPT-OSS failed with CUDA Graphs enabled, then completed with `GGML_CUDA_DISABLE_GRAPHS=1`. The original failed attempt remains in the evidence. Latency values belong to their respective settings and should not be mixed with separate runs.
+The [recorded model comparison](MODEL_RESULTS.md#recorded-model-comparison) summarizes the completed September 23 RTX 3060 matrix: 22 GGUF checkpoints each scored all 231 items, with no errors in those completed runs. There were 23 runtime configurations: GPT-OSS failed with CUDA Graphs enabled, then completed with `GGML_CUDA_DISABLE_GRAPHS=1`. The original failed attempt remains in the evidence. Latency values belong to their respective settings and should not be mixed with separate runs.
 
 The complete report, CSV, raw predictions, model plan, runtime hashes and measured source snapshot are in the local, gitignored `results/jevbench-matrix-20260923/` directory; they are not included in this repository. Qwen3.5-4B Q8_0 led this selected matrix at 184/231 (79.65%). Full reruns after model downloads finished reproduced all probabilities for that model and Gemma4 E2B exactly. The snapshot records the frozen build used by this comparison, independently of subsequent working-tree changes.
 

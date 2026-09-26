@@ -117,7 +117,7 @@
     <section id="models" class="section model-section">
       <div class="section-heading horizontal"><div><p class="eyebrow">03 / YOUR MODEL, YOUR MACHINE</p><h2>A common contract.<br /><em>Different models.</em></h2></div><p>Use a compatible local chat GGUF. Embedded Jinja templates handle model-specific formatting; Qwen3 keeps its non-thinking profile.</p></div>
       <div class="model-list">{#each models as model (model.name)}<a href={model.url} target="_blank" rel="noreferrer external"><span class="model-dot" aria-hidden="true"></span><strong>{model.name}</strong><span>{model.detail}</span><span class="model-arrow" aria-hidden="true">↗</span></a>{/each}</div>
-      <p class="section-note">Specific checkpoints tested locally. Compatibility still depends on the template, tokenizer, libllama build, and available memory. <a href="/docs/VERIFICATION.md" rel="external">Read the verification record ↗</a></p>
+      <p class="section-note">Specific checkpoints tested locally. Compatibility still depends on the template, tokenizer, libllama build, and available memory. <a href="/docs/docs/VERIFICATION.md" rel="external">Read the verification record ↗</a></p>
     </section>
 
     <section id="performance" class="section performance-section">
@@ -127,7 +127,7 @@
         <div class="table-scroll"><table><caption class="sr-only">Warehouse request latency and throughput by model</caption><thead><tr><th>Checkpoint</th><th>CPU p50 / request</th><th>CUDA p50 / request</th><th>CUDA decisions / sec</th><th>CUDA abstentions</th></tr></thead><tbody>{#each measurements as row (row.model)}<tr><td>{row.model}{#if !row.nativeCuda}<span aria-label="CUDA batch consistency limitation"> †</span>{/if}</td><td>{row.cpuP50.toFixed(1)} <span>ms</span></td><td>{row.cudaP50.toFixed(1)} <span>ms</span></td><td>{row.cudaDecisionsPerSecond.toFixed(2)}</td><td>{Math.round(row.cudaAbstentionRate * 100)}%</td></tr>{/each}</tbody></table></div>
         <p class="section-note">English warehouse fixture · {benchmarks.date}. Five samples are a smoke measurement, not a broad benchmark. Inference timings include prompt processing and scoring, not generated text. Hardware, quantization, and build differences matter. Throughput includes abstentions. † Gemma 3 and TinyLlama exceed the CUDA batch-consistency tolerance; these timings use a fixed batch of 256.</p>
       {/if}
-      <a class="benchmark-link" href="/docs/README.md" rel="external">Run the performance test on your machine <span aria-hidden="true">↗</span></a>
+      <a class="benchmark-link" href="/docs/docs/BENCHMARK.md" rel="external">Run the performance test on your machine <span aria-hidden="true">↗</span></a>
     </section>
 
     <section id="get-started" class="start-section">
@@ -135,7 +135,7 @@
       <div class="command-panel"><div class="command-header"><span>TERMINAL / QUICK START</span><button onclick={copyCommand}>{copied ? 'Copied ✓' : 'Copy command'}</button></div><pre><code>{command}</code></pre>{#if copyError}<p role="status">Clipboard access is unavailable. Select and copy the command above.</p>{/if}<div class="command-footer"><span>Local inference</span><span>No automatic downloads</span></div></div>
     </section>
 
-    <section class="license-strip"><div class="license-symbol" aria-hidden="true">↗</div><div><h3>Open source code. Separate model licenses.</h3><p>The application is MIT-licensed. Model weights are never bundled. Gemma 4 uses Apache 2.0; Gemma 3 has its own terms. Preserve applicable third-party notices when distributing.</p></div><a href="/docs/LICENSING.md" rel="external">License details ↗</a></section>
+    <section class="license-strip"><div class="license-symbol" aria-hidden="true">↗</div><div><h3>Open source code. Separate model licenses.</h3><p>The application is MIT-licensed. Model weights are never bundled. Gemma 4 uses Apache 2.0; Gemma 3 has its own terms. Preserve applicable third-party notices when distributing.</p></div><a href="/docs/docs/LICENSING.md" rel="external">License details ↗</a></section>
   </main>
   <footer><a class="brand" href="#main"><span class="brand-symbol" aria-hidden="true">s1<span>↗</span></span><span>L2S1</span></a><p>Local models. Typed decisions.</p><div><a href="/docs/README.md" rel="external">Documentation</a><a href="/docs/LICENSE" rel="external">MIT license</a><a href="/docs/WEB_THIRD_PARTY_LICENSES.txt" rel="external">Third-party notices</a></div><span>Built with Rust. Presented with Svelte.</span></footer>
 </div>

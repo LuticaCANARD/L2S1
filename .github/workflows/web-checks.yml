@@ -4,11 +4,17 @@ on:
   pull_request:
     paths:
       - 'web/**'
+      - 'README*.md'
+      - 'docs/**'
+      - 'benchmarks/**/*.md'
       - '.github/workflows/web-checks.yml'
   push:
     branches: [main]
     paths:
       - 'web/**'
+      - 'README*.md'
+      - 'docs/**'
+      - 'benchmarks/**/*.md'
       - '.github/workflows/web-checks.yml'
 
 permissions:
