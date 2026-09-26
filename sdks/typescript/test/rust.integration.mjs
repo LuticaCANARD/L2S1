@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { resolve } from 'node:path';
 import { L2S1 } from '../dist/index.js';
 
-const binaryPath = resolve('../target/debug/examples/typescript_fixture' + (process.platform === 'win32' ? '.exe' : ''));
+const binaryPath = resolve('../../target/debug/examples/typescript_fixture' + (process.platform === 'win32' ? '.exe' : ''));
 const request = { state: { x: 1 }, decisions: [
   { id: 'binary', instruction: 'Is x positive?', kind: { type: 'binary', false_label: 'No', true_label: 'Yes' } },
   { id: 'choice', instruction: 'Select a class.', kind: { type: 'choice', options: [{ id: 'a', criterion: 'A' }, { id: 'b', criterion: 'B' }] } },

@@ -1,8 +1,8 @@
 # L2S1 for TypeScript
 
-[English](../docs/en/typescript/README.md) · [한국어](../docs/ko/typescript/README.md) · [日本語](../docs/ja/typescript/README.md)
+[English](../../docs/en/typescript/README.md) · [한국어](../../docs/ko/typescript/README.md) · [日本語](../../docs/ja/typescript/README.md)
 
-[English index](../docs/en/README.md) · [한국어 색인](../docs/ko/README.md) · [日本語索引](../docs/ja/README.md)
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
 
 `@l2s1/node` uses the existing Rust inference engine from Node.js. One model process stays resident across calls. Binary, choice, ordinal, image, policy, reasoning and evidence fields use the Rust HTTP v1 schema. Validation, tokenization, scoring, abstention and GPU execution remain in Rust.
 
@@ -26,17 +26,17 @@ For a custom native build, build the Rust executable at the repository root:
 cargo build --release --locked --features llama --bin l2s1
 ```
 
-For NVIDIA CUDA use `--features llama-cuda`; for macOS Metal use `--features llama-metal`. See the [native build guide](../docs/GUIDE.md#build) for toolchain requirements and shared libraries. Keep the executable and its required native libraries together when distributing it.
+For NVIDIA CUDA use `--features llama-cuda`; for macOS Metal use `--features llama-metal`. See the [native build guide](../../docs/GUIDE.md#build) for toolchain requirements and shared libraries. Keep the executable and its required native libraries together when distributing it.
 
 Build and pack the TypeScript package:
 
 ```sh
-cd typescript
+cd sdks/typescript
 npm ci
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/typescript/l2s1-node-0.1.0.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.0.tgz
 ```
 
 ## Load a local model
@@ -151,7 +151,7 @@ and image groups are rejected. All wire requests are validated before inference;
 an execution failure fails the whole batch without rolling back executed waves.
 Check `capabilities().batch`. `Promise.all(engine.decide(...))` queues separate
 requests; it does not combine them into a native batch. See the
-[batching review](../docs/BATCHING_API_REVIEW.md).
+[batching review](../../docs/BATCHING_API_REVIEW.md).
 
 The [Python SDK](../python/README.md) exposes the same lifecycle and HTTP v1 JSON
 contract, with `prepare(..., state_type=State)` and `decide_batch()` equivalents.
@@ -193,7 +193,7 @@ const request = {
 // Load with { model: visionModel, mmproj: matchingProjector } before deciding.
 ```
 
-Omitted `media_ids` uses all request media; `[]` selects text only. Rust enforces media, decision, body and model limits. See the [HTTP contract](../docs/GUIDE.md#direct-image-input-and-http-api).
+Omitted `media_ids` uses all request media; `[]` selects text only. Rust enforces media, decision, body and model limits. See the [HTTP contract](../../docs/GUIDE.md#direct-image-input-and-http-api).
 
 ## Verification and portability
 
@@ -209,7 +209,7 @@ npm pack --dry-run
 Optional real-model smoke (at the repository root, build the native binary first):
 
 ```sh
-cd typescript
+cd sdks/typescript
 L2S1_BINARY=/absolute/path/to/l2s1 L2S1_MODEL=/path/to/chat-model.gguf node --test test/model.integration.mjs
 ```
 
@@ -217,7 +217,7 @@ WASM is a separate runtime port. Compiling the Rust wrapper for WASM does not pa
 
 ## Build distribution artifacts
 
-The [runtime workflow](../.github/workflows/typescript-runtimes.yml) runs on `v*` version-tag pushes or manual dispatch, and builds all five platforms and uploads wrapper/runtime `.tgz` files as workflow artifacts. It does not publish packages. Publish all runtime packages at the matching version before publishing the wrapper. The workflow verifies checksums, executable startup, installation into a fresh npm project and automatic runtime resolution. Invalid-model startup in CI is not model inference validation.
+The [runtime workflow](../../.github/workflows/typescript-runtimes.yml) runs on `v*` version-tag pushes or manual dispatch, and builds all five platforms and uploads wrapper/runtime `.tgz` files as workflow artifacts. It does not publish packages. Publish all runtime packages at the matching version before publishing the wrapper. The workflow verifies checksums, executable startup, installation into a fresh npm project and automatic runtime resolution. Invalid-model startup in CI is not model inference validation.
 
 To build the current platform locally, run at the repository root:
 
@@ -225,9 +225,9 @@ To build the current platform locally, run at the repository root:
 # On macOS arm64, use llama-metal and --devices cpu,metal to include Metal.
 L2S1_PORTABLE_BUILD=1 cargo build --release --locked --features llama \
   --bin l2s1 --message-format=json-render-diagnostics > native-build.jsonl
-node typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl
-node typescript/scripts/verify-runtime.mjs typescript/runtime-packages/linux-x64
-cd typescript/runtime-packages/linux-x64
+node sdks/typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl
+node sdks/typescript/scripts/verify-runtime.mjs sdks/typescript/runtime-packages/linux-x64
+cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack
@@ -236,4 +236,4 @@ npm run test:package -- l2s1-node-0.1.0.tgz l2s1-runtime-linux-x64-0.1.0.tgz
 
 Use a fresh output directory when rebuilding a runtime. `L2S1_PORTABLE_BUILD=1` disables build-host CPU instructions and OpenMP dependencies; its general CPU kernels may be slower than a host-optimized custom build. Each artifact includes license notices and a SHA-256 manifest. The verifier checks that Linux llama.cpp/GGML dependencies resolve from the bundle directory.
 
-The [release pipeline](../docs/RELEASE_PIPELINE.md) publishes verified GitHub Release, npm, PyPI and native Cargo artifacts. Configure registry publishers before pushing a stable version tag.
+The [release pipeline](../../docs/RELEASE_PIPELINE.md) publishes verified GitHub Release, npm, PyPI and native Cargo artifacts. Configure registry publishers before pushing a stable version tag.

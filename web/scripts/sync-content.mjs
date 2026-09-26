@@ -48,9 +48,9 @@ for (const language of ['en', 'ko', 'ja']) {
 
 // The language indexes also link to public package and website documentation.
 for (const path of [
-  'typescript/README.md', 'python/README.md', 'crates/l2s1-llama-sys/README.md',
+  'sdks/README.md', 'sdks/typescript/README.md', 'sdks/python/README.md', 'crates/l2s1-llama-sys/README.md',
   'crates/l2s1-tools/README.md', 'crates/l2s1-tools/NOTICE.md',
-  'typescript/PUBLISHING.md', 'web/README.md',
+  'sdks/typescript/PUBLISHING.md', 'web/README.md',
   'skills/l2s1/SKILL.md', 'skills/l2s1/references/decisions.md',
   'skills/l2s1/references/interfaces.md',
 ]) {

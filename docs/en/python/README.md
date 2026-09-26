@@ -11,7 +11,7 @@ It is prepared for repository/wheel distribution; it has not been published to P
 From a checkout:
 
 ```sh
-python -m pip install ./python
+python -m pip install ./sdks/python
 ```
 
 From a built package:
@@ -148,17 +148,17 @@ timed-out calls occupy their slot until the native reply arrives.
 ## Build and verify
 
 ```sh
-python -m pip install './python[dev]'
-python -m mypy --config-file python/pyproject.toml python/src python/examples python/tests/typecheck.py
-python -m unittest discover -s python/tests -v
-python -m build python
+python -m pip install './sdks/python[dev]'
+python -m mypy --config-file sdks/python/pyproject.toml sdks/python/src sdks/python/examples sdks/python/tests/typecheck.py
+python -m unittest discover -s sdks/python/tests -v
+python -m build sdks/python
 
 # Actual Rust stdio/HTTP/scoring boundary and Python ↔ TypeScript JSON equality:
 cargo build --locked --example typescript_fixture
-npm --prefix typescript ci
-npm --prefix typescript run build
+npm --prefix sdks/typescript ci
+npm --prefix sdks/typescript run build
 L2S1_TEST_BINARY="$PWD/target/debug/examples/typescript_fixture" \
-  python -m unittest discover -s python/tests -v
+  python -m unittest discover -s sdks/python/tests -v
 ```
 
 On Windows use `typescript_fixture.exe`. The Rust fixture exercises resident

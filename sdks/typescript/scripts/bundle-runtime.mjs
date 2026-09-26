@@ -4,7 +4,7 @@ import { parseArgs } from 'node:util';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const { values } = parseArgs({ options: {
   'cargo-log': { type: 'string' }, binary: { type: 'string' }, 'library-dir': { type: 'string' },
   devices: { type: 'string', default: 'cpu' }, output: { type: 'string' },
@@ -29,8 +29,8 @@ const devices = values.devices.split(',');
 if (!devices.includes('cpu') || devices.some((device) => !['cpu', 'metal'].includes(device)) || (devices.includes('metal') && process.platform !== 'darwin')) {
   throw new Error('Published runtime devices must be cpu, or cpu,metal on macOS');
 }
-const manifest = JSON.parse(await readFile(join(root, 'typescript/package.json'), 'utf8'));
-const directory = resolve(values.output ?? join(root, 'typescript/runtime-packages', platform));
+const manifest = JSON.parse(await readFile(join(root, 'sdks/typescript/package.json'), 'utf8'));
+const directory = resolve(values.output ?? join(root, 'sdks/typescript/runtime-packages', platform));
 try { await stat(directory); throw new Error(`Output already exists: ${directory}; use a fresh --output directory`); }
 catch (error) { if (error.code !== 'ENOENT') throw error; }
 const bin = join(directory, 'bin');

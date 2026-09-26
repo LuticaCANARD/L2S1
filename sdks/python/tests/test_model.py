@@ -13,7 +13,7 @@ from l2s1 import DecisionRequest, L2S1, LoadOptions, ModelScoredEvidence
 @unittest.skipUnless(os.environ.get("L2S1_MODEL"), "set L2S1_MODEL for real native GGUF smoke")
 class RealModel(unittest.IsolatedAsyncioTestCase):
     async def test_stdio_native_parallel_independent_states_and_shared_prefix_usage(self) -> None:
-        root = Path(__file__).resolve().parents[2]
+        root = Path(__file__).resolve().parents[3]
         request = DecisionRequest.model_validate(json.loads((root / "examples/warehouse.json").read_text()))
         with patch("l2s1.native.L2S1Client", side_effect=AssertionError("must not use HTTP")):
             engine = await L2S1.load(LoadOptions(

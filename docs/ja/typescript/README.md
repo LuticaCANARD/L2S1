@@ -33,12 +33,12 @@ NVIDIA CUDA の場合は、`--features llama-cuda` を使用します。 macOS M
 TypeScript パッケージをビルドしてパックします。
 
 ```sh
-cd typescript
+cd sdks/typescript
 npm ci
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/typescript/l2s1-node-0.1.0.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.0.tgz
 ```
 
 <a id="load-a-local-model"></a>
@@ -88,7 +88,7 @@ try {
 
 `LoadOptions` は、CPU/CUDA/Metal、コンテキスト/バッチ/スレッド数、ビジョン プロジェクター (`mmproj`)、LoRA、実行モード、並列幅、プロンプト レイアウト/詳細、および起動ポリシーを公開します。あまり一般的ではない Rust フラグは `extraArgs` で渡すことができます。 `--stdio` / `--listen` は予約されています。 `startupTimeoutMs` のデフォルトは 120,000 および `timeoutMs` から 180,000 です。 `signal` を起動するとロードがキャンセルされます。 `onStderr` は、ネイティブ ログ チャンクを受信します。呼び出しでは、2 番目の引数として `{ signal, timeoutMs }` を受け入れます。失敗した推論リクエストが自動的に再試行されることはありません。
 
-ビルド後に、Node.js 24 の TypeScript サポートを使用して、[warehouse サンプル ](../../../typescript/examples/warehouse.ts) を実行します。
+ビルド後に、Node.js 24 の TypeScript サポートを使用して、[warehouse サンプル ](../../../sdks/typescript/examples/warehouse.ts) を実行します。
 
 ```sh
 L2S1_BINARY=/absolute/path/to/l2s1 node examples/warehouse.ts /path/to/chat-model.gguf
@@ -203,7 +203,7 @@ npm pack --dry-run
 オプションの実モデル スモーク (リポジトリ ルートで、最初に ネイティブ バイナリをビルドします):
 
 ```sh
-cd typescript
+cd sdks/typescript
 L2S1_BINARY=/absolute/path/to/l2s1 L2S1_MODEL=/path/to/chat-model.gguf node --test test/model.integration.mjs
 ```
 
@@ -220,9 +220,9 @@ WASM は別個のランタイム ポートです。 WASM 用の Rust ラッパ�
 # On macOS arm64, use llama-metal and --devices cpu,metal to include Metal.
 L2S1_PORTABLE_BUILD=1 cargo build --release --locked --features llama \
   --bin l2s1 --message-format=json-render-diagnostics > native-build.jsonl
-node typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl
-node typescript/scripts/verify-runtime.mjs typescript/runtime-packages/linux-x64
-cd typescript/runtime-packages/linux-x64
+node sdks/typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl
+node sdks/typescript/scripts/verify-runtime.mjs sdks/typescript/runtime-packages/linux-x64
+cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack

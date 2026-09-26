@@ -33,12 +33,12 @@ NVIDIA CUDA의 경우 `--features llama-cuda`를 사용하세요. macOS Metal의
 TypeScript 패키지를 빌드하고 패키징합니다.
 
 ```sh
-cd typescript
+cd sdks/typescript
 npm ci
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/typescript/l2s1-node-0.1.0.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.0.tgz
 ```
 
 <a id="load-a-local-model"></a>
@@ -88,7 +88,7 @@ try {
 
 `LoadOptions`는 CPU/CUDA/Metal, 컨텍스트/배치/스레드 수, 비전 프로젝터(`mmproj`), LoRA, 실행 모드, 병렬 너비, 프롬프트 레이아웃/세부 정보를 노출합니다. 그리고 시작 정책. 덜 일반적인 Rust 플래그는 `extraArgs`에서 전달될 수 있습니다. `--stdio` / `--listen`는 예약되어 있습니다. `startupTimeoutMs`의 기본값은 120,000이고 `timeoutMs`는 180,000입니다. 시작 `signal`가 로드를 취소합니다. `onStderr`는 네이티브 로그 청크를 수신합니다. 호출에서는 `{ signal, timeoutMs }`를 두 번째 인수로 허용합니다. 실패한 추론 요청은 자동으로 재시도되지 않습니다.
 
-빌드 후 Node.js 24의 TypeScript 지원을 사용하여 [warehouse example](../../../typescript/examples/warehouse.ts)를 실행합니다.
+빌드 후 Node.js 24의 TypeScript 지원을 사용하여 [warehouse example](../../../sdks/typescript/examples/warehouse.ts)를 실행합니다.
 
 ```sh
 L2S1_BINARY=/absolute/path/to/l2s1 node examples/warehouse.ts /path/to/chat-model.gguf
@@ -203,7 +203,7 @@ npm pack --dry-run
 선택적 실제 모델 스모크(저장소 루트에서 먼저 네이티브 바이너리를 빌드):
 
 ```sh
-cd typescript
+cd sdks/typescript
 L2S1_BINARY=/absolute/path/to/l2s1 L2S1_MODEL=/path/to/chat-model.gguf node --test test/model.integration.mjs
 ```
 
@@ -220,9 +220,9 @@ WASM은 별도의 런타임 포트입니다. WASM용 Rust 래퍼를 컴파일해
 # On macOS arm64, use llama-metal and --devices cpu,metal to include Metal.
 L2S1_PORTABLE_BUILD=1 cargo build --release --locked --features llama \
   --bin l2s1 --message-format=json-render-diagnostics > native-build.jsonl
-node typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl
-node typescript/scripts/verify-runtime.mjs typescript/runtime-packages/linux-x64
-cd typescript/runtime-packages/linux-x64
+node sdks/typescript/scripts/bundle-runtime.mjs --cargo-log native-build.jsonl
+node sdks/typescript/scripts/verify-runtime.mjs sdks/typescript/runtime-packages/linux-x64
+cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack

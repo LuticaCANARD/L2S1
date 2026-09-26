@@ -13,8 +13,8 @@ HTTP v1 JSON を使い、Pydantic の実行時検証と PEP 561 型情報を提�
 リポジトリのルート、またはビルドした wheel からインストールします。
 
 ```sh
-python -m pip install ./python
-python -m pip install ./python/dist/l2s1-0.1.0-py3-none-any.whl
+python -m pip install ./sdks/python
+python -m pip install ./sdks/python/dist/l2s1-0.1.0-py3-none-any.whl
 ```
 
 wheel は Python SDK を含みます。Rust 実行ファイルと GGUF は別途用意します。
@@ -131,15 +131,15 @@ stdio は最大 16 未完了呼び出しで、timeout 後も native 応答まで
 ## ビルドと検証
 
 ```sh
-python -m pip install './python[dev]'
-python -m mypy --config-file python/pyproject.toml python/src python/examples python/tests/typecheck.py
-python -m unittest discover -s python/tests -v
-python -m build python
+python -m pip install './sdks/python[dev]'
+python -m mypy --config-file sdks/python/pyproject.toml sdks/python/src sdks/python/examples sdks/python/tests/typecheck.py
+python -m unittest discover -s sdks/python/tests -v
+python -m build sdks/python
 cargo build --locked --example typescript_fixture
-npm --prefix typescript ci
-npm --prefix typescript run build
+npm --prefix sdks/typescript ci
+npm --prefix sdks/typescript run build
 L2S1_TEST_BINARY="$PWD/target/debug/examples/typescript_fixture" \
-  python -m unittest discover -s python/tests -v
+  python -m unittest discover -s sdks/python/tests -v
 ```
 
 Windows は実行ファイルに `.exe` を付けます。Rust fixture はモデルを使わず、

@@ -10,7 +10,7 @@ It is prepared for repository/wheel distribution; it has not been published to P
 From a checkout:
 
 ```sh
-python -m pip install ./python
+python -m pip install ./sdks/python
 ```
 
 From a built package:
@@ -90,7 +90,7 @@ with a matching projector; mixing text and image groups is rejected. All wire
 requests are validated before inference. An execution error fails the whole
 batch; already executed waves are not rolled back or replayed. Separate
 `asyncio.gather(engine.decide(...))` calls are queued individually and are not
-implicitly combined. See [the batching review](../docs/BATCHING_API_REVIEW.md).
+implicitly combined. See [the batching review](../../docs/BATCHING_API_REVIEW.md).
 
 ## Connect, send existing JSON, or adapt another transport
 
@@ -147,17 +147,17 @@ timed-out calls occupy their slot until the native reply arrives.
 ## Build and verify
 
 ```sh
-python -m pip install './python[dev]'
-python -m mypy --config-file python/pyproject.toml python/src python/examples python/tests/typecheck.py
-python -m unittest discover -s python/tests -v
-python -m build python
+python -m pip install './sdks/python[dev]'
+python -m mypy --config-file sdks/python/pyproject.toml sdks/python/src sdks/python/examples sdks/python/tests/typecheck.py
+python -m unittest discover -s sdks/python/tests -v
+python -m build sdks/python
 
 # Actual Rust stdio/HTTP/scoring boundary and Python ↔ TypeScript JSON equality:
 cargo build --locked --example typescript_fixture
-npm --prefix typescript ci
-npm --prefix typescript run build
+npm --prefix sdks/typescript ci
+npm --prefix sdks/typescript run build
 L2S1_TEST_BINARY="$PWD/target/debug/examples/typescript_fixture" \
-  python -m unittest discover -s python/tests -v
+  python -m unittest discover -s sdks/python/tests -v
 ```
 
 On Windows use `typescript_fixture.exe`. The Rust fixture exercises resident
@@ -167,4 +167,4 @@ GGUF, CUDA or Metal quality/performance evidence. The CI matrix targets Python
 actual host. Wheel/sdist artifacts are uploaded by CI; registry publishing is
 not enabled.
 
-The [release pipeline](../docs/RELEASE_PIPELINE.md) builds and publishes GitHub Release, npm, PyPI and native Cargo packages after validation. External registry account/trusted-publisher setup is required; this local work has not published packages.
+The [release pipeline](../../docs/RELEASE_PIPELINE.md) builds and publishes GitHub Release, npm, PyPI and native Cargo packages after validation. External registry account/trusted-publisher setup is required; this local work has not published packages.

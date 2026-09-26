@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 from l2s1 import DecisionRequest, L2S1, L2S1Error, LoadOptions, ModelScoredEvidence
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 BINARY = os.environ.get("L2S1_TEST_BINARY")
 
 
@@ -32,7 +32,7 @@ class RustBoundary(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(responses), 2)
             self.assertNotEqual(responses[0].request_id, responses[1].request_id)
             items = [request, DecisionRequest(state={"storage_requirement": "ambient"}, decisions=request.decisions)]
-            child = await asyncio.create_subprocess_exec("node", str(ROOT / "python/tests/typescript_peer.mjs"),
+            child = await asyncio.create_subprocess_exec("node", str(ROOT / "sdks/python/tests/typescript_peer.mjs"),
                 "--stdio", BINARY, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             stdout, stderr = await child.communicate(json.dumps([item.model_dump(exclude_unset=True) for item in items]).encode())
             self.assertEqual(child.returncode, 0, stderr.decode())
@@ -63,8 +63,8 @@ class RustBoundary(unittest.IsolatedAsyncioTestCase):
             self.assertIsInstance(results[0].results[0].evidence, ModelScoredEvidence)
             address = re.search(r"l2s1 HTTP listening on (127\.0\.0\.1:\d+)", "".join(logs))
             assert address is not None
-            if shutil.which("node") and (ROOT / "typescript/dist/index.js").exists():
-                child = await asyncio.create_subprocess_exec("node", str(ROOT / "python/tests/typescript_peer.mjs"),
+            if shutil.which("node") and (ROOT / "sdks/typescript/dist/index.js").exists():
+                child = await asyncio.create_subprocess_exec("node", str(ROOT / "sdks/python/tests/typescript_peer.mjs"),
                     "http://" + address[1], stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
                 stdout, stderr = await child.communicate(request.model_dump_json(exclude_unset=True).encode())
                 self.assertEqual(child.returncode, 0, stderr.decode())
