@@ -1,0 +1,16 @@
+{
+  "state": {"task": "classify the object visible in the image"},
+  "media": [{"type": "image", "id": "photo", "data_base64": "REPLACE_WITH_STANDARD_BASE64_IMAGE_BYTES"}],
+  "decisions": [{
+    "id": "object",
+    "instruction": "Select the object visible in the photo.",
+    "media_ids": ["photo"],
+    "kind": {
+      "type": "choice",
+      "options": [
+        {"id": "box", "criterion": "The main object is a box."},
+        {"id": "bottle", "criterion": "The main object is a bottle."}
+      ]
+    }
+  }]
+}

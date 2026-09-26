@@ -212,6 +212,10 @@ These are recorded local experiments at their stated revisions, hardware, and se
 
 ## Documentation
 
+For AI agents, use the portable [L2S1 skill](skills/l2s1/SKILL.md) and optional
+stdio MCP adapter. MCP exposes documentation, typed request validation and the
+resident HTTP backend's decisions. See [agent setup](docs/AGENT_INTEGRATION.md).
+
 | Topic | Read |
 | --- | --- |
 | Build, requests, Rust API, HTTP, runtime options | [Guide](docs/GUIDE.md) |

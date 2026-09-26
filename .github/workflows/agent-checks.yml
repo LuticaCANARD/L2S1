@@ -1,0 +1,48 @@
+name: Agent integration checks
+
+on:
+  pull_request:
+    paths:
+      - 'mcp/**'
+      - 'skills/**'
+      - 'examples/warehouse.json'
+      - 'examples/http-image.json'
+      - 'docs/**'
+      - 'README.md'
+      - 'src/decision.rs'
+      - 'src/http*'
+      - 'src/http/**'
+      - '.github/workflows/agent-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mcp/**'
+      - 'skills/**'
+      - 'examples/warehouse.json'
+      - 'examples/http-image.json'
+      - 'docs/**'
+      - 'README.md'
+      - 'src/decision.rs'
+      - 'src/http*'
+      - 'src/http/**'
+      - '.github/workflows/agent-checks.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  mcp:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.14']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: mcp/requirements.txt
+      - run: python -m pip install -r mcp/requirements.txt
+      - run: python -m unittest discover -s mcp -p 'test_*.py' -v
+      - run: python mcp/server.py --help
