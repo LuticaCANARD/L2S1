@@ -38,6 +38,11 @@ result in the same request. If one decision depends on another, construct anothe
 request after handling the first result. For exact deterministic business rules,
 implement the rule directly when that better meets the user's intent.
 
+For Rust callers, show explicit `DecisionRequest`, `Decision`, `DecisionKind`,
+`OptionSpec` and `Level` construction rather than hiding the contract behind JSON
+file parsing. The interface reference includes all three kinds; the checkout's
+`examples/warehouse.rs` runs and validates them without a model.
+
 Validate structure before inference. MCP validation checks IDs, order, media
 references and sizes; it does **not** check the model template, answer tokenization,
 image decoding or context fit. CLI `--preflight` checks the actual text request
