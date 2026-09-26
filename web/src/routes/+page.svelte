@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import benchmarks from '$lib/benchmarks.json';
 
   type Kind = 'choice' | 'binary' | 'ordinal';
@@ -56,7 +57,7 @@
   <header class="site-header">
     <a class="brand" href="#main" aria-label="L2S1 home"><span class="brand-symbol" aria-hidden="true">s1<span>↗</span></span><span>L2S1</span></a>
     <nav aria-label="Main navigation">
-      <a href="#how-it-works">How it works</a><a href="#models">Models</a><a href="#performance">Performance</a>
+      <a href="#how-it-works">How it works</a><a href={resolve('/webgpu')}>Decision demo</a><a href="#models">Models</a><a href="#performance">Performance</a>
     </nav>
     <a class="header-cta" href="#get-started">Start building <span aria-hidden="true">↗</span></a>
   </header>

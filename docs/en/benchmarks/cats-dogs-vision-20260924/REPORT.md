@@ -25,11 +25,4 @@ Confusion in both runs: cats 24/24 correct; dogs 45/46 correct, 1 classified cat
 
 An always-dog classifier would score 46/70 (65.71%) because of class imbalance. The descriptive 95% Wilson interval for 69/70 is approximately 92.34% to 99.75%, conditional on this sample and protocol. Exact image-hash overlap was absent, but visual near-duplicates and model pretraining contamination were not assessed. This is a small, single-dataset evaluation, not a general image-classification accuracy claim.
 
-This directory includes both summary JSON files, per-image observation records,
-and the historical `evaluate-order-check.py` evaluator. The source image archive
-and server logs remain local; no image bytes or model weights are published.
-The evaluator sends the `image_base64` field accepted by the recorded binary.
-Current L2S1 HTTP releases use the versioned `media` request contract, so the
-script needs a request-shape update before replay against current `main`.
-The binary SHA-256 above identifies the version that produced these results.
-The GPU process was stopped after each run.
+This directory retains both summary JSON files and per-image observation records. The obsolete evaluator was removed because it uses the historical `image_base64` request field; its [archived source](https://github.com/LuticaCANARD/L2S1/blob/eb900059b7eb93f19c9502a50eeb729d7224e240/benchmarks/cats-dogs-vision-20260924/evaluate-order-check.py) remains tied to the recorded binary. Current L2S1 uses the versioned `media` contract. Source images and server logs remain local; no image bytes or model weights are published. The binary SHA-256 above identifies the version that produced these results. The GPU process was stopped after each run.

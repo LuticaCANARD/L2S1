@@ -7,7 +7,7 @@
 
 `decision-rules-v1` 벤치마크는 **12 요청의 기존 GGUF 체크포인트를 36 라벨이 붙은 판단**와 비교합니다. 규칙 준수 정확성, 판단 보류, 반복 출력 일관성 및 추론 대기 시간을 측정합니다. 모델을 다운로드하거나 배포하지 않습니다.
 
-기본값은 레거시 v1 프롬프트입니다. 선택적 v2 상태 우선 프롬프트 및 선택적 접두사 재사용은 [SEMIF_ALGORITHM.md](SEMIF_ALGORITHM.md)에 문서화되어 있습니다. 비교를 위해 별도의 출력 디렉터리를 사용하여 v2의 경우 `--prompt-layout state-first`를 전달한 다음 `--execution-mode fresh`(기본값) 또는 `--execution-mode prefix-reuse`를 Python 실행기에 전달합니다. 보고서는 요청된 모드, 논리적 입력 토큰, 재사용된 접두사 토큰 및 실제 평가된 토큰을 기록합니다. 동일한 프롬프트 버전, 모델, 장치 및 배치 설정을 비교합니다. 프롬프트를 변경하면 캐시 재사용과 관계없이 정답률이 변경될 수 있습니다.
+기본값은 레거시 v1 프롬프트입니다. 선택적 v2 상태 우선 프롬프트 및 선택적 접두사 재사용은 [SEMIF_ALGORITHM.md](SEMIF_ALGORITHM.md)에 문서화되어 있습니다. 비교를 위해 별도의 출력 디렉터리를 사용하여 v2의 경우 `--prompt-layout state-first`를 전달한 다음 `--execution-mode fresh`(기본값) 또는 `--execution-mode prefix-reuse`를 Rust 실행기에 전달합니다. 보고서는 요청된 모드, 논리적 입력 토큰, 재사용된 접두사 토큰 및 실제 평가된 토큰을 기록합니다. 동일한 프롬프트 버전, 모델, 장치 및 배치 설정을 비교합니다. 프롬프트를 변경하면 캐시 재사용과 관계없이 정답률이 변경될 수 있습니다.
 
 `tests/fixtures/decision_benchmark.json`의 영어 픽스처는 두 가지 도메인을 다룹니다.
 
@@ -89,7 +89,7 @@ target/release/l2s1-tools benchmark-models \
 
 ```sh
 cargo test --locked --offline --test benchmark
-python3 -m unittest discover -s scripts -p 'test_benchmark_models.py'
+cargo test --locked --offline -p l2s1-tools
 ```
 
 이는 동점 및 완전 판단 보류 출력을 포함하여 픽스처 레이블 및 측정 단위 분모를 검증하고 매니페스트 검증 및 오류 보존 보고서를 제공합니다. 그들은 실제 추론 정확성을 확립하지 않습니다.
@@ -106,4 +106,4 @@ SKID_BENCH_OUTPUT=results/benchmark/single-model.json \
   native::model_decision_benchmark -- --exact --ignored --nocapture
 ```
 
-직접 실행에서는 `SKID_CONTEXT`, `SKID_BATCH`, `SKID_THREADS`, `SKID_MIN_TOP_PROBABILITY` 및 `SKID_MIN_CANDIDATE_MASS`를 허용합니다. Python 실행기는 체크포인트 해시와 비교 테이블을 추가합니다. 이전 `tests/performance.rs`는 단일 창고 예의 반복 측정에 계속 사용할 수 있습니다.
+직접 실행에서는 `SKID_CONTEXT`, `SKID_BATCH`, `SKID_THREADS`, `SKID_MIN_TOP_PROBABILITY` 및 `SKID_MIN_CANDIDATE_MASS`를 허용합니다. Rust 실행기는 체크포인트 해시와 비교 테이블을 추가합니다. 이전 `tests/performance.rs`는 단일 창고 예의 반복 측정에 계속 사용할 수 있습니다.

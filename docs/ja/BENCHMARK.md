@@ -7,7 +7,7 @@
 
 `decision-rules-v1` ベンチマークは、**12 リクエスト上の既存の GGUF チェックポイントと、36 ラベル付き判断** を比較します。ルールに従っている正確性、判断保留、繰り返し出力の一貫性、推論レイテンシーを測定します。モデルのダウンロードや配布は行いません。
 
-デフォルトはレガシー v1 プロンプトです。オプションの v2 状態優先プロンプトとオプションのプレフィックスの再利用については、[SEMIF_ALGORITHM.md](SEMIF_ALGORITHM.md) に記載されています。比較用に別の出力ディレクトリを使用して、v2 の `--prompt-layout state-first` を渡し、次に `--execution-mode fresh` (デフォルト) または `--execution-mode prefix-reuse` を Python ランナーに渡します。レポートには、要求されたモード、論理入力トークン、再利用されたプレフィックス トークン、および実際に評価されたトークンが記録されます。同じプロンプトのバージョン、モデル、デバイス、およびバッチ設定を比較します。プロンプトを変更すると、キャッシュの再利用とは関係なく、正解率 が変更される可能性があります。
+デフォルトはレガシー v1 プロンプトです。オプションの v2 状態優先プロンプトとオプションのプレフィックスの再利用については、[SEMIF_ALGORITHM.md](SEMIF_ALGORITHM.md) に記載されています。比較用に別の出力ディレクトリを使用して、v2 の `--prompt-layout state-first` を渡し、次に `--execution-mode fresh` (デフォルト) または `--execution-mode prefix-reuse` を Rust ランナーに渡します。レポートには、要求されたモード、論理入力トークン、再利用されたプレフィックス トークン、および実際に評価されたトークンが記録されます。同じプロンプトのバージョン、モデル、デバイス、およびバッチ設定を比較します。プロンプトを変更すると、キャッシュの再利用とは関係なく、正解率 が変更される可能性があります。
 
 `tests/fixtures/decision_benchmark.json` の英語の フィクスチャー は、2 つのドメインをカバーしています。
 
@@ -89,7 +89,7 @@ target/release/l2s1-tools benchmark-models \
 
 ```sh
 cargo test --locked --offline --test benchmark
-python3 -m unittest discover -s scripts -p 'test_benchmark_models.py'
+cargo test --locked --offline -p l2s1-tools
 ```
 
 これらは、フィクスチャー ラベルとメトリック分母を検証します。これには、同点と全禁止出力に加えて、マニフェスト検証と失敗保存レポートが含まれます。それらは実際の推論の正しさを証明するものではありません。
@@ -106,4 +106,4 @@ SKID_BENCH_OUTPUT=results/benchmark/single-model.json \
   native::model_decision_benchmark -- --exact --ignored --nocapture
 ```
 
-直接実行では、`SKID_CONTEXT`、`SKID_BATCH`、`SKID_THREADS`、`SKID_MIN_TOP_PROBABILITY`、および `SKID_MIN_CANDIDATE_MASS` を受け入れます。 Python ランナーは、チェックポイント ハッシュと比較テーブルを追加します。以前の `tests/performance.rs` は、単一の倉庫の例を繰り返し測定するために引き続き使用できます。
+直接実行では、`SKID_CONTEXT`、`SKID_BATCH`、`SKID_THREADS`、`SKID_MIN_TOP_PROBABILITY`、および `SKID_MIN_CANDIDATE_MASS` を受け入れます。 Rust ランナーは、チェックポイント ハッシュと比較テーブルを追加します。以前の `tests/performance.rs` は、単一の倉庫の例を繰り返し測定するために引き続き使用できます。
