@@ -160,6 +160,20 @@ HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 �
 
 [`@l2s1/node`](typescript/README.md)는 현재 OS·CPU에 맞는 사전 빌드 Rust 런타임을 선택하며, 타입이 있는 `load()`, `decide()`, `capabilities()`, `close()`를 제공합니다. 빌드 워크플로가 만드는 래퍼·런타임 tarball을 설치합니다. npm에는 아직 배포하지 않았으며 GGUF 가중치는 별도로 준비합니다. 같은 애플리케이션 API에서 `connect()`는 HTTP 서버를, `fromBackend()`는 사용자 정의 백엔드를 사용합니다.
 
+Node.js 24 이상과 Bash 또는 Zsh에서 저장소 루트를 기준으로 실행합니다. 로컬 CPU 런타임과 TypeScript 패키지를 빌드하고, 예제의 타입을 검사한 뒤 [창고 분류 예제](typescript/examples/warehouse.ts)를 실행합니다. 모델 경로는 준비한 GGUF 파일의 절대 경로로 바꾸세요. `npm pack`은 `typescript/l2s1-node-0.1.0.tgz`를 생성합니다.
+
+```sh
+cargo build --release --locked --features llama --bin l2s1
+cd typescript
+npm ci
+npm run build
+npm run check
+L2S1_BINARY=../target/release/l2s1 \
+  node examples/warehouse.ts /absolute/path/to/chat-model.gguf
+npm pack
+cd ..
+```
+
 ```ts
 import { L2S1 } from '@l2s1/node';
 

@@ -160,6 +160,20 @@ HTTP image requests use named `media` and per-decision `media_ids`. Local backen
 
 The [`@l2s1/node` package](typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install the wrapper and runtime tarballs from the build workflow; they have not been published to npm. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
 
+With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `typescript/l2s1-node-0.1.0.tgz`.
+
+```sh
+cargo build --release --locked --features llama --bin l2s1
+cd typescript
+npm ci
+npm run build
+npm run check
+L2S1_BINARY=../target/release/l2s1 \
+  node examples/warehouse.ts /absolute/path/to/chat-model.gguf
+npm pack
+cd ..
+```
+
 ```ts
 import { L2S1 } from '@l2s1/node';
 
