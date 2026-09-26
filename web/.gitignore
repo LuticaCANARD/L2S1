@@ -4,3 +4,4 @@ build/
 static/docs/
 test-results/
 playwright-report/
+static/benchmarks/

@@ -1,5 +1,9 @@
 # License
 
+[English](en/LICENSING.md) · [한국어](ko/LICENSING.md) · [日本語](ja/LICENSING.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 L2S1 source code is licensed under the [MIT License](../LICENSE), as declared in `Cargo.toml`.
 
 [THIRD_PARTY_LICENSES.txt](../THIRD_PARTY_LICENSES.txt) contains the dependency license texts and attribution notices. Preserve the applicable notices when distributing those components.

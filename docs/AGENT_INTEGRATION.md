@@ -1,5 +1,9 @@
 # AI agent integration
 
+[English](en/AGENT_INTEGRATION.md) · [한국어](ko/AGENT_INTEGRATION.md) · [日本語](ja/AGENT_INTEGRATION.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 L2S1 includes a portable [skill](../skills/l2s1/SKILL.md) and a stdio MCP adapter.
 The skill teaches agents to design requests, choose Rust/CLI/HTTP integration,
 validate the actual model, and preserve abstention and evidence. MCP exposes

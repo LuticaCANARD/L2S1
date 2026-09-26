@@ -1,59 +1,23 @@
-# Documentation
+# Documentation / 문서 / ドキュメント
 
-[English introduction](../README.md) · [한국어 소개](../README.ko.md)
+| Language / 언어 / 言語 | Introduction / 소개 / 紹介 | Index / 색인 / 索引 |
+| --- | --- | --- |
+| English | [README](../README.md) | [Documentation index](en/README.md) |
+| 한국어 | [README](../README.ko.md) | [문서 색인](ko/README.md) |
+| 日本語 | [README](../README.ja.md) | [ドキュメント索引](ja/README.md) |
 
-Start with the root README to build L2S1 and run a first decision. This directory contains the detailed English guides, execution contracts, and evaluation methods.
+```text
+docs/
+├── README.md           # Language directory
+├── translations.json  # Public document inventory
+├── en/                # English index and complete bodies
+├── ko/                # Korean index and complete bodies
+├── ja/                # Japanese index and complete bodies
+└── *.md               # Existing document paths retained for compatibility
+```
 
-## Usage and integration
+Each language directory contains an index and complete bodies for all public guides, package documentation, benchmark reports, and skill references. Every document links to the same document in all three languages and to all three indexes. Guides use the original filename; package, benchmark, and skill documents retain their source hierarchy inside each language directory. Original heading anchors are preserved across translations. Existing document paths remain available for repository links, MCP resources, and published references. Keep all three bodies aligned when updating a document; `translations.json` records their source paths and translation revisions.
 
-| Document | Contents |
-| --- | --- |
-| [Guide](GUIDE.md) | Build requirements, decision schema, scores, CLI, Rust, HTTP, images, and backend setup |
-| [TypeScript library](../typescript/README.md) | Resident Rust model process from Node.js, typed HTTP client, packaging, and verification |
-| [AI agent integration](AGENT_INTEGRATION.md) | Portable skill, stdio MCP, request validation, documentation resources, and resident inference |
-| [Model interchangeability](MODEL_INTERCHANGEABILITY.md) | Model identity, request preflight, calibration, diagnostics, worker ownership, and memory controls |
-| [Verification](VERIFICATION.md) | Build and model-dependent validation commands |
-| [Licensing](LICENSING.md) | Source, dependency, and model license boundaries |
+각 언어 디렉토리는 모든 공개 가이드·패키지 문서·벤치마크 보고서·스킬 참조의 색인과 전체 본문을 제공합니다. 각 문서는 같은 문서의 세 언어판과 세 언어 색인에 연결됩니다. 가이드는 원래 파일명, 패키지·벤치마크·스킬 문서는 원래 하위 디렉토리 구성을 유지합니다. 번역에도 원문 제목 앵커를 유지합니다. 기존 문서 경로는 저장소·MCP·외부 참조와의 호환성을 위해 남깁니다. 문서 갱신 시 세 본문을 함께 맞추고, `translations.json`에서 원본 경로와 번역 기준 리비전을 확인하세요.
 
-## Execution and specialization
-
-| Document | Contents |
-| --- | --- |
-| [Parallel execution](PARALLEL_EXECUTION.md) | Supported text/image batching, dynamic context, projector reuse, and vision throughput profile |
-| [Prefix algorithm](SEMIF_ALGORITHM.md) | Prefix preparation and reuse |
-| [Decision fine-tuning](DECISION_FINETUNE.md) | LoRA workflow and its recorded evaluation |
-| [Output heads](OUTPUT_HEAD.md) | Task-specific heads and artifact bindings |
-
-Parallel execution and optimized vision are supported features within their documented model, device, and layout limits. The guides describe measured numerical differences and validation procedures for each execution mode.
-
-## Evaluation methods and results
-
-| Document | Contents |
-| --- | --- |
-| [Recorded model results](MODEL_RESULTS.md) | Checkpoint comparisons, scope, and measurement limits |
-| [Synthetic benchmark](BENCHMARK.md) | Correctness, abstention, consistency, and latency on rule fixtures |
-| [JevBench](JEVBENCH.md) | Public task mapping, upstream scoring, and acceptance metrics |
-| [Intent classification](INTENT_BENCHMARK.md) | Wide answer codes, BANKING77, and MASSIVE Korean |
-| [AG News](KAGGLE_BENCHMARK.md) | Frozen classification protocol |
-| [Laya/Jev tasks and caching](LAYA_BENCHMARK.md) | Task conversion and CPU/GPU cache checks |
-| [Vision benchmark](VISION_BENCHMARK.md) | Direct image inference and timing scope |
-
-Task and hardware reports remain with their artifacts under [`benchmarks/`](../benchmarks):
-
-- [Caltech-101](../benchmarks/caltech101-vision-20260924/README.md)
-- [Cats and dogs](../benchmarks/cats-dogs-vision-20260924/REPORT.md)
-- [TrashNet and vision throughput](../benchmarks/trashnet-vision-20260925/REPORT.md)
-- [Generic GGUF CUDA smoke](../benchmarks/gguf-cuda-20260925/README.md)
-- [Bonsai state restoration](../benchmarks/bonsai-state-restore-20260925/REPORT.md)
-- [Shared-state caching](../benchmarks/shared-state-cache-20260925/REPORT.md)
-- [Build caching](../benchmarks/build-cache-20260925/REPORT.md)
-
-## Source and tooling
-
-- [Architecture and component map](GUIDE.md#architecture)
-- [Native llama.cpp dependency](../crates/l2s1-llama-sys/README.md)
-- [Dataset and report tools](../crates/l2s1-tools/README.md)
-- [Request and integration examples](../examples)
-- [Documentation website](../web/README.md)
-
-Code and dependency notices stay at the repository root in [LICENSE](../LICENSE) and [THIRD_PARTY_LICENSES.txt](../THIRD_PARTY_LICENSES.txt). Model weights are supplied separately and keep their own terms.
+各言語ディレクトリに、全公開ガイド、パッケージ文書、ベンチマークレポート、スキル参照の索引と完全な本文があります。各文書は同じ文書の 3 言語版と各索引にリンクします。ガイドは元のファイル名、パッケージ・ベンチマーク・スキルは元の階層を保持します。翻訳でも元の見出しのアンカーを保持します。既存パスはリポジトリ・MCP・外部参照との互換性のため残します。更新時は 3 本文を揃え、`translations.json` で原本パスと翻訳の基準リビジョンを確認してください。

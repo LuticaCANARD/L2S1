@@ -1,5 +1,9 @@
 # Kaggle Cats and Dogs validation: L2S1 vision HTTP
 
+[English](../../docs/en/benchmarks/cats-dogs-vision-20260924/REPORT.md) · [한국어](../../docs/ko/benchmarks/cats-dogs-vision-20260924/REPORT.md) · [日本語](../../docs/ja/benchmarks/cats-dogs-vision-20260924/REPORT.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 Source: https://www.kaggle.com/datasets/marquis03/cats-and-dogs
 
 - Source archive SHA-256: `47ac0f845f65b5f2b9cb8a184d9d17d4345f8bd77bf1ed63e79b426d90c3b99b`

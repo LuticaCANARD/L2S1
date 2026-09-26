@@ -1,5 +1,9 @@
 # State-first decisions and request-local prefix reuse
 
+[English](en/SEMIF_ALGORITHM.md) · [한국어](ko/SEMIF_ALGORITHM.md) · [日本語](ja/SEMIF_ALGORITHM.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 The prefix-reuse mode applies SemIf's evidence-first prompt and serial prefix-cache ideas to the existing Rust/libllama decision backend. The scoring contract remains single-token conditional softmax with full-vocabulary candidate mass, typed results, and explicit abstention.
 
 ## Reference and scope

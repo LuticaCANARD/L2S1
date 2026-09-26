@@ -1,0 +1,399 @@
+{
+  "languages": [
+    "en",
+    "ko",
+    "ja"
+  ],
+  "documents": [
+    {
+      "source": "docs/AGENT_INTEGRATION.md",
+      "path": "AGENT_INTEGRATION.md",
+      "source_sha256": "425f8cc6163e25ff2ca8fc0d36b9061c07e0d22469f547043f8699cc79f620d7",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/BENCHMARK.md",
+      "path": "BENCHMARK.md",
+      "source_sha256": "d20a695d9029ec675821b8b2e603eb8cb8277b95e4c11a171003c1e4cd599d3b",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/DECISION_FINETUNE.md",
+      "path": "DECISION_FINETUNE.md",
+      "source_sha256": "d013337304251491c8a86594281d64ad8eae562ebb6682099434faa052b6c06f",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/GUIDE.md",
+      "path": "GUIDE.md",
+      "source_sha256": "fbce0281d61d7ca690aa7df6b69b2c330ccb11993049e13c7931733f844adc25",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/IMAGE_DEMO.md",
+      "path": "IMAGE_DEMO.md",
+      "source_sha256": "e5e31d20af89a60b1d161a5a788657f56a003d79bf5b81771590bb4bdea78835",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/INTENT_BENCHMARK.md",
+      "path": "INTENT_BENCHMARK.md",
+      "source_sha256": "ae158b92e99948e3c627ba56ad8da09e3437f9d157e4aab887a8bd6b94c4771c",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/JEVBENCH.md",
+      "path": "JEVBENCH.md",
+      "source_sha256": "45d7905d4d3b485870b3963299088ba1051b0029e8c016c8c1d03c19beaf6368",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/KAGGLE_BENCHMARK.md",
+      "path": "KAGGLE_BENCHMARK.md",
+      "source_sha256": "501b3c6c99164f7105630669574914a7d75d5a63bc17d69fd4493823122a3852",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/LAYA_BENCHMARK.md",
+      "path": "LAYA_BENCHMARK.md",
+      "source_sha256": "d2c3bf787146ca711b57e18b25648ad3a25c31061596d8c61e8da6f6d9f2e315",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/LICENSING.md",
+      "path": "LICENSING.md",
+      "source_sha256": "ccc1d313424bfaa2f9deacf8f63288575f9f93f1bb723b9cb27c559e74c1500a",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/MODEL_INTERCHANGEABILITY.md",
+      "path": "MODEL_INTERCHANGEABILITY.md",
+      "source_sha256": "c528f6676007d9d95b134bcff58e2346d1e1490b11af0d603f6b71f2db610ac5",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/MODEL_RESULTS.md",
+      "path": "MODEL_RESULTS.md",
+      "source_sha256": "a0fcc92d5b1c70bfe57aec5e00946d9664982c5c854ca240c9954bff49178f87",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/OLLAYA_COMPARISON.md",
+      "path": "OLLAYA_COMPARISON.md",
+      "source_sha256": "4f9e15287100de7b764fdb8faa590f37bfee530a28c075992f406977be935c66",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/OUTPUT_HEAD.md",
+      "path": "OUTPUT_HEAD.md",
+      "source_sha256": "0954eda21b6956f7dbe54c089679e1f376543d3a29e61dea41533e3a717cfecb",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/PAGES_DEPLOYMENT.md",
+      "path": "PAGES_DEPLOYMENT.md",
+      "source_sha256": "853ce2947f88917b8a78425d384294a5bcd626c1168c29d2c382736cf5aae760",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/PARALLEL_EXECUTION.md",
+      "path": "PARALLEL_EXECUTION.md",
+      "source_sha256": "5e58666e48c6090bd6119fed88d2e2c86126ee80af7492140b590bc937fd0115",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/REASONING.md",
+      "path": "REASONING.md",
+      "source_sha256": "9df6dc28b552620e948f2f302a09829fbaa02dea55b1667a33e5448ecdfebab6",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/SEMIF_ALGORITHM.md",
+      "path": "SEMIF_ALGORITHM.md",
+      "source_sha256": "0c87591e2dc8c174e4688f011565ae4d8e34d83c1e46fc0a344d108570aa7122",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/TYPED_DECISIONS_BENCHMARK.md",
+      "path": "TYPED_DECISIONS_BENCHMARK.md",
+      "source_sha256": "b5de2e8e400867149378822a3dfe57e9d08e22227d52f8d80411bf7063c04538",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/VERIFICATION.md",
+      "path": "VERIFICATION.md",
+      "source_sha256": "271c81d91cb83af8701643edbec1af545a337210de63eaa4544a04aa3d9a8cba",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/VISION_BENCHMARK.md",
+      "path": "VISION_BENCHMARK.md",
+      "source_sha256": "39ab86f16b5436c4ce1b50c0e1d4238571ef9691cbff27f5774aba550f51205c",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/WEBGPU_DEMO.md",
+      "path": "WEBGPU_DEMO.md",
+      "source_sha256": "81df341463d6201a35506bfc15d58863c37df1df2cb352b63a15429d9dc9efe4",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "benchmarks/bonsai-state-restore-20260925/REPORT.md",
+      "path": "benchmarks/bonsai-state-restore-20260925/REPORT.md",
+      "source_sha256": "7058004a34c2ef2982af994e5509720c3872234295f8c93af6da69e7514966c7",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "benchmarks/build-cache-20260925/REPORT.md",
+      "path": "benchmarks/build-cache-20260925/REPORT.md",
+      "source_sha256": "2bde966ea19f152aec73f165f875f27b975af693c127e86102d1d6df1462e923",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "benchmarks/caltech101-vision-20260924/README.md",
+      "path": "benchmarks/caltech101-vision-20260924/README.md",
+      "source_sha256": "246cbabb49c5c6b7ae9ae2ae36508b608ef99516527123f9b7ac830d293365c2",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "benchmarks/cats-dogs-vision-20260924/REPORT.md",
+      "path": "benchmarks/cats-dogs-vision-20260924/REPORT.md",
+      "source_sha256": "4122c96697bc9ee7969b87d3a464e76fafbf5b280ca3e646f55b9c601b91f789",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "benchmarks/gguf-cuda-20260925/README.md",
+      "path": "benchmarks/gguf-cuda-20260925/README.md",
+      "source_sha256": "fa85d938e4b9a344337cb702d63ea3bcc5b1e42ee029eddd595599521ec0e6ad",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "benchmarks/shared-state-cache-20260925/REPORT.md",
+      "path": "benchmarks/shared-state-cache-20260925/REPORT.md",
+      "source_sha256": "d98d339b98830815e234d234a9cfcca5248d5462ecb3a4bc0386280e5970d1a3",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "benchmarks/trashnet-vision-20260925/REPORT.md",
+      "path": "benchmarks/trashnet-vision-20260925/REPORT.md",
+      "source_sha256": "4c92ac87c185802e9fd21ad3daf7452c909c46f1a59765e670dbdf2a3e0b5b82",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "benchmarks/typed-decisions-20260926/README.md",
+      "path": "benchmarks/typed-decisions-20260926/README.md",
+      "source_sha256": "7305f1d6d684a68ec7b97a1c95444d05613c8b9dd131bd4c0ddafab66821c0d9",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "typescript/README.md",
+      "path": "typescript/README.md",
+      "source_sha256": "d3bd09cf069a88cb2051124c1fc573bea46ab81cd06fff0749eb332fa2e4d2cb",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "crates/l2s1-llama-sys/README.md",
+      "path": "crates/l2s1-llama-sys/README.md",
+      "source_sha256": "4c7c93acbc6ba0c498fef157e26f4f1c4a422a2579c4eab97d5b96c8997d6117",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "crates/l2s1-tools/README.md",
+      "path": "crates/l2s1-tools/README.md",
+      "source_sha256": "fcba92090ef9c28105a104bf8e456a610a8b47791a34b64992e48e3bfd55e8c8",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "web/README.md",
+      "path": "web/README.md",
+      "source_sha256": "155e20caa4e888d6176c39686d91a325990e301bc1e446bbd8c2c24ffc1fae91",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "crates/l2s1-tools/NOTICE.md",
+      "path": "crates/l2s1-tools/NOTICE.md",
+      "source_sha256": "8c1e00447527f9d1ca49c8770d2cf4c98a99fcd65d900bf8ccd50e9f63cf9dd6",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "typescript/PUBLISHING.md",
+      "path": "typescript/PUBLISHING.md",
+      "source_sha256": "34c6776f7324053f423f27158f1120815b86bead525fc9327702bc9b2720764e",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "skills/l2s1/SKILL.md",
+      "path": "skills/l2s1/SKILL.md",
+      "source_sha256": "b87385b3c4a32fe315c73b06d4b7f3d62f40c3e68601e43a0d7c79b9edaeac50",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "skills/l2s1/references/decisions.md",
+      "path": "skills/l2s1/references/decisions.md",
+      "source_sha256": "101b340c377366c1bb33c56dbbef834487da9b34448f664991d0dbd8940679f0",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "skills/l2s1/references/interfaces.md",
+      "path": "skills/l2s1/references/interfaces.md",
+      "source_sha256": "425b3163e2cb7e328420f7c83d935b65fecbd256495488434801437d35b4b295",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    }
+  ]
+}

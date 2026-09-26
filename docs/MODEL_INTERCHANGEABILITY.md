@@ -1,5 +1,9 @@
 # Model interchangeability in L2S1
 
+[English](en/MODEL_INTERCHANGEABILITY.md) · [한국어](ko/MODEL_INTERCHANGEABILITY.md) · [日本語](ja/MODEL_INTERCHANGEABILITY.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 L2S1 keeps the application decision contract while replacing a compatible local GGUF model. Identity and preflight explain compatibility; quality and threshold suitability still require a labeled workload.
 
 ## Inspect, validate, run

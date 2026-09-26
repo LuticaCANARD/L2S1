@@ -2,7 +2,7 @@
 
 **ローカル GGUF モデルのスコアを、型付きの判断結果に変換します。**
 
-[English](README.md) · [한국어](README.ko.md) · 日本語 · [ドキュメント](docs/README.md) · [モデルの測定結果](docs/MODEL_RESULTS.md)
+[English](README.md) · [한국어](README.ko.md) · 日本語 · [ドキュメント](docs/ja/README.md) · [モデルの測定結果](docs/ja/MODEL_RESULTS.md)
 
 L2S1 は、ローカルのチャットモデルで二値・選択・順序付きの判断を行う Rust ライブラリと CLI です。JSON 形式の状態、質問、候補ごとの判断基準を渡すと、型付きの値とモデルのスコアを返します。採用ポリシーを満たさない場合は、判断を保留し、その理由を明示します。
 
@@ -60,7 +60,7 @@ CLI の完全な応答には、バックエンド情報、ポリシー、候補�
 - **ローカルモデルのスコアを直接使用。** モデルのアシスタント応答の開始位置でスコアを読み取ります。候補が多く、回答コードが複数トークンに分かれる場合は、コード全体の尤度を計算します。
 - **明示的な判断保留。** 選択を保留してもスコアを保持し、その理由を返します。デフォルトのポリシーでは、候補間の相対確率と、全語彙における候補の確率質量の両方を確認します。
 - **テキストと画像。** 対応するビジョンモデルと、それに適合する `mmproj` GGUF を使って静止画像を判断できます。
-- **Rust、CLI、HTTP。** アプリケーション内でバックエンドを常駐させる、ファイルや標準入力から JSON を渡す、バージョン付きの判断 API を提供するといった方法を選べます。
+- **Rust、TypeScript、CLI、HTTP。** アプリケーション内でバックエンドを常駐させる、[TypeScript パッケージ](docs/ja/typescript/README.md)を Node.js から使う、ファイルや標準入力から JSON を渡す、バージョン付きの判断 API を提供するといった方法を選べます。
 - **実行内容の確認。** モデルの識別情報、リクエストの事前検証、診断情報を確認できます。オプションのキャッシュ、状態復元、並列実行、LoRA、タスク別の校正には、それぞれ明示された利用条件があります。
 
 ## 判断の型とスコア
@@ -80,7 +80,7 @@ CLI の完全な応答には、バックエンド情報、ポリシー、候補�
 
 デフォルトのポリシーでは、最上位候補の確率が **0.8 以上**、候補の確率質量が **0.05 以上**で、最上位候補に同点がないことを要求します。条件を満たさない場合、選択値は `null` になります。これらはモデルのスコアであり、正解する確率として校正された値ではありません。オプションの校正は、特定のモデル、設定、タスクに紐付きます。
 
-数式、回答コード、検証ルールは[判断の仕様](docs/GUIDE.md#the-decision-contract)を参照してください。
+数式、回答コード、検証ルールは[判断の仕様](docs/ja/GUIDE.md#the-decision-contract)を参照してください。
 
 ## バックエンドとハードウェア
 
@@ -106,9 +106,9 @@ cargo build --release --locked --features llama-metal --bin l2s1
   --device metal --input examples/warehouse.json
 ```
 
-デフォルトは CPU です。GPU を明示的に指定する場合、その GPU が利用可能である必要があります。初回ビルドではネイティブのソースを取得します。オフラインビルドでは `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp` を設定できます。ネイティブライブラリ、配布パッケージ、CUDA アーキテクチャごとのビルドについては[ビルドガイド](docs/GUIDE.md#build)を参照してください。
+デフォルトは CPU です。GPU を明示的に指定する場合、その GPU が利用可能である必要があります。初回ビルドではネイティブのソースを取得します。オフラインビルドでは `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp` を設定できます。ネイティブライブラリ、配布パッケージ、CUDA アーキテクチャごとのビルドについては[ビルドガイド](docs/ja/GUIDE.md#build)を参照してください。
 
-[wgpu](docs/GUIDE.md#optional-wgpu-backend) には専用の `l2s1-wgpu` 実行ファイルを使います。[OpenRouter](docs/GUIDE.md#openrouter-adapter) には `l2s1-openrouter` を使い、`OPENROUTER_API_KEY` を設定します。OpenRouter の応答は共通の型付き HTTP エンベロープを使い、根拠は `selection_only` です。ローカルの確率ポリシーは適用されません。
+[wgpu](docs/ja/GUIDE.md#optional-wgpu-backend) には専用の `l2s1-wgpu` 実行ファイルを使います。[OpenRouter](docs/ja/GUIDE.md#openrouter-adapter) には `l2s1-openrouter` を使い、`OPENROUTER_API_KEY` を設定します。OpenRouter の応答は共通の型付き HTTP エンベロープを使い、根拠は `selection_only` です。ローカルの確率ポリシーは適用されません。
 
 ## モデルの確認と実行
 
@@ -125,7 +125,7 @@ cargo build --release --locked --features llama-metal --bin l2s1
   --input examples/warehouse.json --diagnostics
 ```
 
-`--input -` は標準入力を読み取ります。結果は標準出力へ、ネイティブのログは標準エラー出力へ送られます。設定されたコンテキストを超える入力は、切り詰めずに拒否します。計算設定と構造化されたエラーについては[確認と診断](docs/GUIDE.md#inspect-validate-and-run)を参照してください。
+`--input -` は標準入力を読み取ります。結果は標準出力へ、ネイティブのログは標準エラー出力へ送られます。設定されたコンテキストを超える入力は、切り詰めずに拒否します。計算設定と構造化されたエラーについては[確認と診断](docs/ja/GUIDE.md#inspect-validate-and-run)を参照してください。
 
 ## HTTP と画像入力
 
@@ -154,11 +154,11 @@ curl -sS -H 'Content-Type: application/json' \
   --input examples/warehouse.json
 ```
 
-HTTP の画像リクエストでは、名前付きの `media` と判断ごとの `media_ids` を使います。ローカルバックエンドは、判断ごとに 1 枚の画像を受け付けます。ペイロード、制限、バックエンドごとの動作については[画像と HTTP の仕様](docs/GUIDE.md#direct-image-input-and-http-api)を参照してください。
+HTTP の画像リクエストでは、名前付きの `media` と判断ごとの `media_ids` を使います。ローカルバックエンドは、判断ごとに 1 枚の画像を受け付けます。ペイロード、制限、バックエンドごとの動作については[画像と HTTP の仕様](docs/ja/GUIDE.md#direct-image-input-and-http-api)を参照してください。
 
 ## TypeScript から使う
 
-[`@l2s1/node` パッケージ](typescript/README.md)は、現在の OS とアーキテクチャに対応するビルド済みの Rust ランタイムを選択し、型付きの `load()`、`decide()`、`capabilities()`、`close()` を提供します。ビルドワークフローで作成されたラッパーとランタイムの tarball をインストールしてください。npm にはまだ公開されていません。GGUF の重みは別途用意します。同じアプリケーション API で、`connect()` は HTTP サーバーを使い、`fromBackend()` はカスタムバックエンドを受け付けます。
+[`@l2s1/node` パッケージ](docs/ja/typescript/README.md)は、現在の OS とアーキテクチャに対応するビルド済みの Rust ランタイムを選択し、型付きの `load()`、`decide()`、`capabilities()`、`close()` を提供します。ビルドワークフローで作成されたラッパーとランタイムの tarball をインストールしてください。npm にはまだ公開されていません。GGUF の重みは別途用意します。同じアプリケーション API で、`connect()` は HTTP サーバーを使い、`fromBackend()` はカスタムバックエンドを受け付けます。
 
 Node.js 24 以上と Bash または Zsh を使い、リポジトリのルートから次のコマンドを実行してください。ローカル CPU ランタイムと TypeScript パッケージをビルドし、例の型を検査してから[倉庫の分類例](typescript/examples/warehouse.ts)を実行します。モデルのパスは、用意した GGUF ファイルの絶対パスに置き換えてください。`npm pack` は `typescript/l2s1-node-0.1.0.tgz` を生成します。
 
@@ -190,7 +190,7 @@ try {
 } finally { await engine.close(); }
 ```
 
-既存のサーバーやブラウザーアプリケーションから使う場合は、`@l2s1/node/http` から `L2S1Client` をインポートします。インストール、画像、推論、エラー、移植性については[パッケージガイド](typescript/README.md)を参照してください。
+既存のサーバーやブラウザーアプリケーションから使う場合は、`@l2s1/node/http` から `L2S1Client` をインポートします。インストール、画像、推論、エラー、移植性については[パッケージガイド](docs/ja/typescript/README.md)を参照してください。
 
 ## Rust から使う
 
@@ -276,7 +276,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-依存関係に `serde_json` を追加してください。リクエストは Rust で直接組み立てるため、入力ファイルは不要です。モデル不要の[実行可能な例](examples/warehouse.rs)でも同じリクエストを組み立てて検証できます。`cargo run --locked --example warehouse` で実行してください。専用スレッドでバックエンドを所有し、受け付けるリクエスト数を制限する場合は `BackendWorker` を使います。Metal ではプロセス終了前にバックエンドを解放してください。ワーカーを使う場合は `close()` を呼び出し、所有スレッドの終了を待ちます。ライフサイクルとネイティブリンクの詳細は [Rust 統合](docs/GUIDE.md#rust-integration)を参照してください。
+依存関係に `serde_json` を追加してください。リクエストは Rust で直接組み立てるため、入力ファイルは不要です。モデル不要の[実行可能な例](examples/warehouse.rs)でも同じリクエストを組み立てて検証できます。`cargo run --locked --example warehouse` で実行してください。専用スレッドでバックエンドを所有し、受け付けるリクエスト数を制限する場合は `BackendWorker` を使います。Metal ではプロセス終了前にバックエンドを解放してください。ワーカーを使う場合は `close()` を呼び出し、所有スレッドの終了を待ちます。ライフサイクルとネイティブリンクの詳細は [Rust 統合](docs/ja/GUIDE.md#rust-integration)を参照してください。
 
 ## 実行モードと画像処理のスループット
 
@@ -297,31 +297,34 @@ GPU での画像処理では、`--vision-optimized` により、4 つのデコ�
   --image photo.jpg --input examples/warehouse.json
 ```
 
-並列実行とビジョンプロファイルはサポートされた機能ですが、`fresh` とは数値計算の実行経路が異なるため、スコアや選択結果が変わることがあります。並列モードは再帰型・ハイブリッドモデルを拒否し、画像の並列処理では選択肢数が最大 26 個に制限されます。ビジョンプロファイルには CUDA または Metal と、互換性のある GPU カーネルが必要です。Metal での性能は未検証です。使用するチェックポイントで、タスクの品質と採用率を検証してください。モデル依存のテストは明示的に有効にする必要があり、重みをダウンロードしません。[実行とメモリ](docs/GUIDE.md#execution-and-memory)、[画像処理の最適化](docs/GUIDE.md#optimized-vision)、[検証](docs/VERIFICATION.md)を参照してください。
+並列実行とビジョンプロファイルはサポートされた機能ですが、`fresh` とは数値計算の実行経路が異なるため、スコアや選択結果が変わることがあります。並列モードは再帰型・ハイブリッドモデルを拒否し、画像の並列処理では選択肢数が最大 26 個に制限されます。ビジョンプロファイルには CUDA または Metal と、互換性のある GPU カーネルが必要です。Metal での性能は未検証です。使用するチェックポイントで、タスクの品質と採用率を検証してください。モデル依存のテストは明示的に有効にする必要があり、重みをダウンロードしません。[実行とメモリ](docs/ja/GUIDE.md#execution-and-memory)、[画像処理の最適化](docs/ja/GUIDE.md#optimized-vision)、[検証](docs/ja/VERIFICATION.md)を参照してください。
+
+[画像とテキストのデモを開く](https://n2s1.luticalab.net/demo): 実際に記録されたモデル応答を確認し、対応するローカルのテキスト推論では直接回答または上限付きの思考を選び、採用しきい値や失敗時のメッセージを編集できます。[デモのセットアップ](docs/ja/IMAGE_DEMO.md) · [推論の仕様](docs/ja/REASONING.md)。Pages サイトは記録済みの結果を配信します。新たに推論を実行するには、ドキュメントに記載されたローカルのネイティブサーバーが必要です。
 
 ## 記録済みの測定
 
 | 評価 | 記録された範囲 | レポート |
 | --- | --- | --- |
-| JevBench 公開サブセット | 元の測定表: 22 チェックポイント × 231 項目、5,082 件の有効な予測 | [モデルの測定結果](docs/MODEL_RESULTS.md)、[手法](docs/JEVBENCH.md) |
-| 意図分類 | 英語 77 ラベル、韓国語 60 ラベル。チェックポイントごとに各言語 200 例 | [意図分類ベンチマーク](docs/INTENT_BENCHMARK.md) |
-| 画像の判断 | 静止画像の分類と実行モードの比較 | [画像ベンチマーク](docs/VISION_BENCHMARK.md)、[TrashNet 評価](benchmarks/trashnet-vision-20260925/REPORT.md) |
+| JevBench 公開サブセット | 元の測定表: 22 チェックポイント × 231 項目、5,082 件の有効な予測 | [モデルの測定結果](docs/ja/MODEL_RESULTS.md)、[手法](docs/ja/JEVBENCH.md) |
+| 意図分類 | 英語 77 ラベル、韓国語 60 ラベル。チェックポイントごとに各言語 200 例 | [意図分類ベンチマーク](docs/ja/INTENT_BENCHMARK.md) |
+| typed-decisions | テスト分割全体: モデルごとに 400 ケース / 2,000 判断。採用ポリシー適用前の正解率は Gemma 4 E2B が 54.30%、Qwen3 0.6B が 31.25% | [手順と結果](docs/ja/TYPED_DECISIONS_BENCHMARK.md) |
+| 画像の判断 | 静止画像の分類と実行モードの比較 | [画像ベンチマーク](docs/ja/VISION_BENCHMARK.md)、[TrashNet 評価](docs/ja/benchmarks/trashnet-vision-20260925/REPORT.md) |
 
 これらは、記載されたリビジョン、ハードウェア、設定で行ったローカル実験の記録です。正解率、採用された判断の正解率、採用率は分けて報告してください。一部の生データはローカルに保持され、gitignore の対象です。レポートに保存場所と再現手順を記載しています。JevBench 公開サブセットの結果は、公式の全スイートのスコアや順位ではありません。
 
 ## ドキュメント
 
-AI エージェントには、環境をまたいで利用できる [L2S1 スキル](skills/l2s1/SKILL.md)と、オプションの stdio MCP アダプターを使えます。MCP はドキュメント、型付きリクエストの検証、常駐 HTTP バックエンドによる判断を提供します。[エージェントのセットアップ](docs/AGENT_INTEGRATION.md)を参照してください。
+AI エージェントには、環境をまたいで利用できる [L2S1 スキル](docs/ja/skills/l2s1/SKILL.md)と、オプションの stdio MCP アダプターを使えます。MCP はドキュメント、型付きリクエストの検証、常駐 HTTP バックエンドによる判断を提供します。[エージェントのセットアップ](docs/ja/AGENT_INTEGRATION.md)を参照してください。
 
 | トピック | ドキュメント |
 | --- | --- |
-| ビルド、リクエスト、Rust API、HTTP、ランタイムオプション | [ガイド](docs/GUIDE.md) |
-| モデル識別、事前検証、校正、ワーカーの所有権 | [モデルの交換](docs/MODEL_INTERCHANGEABILITY.md) |
-| モデル別のテストコマンド | [検証](docs/VERIFICATION.md) |
-| プレフィックス再利用と並列実行 | [プレフィックスアルゴリズム](docs/SEMIF_ALGORITHM.md)、[並列実行](docs/PARALLEL_EXECUTION.md) |
-| 学習による特化 | [LoRA 学習](docs/DECISION_FINETUNE.md)、[出力ヘッド](docs/OUTPUT_HEAD.md) |
-| データセットの準備とレポートツール | [l2s1-tools](crates/l2s1-tools/README.md) |
-| 記録されたモデル比較とその限界 | [モデルの測定結果](docs/MODEL_RESULTS.md) |
+| ビルド、リクエスト、Rust API、HTTP、ランタイムオプション | [ガイド](docs/ja/GUIDE.md) |
+| モデル識別、事前検証、校正、ワーカーの所有権 | [モデルの交換](docs/ja/MODEL_INTERCHANGEABILITY.md) |
+| モデル別のテストコマンド | [検証](docs/ja/VERIFICATION.md) |
+| プレフィックス再利用と並列実行 | [プレフィックスアルゴリズム](docs/ja/SEMIF_ALGORITHM.md)、[並列実行](docs/ja/PARALLEL_EXECUTION.md) |
+| 学習による特化 | [LoRA 学習](docs/ja/DECISION_FINETUNE.md)、[出力ヘッド](docs/ja/OUTPUT_HEAD.md) |
+| データセットの準備とレポートツール | [l2s1-tools](docs/ja/crates/l2s1-tools/README.md) |
+| 記録されたモデル比較とその限界 | [モデルの測定結果](docs/ja/MODEL_RESULTS.md) |
 
 ## リポジトリと開発
 
@@ -336,8 +339,8 @@ AI エージェントには、環境をまたいで利用できる [L2S1 スキ�
 | [`docs/`](docs/README.md) | 詳細ガイド、設計ノート、評価レポート |
 | [`web/`](web) | Svelte のドキュメントサイト |
 
-Rust のみで実行できる検証は `cargo test --locked` で実行します。ネイティブおよびモデル別の検証は [VERIFICATION.md](docs/VERIFICATION.md)に記載しています。不具合を報告する際は、実行コマンド、チェックポイントと量子化、ランタイムとデバイス、エラーを添えて [GitHub Issue](https://github.com/LuticaCANARD/L2S1/issues) を作成してください。ドキュメントを更新する際は、英語・韓国語・日本語の README の内容を揃えてください。
+Rust のみで実行できる検証は `cargo test --locked` で実行します。ネイティブおよびモデル別の検証は [VERIFICATION.md](docs/ja/VERIFICATION.md)に記載しています。不具合を報告する際は、実行コマンド、チェックポイントと量子化、ランタイムとデバイス、エラーを添えて [GitHub Issue](https://github.com/LuticaCANARD/L2S1/issues) を作成してください。ドキュメントを更新する際は、英語・韓国語・日本語の README の内容を揃えてください。
 
 ## ライセンス
 
-L2S1 のソースは [MIT ライセンス](LICENSE)です。モデルの重みにはそれぞれ独自のライセンスがあり、同梱されません。ネイティブコンポーネントを配布する際は[第三者のライセンス表記](THIRD_PARTY_LICENSES.txt)を保持してください。[LICENSING.md](docs/LICENSING.md)も参照してください。
+L2S1 のソースは [MIT ライセンス](LICENSE)です。モデルの重みにはそれぞれ独自のライセンスがあり、同梱されません。ネイティブコンポーネントを配布する際は[第三者のライセンス表記](THIRD_PARTY_LICENSES.txt)を保持してください。[LICENSING.md](docs/ja/LICENSING.md)も参照してください。

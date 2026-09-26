@@ -1,5 +1,9 @@
 # Direct vision HTTP benchmark
 
+[English](en/VISION_BENCHMARK.md) · [한국어](ko/VISION_BENCHMARK.md) · [日本語](ja/VISION_BENCHMARK.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 This is a **local synthetic smoke benchmark**, measured on 2026-09-24 on `lucatagpu` (RTX 3060 12 GiB, driver 595.71.05). It compares the CPU and CUDA paths of the same CUDA-enabled L2S1 executable, Gemma 4 E2B Q8_0 GGUF, matching `mmproj`, request schema and host. The model and projector SHA-256 values are recorded in the [raw CPU](../benchmarks/vision-20260924/cpu.json) and [raw CUDA](../benchmarks/vision-20260924/cuda.json) reports. Model weights are not in this repository.
 
 The [runner](../scripts/benchmark_vision_http.py) starts an isolated loopback HTTP server for each device, waits for `/healthz`, sends four excluded warmup requests, then times 30 serial `POST /v1/decisions` requests alternating the repository's red and blue 64×64 PNGs. It prepares JSON/base64 before timing. Each timed interval includes HTTP request/response transfer, image encoding, model inference, scoring and response serialization. A single loaded model handles each run; no parallel clients or batching across requests are measured. Both runs used context 2048, batch 256, four CPU threads and `--model-load-mode read`. The GPU run preceded the CPU run.

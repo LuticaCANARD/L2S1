@@ -1,5 +1,9 @@
 # Kaggle AG News evaluation
 
+[English](en/KAGGLE_BENCHMARK.md) · [한국어](ko/KAGGLE_BENCHMARK.md) · [日本語](ja/KAGGLE_BENCHMARK.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 This evaluates the existing decision engine on natural news articles rather than the synthetic rule fixture. It is a zero-shot classification experiment, not a trained Kaggle competition submission.
 
 ## Data and frozen protocol

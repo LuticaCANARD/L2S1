@@ -1,5 +1,9 @@
 # Verification guide
 
+[English](en/VERIFICATION.md) · [한국어](ko/VERIFICATION.md) · [日本語](ja/VERIFICATION.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 Run checks for the exact checkpoint, runtime and execution configuration you intend to use. Unit tests, native contract tests and labeled task evaluations answer different questions.
 
 ## Build and general checks

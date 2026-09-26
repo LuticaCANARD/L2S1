@@ -1,5 +1,9 @@
 # CUDA architecture build cache check (2026-09-25)
 
+[English](../../docs/en/benchmarks/build-cache-20260925/REPORT.md) · [한국어](../../docs/ko/benchmarks/build-cache-20260925/REPORT.md) · [日本語](../../docs/ja/benchmarks/build-cache-20260925/REPORT.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 ## Setup
 
 On one 4-core Linux host with an RTX 3080, 15 GiB RAM, and 4 GiB swap, build the same `sm_86` release source from one checkout into separate, previously empty Cargo target directories. Use the complete local llama.cpp source cache, `CARGO_BUILD_JOBS=3`, and `CMAKE_BUILD_PARALLEL_LEVEL=3`. The source is merged PR #28 (`f61b6e6`) plus the compiler-cache changes in this PR. The native build uses `ccache` 4.12.3; runs A and B also use `sccache` 0.13.0 for Rust and the C++ bridge. Both tools were unpacked into ignored local build artifacts for this check; they are not repository dependencies.

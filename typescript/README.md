@@ -1,6 +1,8 @@
 # L2S1 for TypeScript
 
-[English](../docs/en/README.md) · [한국어](../docs/ko/README.md) · [日本語](../docs/ja/README.md)
+[English](../docs/en/typescript/README.md) · [한국어](../docs/ko/typescript/README.md) · [日本語](../docs/ja/typescript/README.md)
+
+[English index](../docs/en/README.md) · [한국어 색인](../docs/ko/README.md) · [日本語索引](../docs/ja/README.md)
 
 `@l2s1/node` uses the existing Rust inference engine from Node.js. One model process stays resident across calls. Binary, choice, ordinal, image, policy, reasoning and evidence fields use the Rust HTTP v1 schema. Validation, tokenization, scoring, abstention and GPU execution remain in Rust.
 

@@ -1,0 +1,56 @@
+{
+  "source_commit": "fb3ad4e",
+  "date": "2026-09-26",
+  "scope": "Frozen direct-mode native evaluator before optional thinking mode implementation",
+  "libraries_original_path": "/home/lutica/personal/skid/skid-desion/target/cuda-architectures/sm_86/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/172df53ffa7c6907/lib",
+  "sha256": {
+    "l2s1": "9cc563af81b61b251c7b7cf3d9ad07a045fd5e5ec0ca60d16168ee1030432fed",
+    "evaluate_jsonl": "7fb6e5237188de8161a3025f6b0ce7e16e7b2e3274520a19879e95a115d221ba"
+  },
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3080",
+    "vram_mib": 10240,
+    "driver": "596.21",
+    "cpu": "Intel Core i9-9900K",
+    "os": "Linux under WSL2",
+    "threads": 4
+  },
+  "prepared": {
+    "suite": "typed",
+    "sources": {
+      "suite": "typed",
+      "files": [
+        {
+          "repo": "LocalLLaMA/typed-decisions",
+          "revision": "c76749ec58bd8c3d2ea706b31c333a9059c38f90",
+          "path": "all/test-00000-of-00001.parquet",
+          "local": "test-00000-of-00001.parquet",
+          "url": "https://huggingface.co/datasets/LocalLLaMA/typed-decisions/resolve/c76749ec58bd8c3d2ea706b31c333a9059c38f90/all/test-00000-of-00001.parquet",
+          "sha256": "4f294f218ea1da27f3efef936359389c62ea4d3973a41457732990f1d31b647c"
+        },
+        {
+          "repo": "Luni/laya-jev-benchmark",
+          "revision": "d75081b2a4b2ad772793d6a7f5f5b4fdca00d557",
+          "path": "bench/eval.py",
+          "local": "eval.py",
+          "url": "https://huggingface.co/datasets/Luni/laya-jev-benchmark/resolve/d75081b2a4b2ad772793d6a7f5f5b4fdca00d557/bench/eval.py",
+          "sha256": "da874d9bdfd3ae1793c6a5d9e7def69349afc19e73874a2a0200c8b8eb90346c"
+        }
+      ]
+    },
+    "available_cases": 400,
+    "logical_cases": 400,
+    "repeats": 1,
+    "measured_cases": 400,
+    "decisions": 2000,
+    "limited": false,
+    "files": {
+      "requests.jsonl": "a677142b77f72f4445d79d10213d79e7de564f223553bb3a4c88105a181f7e6d",
+      "cases-with-gold.jsonl": "2bd01c323fd2c6e7c767f8db4119f8121442cc62b9774ddd113702a5607cf906"
+    },
+    "adapter_sha256": "44f59fb153e2767e18cf30ad76b7817c1fa83373618588844c3abd9626358d74",
+    "ordering": "source order, immediate repeats per case",
+    "protocol": "Only id/state/instruction/criteria enter inference. No gold, rationale or workflow metadata. Repeated identical cases measure preparation caching, not a persistent KV or answer cache. Probe grounding outputs also supply overconfidence checks; no second inference for the same check."
+  },
+  "postprocess_scorer_sha256": "f62991bf827344e9fcd23a43828668ee5b1a994d18c9f5dc996cd06d91ac1621"
+}

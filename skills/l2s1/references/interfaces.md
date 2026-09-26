@@ -1,5 +1,9 @@
 # Build and interfaces
 
+[English](../../../docs/en/skills/l2s1/references/interfaces.md) · [한국어](../../../docs/ko/skills/l2s1/references/interfaces.md) · [日本語](../../../docs/ja/skills/l2s1/references/interfaces.md)
+
+[English index](../../../docs/en/README.md) · [한국어 색인](../../../docs/ko/README.md) · [日本語索引](../../../docs/ja/README.md)
+
 Run repository commands from a verified L2S1 checkout. Model paths are supplied
 by the user/application; weights are not bundled. Rust needs edition 2024 support;
 native builds need CMake 3.24+ and C++17. Check CLI `--help` when adapting flags.

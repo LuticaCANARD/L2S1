@@ -1,5 +1,9 @@
 # npm publishing review
 
+[English](../docs/en/typescript/PUBLISHING.md) · [한국어](../docs/ko/typescript/PUBLISHING.md) · [日本語](../docs/ja/typescript/PUBLISHING.md)
+
+[English index](../docs/en/README.md) · [한국어 색인](../docs/ko/README.md) · [日本語索引](../docs/ja/README.md)
+
 The wrapper and platform runtimes can be distributed as public npm packages. The implementation uses ordinary npm tarballs, ESM exports, TypeScript declarations and optional platform dependencies. End users do not need a Rust/C++ compiler. Publication is still conditional on passing the native platform builds and obtaining npm scope/publishing access.
 
 ## Package layout

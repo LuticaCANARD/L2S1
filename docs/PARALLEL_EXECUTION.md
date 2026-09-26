@@ -1,5 +1,9 @@
 # Parallel question execution
 
+[English](en/PARALLEL_EXECUTION.md) · [한국어](ko/PARALLEL_EXECUTION.md) · [日本語](ja/PARALLEL_EXECUTION.md)
+
+[English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)
+
 The supported `parallel` mode evaluates independent questions using separate llama.cpp sequence IDs. It shares the loaded model, computes an exact common prompt prefix once per wave, and puts suffix tokens from multiple questions into each decode batch. It does not start multiple threads that concurrently mutate one llama context.
 
 ```sh

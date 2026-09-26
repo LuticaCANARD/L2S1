@@ -2,7 +2,7 @@
 
 **로컬 GGUF 모델의 점수를 타입이 있는 판단으로 바꿉니다.**
 
-[English](README.md) · 한국어 · [日本語](README.ja.md) · [문서 색인](docs/README.md) · [모델 측정 결과](docs/MODEL_RESULTS.md)
+[English](README.md) · 한국어 · [日本語](README.ja.md) · [문서 색인](docs/ko/README.md) · [모델 측정 결과](docs/ko/MODEL_RESULTS.md)
 
 L2S1은 로컬 채팅 모델로 이진·선택·서열 판단을 수행하는 Rust 라이브러리와 CLI입니다. JSON 상태, 질문, 후보별 판단 기준을 전달하면 타입이 있는 결과와 모델 점수를 반환합니다. 수락 정책을 충족하지 못하면 판단을 보류하고 그 이유를 알려줍니다.
 
@@ -60,7 +60,7 @@ cargo build --release --locked --features llama --bin l2s1
 - **로컬 모델 점수 직접 사용.** 모델의 어시스턴트 응답 경계에서 점수를 읽습니다. 후보가 많아 답변 코드가 여러 토큰으로 나뉘면 전체 코드의 우도를 계산합니다.
 - **명시적인 판단 보류.** 선택을 보류해도 점수를 반환하고 이유를 설명합니다. 기본 정책은 후보 간 상대 확률과 전체 어휘에 대한 후보 확률 질량을 함께 확인합니다.
 - **텍스트와 이미지.** 지원되는 비전 모델과 그에 맞는 `mmproj` GGUF를 사용해 정지 이미지도 판단할 수 있습니다.
-- **Rust, CLI, HTTP.** 모델을 애플리케이션에 상주시켜 사용하거나, 파일·표준 입력으로 JSON을 전달하거나, 버전이 명시된 HTTP API로 제공할 수 있습니다.
+- **Rust, TypeScript, CLI, HTTP.** 모델을 애플리케이션에 상주시켜 사용하거나, [TypeScript 패키지](docs/ko/typescript/README.md)로 Node.js에서 호출하거나, 파일·표준 입력 또는 HTTP API로 요청할 수 있습니다.
 - **실행 정보 확인.** 모델 식별 정보, 요청 사전 검증, 실행 진단을 제공합니다. 캐시, 상태 복원, 병렬 실행, LoRA, 작업별 보정에는 각각 명시된 사용 조건이 있습니다.
 
 ## 판단 타입과 점수
@@ -80,7 +80,7 @@ cargo build --release --locked --features llama --bin l2s1
 
 기본 정책은 최상위 후보 확률 **0.8 이상**, 후보 확률 질량 **0.05 이상**, 최상위 후보 간 동점 없음을 요구합니다. 조건을 충족하지 못하면 선택값은 `null`입니다. 이 수치는 모델 점수이며, 정답일 확률로 보정된 값은 아닙니다. 선택적으로 적용하는 보정은 특정 모델·설정·작업에 연결됩니다.
 
-수식, 답변 코드, 검증 규칙은 [판단 계약](docs/GUIDE.md#the-decision-contract)을 참고하세요.
+수식, 답변 코드, 검증 규칙은 [판단 계약](docs/ko/GUIDE.md#the-decision-contract)을 참고하세요.
 
 ## 백엔드와 하드웨어
 
@@ -106,9 +106,9 @@ cargo build --release --locked --features llama-metal --bin l2s1
   --device metal --input examples/warehouse.json
 ```
 
-기본 장치는 CPU입니다. GPU를 명시적으로 지정했다면 해당 장치가 사용 가능해야 합니다. 첫 빌드에서는 네이티브 소스를 내려받으며, 오프라인 빌드는 `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`로 소스 위치를 지정할 수 있습니다. 네이티브 라이브러리, 배포 패키징, CUDA 아키텍처별 빌드는 [빌드 가이드](docs/GUIDE.md#build)에 설명되어 있습니다.
+기본 장치는 CPU입니다. GPU를 명시적으로 지정했다면 해당 장치가 사용 가능해야 합니다. 첫 빌드에서는 네이티브 소스를 내려받으며, 오프라인 빌드는 `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`로 소스 위치를 지정할 수 있습니다. 네이티브 라이브러리, 배포 패키징, CUDA 아키텍처별 빌드는 [빌드 가이드](docs/ko/GUIDE.md#build)에 설명되어 있습니다.
 
-[wgpu](docs/GUIDE.md#optional-wgpu-backend)는 별도 실행 파일인 `l2s1-wgpu`를 사용합니다. [OpenRouter](docs/GUIDE.md#openrouter-adapter)는 `l2s1-openrouter`와 `OPENROUTER_API_KEY`를 사용합니다. OpenRouter도 공통 타입을 가진 HTTP 응답 구조를 사용하지만, 근거는 `selection_only`이며 로컬 확률 수락 정책을 적용하지 않습니다.
+[wgpu](docs/ko/GUIDE.md#optional-wgpu-backend)는 별도 실행 파일인 `l2s1-wgpu`를 사용합니다. [OpenRouter](docs/ko/GUIDE.md#openrouter-adapter)는 `l2s1-openrouter`와 `OPENROUTER_API_KEY`를 사용합니다. OpenRouter도 공통 타입을 가진 HTTP 응답 구조를 사용하지만, 근거는 `selection_only`이며 로컬 확률 수락 정책을 적용하지 않습니다.
 
 ## 확인과 실행
 
@@ -125,7 +125,7 @@ cargo build --release --locked --features llama-metal --bin l2s1
   --input examples/warehouse.json --diagnostics
 ```
 
-`--input -`는 표준 입력을 읽습니다. 결과는 stdout, 네이티브 로그는 stderr로 출력됩니다. 설정한 컨텍스트를 초과하는 입력은 잘라내지 않고 오류로 처리합니다. 컴퓨팅 설정과 구조화된 실패 정보는 [모델 확인과 진단](docs/GUIDE.md#inspect-validate-and-run)을 참고하세요.
+`--input -`는 표준 입력을 읽습니다. 결과는 stdout, 네이티브 로그는 stderr로 출력됩니다. 설정한 컨텍스트를 초과하는 입력은 잘라내지 않고 오류로 처리합니다. 컴퓨팅 설정과 구조화된 실패 정보는 [모델 확인과 진단](docs/ko/GUIDE.md#inspect-validate-and-run)을 참고하세요.
 
 ## HTTP와 이미지 입력
 
@@ -154,11 +154,11 @@ curl -sS -H 'Content-Type: application/json' \
   --input examples/warehouse.json
 ```
 
-HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 사용합니다. 로컬 백엔드는 질문 하나당 이미지 한 장을 받습니다. 요청 구조, 제한, 백엔드별 동작은 [이미지와 HTTP 계약](docs/GUIDE.md#direct-image-input-and-http-api)에 설명되어 있습니다.
+HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 사용합니다. 로컬 백엔드는 질문 하나당 이미지 한 장을 받습니다. 요청 구조, 제한, 백엔드별 동작은 [이미지와 HTTP 계약](docs/ko/GUIDE.md#direct-image-input-and-http-api)에 설명되어 있습니다.
 
 ## TypeScript에서 사용하기
 
-[`@l2s1/node`](typescript/README.md)는 현재 OS·CPU에 맞는 사전 빌드 Rust 런타임을 선택하며, 타입이 있는 `load()`, `decide()`, `capabilities()`, `close()`를 제공합니다. 빌드 워크플로가 만드는 래퍼·런타임 tarball을 설치합니다. npm에는 아직 배포하지 않았으며 GGUF 가중치는 별도로 준비합니다. 같은 애플리케이션 API에서 `connect()`는 HTTP 서버를, `fromBackend()`는 사용자 정의 백엔드를 사용합니다.
+[`@l2s1/node`](docs/ko/typescript/README.md)는 현재 OS·CPU에 맞는 사전 빌드 Rust 런타임을 선택하며, 타입이 있는 `load()`, `decide()`, `capabilities()`, `close()`를 제공합니다. 빌드 워크플로가 만드는 래퍼·런타임 tarball을 설치합니다. npm에는 아직 배포하지 않았으며 GGUF 가중치는 별도로 준비합니다. 같은 애플리케이션 API에서 `connect()`는 HTTP 서버를, `fromBackend()`는 사용자 정의 백엔드를 사용합니다.
 
 Node.js 24 이상과 Bash 또는 Zsh에서 저장소 루트를 기준으로 실행합니다. 로컬 CPU 런타임과 TypeScript 패키지를 빌드하고, 예제의 타입을 검사한 뒤 [창고 분류 예제](typescript/examples/warehouse.ts)를 실행합니다. 모델 경로는 준비한 GGUF 파일의 절대 경로로 바꾸세요. `npm pack`은 `typescript/l2s1-node-0.1.0.tgz`를 생성합니다.
 
@@ -190,7 +190,7 @@ try {
 } finally { await engine.close(); }
 ```
 
-실행 중인 서버나 브라우저 앱에서는 `@l2s1/node/http`의 `L2S1Client`를 사용합니다. 설치, 이미지, 추론 모드, 오류, 배포 조건은 [패키지 안내](typescript/README.md)를 참고하세요.
+실행 중인 서버나 브라우저 앱에서는 `@l2s1/node/http`의 `L2S1Client`를 사용합니다. 설치, 이미지, 추론 모드, 오류, 배포 조건은 [패키지 안내](docs/ko/typescript/README.md)를 참고하세요.
 
 ## Rust에서 사용하기
 
@@ -276,7 +276,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-`serde_json`을 의존성에 추가합니다. 요청은 Rust 구조체로 직접 작성하므로 입력 파일이 필요하지 않습니다. 같은 요청을 만들고 검증하는 [실행 가능한 예제](examples/warehouse.rs)는 모델 없이 `cargo run --locked --example warehouse`로 실행할 수 있습니다. 전용 스레드에서 백엔드를 소유하고 요청 수를 제한하려면 `BackendWorker`를 사용합니다. Metal에서는 프로세스 종료 전에 백엔드를 해제해야 합니다. worker를 사용한다면 `close()`를 호출하고 소유 스레드의 종료를 기다리세요. 수명 관리와 네이티브 링크 설정은 [Rust 통합 가이드](docs/GUIDE.md#rust-integration)를 참고하세요.
+`serde_json`을 의존성에 추가합니다. 요청은 Rust 구조체로 직접 작성하므로 입력 파일이 필요하지 않습니다. 같은 요청을 만들고 검증하는 [실행 가능한 예제](examples/warehouse.rs)는 모델 없이 `cargo run --locked --example warehouse`로 실행할 수 있습니다. 전용 스레드에서 백엔드를 소유하고 요청 수를 제한하려면 `BackendWorker`를 사용합니다. Metal에서는 프로세스 종료 전에 백엔드를 해제해야 합니다. worker를 사용한다면 `close()`를 호출하고 소유 스레드의 종료를 기다리세요. 수명 관리와 네이티브 링크 설정은 [Rust 통합 가이드](docs/ko/GUIDE.md#rust-integration)를 참고하세요.
 
 ## 실행 모드와 비전 처리량 최적화
 
@@ -297,35 +297,40 @@ GPU 비전 작업에서 `--vision-optimized`를 사용하면 디코더 스트림
   --image photo.jpg --input examples/warehouse.json
 ```
 
-병렬 실행과 비전 프로파일은 정식 지원 기능이며, `fresh`와 다른 수치 계산 경로를 사용하므로 점수와 선택 결과가 달라질 수 있습니다. 병렬 모드는 recurrent/hybrid 모델을 지원하지 않으며, 병렬 비전은 후보 26개 이하를 지원합니다. 비전 프로파일에는 CUDA 또는 Metal과 호환되는 GPU 커널이 필요합니다. Metal 처리 성능은 아직 측정되지 않았습니다. 사용하는 체크포인트에서 작업 품질과 수락 비율을 확인하세요. 실제 모델이 필요한 테스트는 명시적으로 실행해야 하며 가중치를 자동으로 내려받지 않습니다. [실행과 메모리](docs/GUIDE.md#execution-and-memory), [비전 최적화](docs/GUIDE.md#optimized-vision), [검증 안내](docs/VERIFICATION.md)를 참고하세요.
+병렬 실행과 비전 프로파일은 정식 지원 기능이며, `fresh`와 다른 수치 계산 경로를 사용하므로 점수와 선택 결과가 달라질 수 있습니다. 병렬 모드는 recurrent/hybrid 모델을 지원하지 않으며, 병렬 비전은 후보 26개 이하를 지원합니다. 비전 프로파일에는 CUDA 또는 Metal과 호환되는 GPU 커널이 필요합니다. Metal 처리 성능은 아직 측정되지 않았습니다. 사용하는 체크포인트에서 작업 품질과 수락 비율을 확인하세요. 실제 모델이 필요한 테스트는 명시적으로 실행해야 하며 가중치를 자동으로 내려받지 않습니다. [실행과 메모리](docs/ko/GUIDE.md#execution-and-memory), [비전 최적화](docs/ko/GUIDE.md#optimized-vision), [검증 안내](docs/ko/VERIFICATION.md)를 참고하세요.
+
+[이미지·텍스트 데모](https://n2s1.luticalab.net/demo)에서 실제 모델 실행 기록을 확인하고, 로컬 텍스트 추론의 즉시 판단·생각 후 판단 모드와 수락 기준·실패 설명을 지정할 수 있습니다. [데모 실행](docs/ko/IMAGE_DEMO.md) · [추론 계약](docs/ko/REASONING.md). Pages에서는 기록을 제공하며 새 입력 추론에는 안내된 로컬 네이티브 서버가 필요합니다.
+
+[브라우저 WebGPU 데모](https://n2s1.luticalab.net/webgpu)는 Qwen3 0.6B ONNX를 선택적으로 내려받아 내 텍스트를 브라우저에서 직접 판단합니다. 즉시 판단·생각 후 판단, 수락 기준·실패 설명을 지정할 수 있습니다. WebGPU 어댑터가 필요하며 모델 크기는 q4f16 543.4 MiB, q4 876.5 MiB입니다. [실행과 측정 범위](docs/ko/WEBGPU_DEMO.md).
 
 ## 기록된 측정 결과
 
 | 측정 | 기록된 범위 | 보고서 |
 | --- | --- | --- |
-| JevBench 공개 부분집합 | 최초 비교: 체크포인트 22개 × 항목 231개; 유효한 예측 5,082개 | [모델 결과](docs/MODEL_RESULTS.md), [측정 방법](docs/JEVBENCH.md) |
-| 의도 분류 | 영어 레이블 77개와 한국어 레이블 60개; 체크포인트마다 언어별 예제 200개 | [의도 분류 벤치마크](docs/INTENT_BENCHMARK.md) |
-| 비전 판단 | 정지 이미지 분류와 실행 모드 비교 | [비전 벤치마크](docs/VISION_BENCHMARK.md), [TrashNet 연구](benchmarks/trashnet-vision-20260925/REPORT.md) |
+| JevBench 공개 부분집합 | 최초 비교: 체크포인트 22개 × 항목 231개; 유효한 예측 5,082개 | [모델 결과](docs/ko/MODEL_RESULTS.md), [측정 방법](docs/ko/JEVBENCH.md) |
+| 의도 분류 | 영어 레이블 77개와 한국어 레이블 60개; 체크포인트마다 언어별 예제 200개 | [의도 분류 벤치마크](docs/ko/INTENT_BENCHMARK.md) |
+| typed-decisions | 전체 테스트: 모델별 400개 사례·2,000개 판단; Gemma 4 E2B 54.30%, Qwen3 0.6B 31.25% 원시 정확도 | [방법과 결과](docs/ko/TYPED_DECISIONS_BENCHMARK.md) |
+| 비전 판단 | 정지 이미지 분류와 실행 모드 비교 | [비전 벤치마크](docs/ko/VISION_BENCHMARK.md), [TrashNet 연구](docs/ko/benchmarks/trashnet-vision-20260925/REPORT.md) |
 
 명시된 리비전, 하드웨어, 설정에서 수행한 로컬 실험 기록입니다. 전체 정확도, 수락한 판단의 정확도, 수락 비율은 따로 확인해야 합니다. 일부 원시 결과는 로컬에만 보관되어 Git에서 제외되어 있으며, 각 보고서에 위치와 재현 절차가 명시되어 있습니다. JevBench 공개 부분집합의 결과는 공식 전체 평가 점수나 순위가 아닙니다.
 
 ## 문서
 
-AI Agent용 [L2S1 skill](skills/l2s1/SKILL.md)과 stdio MCP 어댑터를 제공합니다.
+AI Agent용 [L2S1 skill](docs/ko/skills/l2s1/SKILL.md)과 stdio MCP 어댑터를 제공합니다.
 MCP에서 문서 조회, 요청 형식 검증, 상주 HTTP 백엔드의 추론을 사용할 수 있습니다.
-설치와 연결 방법은 [에이전트 연동 가이드](docs/AGENT_INTEGRATION.md)를 참고하세요.
+설치와 연결 방법은 [에이전트 연동 가이드](docs/ko/AGENT_INTEGRATION.md)를 참고하세요.
 
 아래 상세 가이드는 영어로 제공됩니다.
 
 | 주제 | 문서 |
 | --- | --- |
-| 빌드, 요청, Rust API, HTTP, 실행 옵션 | [사용 가이드](docs/GUIDE.md) |
-| 모델 식별 정보, 사전 검증, 보정, worker 소유권 | [모델 교체와 계약](docs/MODEL_INTERCHANGEABILITY.md) |
-| 모델별 테스트 명령 | [검증 안내](docs/VERIFICATION.md) |
-| 접두사 재사용과 병렬 실행 | [접두사 알고리즘](docs/SEMIF_ALGORITHM.md), [병렬 실행](docs/PARALLEL_EXECUTION.md) |
-| 학습을 통한 특화 | [LoRA 학습](docs/DECISION_FINETUNE.md), [출력 헤드](docs/OUTPUT_HEAD.md) |
-| 데이터 준비와 보고서 도구 | [l2s1-tools](crates/l2s1-tools/README.md) |
-| 모델 비교 기록과 측정 한계 | [모델 결과](docs/MODEL_RESULTS.md) |
+| 빌드, 요청, Rust API, HTTP, 실행 옵션 | [사용 가이드](docs/ko/GUIDE.md) |
+| 모델 식별 정보, 사전 검증, 보정, worker 소유권 | [모델 교체와 계약](docs/ko/MODEL_INTERCHANGEABILITY.md) |
+| 모델별 테스트 명령 | [검증 안내](docs/ko/VERIFICATION.md) |
+| 접두사 재사용과 병렬 실행 | [접두사 알고리즘](docs/ko/SEMIF_ALGORITHM.md), [병렬 실행](docs/ko/PARALLEL_EXECUTION.md) |
+| 학습을 통한 특화 | [LoRA 학습](docs/ko/DECISION_FINETUNE.md), [출력 헤드](docs/ko/OUTPUT_HEAD.md) |
+| 데이터 준비와 보고서 도구 | [l2s1-tools](docs/ko/crates/l2s1-tools/README.md) |
+| 모델 비교 기록과 측정 한계 | [모델 결과](docs/ko/MODEL_RESULTS.md) |
 
 ## 저장소와 개발
 
@@ -340,8 +345,8 @@ MCP에서 문서 조회, 요청 형식 검증, 상주 HTTP 백엔드의 추론�
 | [`docs/`](docs/README.md) | 상세 가이드, 설계 설명, 평가 보고서 |
 | [`web/`](web) | Svelte 문서 사이트 |
 
-순수 Rust 검증은 `cargo test --locked`로 실행합니다. 네이티브와 모델별 검증은 [VERIFICATION.md](docs/VERIFICATION.md)에 정리되어 있습니다. 버그를 보고할 때는 실행 명령, 체크포인트·양자화, 런타임·장치, 오류 내용을 포함해 [GitHub 이슈](https://github.com/LuticaCANARD/L2S1/issues)를 작성하세요. 문서를 수정할 때는 영어·한국어·일본어 README의 내용을 함께 맞춰주세요.
+순수 Rust 검증은 `cargo test --locked`로 실행합니다. 네이티브와 모델별 검증은 [VERIFICATION.md](docs/ko/VERIFICATION.md)에 정리되어 있습니다. 버그를 보고할 때는 실행 명령, 체크포인트·양자화, 런타임·장치, 오류 내용을 포함해 [GitHub 이슈](https://github.com/LuticaCANARD/L2S1/issues)를 작성하세요. 문서를 수정할 때는 영어·한국어·일본어 README의 내용을 함께 맞춰주세요.
 
 ## 라이선스
 
-L2S1 소스는 [MIT 라이선스](LICENSE)입니다. 모델 가중치는 각자의 라이선스를 따르며 저장소에 포함되지 않습니다. 네이티브 구성 요소를 배포할 때는 [서드파티 고지](THIRD_PARTY_LICENSES.txt)를 유지해야 합니다. 자세한 내용은 [LICENSING.md](docs/LICENSING.md)를 참고하세요.
+L2S1 소스는 [MIT 라이선스](LICENSE)입니다. 모델 가중치는 각자의 라이선스를 따르며 저장소에 포함되지 않습니다. 네이티브 구성 요소를 배포할 때는 [서드파티 고지](THIRD_PARTY_LICENSES.txt)를 유지해야 합니다. 자세한 내용은 [LICENSING.md](docs/ko/LICENSING.md)를 참고하세요.

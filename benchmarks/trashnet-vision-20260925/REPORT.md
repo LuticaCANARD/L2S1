@@ -1,5 +1,9 @@
 # TrashNet material classification with local L2S1 vision
 
+[English](../../docs/en/benchmarks/trashnet-vision-20260925/REPORT.md) · [한국어](../../docs/ko/benchmarks/trashnet-vision-20260925/REPORT.md) · [日本語](../../docs/ja/benchmarks/trashnet-vision-20260925/REPORT.md)
+
+[English index](../../docs/en/README.md) · [한국어 색인](../../docs/ko/README.md) · [日本語索引](../../docs/ja/README.md)
+
 Evaluated on 2026-09-25. Source: [garythung/trashnet](https://github.com/garythung/trashnet), commit `6fa2b878c6c1b4304b91109070ce0edf9279bb31`, `data/dataset-resized.zip`. The archive SHA-256 is `0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2`. The source has 2,527 photographs in six material classes. Its creator states that objects were photographed on a white posterboard and resized to 512 × 384.
 
 ## Protocol
