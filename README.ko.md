@@ -313,9 +313,9 @@ GPU 비전 작업에서 `--vision-optimized`를 사용하면 디코더 스트림
 
 병렬 실행과 비전 프로파일은 정식 지원 기능이며, `fresh`와 다른 수치 계산 경로를 사용하므로 점수와 선택 결과가 달라질 수 있습니다. 병렬 모드는 recurrent/hybrid 모델을 지원하지 않으며, 병렬 비전은 후보 26개 이하를 지원합니다. 비전 프로파일에는 CUDA 또는 Metal과 호환되는 GPU 커널이 필요합니다. Metal 처리 성능은 아직 측정되지 않았습니다. 사용하는 체크포인트에서 작업 품질과 수락 비율을 확인하세요. 실제 모델이 필요한 테스트는 명시적으로 실행해야 하며 가중치를 자동으로 내려받지 않습니다. [실행과 메모리](docs/ko/GUIDE.md#execution-and-memory), [비전 최적화](docs/ko/GUIDE.md#optimized-vision), [검증 안내](docs/ko/VERIFICATION.md)를 참고하세요.
 
-[이미지·텍스트 데모](https://n2s1.luticalab.net/demo)에서 실제 모델 실행 기록을 확인하고, 로컬 텍스트 추론의 즉시 판단·생각 후 판단 모드와 수락 기준·실패 설명을 지정할 수 있습니다. [데모 실행](docs/ko/IMAGE_DEMO.md) · [추론 계약](docs/ko/REASONING.md). Pages에서는 기록을 제공하며 새 입력 추론에는 안내된 로컬 네이티브 서버가 필요합니다.
+[이미지·텍스트 데모](https://l2s1.luticalab.net/demo)에서 실제 모델 실행 기록을 확인하고, 로컬 텍스트 추론의 즉시 판단·생각 후 판단 모드와 수락 기준·실패 설명을 지정할 수 있습니다. [데모 실행](docs/ko/IMAGE_DEMO.md) · [추론 계약](docs/ko/REASONING.md). Pages에서는 기록을 제공하며 새 입력 추론에는 안내된 로컬 네이티브 서버가 필요합니다.
 
-[브라우저 WebGPU 데모](https://n2s1.luticalab.net/webgpu)는 Qwen3 0.6B ONNX를 선택적으로 내려받아 내 텍스트를 브라우저에서 직접 판단합니다. 즉시 판단·생각 후 판단, 수락 기준·실패 설명을 지정할 수 있습니다. WebGPU 어댑터가 필요하며 모델 크기는 q4f16 543.4 MiB, q4 876.5 MiB입니다. [실행과 측정 범위](docs/ko/WEBGPU_DEMO.md).
+[브라우저 WebGPU 데모](https://l2s1.luticalab.net/webgpu)는 Qwen3 0.6B ONNX를 선택적으로 내려받아 내 텍스트를 브라우저에서 직접 판단합니다. 즉시 판단·생각 후 판단, 수락 기준·실패 설명을 지정할 수 있습니다. WebGPU 어댑터가 필요하며 모델 크기는 q4f16 543.4 MiB, q4 876.5 MiB입니다. [실행과 측정 범위](docs/ko/WEBGPU_DEMO.md).
 
 ## 기록된 측정 결과
 
