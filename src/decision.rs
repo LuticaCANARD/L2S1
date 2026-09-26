@@ -250,6 +250,9 @@ pub struct BackendInfo {
     pub vision_projector_path: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vision_projector_sha256: Option<String>,
+    /// Request-local sharing of exact duplicate image projector embeddings.
+    #[serde(default, skip_serializing_if = "bool_is_false")]
+    pub vision_projector_reuse: bool,
     /// Explicit adapter at scale 1; absent for the unchanged base model.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lora_path: Option<String>,
@@ -371,6 +374,20 @@ impl Default for ComputeOptions {
 }
 
 impl ComputeOptions {
+    /// Experimental GPU vision throughput profile. Pair with
+    /// `LlamaBackend::enable_vision_optimizations` after loading a projector.
+    /// Different token batches/attention kernels can change model scores.
+    pub fn vision_optimized() -> Self {
+        Self {
+            context: 4096,
+            batch: 1024,
+            ubatch: 1024,
+            flash_attention: FlashAttention::On,
+            model_load_mode: ModelLoadMode::Read,
+            ..Self::default()
+        }
+    }
+
     pub fn validate(&self) -> Result<()> {
         if self.context == 0
             || self.context > i32::MAX as u32

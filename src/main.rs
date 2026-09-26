@@ -20,6 +20,10 @@ struct Args {
     /// Matching multimodal projector GGUF for direct image input.
     #[arg(long)]
     mmproj: Option<PathBuf>,
+    /// Experimental vision throughput profile: parallel4, dynamic KV, batch1024,
+    /// FlashAttention, compact evidence, bounded preparation and image reuse.
+    #[arg(long, requires = "mmproj", conflicts_with_all = ["execution_mode", "parallel_width", "parallel_context_dynamic", "batch", "ubatch", "flash_attention", "evidence_transfer", "preparation_cache_bytes", "preparation_cache_entries", "output_head", "calibration"])]
+    vision_optimized: bool,
     /// Start a JSON HTTP API at this address, for example 127.0.0.1:8080.
     #[arg(long, conflicts_with_all = ["input", "image", "inspect", "preflight", "diagnostics"])]
     listen: Option<String>,
@@ -81,8 +85,9 @@ struct Args {
     /// The selected GPU device is required; no silent CPU fallback.
     #[arg(long, value_enum, default_value_t = Device::Cpu)]
     device: Device,
-    #[arg(long, default_value_t = 2048)]
-    context: u32,
+    /// Per-question token limit; defaults to 2048, or 4096 with --vision-optimized.
+    #[arg(long)]
+    context: Option<u32>,
     #[arg(long, default_value_t = 256)]
     batch: u32,
     /// Physical token microbatch; defaults to --batch.
@@ -120,15 +125,41 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         min_top_probability: args.min_top_probability,
         min_candidate_mass: args.min_candidate_mass,
     };
+    if args.vision_optimized && matches!(args.device, Device::Cpu) {
+        return Err("--vision-optimized requires --device cuda or --device metal".into());
+    }
+    let profile = if args.vision_optimized {
+        ComputeOptions::vision_optimized()
+    } else {
+        ComputeOptions::default()
+    };
     let compute = ComputeOptions {
-        context: args.context,
-        batch: args.batch,
-        ubatch: args.ubatch.unwrap_or(args.batch),
+        context: args.context.unwrap_or(profile.context),
+        batch: if args.vision_optimized {
+            profile.batch
+        } else {
+            args.batch
+        },
+        ubatch: if args.vision_optimized {
+            profile.ubatch
+        } else {
+            args.ubatch.unwrap_or(args.batch)
+        },
         threads: args.threads,
-        flash_attention: args.flash_attention,
+        flash_attention: if args.vision_optimized {
+            profile.flash_attention
+        } else {
+            args.flash_attention
+        },
         gpu_layers: args.gpu_layers,
         cpu_moe_layers: args.cpu_moe_layers,
-        model_load_mode: args.model_load_mode,
+        model_load_mode: if args.vision_optimized
+            && args.model_load_mode == l2s1::ModelLoadMode::Auto
+        {
+            profile.model_load_mode
+        } else {
+            args.model_load_mode
+        },
     };
     let mut backend = match args.device {
         Device::Metal => LlamaBackend::load_with_metal_options(
@@ -168,6 +199,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     backend.set_snapshot_limit_bytes(args.snapshot_limit_bytes);
     for path in &args.calibration {
         backend.load_calibration(path)?;
+    }
+    if args.vision_optimized {
+        backend.enable_vision_optimizations()?;
     }
     if args.inspect {
         serde_json::to_writer_pretty(io::stdout().lock(), &backend.inspect())?;
@@ -226,5 +260,63 @@ fn main() {
     if let Err(error) = run() {
         eprintln!("{error}");
         std::process::exit(1);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn optimized_profile_requires_projector_and_rejects_partial_overrides() {
+        assert!(Args::try_parse_from(["l2s1", "--model", "m.gguf", "--vision-optimized"]).is_err());
+        for flag in [
+            "--batch",
+            "--ubatch",
+            "--parallel-width",
+            "--preparation-cache-bytes",
+        ] {
+            assert!(
+                Args::try_parse_from([
+                    "l2s1",
+                    "--model",
+                    "m.gguf",
+                    "--mmproj",
+                    "p.gguf",
+                    "--vision-optimized",
+                    flag,
+                    "4",
+                ])
+                .is_err()
+            );
+        }
+        assert!(
+            Args::try_parse_from([
+                "l2s1",
+                "--model",
+                "m.gguf",
+                "--mmproj",
+                "p.gguf",
+                "--device",
+                "cuda",
+                "--vision-optimized",
+                "--context",
+                "8192",
+            ])
+            .is_ok()
+        );
+        assert!(
+            Args::try_parse_from([
+                "l2s1",
+                "--model",
+                "m.gguf",
+                "--mmproj",
+                "p.gguf",
+                "--vision-optimized",
+                "--flash-attention",
+                "off",
+            ])
+            .is_err()
+        );
     }
 }

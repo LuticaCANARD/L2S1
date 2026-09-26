@@ -34,16 +34,24 @@ fn assert_vision_equivalent(serial: &DecisionResponse, batched: &DecisionRespons
 fn batch_fixture() -> (LlamaBackend, Vec<DecisionRequest>, [&'static [u8]; 5]) {
     let model = std::env::var("SKID_VISION_MODEL").expect("set SKID_VISION_MODEL");
     let projector = std::env::var("SKID_VISION_MMPROJ").expect("set SKID_VISION_MMPROJ");
-    let mut backend = LlamaBackend::load(
+    let optimized_compute = std::env::var("SKID_VISION_OPTIMIZED").as_deref() == Ok("1");
+    let mut backend = LlamaBackend::load_with_options(
         model.as_ref(),
-        2048,
-        256,
-        4,
+        if optimized_compute {
+            l2s1::ComputeOptions::vision_optimized()
+        } else {
+            l2s1::ComputeOptions::default()
+        },
         std::env::var("SKID_CUDA").as_deref() == Ok("1"),
         DecisionPolicy::default(),
+        l2s1::PromptProfile::Auto,
     )
     .unwrap();
     backend.load_vision_projector(projector.as_ref()).unwrap();
+    if optimized_compute {
+        backend.set_parallel_context_dynamic(true);
+        backend.set_vision_projector_reuse(true);
+    }
     let red = include_bytes!("fixtures/vision_red_64.png").as_slice();
     let blue = include_bytes!("fixtures/vision_blue_64.png").as_slice();
     // Repeated decision IDs are valid across independent requests. Vary state,
@@ -156,6 +164,102 @@ fn real_vision_batch_equivalence_on_color_fixture() {
     for (a, b) in serial.iter().zip(&batched) {
         assert_vision_equivalent(a, b);
     }
+}
+
+#[test]
+#[ignore = "requires real vision GGUF/projector; compact, cache, duplicate-image reuse and cleanup"]
+fn real_vision_optimizations_preserve_full_evidence_and_recover() {
+    let (mut backend, requests, images) = batch_fixture();
+    let mut requests: Vec<_> = (0..4)
+        .map(|i| {
+            let mut request = requests[0].clone();
+            request.state = serde_json::json!({"case": i});
+            request
+        })
+        .collect();
+    // Different candidate counts exercise compact output offsets independently
+    // of per-sequence vocabulary rows.
+    if let l2s1::DecisionKind::Choice { options } = &mut requests[3].decisions[0].kind {
+        options.push(l2s1::OptionSpec {
+            id: "other".into(),
+            criterion: "Neither red nor blue.".into(),
+        });
+    }
+    let repeated_images = [images[0]; 4];
+    backend.enable_vision_optimizations().unwrap();
+    let compact = backend
+        .decide_vision_batch(&requests, &repeated_images)
+        .unwrap();
+    let metrics = backend.vision_batch_metrics().unwrap();
+    // Some projectors create a global image plus tiles. Reuse each matching
+    // chunk, without assuming that one input picture means one encoder chunk.
+    assert!(metrics.projector_encode_calls > 0);
+    assert!(metrics.projector_reused_chunks >= 3);
+    assert_eq!(
+        metrics.kv_clear_calls, 1,
+        "one physical clear per successful wave"
+    );
+    assert!(metrics.kv_clear_skipped > 0);
+    assert!(metrics.decoder_batch_max_sequences > 1);
+    let first_cache = backend.preparation_cache_stats();
+    let repeated = backend
+        .decide_vision_batch(&requests, &repeated_images)
+        .unwrap();
+    assert!(backend.preparation_cache_stats().vision.hits >= first_cache.vision.hits + 4);
+    for (a, b) in compact.iter().zip(&repeated) {
+        assert_vision_equivalent(a, b);
+    }
+
+    backend
+        .set_evidence_transfer(l2s1::EvidenceTransfer::Full)
+        .unwrap();
+    let full = backend
+        .decide_vision_batch(&requests, &repeated_images)
+        .unwrap();
+    for (a, b) in compact.iter().zip(&full) {
+        assert_vision_equivalent(a, b);
+        for (a, b) in a.results.iter().zip(&b.results) {
+            assert!((a.candidate_mass - b.candidate_mass).abs() < 1e-12);
+            for (a, b) in a.scores.iter().zip(&b.scores) {
+                assert_eq!(a.raw_logit, b.raw_logit);
+                assert!((a.option_probability - b.option_probability).abs() < 1e-12);
+            }
+        }
+    }
+    let mut invalid = repeated_images;
+    invalid[2] = b"invalid image";
+    assert!(backend.decide_vision_batch(&requests, &invalid).is_err());
+    let mut overlong = requests.clone();
+    overlong[0].decisions[0].instruction = "context overflow ".repeat(4096);
+    assert!(
+        backend
+            .decide_vision_batch(&overlong, &repeated_images)
+            .is_err()
+    );
+    for (a, b) in full.iter().zip(
+        backend
+            .decide_vision_batch(&requests, &repeated_images)
+            .unwrap(),
+    ) {
+        assert_vision_equivalent(a, &b);
+    }
+    backend.set_code_rotation(1).unwrap();
+    assert_eq!(backend.preparation_cache_stats().vision.entries, 0);
+    backend.set_code_rotation(0).unwrap();
+    backend.set_execution_mode(ExecutionMode::Fresh);
+    backend
+        .set_evidence_transfer(l2s1::EvidenceTransfer::Full)
+        .unwrap();
+    let fresh_full = backend.decide_vision(&requests[0], images[0]).unwrap();
+    backend
+        .set_evidence_transfer(l2s1::EvidenceTransfer::Compact)
+        .unwrap();
+    let fresh_compact = backend.decide_vision(&requests[0], images[0]).unwrap();
+    assert_vision_equivalent(&fresh_full, &fresh_compact);
+    assert!(
+        (fresh_full.results[0].candidate_mass - fresh_compact.results[0].candidate_mass).abs()
+            < 1e-12
+    );
 }
 
 #[test]

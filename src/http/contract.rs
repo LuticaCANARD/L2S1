@@ -126,6 +126,7 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
             let images = images.iter().map(|images| images[0]).collect::<Vec<_>>();
             let responses = self.decide_vision_batch(requests, &images)?;
             let metrics = self.vision_batch_metrics()?;
+            let preparation_cache = self.preparation_cache_stats();
             responses
                 .into_iter()
                 .map(|response| {
@@ -136,6 +137,12 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
                         "projector_batch_max": metrics.projector_batch_max,
                         "decoder_calls": metrics.decoder_calls,
                         "decoder_batch_max_sequences": metrics.decoder_batch_max_sequences,
+                        "projector_reused_chunks": metrics.projector_reused_chunks,
+                        "kv_clear_calls": metrics.kv_clear_calls,
+                        "kv_clear_skipped": metrics.kv_clear_skipped,
+                        "kv_clear_scope": "since_last_native_vision_start",
+                        "preparation_cache_scope": "backend_lifetime_since_cache_configuration",
+                        "preparation_cache": preparation_cache,
                     });
                     Ok(output)
                 })

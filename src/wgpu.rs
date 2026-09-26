@@ -92,6 +92,7 @@ impl WgpuBackend {
             evidence_transfer: crate::EvidenceTransfer::Full,
             model_path: model_path.display().to_string(),
             vision_projector_path: projector_path.map(|path| path.display().to_string()),
+            vision_projector_reuse: false,
             vision_projector_sha256: projector_path
                 .map(crate::interoperability::file_digest)
                 .transpose()?,

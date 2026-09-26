@@ -28,6 +28,7 @@ pub use shared_state::SharedStateSession;
 pub struct PreparationCacheStats {
     pub prompts: CacheMetrics,
     pub candidates: CacheMetrics,
+    pub vision: CacheMetrics,
 }
 
 use l2s1_llama_sys::*;
@@ -40,10 +41,12 @@ pub struct LlamaBackend {
     preparation_cache_enabled: bool,
     prepared_cache: RefCell<BoundedTokenCache<(Vec<i32>, CandidateTokens)>>,
     candidate_cache: RefCell<BoundedTokenCache<CandidateTokens>>,
+    vision_prepared_cache: RefCell<BoundedTokenCache<vision::PreparedVision>>,
     logits_buffer: Vec<f32>,
     model_path: String,
     vision_projector_path: Option<String>,
     vision_projector_sha256: Option<String>,
+    vision_projector_reuse: bool,
     lora_path: Option<String>,
     output_head: Option<OutputHead>,
     output_head_path: Option<String>,
@@ -294,10 +297,12 @@ impl LlamaBackend {
             preparation_cache_enabled: false,
             prepared_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
             candidate_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
+            vision_prepared_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
             logits_buffer: Vec::new(),
             model_path,
             vision_projector_path: None,
             vision_projector_sha256: None,
+            vision_projector_reuse: false,
             context: compute.context as usize,
             compute,
             timings: InferenceTimings::default(),
@@ -350,9 +355,11 @@ impl LlamaBackend {
         self.preparation_cache_enabled = config.max_entries > 0 && config.max_bytes > 0;
         self.prepared_cache = RefCell::new(BoundedTokenCache::new(
             config.max_entries,
-            config.max_bytes - boundary_bytes,
+            config.max_bytes - boundary_bytes * 2,
         ));
         self.candidate_cache =
+            RefCell::new(BoundedTokenCache::new(config.max_entries, boundary_bytes));
+        self.vision_prepared_cache =
             RefCell::new(BoundedTokenCache::new(config.max_entries, boundary_bytes));
     }
 
@@ -360,12 +367,14 @@ impl LlamaBackend {
         PreparationCacheStats {
             prompts: self.prepared_cache.borrow().metrics(),
             candidates: self.candidate_cache.borrow().metrics(),
+            vision: self.vision_prepared_cache.borrow().metrics(),
         }
     }
 
     pub fn clear_preparation_cache(&self) {
         self.prepared_cache.borrow_mut().clear();
         self.candidate_cache.borrow_mut().clear();
+        self.vision_prepared_cache.borrow_mut().clear();
     }
 
     /// Compact evidence is opt-in and retains the full-vocabulary mass gate.
@@ -373,7 +382,12 @@ impl LlamaBackend {
     pub fn set_evidence_transfer(&mut self, mode: EvidenceTransfer) -> Result<()> {
         let previous = self.evidence_transfer;
         self.evidence_transfer = mode;
-        if let Err(error) = self.check_evidence_transfer() {
+        // Parallel compact evidence currently has a native implementation only
+        // for vision. Text admission keeps its separate strict capability gate.
+        let vision_compact = self.vision_projector_path.is_some()
+            && self.execution_mode == ExecutionMode::Parallel
+            && self.output_head.is_none();
+        if !vision_compact && let Err(error) = self.check_evidence_transfer() {
             self.evidence_transfer = previous;
             return Err(error);
         }
@@ -795,23 +809,31 @@ impl LlamaBackend {
                 ),
             ));
         }
-        let tail = parts.last().unwrap();
+        let candidates = self.prepare_candidate_tokens(decision, &parts.last().unwrap().text)?;
+        Ok((input, candidates))
+    }
+
+    fn prepare_candidate_tokens(
+        &self,
+        decision: &Decision,
+        tail: &str,
+    ) -> std::result::Result<Vec<i32>, DecisionFailure> {
         let candidate_key = self
             .preparation_cache_enabled
-            .then(|| format!("{}:{}", decision.options().len(), tail.text));
+            .then(|| format!("{}:{}", decision.options().len(), tail));
         if let Some(candidate_key) = &candidate_key
             && let Some(CandidateTokens::Single(candidates)) = self
                 .candidate_cache
                 .borrow_mut()
                 .get("model-local-v1", candidate_key)
         {
-            return Ok((input, candidates));
+            return Ok(candidates);
         }
-        let tail_tokens = self.tokenize(&tail.text, true)?;
+        let tail_tokens = self.tokenize(tail, true)?;
         let mut candidates = Vec::new();
         for i in 0..decision.options().len() {
             let code = ((b'A' + i as u8) as char).to_string();
-            let combined = self.tokenize(&format!("{}{code}", tail.text), true)?;
+            let combined = self.tokenize(&format!("{}{code}", tail), true)?;
             if combined.len() != tail_tokens.len() + 1 || !combined.starts_with(&tail_tokens) {
                 return Err(DecisionFailure::new(
                     FailureKind::UnsupportedCapability,
@@ -842,7 +864,7 @@ impl LlamaBackend {
                 CandidateTokens::Single(candidates.clone()),
             );
         }
-        Ok((input, candidates))
+        Ok(candidates)
     }
 
     fn evaluate(
@@ -1109,6 +1131,7 @@ impl LlamaBackend {
             model_path: self.model_path.clone(),
             vision_projector_path: self.vision_projector_path.clone(),
             vision_projector_sha256: self.vision_projector_sha256.clone(),
+            vision_projector_reuse: self.vision_projector_reuse,
             lora_path: self.lora_path.clone(),
             output_head_path: self.output_head_path.clone(),
             model_description: description,

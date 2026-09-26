@@ -1,5 +1,68 @@
 //! Direct image input with fresh evaluation or isolated parallel sequences.
+use super::prepared_cache::TokenCacheValue;
 use super::*;
+
+/// The exact rendered prompt and answer mapping; no image bytes or KV state are
+/// retained. The model-local cache is invalidated by every preparation setter.
+pub(super) struct PreparedVision {
+    parts: Vec<crate::prompt::PromptPart>,
+    after: String,
+    candidates: Vec<i32>,
+}
+
+impl Clone for PreparedVision {
+    fn clone(&self) -> Self {
+        Self {
+            parts: self
+                .parts
+                .iter()
+                .map(|part| crate::prompt::PromptPart {
+                    text: part.text.clone(),
+                    parse_special: part.parse_special,
+                })
+                .collect(),
+            after: self.after.clone(),
+            candidates: self.candidates.clone(),
+        }
+    }
+}
+impl TokenCacheValue for PreparedVision {
+    fn retained_bytes(&self) -> usize {
+        self.parts.capacity() * std::mem::size_of::<crate::prompt::PromptPart>()
+            + self
+                .parts
+                .iter()
+                .map(|part| part.text.capacity())
+                .sum::<usize>()
+            + self.after.capacity()
+            + self.candidates.retained_bytes()
+    }
+}
+
+/// Native vision calls clear their own request-local memory on every exit. This
+/// guard owns Rust-only failures and unwinding before/after those calls.
+struct VisionCleanup {
+    engine: *mut c_void,
+    armed: bool,
+}
+impl VisionCleanup {
+    fn new(engine: *mut c_void) -> Self {
+        Self {
+            engine,
+            armed: true,
+        }
+    }
+    fn complete(&mut self) {
+        self.armed = false;
+    }
+}
+impl Drop for VisionCleanup {
+    fn drop(&mut self) {
+        if self.armed {
+            unsafe { sd_clear(self.engine) };
+        }
+    }
+}
 
 impl LlamaBackend {
     /// Attach a vision projector compatible with this GGUF. Text decisions
@@ -33,14 +96,16 @@ impl LlamaBackend {
         request: &DecisionRequest,
         image: &[u8],
     ) -> Result<DecisionResponse> {
-        unsafe { sd_clear(self.engine.as_ptr()) };
-        let result = if self.execution_mode == ExecutionMode::Parallel {
-            self.decide_vision_batch(std::slice::from_ref(request), &[image])
-                .map(|mut responses| responses.remove(0))
-        } else {
-            self.decide_vision_inner(request, image)
-        };
-        unsafe { sd_clear(self.engine.as_ptr()) };
+        if self.execution_mode == ExecutionMode::Parallel {
+            return self
+                .decide_vision_batch(std::slice::from_ref(request), &[image])
+                .map(|mut responses| responses.remove(0));
+        }
+        let mut cleanup = VisionCleanup::new(self.engine.as_ptr());
+        let result = self.decide_vision_inner(request, image);
+        if result.is_ok() {
+            cleanup.complete();
+        }
         result
     }
 
@@ -55,7 +120,7 @@ impl LlamaBackend {
         requests: &[DecisionRequest],
         images: &[&[u8]],
     ) -> Result<Vec<DecisionResponse>> {
-        unsafe { sd_clear(self.engine.as_ptr()) };
+        let mut cleanup = VisionCleanup::new(self.engine.as_ptr());
         let responses = (|| {
             if requests.len() != images.len() {
                 return Err(Error::Invalid(
@@ -66,6 +131,8 @@ impl LlamaBackend {
                 self.validate_vision_request(request, image)?;
             }
             if requests.is_empty() {
+                // No native call will establish a clean request boundary.
+                unsafe { sd_clear(self.engine.as_ptr()) };
                 return Ok(Vec::new());
             }
             if self.execution_mode == ExecutionMode::Fresh {
@@ -103,28 +170,7 @@ impl LlamaBackend {
                 let started = Instant::now();
                 let prepared = wave
                     .iter()
-                    .map(|(state, decision, _)| {
-                        let parts = match &self.chat_skeleton {
-                            Some(skeleton) => crate::prompt::compile_model_prompt_with_detail(
-                                skeleton,
-                                state,
-                                decision,
-                                self.prompt_layout,
-                                self.prompt_detail,
-                                self.code_rotation,
-                            )?,
-                            None => compile_prompt_with_detail(
-                                state,
-                                decision,
-                                self.prompt_layout,
-                                self.prompt_detail,
-                                self.code_rotation,
-                            ),
-                        };
-                        let (_, candidates) = self.prepare(state, decision)?;
-                        let after = format!("\nDecision data:\n{}", parts[1].text);
-                        Ok((parts, after, candidates))
-                    })
+                    .map(|(state, decision, _)| self.prepare_vision(state, decision))
                     .collect::<Result<Vec<_>>>()?;
                 self.timings.prepare_ms += started.elapsed().as_secs_f64() * 1000.0;
                 let before = "Image:\n";
@@ -132,20 +178,41 @@ impl LlamaBackend {
                 let inputs = prepared
                     .iter()
                     .zip(wave)
-                    .map(|((parts, after, _), (_, _, image))| NativeVisionInput {
-                        prefix: parts[0].text.as_ptr().cast(),
-                        prefix_len: parts[0].text.len(),
+                    .map(|(prepared, (_, _, image))| NativeVisionInput {
+                        prefix: prepared.parts[0].text.as_ptr().cast(),
+                        prefix_len: prepared.parts[0].text.len(),
                         data_before: before.as_ptr().cast(),
                         before_len: before.len(),
                         image: image.as_ptr(),
                         image_len: image.len(),
-                        data_after: after.as_ptr().cast(),
-                        after_len: after.len(),
-                        suffix: parts[2].text.as_ptr().cast(),
-                        suffix_len: parts[2].text.len(),
+                        data_after: prepared.after.as_ptr().cast(),
+                        after_len: prepared.after.len(),
+                        suffix: prepared.parts[2].text.as_ptr().cast(),
+                        suffix_len: prepared.parts[2].text.len(),
                     })
                     .collect::<Vec<_>>();
-                let mut logits = vec![0.0; wave.len() * vocab as usize];
+                let compact = self.evidence_transfer == EvidenceTransfer::Compact;
+                let candidate_ids = prepared
+                    .iter()
+                    .map(|p| p.candidates.as_ptr())
+                    .collect::<Vec<_>>();
+                let candidate_counts = prepared
+                    .iter()
+                    .map(|p| p.candidates.len())
+                    .collect::<Vec<_>>();
+                let mut offsets = vec![0usize];
+                for count in &candidate_counts {
+                    offsets.push(offsets.last().unwrap() + count);
+                }
+                let mut logits = vec![
+                    0.0;
+                    if compact {
+                        *offsets.last().unwrap()
+                    } else {
+                        wave.len() * vocab as usize
+                    }
+                ];
+                let mut normalizers = vec![0.0; wave.len()];
                 let mut input_tokens = vec![0; wave.len()];
                 let mut error = [0 as c_char; 1024];
                 self.failure_stage = (
@@ -155,40 +222,72 @@ impl LlamaBackend {
                 );
                 let started = Instant::now();
                 let ok = unsafe {
-                    sd_forward_vision_parallel(
-                        self.engine.as_ptr(),
-                        inputs.as_ptr(),
-                        wave.len() as i32,
-                        width as u32,
-                        self.parallel_context_dynamic,
-                        logits.as_mut_ptr(),
-                        logits.len(),
-                        input_tokens.as_mut_ptr(),
-                        error.as_mut_ptr(),
-                        error.len(),
-                    )
+                    if compact {
+                        sd_forward_vision_parallel_compact(
+                            self.engine.as_ptr(),
+                            inputs.as_ptr(),
+                            wave.len() as i32,
+                            width as u32,
+                            self.parallel_context_dynamic,
+                            candidate_ids.as_ptr(),
+                            candidate_counts.as_ptr(),
+                            logits.as_mut_ptr(),
+                            logits.len(),
+                            normalizers.as_mut_ptr(),
+                            input_tokens.as_mut_ptr(),
+                            error.as_mut_ptr(),
+                            error.len(),
+                        )
+                    } else {
+                        sd_forward_vision_parallel(
+                            self.engine.as_ptr(),
+                            inputs.as_ptr(),
+                            wave.len() as i32,
+                            width as u32,
+                            self.parallel_context_dynamic,
+                            logits.as_mut_ptr(),
+                            logits.len(),
+                            input_tokens.as_mut_ptr(),
+                            error.as_mut_ptr(),
+                            error.len(),
+                        )
+                    }
                 };
                 self.timings.native_ms += started.elapsed().as_secs_f64() * 1000.0;
                 if !ok {
                     return Err(native_error(&error));
                 }
                 let started = Instant::now();
-                for (index, ((_, decision, _), (_, _, candidates))) in
-                    wave.iter().zip(&prepared).enumerate()
+                for (index, ((_, decision, _), prepared)) in wave.iter().zip(&prepared).enumerate()
                 {
                     self.failure_stage = (
                         "score",
                         FailureKind::InvalidEvidence,
                         Some(decision.id.clone()),
                     );
-                    let offset = index * vocab as usize;
-                    let mut result = score_logits(
-                        decision,
-                        &logits[offset..offset + vocab as usize],
-                        candidates,
-                        input_tokens[index],
-                        &self.policy,
-                    )?;
+                    let mut result = if compact {
+                        ExactEvidence::from_native_summary(
+                            decision,
+                            &logits[offsets[index]..offsets[index + 1]],
+                            &prepared.candidates,
+                            vocab as usize,
+                            normalizers[index],
+                        )?
+                        .score(
+                            decision,
+                            input_tokens[index],
+                            &self.policy,
+                        )?
+                    } else {
+                        let offset = index * vocab as usize;
+                        score_logits(
+                            decision,
+                            &logits[offset..offset + vocab as usize],
+                            &prepared.candidates,
+                            input_tokens[index],
+                            &self.policy,
+                        )?
+                    };
                     self.restore_code_metadata(&mut result);
                     results.push(result);
                 }
@@ -209,7 +308,9 @@ impl LlamaBackend {
                 })
                 .collect())
         })();
-        unsafe { sd_clear(self.engine.as_ptr()) };
+        if responses.is_ok() {
+            cleanup.complete();
+        }
         responses
     }
 
@@ -224,6 +325,100 @@ impl LlamaBackend {
             ));
         }
         Ok(metrics)
+    }
+
+    /// Enable compatible opt-in vision optimizations on a resident backend.
+    /// Compute batch size and flash attention are fixed when constructing the
+    /// backend; use `ComputeOptions::vision_optimized()` for those settings.
+    /// This profile can change scores through parallel decoder/projector math.
+    pub fn enable_vision_optimizations(&mut self) -> Result<()> {
+        if self.vision_projector_path.is_none()
+            || self.output_head.is_some()
+            || !self.calibrations.is_empty()
+            || self.collect_features
+        {
+            return Err(Error::Invalid("vision optimizations require a loaded projector without output heads, calibration or feature export".into()));
+        }
+        if unsafe { sd_recurrent_or_hybrid(self.engine.as_ptr()) } {
+            return Err(Error::Invalid(
+                "optimized vision requires a non-recurrent, non-hybrid decoder".into(),
+            ));
+        }
+        self.set_parallel_width(4)?;
+        self.set_execution_mode(ExecutionMode::Parallel);
+        self.set_parallel_context_dynamic(true);
+        self.set_evidence_transfer(EvidenceTransfer::Compact)?;
+        self.set_preparation_cache(PreparationCacheConfig {
+            max_entries: 128,
+            max_bytes: 8 * 1024 * 1024,
+        });
+        self.set_vision_projector_reuse(true);
+        Ok(())
+    }
+
+    /// Opt in to reusing identical image embeddings inside one native wave.
+    /// Image bytes and ordered projector chunks must match exactly. Different
+    /// projector batch shapes can change scores, so this is disabled by default.
+    pub fn set_vision_projector_reuse(&mut self, enabled: bool) {
+        unsafe { sd_set_vision_projector_reuse(self.engine.as_ptr(), enabled) };
+        self.vision_projector_reuse = enabled;
+    }
+
+    fn prepare_vision(
+        &self,
+        state: &serde_json::Value,
+        decision: &Decision,
+    ) -> Result<PreparedVision> {
+        let key = self
+            .preparation_cache_enabled
+            .then(|| serde_json::to_string(&(state, decision)))
+            .transpose()
+            .map_err(|e| Error::Invalid(e.to_string()))?;
+        if let Some(key) = &key
+            && let Some(prepared) = self
+                .vision_prepared_cache
+                .borrow_mut()
+                .get("vision-model-local-v1", key)
+        {
+            return Ok(prepared);
+        }
+        let parts = match &self.chat_skeleton {
+            Some(skeleton) => crate::prompt::compile_model_prompt_with_detail(
+                skeleton,
+                state,
+                decision,
+                self.prompt_layout,
+                self.prompt_detail,
+                self.code_rotation,
+            )?,
+            None => compile_prompt_with_detail(
+                state,
+                decision,
+                self.prompt_layout,
+                self.prompt_detail,
+                self.code_rotation,
+            ),
+        };
+        let candidates = if decision.options().len() <= 26 {
+            self.prepare_candidate_tokens(decision, &parts[2].text)
+                .map_err(|failure| Error::Backend(failure.message))?
+        } else {
+            Vec::new()
+        };
+        let after = format!("\nDecision data:\n{}", parts[1].text);
+        let prepared = PreparedVision {
+            parts,
+            after,
+            candidates,
+        };
+        if let Some(key) = key {
+            self.vision_prepared_cache.borrow_mut().insert(
+                "vision-model-local-v1".into(),
+                key,
+                prepared.clone(),
+            );
+        }
+        Ok(prepared)
     }
 
     fn vision_info(&self, request: &DecisionRequest) -> BackendInfo {
@@ -242,13 +437,12 @@ impl LlamaBackend {
         if !matches!(
             self.execution_mode,
             ExecutionMode::Fresh | ExecutionMode::Parallel
-        ) || self.evidence_transfer != EvidenceTransfer::Full
-            || self.output_head.is_some()
+        ) || self.output_head.is_some()
             || !self.calibrations.is_empty()
             || self.collect_features
         {
             return Err(Error::Invalid(
-                "vision decisions require fresh or parallel full-evidence execution without output heads, calibration or feature export".into(),
+                "vision decisions require fresh or parallel execution without output heads, calibration or feature export".into(),
             ));
         }
         let marker = unsafe { CStr::from_ptr(sd_vision_marker()) }
@@ -273,32 +467,22 @@ impl LlamaBackend {
         self.validate_vision_request(request, image)?;
         let mut results = Vec::with_capacity(request.decisions.len());
         for decision in &request.decisions {
-            let parts = match &self.chat_skeleton {
-                Some(skeleton) => crate::prompt::compile_model_prompt_with_detail(
-                    skeleton,
-                    &request.state,
-                    decision,
-                    self.prompt_layout,
-                    self.prompt_detail,
-                    self.code_rotation,
-                )?,
-                None => compile_prompt_with_detail(
-                    &request.state,
-                    decision,
-                    self.prompt_layout,
-                    self.prompt_detail,
-                    self.code_rotation,
-                ),
-            };
-            // Keep media in the user-data segment; model control tokens remain
-            // confined to the trusted prefix and suffix.
+            let started = Instant::now();
+            let prepared = self.prepare_vision(&request.state, decision)?;
+            self.timings.prepare_ms += started.elapsed().as_secs_f64() * 1000.0;
+            let parts = &prepared.parts;
+            // Media stays in the user-data segment; control tokens remain in
+            // the trusted prefix and suffix.
             let before = "Image:\n";
-            let after = format!("\nDecision data:\n{}", parts[1].text);
+            let after = &prepared.after;
             let size = unsafe { sd_vocab_size(self.engine.as_ptr()) };
             if size <= 0 {
                 return Err(Error::Backend("invalid vocabulary size".into()));
             }
             if decision.options().len() > 26 {
+                if self.evidence_transfer == EvidenceTransfer::Compact {
+                    return Err(Error::Invalid("compact vision supports at most 26 options; use full evidence for multi-token codes".into()));
+                }
                 let paths = self.prepare_code_paths(&parts[2].text, decision.options().len())?;
                 let mut input_tokens = 0;
                 let mut prefix_evaluations = 0;
@@ -371,44 +555,92 @@ impl LlamaBackend {
                 self.timings.decisions += 1;
                 continue;
             }
-            let (_, candidates) = self.prepare(&request.state, decision)?;
-            self.logits_buffer.resize(size as usize, 0.0);
+            let candidates = &prepared.candidates;
+            let compact = self.evidence_transfer == EvidenceTransfer::Compact;
+            self.logits_buffer.resize(
+                if compact {
+                    candidates.len()
+                } else {
+                    size as usize
+                },
+                0.0,
+            );
             let mut input_tokens = 0;
+            let mut normalizer = 0.0;
             let mut error = [0 as c_char; 1024];
             let start = Instant::now();
             let ok = unsafe {
-                sd_forward_vision(
-                    self.engine.as_ptr(),
-                    parts[0].text.as_ptr().cast(),
-                    parts[0].text.len(),
-                    before.as_ptr().cast(),
-                    before.len(),
-                    image.as_ptr(),
-                    image.len(),
-                    after.as_ptr().cast(),
-                    after.len(),
-                    parts[2].text.as_ptr().cast(),
-                    parts[2].text.len(),
-                    std::ptr::null(),
-                    0,
-                    self.logits_buffer.as_mut_ptr(),
-                    self.logits_buffer.len(),
-                    &mut input_tokens,
-                    error.as_mut_ptr(),
-                    error.len(),
-                )
+                if compact {
+                    sd_forward_vision_compact(
+                        self.engine.as_ptr(),
+                        parts[0].text.as_ptr().cast(),
+                        parts[0].text.len(),
+                        before.as_ptr().cast(),
+                        before.len(),
+                        image.as_ptr(),
+                        image.len(),
+                        after.as_ptr().cast(),
+                        after.len(),
+                        parts[2].text.as_ptr().cast(),
+                        parts[2].text.len(),
+                        std::ptr::null(),
+                        0,
+                        candidates.as_ptr(),
+                        candidates.len(),
+                        self.logits_buffer.as_mut_ptr(),
+                        self.logits_buffer.len(),
+                        &mut normalizer,
+                        &mut input_tokens,
+                        error.as_mut_ptr(),
+                        error.len(),
+                    )
+                } else {
+                    sd_forward_vision(
+                        self.engine.as_ptr(),
+                        parts[0].text.as_ptr().cast(),
+                        parts[0].text.len(),
+                        before.as_ptr().cast(),
+                        before.len(),
+                        image.as_ptr(),
+                        image.len(),
+                        after.as_ptr().cast(),
+                        after.len(),
+                        parts[2].text.as_ptr().cast(),
+                        parts[2].text.len(),
+                        std::ptr::null(),
+                        0,
+                        self.logits_buffer.as_mut_ptr(),
+                        self.logits_buffer.len(),
+                        &mut input_tokens,
+                        error.as_mut_ptr(),
+                        error.len(),
+                    )
+                }
             };
             self.timings.native_ms += start.elapsed().as_secs_f64() * 1000.0;
             if !ok {
                 return Err(native_error(&error));
             }
-            let mut scored = score_logits(
-                decision,
-                &self.logits_buffer,
-                &candidates,
-                input_tokens,
-                &self.policy,
-            )?;
+            let started = Instant::now();
+            let mut scored = if compact {
+                ExactEvidence::from_native_summary(
+                    decision,
+                    &self.logits_buffer,
+                    candidates,
+                    size as usize,
+                    normalizer,
+                )?
+                .score(decision, input_tokens, &self.policy)?
+            } else {
+                score_logits(
+                    decision,
+                    &self.logits_buffer,
+                    candidates,
+                    input_tokens,
+                    &self.policy,
+                )?
+            };
+            self.timings.score_ms += started.elapsed().as_secs_f64() * 1000.0;
             self.restore_code_metadata(&mut scored);
             results.push(scored);
             self.timings.decisions += 1;

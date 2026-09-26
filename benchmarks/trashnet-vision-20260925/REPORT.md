@@ -11,15 +11,17 @@ Evaluated on 2026-09-25. Source: [garythung/trashnet](https://github.com/garythu
 
 ## Results
 
-| Model (Q8_0) | Correct / all | Coverage | Correct / accepted | Raw top-1 / all | HTTP latency p50 / p95¹ | Fresh → native batch4 mean/ image² | Native correct / all (accepted)² |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Gemma 4 E2B it | 64/120 = 53.3% | 113/120 = 94.2% | 64/113 = 56.6% | 64/120 = 53.3% | 79.1 / 88.9 ms | 77.4 → 69.7 ms (-10.0%) | 63/120 (112) |
-| Qwen3-VL 2B Instruct | 91/120 = 75.8% | 115/120 = 95.8% | 91/115 = 79.1% | 95/120 = 79.2% | 101.1 / 116.2 ms | 101.7 → 86.7 ms (-14.7%) | 93/120 (117) |
-| SmolVLM 256M Instruct | 0/120 = 0% | 0/120 = 0% | undefined | 13/120 = 10.8% | 108.7 / 126.0 ms | 109.1 → 67.1 ms (-38.5%) | 0/120 (0) |
+| Model (Q8_0) | Correct / all | Coverage | Correct / accepted | Raw top-1 / all | HTTP latency p50 / p95¹ | Fresh → native batch4 mean/ image² | Native correct / all (accepted)² | Optimized mean/image³ | Optimized correct/all (accepted)³ |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Gemma 4 E2B it | 64/120 = 53.3% | 113/120 = 94.2% | 64/113 = 56.6% | 64/120 = 53.3% | 79.1 / 88.9 ms | 77.4 → 69.7 ms (-10.0%) | 63/120 (112) | 51.8 ms (-33.5%) | 62/120 (115) |
+| Qwen3-VL 2B Instruct | 91/120 = 75.8% | 115/120 = 95.8% | 91/115 = 79.1% | 95/120 = 79.2% | 101.1 / 116.2 ms | 101.7 → 86.7 ms (-14.7%) | 93/120 (117) | 57.3 ms (-43.6%) | 92/120 (116) |
+| SmolVLM 256M Instruct | 0/120 = 0% | 0/120 = 0% | undefined | 13/120 = 10.8% | 108.7 / 126.0 ms | 109.1 → 67.1 ms (-38.5%) | 0/120 (0) | 42.7 ms (-60.4%) | 0/120 (0) |
 
 ¹ Serial request time on this machine, with models already loaded; the first request is included. Startup to HTTP health: Gemma 28.3 s, Qwen3-VL 11.3 s, and SmolVLM 2.5 s. These figures do not represent concurrent throughput or other hardware.
 
 ² Measured on 2026-09-26 with the same frozen baseline prompt and images. Both modes use four-image HTTP requests; `fresh` runs them serially and `parallel` uses four independent native sequences/KV streams. One untimed group warms context/graph allocation, then three full 120-image passes are timed in each mode. Mean/image is amortized group completion time, not individual response latency; model startup is excluded. These new columns use a different warmup/repetition protocol from the original single-image latency column. **All three CUDA comparisons fail the existing numerical equivalence criterion; batching remains experimental.** Native accepted counts are in parentheses. SmolVLM still abstains on all images. See the native batch section below.
+
+³ Combined profile measured on 2026-09-26, with the same frozen 120 images and three timed passes. Percentages compare the final candidate against validated, earlier fresh baselines of qwen3vl: 101.6 ms/image, gemma4: 77.9 ms/image, smolvlm: 107.8 ms/image. These are amortized four-image group costs on RTX 3080, not per-image response times. Recorded baseline timings are reused explicitly rather than rerun alongside the final candidate. See the combined optimization section.
 
 The balanced six-class sample has a 16.7% constant-class baseline. Qwen3-VL got 27 more accepted answers right than Gemma: on matched images, Qwen alone was correct on 30, Gemma alone on 3, both on 61, and neither on 26. Qwen's five abstentions were all due to low top-option probability; four had the correct raw top-1. It missed every `trash` image despite performing well on the other five classes. Gemma also had uneven class performance. SmolVLM's 0% correct/all is caused by **120 abstentions**, not by 120 accepted wrong answers. Its six-option candidate mass ranged from 0.00000157 to 0.000980, below the default minimum; 113 responses also had low top-option probability. Candidate mass is coverage of the named options in the model's next-token distribution, not a probability that the answer is correct. Its forced top-1 result is also below the constant-class baseline.
 
@@ -104,6 +106,26 @@ Functional isolation is tested separately: the native color-fixture test passed 
 The measured improvements therefore apply to this machine and this experimental execution mode. The default remains fresh. Metal runtime was not verified for this patch.
 
 Reproduce with `python3 benchmarks/trashnet-vision-20260925/evaluate_batch.py --help`. The script freezes each four-image payload, checks original image hashes and RTX 3080 offload, records full real responses and native counters, and terminates/waits for each server. `native-batch4-summary.json` retains model/projector/binary/sample identities, every pass duration, quality counts, changed image indices, and counter distributions. Full response JSONL and logs remain in the ignored `results/vision-trashnet-20260926-native-batch4-final/` directory.
+
+## Combined vision optimizations (2026-09-26)
+
+The final executable SHA-256 is `067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae`. The opt-in `--vision-optimized` profile combines four independent decoder streams, dynamic KV reservation, batch/microbatch 1024, Flash Attention, compact evidence, an 8 MiB bounded preparation cache, and exact duplicate-image projector reuse. Already-clean KV is not physically zeroed again; successful native vision calls perform their own cleanup, with a Rust error/unwind guard. The mtmd/helper/CLIP logger uses the same controlled callback as llama.cpp.
+
+Each unique image chunk is encoded independently in reuse mode. An isolation regression exposed that changing duplicate-image membership otherwise changed encoder batch shape/order and Gemma scores for other images. The final path fixes this while retaining four-way decoder inference. All 90 timed requests per model report decoder width 4, projector batch maximum 1, one physical KV clear, and one skipped clear. These 120 distinct images reuse **zero projector chunks** and zero prefix KV tokens. Repeated state/decision prompts hit the preparation cache; the last wave reports four vision entries, four misses and 360 hits including warmup. Embeddings are only reused inside a wave, never across images with different bytes or across HTTP requests.
+
+| Model | Changed selected images /120 | Changed raw top-1 images /120 | Max option probability delta | Raw correct fresh → optimized | Equivalence |
+|---|---:|---:|---:|---:|---|
+| Qwen3-VL 2B | 1 | 0 | 0.191486 | 95 → 95 | failed |
+| Gemma 4 E2B | 6 | 3 | 0.691368 | 64 → 64 | failed |
+| SmolVLM 256M | 0 | 13 | 0.131205 | 13 → 13 | failed |
+
+The existing equivalence criterion is unchanged and **fails for all three optimized runs**. Correct/all and acceptance counts are in the existing results table; the three repetitions have identical within-mode quality counts. Execution changes are not an accuracy improvement claim. SmolVLM still abstains on all images.
+
+Separate one-pass controls compared the prepatch binary with the final binary in ordinary fresh/full/batch256/FlashOff mode. All 120 images per model preserved probabilities and candidate mass exactly (maximum delta 0), with no selected value, top-1, abstention-reason or token-count changes. These control runs establish numerical preservation of the default on this sample; they do not measure an isolated speed benefit from skipped clears.
+
+Six real-model optimized vision tests passed across the three checkpoints, covering image substitution/isolation, duplicate-image reuse, unequal candidate banks, compact/full equality at the same compute configuration, partial waves, cache invalidation, malformed images, context overflow and recovery. Real CUDA text prefix reuse, shared-state boundaries, compact failure recovery, and Bonsai hybrid snapshot restoration also passed. Metal remains unverified.
+
+`optimized-batch4-summary.json` retains final binary/model/input identities, every pass duration, quality/equivalence results, counter distributions, default-preservation controls and real-model test outcomes. Full real responses and logs remain in ignored `results/vision-optimized-20260926/*-optimized-final/` and `*-fresh-control-final/`. The evaluator can use `--candidate-vision-optimized`; `--baseline-recorded-run` records and validates an earlier fresh baseline against its frozen requests, runtime configuration and raw timing samples.
 
 ## Reproduce and inspect
 

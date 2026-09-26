@@ -16,11 +16,12 @@ impl EvidenceTransfer {
 }
 
 /// Opt-in preparation memoization. The byte budget is shared between complete
-/// prompt tokens (three quarters) and answer-boundary mappings (one quarter).
+/// text prompt tokens (one half), vision prompt parts (one quarter), and
+/// answer-boundary mappings (one quarter).
 /// Limits bound retained cache entries, not process RSS or temporary allocations.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct PreparationCacheConfig {
-    /// Maximum entries in each of the two caches.
+    /// Maximum entries in each of the three caches.
     pub max_entries: usize,
     pub max_bytes: usize,
 }

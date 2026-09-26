@@ -22,6 +22,9 @@ pub struct NativeVisionBatchMetrics {
     pub projector_batch_max: usize,
     pub decoder_calls: usize,
     pub decoder_batch_max_sequences: usize,
+    pub projector_reused_chunks: usize,
+    pub kv_clear_calls: usize,
+    pub kv_clear_skipped: usize,
 }
 
 #[repr(C)]
@@ -36,6 +39,46 @@ pub struct NativeRestoreMetrics {
     pub fallback: i32,
 }
 unsafe extern "C" {
+    pub fn sd_set_vision_projector_reuse(engine: *mut c_void, enabled: bool);
+    pub fn sd_forward_vision_parallel_compact(
+        engine: *mut c_void,
+        inputs: *const NativeVisionInput,
+        sequences: i32,
+        capacity: u32,
+        dynamic_context: bool,
+        candidate_ids: *const *const i32,
+        candidate_counts: *const usize,
+        candidate_logits: *mut f32,
+        candidate_logits_count: usize,
+        log_normalizers: *mut f64,
+        input_tokens: *mut usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+    pub fn sd_forward_vision_compact(
+        engine: *mut c_void,
+        prefix: *const c_char,
+        prefix_len: usize,
+        data_before: *const c_char,
+        before_len: usize,
+        image: *const u8,
+        image_len: usize,
+        data_after: *const c_char,
+        after_len: usize,
+        suffix: *const c_char,
+        suffix_len: usize,
+        continuation: *const i32,
+        continuation_count: usize,
+        candidate_ids: *const i32,
+        candidate_count: usize,
+        candidate_logits: *mut f32,
+        candidate_logits_count: usize,
+        log_normalizer: *mut f64,
+        input_tokens: *mut usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+
     pub fn sd_forward_vision_parallel(
         engine: *mut c_void,
         inputs: *const NativeVisionInput,

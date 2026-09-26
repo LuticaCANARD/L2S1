@@ -1,0 +1,1421 @@
+{
+  "date": "2026-09-26",
+  "hardware": "NVIDIA GeForce RTX 3080, CUDA sm_86",
+  "llama_cpp_revision": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "protocol": "Frozen 120 original TrashNet JPEGs, 4 independent decisions per HTTP request, one warmup group then three complete timed passes. Baseline fresh runs recorded earlier on the same machine are reused after validating inputs, runtime settings and raw timings. Candidate is freshly executed. Startup excluded; latency/image is amortized group completion cost. Separate fresh control runs use one complete pass and are numerical checks, not speed claims.",
+  "profile": {
+    "execution_mode": "parallel",
+    "width": 4,
+    "context": 4096,
+    "batch": 1024,
+    "ubatch": 1024,
+    "threads": 4,
+    "flash_attention": "on",
+    "model_load_mode": "read",
+    "evidence_transfer": "compact",
+    "parallel_context_dynamic": true,
+    "preparation_cache_bytes": 8388608,
+    "preparation_cache_entries": 128,
+    "vision_projector_reuse": true,
+    "encoder_batch_max": 1,
+    "decoder_batch_max_sequences": 4
+  },
+  "models": {
+    "qwen3vl": {
+      "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+      "model_sha256": "b7802e29f71a9e5b5e3f83f613df898a2204342dcea71a231ea501d481813c39",
+      "mmproj_sha256": "69066c8f279ec85ff48ab4059f6ebba0d2932ca57667f2bbdac7d9805bca9e7b",
+      "instruction": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": [
+        {
+          "id": "cardboard",
+          "criterion": "A piece of corrugated cardboard or cardboard packaging."
+        },
+        {
+          "id": "glass",
+          "criterion": "A glass object, such as a bottle or jar."
+        },
+        {
+          "id": "metal",
+          "criterion": "A metal object, such as a can or metal container."
+        },
+        {
+          "id": "paper",
+          "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+        },
+        {
+          "id": "plastic",
+          "criterion": "A plastic object, such as a bottle or plastic container."
+        },
+        {
+          "id": "trash",
+          "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+        }
+      ],
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "timing": {
+        "fresh": {
+          "mode": "fresh",
+          "images_per_request": 4,
+          "request_count": 90,
+          "execution_mode": "fresh",
+          "command": [
+            "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/baseline-runtime/l2s1",
+            "--model",
+            "/home/lutica/personal/skid/skid-desion/models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+            "--mmproj",
+            "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3-VL-2B-Instruct-Q8_0.gguf",
+            "--device",
+            "cuda",
+            "--context",
+            "4096",
+            "--threads",
+            "4",
+            "--model-load-mode",
+            "read",
+            "--listen",
+            "127.0.0.1:18778",
+            "--min-top-probability",
+            "0.8",
+            "--min-candidate-mass",
+            "0.05",
+            "--execution-mode",
+            "fresh",
+            "--parallel-width",
+            "4",
+            "--batch",
+            "256",
+            "--ubatch",
+            "256",
+            "--flash-attention",
+            "off",
+            "--evidence-transfer",
+            "full",
+            "--preparation-cache-bytes",
+            "0"
+          ],
+          "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+          "runtime_override": "results/vision-optimized-20260926/baseline-runtime",
+          "image_evaluations": 360,
+          "startup_to_health_ms": 4018.819643,
+          "warmup_group_ms": 652.239529,
+          "group_latency_ms": {
+            "mean": 406.57826464444446,
+            "p50": 406.6396795,
+            "p95_nearest_rank": 434.381166
+          },
+          "effective_ms_per_image": 101.6445661611111,
+          "images_per_second": 9.838204222495829,
+          "http_latency_sum_ms": 36592.043818,
+          "pass_http_latency_sum_ms": [
+            12274.485406,
+            12075.628915,
+            12241.929497
+          ]
+        },
+        "parallel": {
+          "mode": "parallel",
+          "images_per_request": 4,
+          "request_count": 90,
+          "execution_mode": "parallel",
+          "command": [
+            "/home/lutica/personal/skid/skid-desion/target/cuda-architectures/sm_86/release/l2s1",
+            "--model",
+            "/home/lutica/personal/skid/skid-desion/models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+            "--mmproj",
+            "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3-VL-2B-Instruct-Q8_0.gguf",
+            "--device",
+            "cuda",
+            "--context",
+            "4096",
+            "--threads",
+            "4",
+            "--model-load-mode",
+            "read",
+            "--listen",
+            "127.0.0.1:18778",
+            "--min-top-probability",
+            "0.8",
+            "--min-candidate-mass",
+            "0.05",
+            "--vision-optimized"
+          ],
+          "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+          "runtime_override": null,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 3766.269456,
+          "warmup_group_ms": 492.645311,
+          "group_latency_ms": {
+            "mean": 229.21114154444444,
+            "p50": 228.3215015,
+            "p95_nearest_rank": 234.117696
+          },
+          "effective_ms_per_image": 57.30278538611111,
+          "images_per_second": 17.451158669895605,
+          "http_latency_sum_ms": 20629.002739,
+          "pass_http_latency_sum_ms": [
+            6888.362607,
+            6871.600503,
+            6869.039629
+          ]
+        }
+      },
+      "quality": {
+        "fresh": [
+          {
+            "repetition": 1,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 91,
+            "correct_over_all": 0.7583333333333333,
+            "accepted_accuracy": 0.7913043478260869,
+            "raw_top1_correct": 95
+          },
+          {
+            "repetition": 2,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 91,
+            "correct_over_all": 0.7583333333333333,
+            "accepted_accuracy": 0.7913043478260869,
+            "raw_top1_correct": 95
+          },
+          {
+            "repetition": 3,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 91,
+            "correct_over_all": 0.7583333333333333,
+            "accepted_accuracy": 0.7913043478260869,
+            "raw_top1_correct": 95
+          }
+        ],
+        "parallel": [
+          {
+            "repetition": 1,
+            "accepted": 116,
+            "abstained": 4,
+            "accepted_correct": 92,
+            "correct_over_all": 0.7666666666666667,
+            "accepted_accuracy": 0.7931034482758621,
+            "raw_top1_correct": 95
+          },
+          {
+            "repetition": 2,
+            "accepted": 116,
+            "abstained": 4,
+            "accepted_correct": 92,
+            "correct_over_all": 0.7666666666666667,
+            "accepted_accuracy": 0.7931034482758621,
+            "raw_top1_correct": 95
+          },
+          {
+            "repetition": 3,
+            "accepted": 116,
+            "abstained": 4,
+            "accepted_correct": 92,
+            "correct_over_all": 0.7666666666666667,
+            "accepted_accuracy": 0.7931034482758621,
+            "raw_top1_correct": 95
+          }
+        ]
+      },
+      "comparison": {
+        "changed_selected": 3,
+        "changed_top1": 0,
+        "changed_abstention": 3,
+        "changed_input_tokens": 0,
+        "max_probability_delta": 0.19148635462028984,
+        "max_candidate_mass_delta": 2.3758499510639908e-05,
+        "image_evaluations": 360,
+        "unique_changed_image_indices": {
+          "selected": [
+            1
+          ],
+          "raw_top1": [],
+          "abstention_reasons": [
+            1
+          ]
+        },
+        "within_existing_equivalence_tolerance": false
+      },
+      "parallel_http_time_change_percent": -43.624349485358934,
+      "baseline_recorded_run": "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/qwen3vl",
+      "wave_counter_distributions": {
+        "decoder_batch_max_sequences": {
+          "4": 90
+        },
+        "decoder_calls": {
+          "3": 90
+        },
+        "projector_batch_max": {
+          "1": 90
+        },
+        "projector_encode_calls": {
+          "4": 90
+        },
+        "projector_reused_chunks": {
+          "0": 90
+        },
+        "kv_clear_calls": {
+          "1": 90
+        },
+        "kv_clear_skipped": {
+          "1": 90
+        }
+      },
+      "last_wave_metrics": {
+        "decoder_batch_max_sequences": 4,
+        "decoder_calls": 3,
+        "kv_clear_calls": 1,
+        "kv_clear_scope": "since_last_native_vision_start",
+        "kv_clear_skipped": 1,
+        "preparation_cache": {
+          "candidates": {
+            "entries": 1,
+            "evictions": 0,
+            "hits": 3,
+            "insertions": 1,
+            "misses": 1,
+            "retained_bytes": 161,
+            "skipped": 0
+          },
+          "prompts": {
+            "entries": 0,
+            "evictions": 0,
+            "hits": 0,
+            "insertions": 0,
+            "misses": 0,
+            "retained_bytes": 0,
+            "skipped": 0
+          },
+          "vision": {
+            "entries": 4,
+            "evictions": 0,
+            "hits": 360,
+            "insertions": 4,
+            "misses": 4,
+            "retained_bytes": 11452,
+            "skipped": 0
+          }
+        },
+        "preparation_cache_scope": "backend_lifetime_since_cache_configuration",
+        "projector_batch_max": 1,
+        "projector_encode_calls": 4,
+        "projector_reused_chunks": 0,
+        "scope": "last_native_wave"
+      },
+      "default_fresh_invariance": {
+        "comparison": {
+          "changed_selected": 0,
+          "changed_top1": 0,
+          "changed_abstention": 0,
+          "changed_input_tokens": 0,
+          "max_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "image_evaluations": 120,
+          "unique_changed_image_indices": {
+            "selected": [],
+            "raw_top1": [],
+            "abstention_reasons": []
+          },
+          "within_existing_equivalence_tolerance": true
+        },
+        "timing": {
+          "fresh": {
+            "mode": "fresh",
+            "images_per_request": 4,
+            "request_count": 30,
+            "execution_mode": "fresh",
+            "command": [
+              "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/baseline-runtime/l2s1",
+              "--model",
+              "/home/lutica/personal/skid/skid-desion/models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+              "--mmproj",
+              "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3-VL-2B-Instruct-Q8_0.gguf",
+              "--device",
+              "cuda",
+              "--context",
+              "4096",
+              "--threads",
+              "4",
+              "--model-load-mode",
+              "read",
+              "--listen",
+              "127.0.0.1:18778",
+              "--min-top-probability",
+              "0.8",
+              "--min-candidate-mass",
+              "0.05",
+              "--execution-mode",
+              "fresh",
+              "--parallel-width",
+              "4",
+              "--batch",
+              "256",
+              "--ubatch",
+              "256",
+              "--flash-attention",
+              "off",
+              "--evidence-transfer",
+              "full",
+              "--preparation-cache-bytes",
+              "0"
+            ],
+            "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+            "runtime_override": "results/vision-optimized-20260926/baseline-runtime",
+            "image_evaluations": 120,
+            "startup_to_health_ms": 5038.287396,
+            "warmup_group_ms": 564.289289,
+            "group_latency_ms": {
+              "mean": 405.53265623333334,
+              "p50": 403.289451,
+              "p95_nearest_rank": 422.6707
+            },
+            "effective_ms_per_image": 101.38316405833332,
+            "images_per_second": 9.863570636093238,
+            "http_latency_sum_ms": 12165.979687,
+            "pass_http_latency_sum_ms": [
+              12165.979687
+            ]
+          },
+          "parallel": {
+            "mode": "parallel",
+            "images_per_request": 4,
+            "request_count": 30,
+            "execution_mode": "fresh",
+            "command": [
+              "/home/lutica/personal/skid/skid-desion/target/cuda-architectures/sm_86/release/l2s1",
+              "--model",
+              "/home/lutica/personal/skid/skid-desion/models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+              "--mmproj",
+              "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3-VL-2B-Instruct-Q8_0.gguf",
+              "--device",
+              "cuda",
+              "--context",
+              "4096",
+              "--threads",
+              "4",
+              "--model-load-mode",
+              "read",
+              "--listen",
+              "127.0.0.1:18778",
+              "--min-top-probability",
+              "0.8",
+              "--min-candidate-mass",
+              "0.05",
+              "--execution-mode",
+              "fresh",
+              "--parallel-width",
+              "4",
+              "--batch",
+              "256",
+              "--ubatch",
+              "256",
+              "--flash-attention",
+              "off",
+              "--evidence-transfer",
+              "full",
+              "--preparation-cache-bytes",
+              "0"
+            ],
+            "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+            "runtime_override": null,
+            "image_evaluations": 120,
+            "startup_to_health_ms": 3515.364195,
+            "warmup_group_ms": 719.893899,
+            "group_latency_ms": {
+              "mean": 395.6230569,
+              "p50": 393.94845799999996,
+              "p95_nearest_rank": 419.949804
+            },
+            "effective_ms_per_image": 98.905764225,
+            "images_per_second": 10.110634176235749,
+            "http_latency_sum_ms": 11868.691707,
+            "pass_http_latency_sum_ms": [
+              11868.691707
+            ]
+          }
+        },
+        "repetitions": 1,
+        "raw_summary": "results/vision-optimized-20260926/qwen3vl-fresh-control-final/summary.json"
+      },
+      "optimized_server_log": {
+        "lines": 7,
+        "sha256": "5983fb89edd315e5a0f3e2a17c7fcad40c0c654b9334f775c82c7d3f3569eee4"
+      },
+      "raw_summary": "results/vision-optimized-20260926/qwen3vl-optimized-final/summary.json"
+    },
+    "gemma4": {
+      "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+      "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+      "mmproj_sha256": "9406f99c16d68cda4f1f0552192dcc99021ea1fc6d2fd50b1dc3ccf30d04b292",
+      "instruction": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": [
+        {
+          "id": "cardboard",
+          "criterion": "A piece of corrugated cardboard or cardboard packaging."
+        },
+        {
+          "id": "glass",
+          "criterion": "A glass object, such as a bottle or jar."
+        },
+        {
+          "id": "metal",
+          "criterion": "A metal object, such as a can or metal container."
+        },
+        {
+          "id": "paper",
+          "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+        },
+        {
+          "id": "plastic",
+          "criterion": "A plastic object, such as a bottle or plastic container."
+        },
+        {
+          "id": "trash",
+          "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+        }
+      ],
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "timing": {
+        "fresh": {
+          "mode": "fresh",
+          "images_per_request": 4,
+          "request_count": 90,
+          "execution_mode": "fresh",
+          "command": [
+            "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/baseline-runtime/l2s1",
+            "--model",
+            "/home/lutica/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf",
+            "--mmproj",
+            "/home/lutica/personal/skid/skid-desion/models/mmproj-gemma-4-E2B-it-Q8_0.gguf",
+            "--device",
+            "cuda",
+            "--context",
+            "4096",
+            "--threads",
+            "4",
+            "--model-load-mode",
+            "read",
+            "--listen",
+            "127.0.0.1:18778",
+            "--min-top-probability",
+            "0.8",
+            "--min-candidate-mass",
+            "0.05",
+            "--execution-mode",
+            "fresh",
+            "--parallel-width",
+            "4",
+            "--batch",
+            "256",
+            "--ubatch",
+            "256",
+            "--flash-attention",
+            "off",
+            "--evidence-transfer",
+            "full",
+            "--preparation-cache-bytes",
+            "0"
+          ],
+          "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+          "runtime_override": "results/vision-optimized-20260926/baseline-runtime",
+          "image_evaluations": 360,
+          "startup_to_health_ms": 7070.405065,
+          "warmup_group_ms": 783.559926,
+          "group_latency_ms": {
+            "mean": 311.6471668444444,
+            "p50": 310.95311100000004,
+            "p95_nearest_rank": 316.400697
+          },
+          "effective_ms_per_image": 77.9117917111111,
+          "images_per_second": 12.83502763879307,
+          "http_latency_sum_ms": 28048.245016,
+          "pass_http_latency_sum_ms": [
+            9353.812045,
+            9318.096134,
+            9376.336837
+          ]
+        },
+        "parallel": {
+          "mode": "parallel",
+          "images_per_request": 4,
+          "request_count": 90,
+          "execution_mode": "parallel",
+          "command": [
+            "/home/lutica/personal/skid/skid-desion/target/cuda-architectures/sm_86/release/l2s1",
+            "--model",
+            "/home/lutica/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf",
+            "--mmproj",
+            "/home/lutica/personal/skid/skid-desion/models/mmproj-gemma-4-E2B-it-Q8_0.gguf",
+            "--device",
+            "cuda",
+            "--context",
+            "4096",
+            "--threads",
+            "4",
+            "--model-load-mode",
+            "read",
+            "--listen",
+            "127.0.0.1:18778",
+            "--min-top-probability",
+            "0.8",
+            "--min-candidate-mass",
+            "0.05",
+            "--vision-optimized"
+          ],
+          "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+          "runtime_override": null,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 7523.14107,
+          "warmup_group_ms": 528.876422,
+          "group_latency_ms": {
+            "mean": 207.35958152222221,
+            "p50": 207.0663035,
+            "p95_nearest_rank": 209.69681
+          },
+          "effective_ms_per_image": 51.839895380555554,
+          "images_per_second": 19.290162386691208,
+          "http_latency_sum_ms": 18662.362337,
+          "pass_http_latency_sum_ms": [
+            6229.331991,
+            6214.522745,
+            6218.507601
+          ]
+        }
+      },
+      "quality": {
+        "fresh": [
+          {
+            "repetition": 1,
+            "accepted": 113,
+            "abstained": 7,
+            "accepted_correct": 64,
+            "correct_over_all": 0.5333333333333333,
+            "accepted_accuracy": 0.5663716814159292,
+            "raw_top1_correct": 64
+          },
+          {
+            "repetition": 2,
+            "accepted": 113,
+            "abstained": 7,
+            "accepted_correct": 64,
+            "correct_over_all": 0.5333333333333333,
+            "accepted_accuracy": 0.5663716814159292,
+            "raw_top1_correct": 64
+          },
+          {
+            "repetition": 3,
+            "accepted": 113,
+            "abstained": 7,
+            "accepted_correct": 64,
+            "correct_over_all": 0.5333333333333333,
+            "accepted_accuracy": 0.5663716814159292,
+            "raw_top1_correct": 64
+          }
+        ],
+        "parallel": [
+          {
+            "repetition": 1,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 62,
+            "correct_over_all": 0.5166666666666667,
+            "accepted_accuracy": 0.5391304347826087,
+            "raw_top1_correct": 64
+          },
+          {
+            "repetition": 2,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 62,
+            "correct_over_all": 0.5166666666666667,
+            "accepted_accuracy": 0.5391304347826087,
+            "raw_top1_correct": 64
+          },
+          {
+            "repetition": 3,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 62,
+            "correct_over_all": 0.5166666666666667,
+            "accepted_accuracy": 0.5391304347826087,
+            "raw_top1_correct": 64
+          }
+        ]
+      },
+      "comparison": {
+        "changed_selected": 18,
+        "changed_top1": 9,
+        "changed_abstention": 18,
+        "changed_input_tokens": 0,
+        "max_probability_delta": 0.691367884201238,
+        "max_candidate_mass_delta": 0.00013780269268892642,
+        "image_evaluations": 360,
+        "unique_changed_image_indices": {
+          "selected": [
+            1,
+            3,
+            17,
+            63,
+            68,
+            70
+          ],
+          "raw_top1": [
+            70,
+            101,
+            103
+          ],
+          "abstention_reasons": [
+            1,
+            3,
+            17,
+            63,
+            68,
+            70
+          ]
+        },
+        "within_existing_equivalence_tolerance": false
+      },
+      "parallel_http_time_change_percent": -33.463350999842824,
+      "baseline_recorded_run": "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/gemma4",
+      "wave_counter_distributions": {
+        "decoder_batch_max_sequences": {
+          "4": 90
+        },
+        "decoder_calls": {
+          "3": 90
+        },
+        "projector_batch_max": {
+          "1": 90
+        },
+        "projector_encode_calls": {
+          "4": 90
+        },
+        "projector_reused_chunks": {
+          "0": 90
+        },
+        "kv_clear_calls": {
+          "1": 90
+        },
+        "kv_clear_skipped": {
+          "1": 90
+        }
+      },
+      "last_wave_metrics": {
+        "decoder_batch_max_sequences": 4,
+        "decoder_calls": 3,
+        "kv_clear_calls": 1,
+        "kv_clear_scope": "since_last_native_vision_start",
+        "kv_clear_skipped": 1,
+        "preparation_cache": {
+          "candidates": {
+            "entries": 1,
+            "evictions": 0,
+            "hits": 3,
+            "insertions": 1,
+            "misses": 1,
+            "retained_bytes": 149,
+            "skipped": 0
+          },
+          "prompts": {
+            "entries": 0,
+            "evictions": 0,
+            "hits": 0,
+            "insertions": 0,
+            "misses": 0,
+            "retained_bytes": 0,
+            "skipped": 0
+          },
+          "vision": {
+            "entries": 4,
+            "evictions": 0,
+            "hits": 360,
+            "insertions": 4,
+            "misses": 4,
+            "retained_bytes": 11404,
+            "skipped": 0
+          }
+        },
+        "preparation_cache_scope": "backend_lifetime_since_cache_configuration",
+        "projector_batch_max": 1,
+        "projector_encode_calls": 4,
+        "projector_reused_chunks": 0,
+        "scope": "last_native_wave"
+      },
+      "default_fresh_invariance": {
+        "comparison": {
+          "changed_selected": 0,
+          "changed_top1": 0,
+          "changed_abstention": 0,
+          "changed_input_tokens": 0,
+          "max_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "image_evaluations": 120,
+          "unique_changed_image_indices": {
+            "selected": [],
+            "raw_top1": [],
+            "abstention_reasons": []
+          },
+          "within_existing_equivalence_tolerance": true
+        },
+        "timing": {
+          "fresh": {
+            "mode": "fresh",
+            "images_per_request": 4,
+            "request_count": 30,
+            "execution_mode": "fresh",
+            "command": [
+              "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/baseline-runtime/l2s1",
+              "--model",
+              "/home/lutica/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf",
+              "--mmproj",
+              "/home/lutica/personal/skid/skid-desion/models/mmproj-gemma-4-E2B-it-Q8_0.gguf",
+              "--device",
+              "cuda",
+              "--context",
+              "4096",
+              "--threads",
+              "4",
+              "--model-load-mode",
+              "read",
+              "--listen",
+              "127.0.0.1:18778",
+              "--min-top-probability",
+              "0.8",
+              "--min-candidate-mass",
+              "0.05",
+              "--execution-mode",
+              "fresh",
+              "--parallel-width",
+              "4",
+              "--batch",
+              "256",
+              "--ubatch",
+              "256",
+              "--flash-attention",
+              "off",
+              "--evidence-transfer",
+              "full",
+              "--preparation-cache-bytes",
+              "0"
+            ],
+            "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+            "runtime_override": "results/vision-optimized-20260926/baseline-runtime",
+            "image_evaluations": 120,
+            "startup_to_health_ms": 8777.566688,
+            "warmup_group_ms": 969.553464,
+            "group_latency_ms": {
+              "mean": 309.735501,
+              "p50": 309.857397,
+              "p95_nearest_rank": 311.806897
+            },
+            "effective_ms_per_image": 77.43387525,
+            "images_per_second": 12.914244531497861,
+            "http_latency_sum_ms": 9292.06503,
+            "pass_http_latency_sum_ms": [
+              9292.06503
+            ]
+          },
+          "parallel": {
+            "mode": "parallel",
+            "images_per_request": 4,
+            "request_count": 30,
+            "execution_mode": "fresh",
+            "command": [
+              "/home/lutica/personal/skid/skid-desion/target/cuda-architectures/sm_86/release/l2s1",
+              "--model",
+              "/home/lutica/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf",
+              "--mmproj",
+              "/home/lutica/personal/skid/skid-desion/models/mmproj-gemma-4-E2B-it-Q8_0.gguf",
+              "--device",
+              "cuda",
+              "--context",
+              "4096",
+              "--threads",
+              "4",
+              "--model-load-mode",
+              "read",
+              "--listen",
+              "127.0.0.1:18778",
+              "--min-top-probability",
+              "0.8",
+              "--min-candidate-mass",
+              "0.05",
+              "--execution-mode",
+              "fresh",
+              "--parallel-width",
+              "4",
+              "--batch",
+              "256",
+              "--ubatch",
+              "256",
+              "--flash-attention",
+              "off",
+              "--evidence-transfer",
+              "full",
+              "--preparation-cache-bytes",
+              "0"
+            ],
+            "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+            "runtime_override": null,
+            "image_evaluations": 120,
+            "startup_to_health_ms": 7523.505208,
+            "warmup_group_ms": 723.47411,
+            "group_latency_ms": {
+              "mean": 316.5875437,
+              "p50": 308.496754,
+              "p95_nearest_rank": 341.442301
+            },
+            "effective_ms_per_image": 79.146885925,
+            "images_per_second": 12.634735887746805,
+            "http_latency_sum_ms": 9497.626311,
+            "pass_http_latency_sum_ms": [
+              9497.626311
+            ]
+          }
+        },
+        "repetitions": 1,
+        "raw_summary": "results/vision-optimized-20260926/gemma4-fresh-control-final/summary.json"
+      },
+      "optimized_server_log": {
+        "lines": 9,
+        "sha256": "cc3deb3b7d001a1929ac2c1b6733023ab69f96bf48c21e129f02471ab9dad049"
+      },
+      "raw_summary": "results/vision-optimized-20260926/gemma4-optimized-final/summary.json"
+    },
+    "smolvlm": {
+      "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+      "model_sha256": "2a31195d3769c0b0fd0a4906201666108834848db768af11de1d2cef7cd35e65",
+      "mmproj_sha256": "7e943f7c53f0382a6fc41b6ee0c2def63ba4fded9ab8ed039cc9e2ab905e0edd",
+      "instruction": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": [
+        {
+          "id": "cardboard",
+          "criterion": "A piece of corrugated cardboard or cardboard packaging."
+        },
+        {
+          "id": "glass",
+          "criterion": "A glass object, such as a bottle or jar."
+        },
+        {
+          "id": "metal",
+          "criterion": "A metal object, such as a can or metal container."
+        },
+        {
+          "id": "paper",
+          "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+        },
+        {
+          "id": "plastic",
+          "criterion": "A plastic object, such as a bottle or plastic container."
+        },
+        {
+          "id": "trash",
+          "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+        }
+      ],
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "timing": {
+        "fresh": {
+          "mode": "fresh",
+          "images_per_request": 4,
+          "request_count": 90,
+          "execution_mode": "fresh",
+          "command": [
+            "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/baseline-runtime/l2s1",
+            "--model",
+            "/home/lutica/personal/skid/skid-desion/models/SmolVLM-256M-Instruct-Q8_0.gguf",
+            "--mmproj",
+            "/home/lutica/personal/skid/skid-desion/models/mmproj-SmolVLM-256M-Instruct-Q8_0.gguf",
+            "--device",
+            "cuda",
+            "--context",
+            "4096",
+            "--threads",
+            "4",
+            "--model-load-mode",
+            "read",
+            "--listen",
+            "127.0.0.1:18778",
+            "--min-top-probability",
+            "0.8",
+            "--min-candidate-mass",
+            "0.05",
+            "--execution-mode",
+            "fresh",
+            "--parallel-width",
+            "4",
+            "--batch",
+            "256",
+            "--ubatch",
+            "256",
+            "--flash-attention",
+            "off",
+            "--evidence-transfer",
+            "full",
+            "--preparation-cache-bytes",
+            "0"
+          ],
+          "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+          "runtime_override": "results/vision-optimized-20260926/baseline-runtime",
+          "image_evaluations": 360,
+          "startup_to_health_ms": 2015.231028,
+          "warmup_group_ms": 636.589741,
+          "group_latency_ms": {
+            "mean": 431.28049962222224,
+            "p50": 427.5376465,
+            "p95_nearest_rank": 480.071697
+          },
+          "effective_ms_per_image": 107.82012490555555,
+          "images_per_second": 9.274706376717191,
+          "http_latency_sum_ms": 38815.244966,
+          "pass_http_latency_sum_ms": [
+            12930.654417,
+            12819.980502,
+            13064.610047
+          ]
+        },
+        "parallel": {
+          "mode": "parallel",
+          "images_per_request": 4,
+          "request_count": 90,
+          "execution_mode": "parallel",
+          "command": [
+            "/home/lutica/personal/skid/skid-desion/target/cuda-architectures/sm_86/release/l2s1",
+            "--model",
+            "/home/lutica/personal/skid/skid-desion/models/SmolVLM-256M-Instruct-Q8_0.gguf",
+            "--mmproj",
+            "/home/lutica/personal/skid/skid-desion/models/mmproj-SmolVLM-256M-Instruct-Q8_0.gguf",
+            "--device",
+            "cuda",
+            "--context",
+            "4096",
+            "--threads",
+            "4",
+            "--model-load-mode",
+            "read",
+            "--listen",
+            "127.0.0.1:18778",
+            "--min-top-probability",
+            "0.8",
+            "--min-candidate-mass",
+            "0.05",
+            "--vision-optimized"
+          ],
+          "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+          "runtime_override": null,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 1763.918207,
+          "warmup_group_ms": 420.664301,
+          "group_latency_ms": {
+            "mean": 170.6590604222222,
+            "p50": 168.5319075,
+            "p95_nearest_rank": 186.914601
+          },
+          "effective_ms_per_image": 42.66476510555555,
+          "images_per_second": 23.43854460527162,
+          "http_latency_sum_ms": 15359.315438,
+          "pass_http_latency_sum_ms": [
+            5208.058672,
+            5081.628739,
+            5069.628027
+          ]
+        }
+      },
+      "quality": {
+        "fresh": [
+          {
+            "repetition": 1,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          },
+          {
+            "repetition": 2,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          },
+          {
+            "repetition": 3,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          }
+        ],
+        "parallel": [
+          {
+            "repetition": 1,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          },
+          {
+            "repetition": 2,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          },
+          {
+            "repetition": 3,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          }
+        ]
+      },
+      "comparison": {
+        "changed_selected": 0,
+        "changed_top1": 39,
+        "changed_abstention": 9,
+        "changed_input_tokens": 0,
+        "max_probability_delta": 0.13120451425745827,
+        "max_candidate_mass_delta": 0.0003609136488601796,
+        "image_evaluations": 360,
+        "unique_changed_image_indices": {
+          "selected": [],
+          "raw_top1": [
+            14,
+            15,
+            22,
+            29,
+            30,
+            32,
+            33,
+            35,
+            59,
+            83,
+            101,
+            105,
+            107
+          ],
+          "abstention_reasons": [
+            58,
+            70,
+            108
+          ]
+        },
+        "within_existing_equivalence_tolerance": false
+      },
+      "parallel_http_time_change_percent": -60.42968310143628,
+      "baseline_recorded_run": "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/smolvlm",
+      "wave_counter_distributions": {
+        "decoder_batch_max_sequences": {
+          "4": 90
+        },
+        "decoder_calls": {
+          "5": 90
+        },
+        "projector_batch_max": {
+          "1": 90
+        },
+        "projector_encode_calls": {
+          "8": 90
+        },
+        "projector_reused_chunks": {
+          "0": 90
+        },
+        "kv_clear_calls": {
+          "1": 90
+        },
+        "kv_clear_skipped": {
+          "1": 90
+        }
+      },
+      "last_wave_metrics": {
+        "decoder_batch_max_sequences": 4,
+        "decoder_calls": 5,
+        "kv_clear_calls": 1,
+        "kv_clear_scope": "since_last_native_vision_start",
+        "kv_clear_skipped": 1,
+        "preparation_cache": {
+          "candidates": {
+            "entries": 1,
+            "evictions": 0,
+            "hits": 3,
+            "insertions": 1,
+            "misses": 1,
+            "retained_bytes": 157,
+            "skipped": 0
+          },
+          "prompts": {
+            "entries": 0,
+            "evictions": 0,
+            "hits": 0,
+            "insertions": 0,
+            "misses": 0,
+            "retained_bytes": 0,
+            "skipped": 0
+          },
+          "vision": {
+            "entries": 4,
+            "evictions": 0,
+            "hits": 360,
+            "insertions": 4,
+            "misses": 4,
+            "retained_bytes": 11440,
+            "skipped": 0
+          }
+        },
+        "preparation_cache_scope": "backend_lifetime_since_cache_configuration",
+        "projector_batch_max": 1,
+        "projector_encode_calls": 8,
+        "projector_reused_chunks": 0,
+        "scope": "last_native_wave"
+      },
+      "default_fresh_invariance": {
+        "comparison": {
+          "changed_selected": 0,
+          "changed_top1": 0,
+          "changed_abstention": 0,
+          "changed_input_tokens": 0,
+          "max_probability_delta": 0.0,
+          "max_candidate_mass_delta": 0.0,
+          "image_evaluations": 120,
+          "unique_changed_image_indices": {
+            "selected": [],
+            "raw_top1": [],
+            "abstention_reasons": []
+          },
+          "within_existing_equivalence_tolerance": true
+        },
+        "timing": {
+          "fresh": {
+            "mode": "fresh",
+            "images_per_request": 4,
+            "request_count": 30,
+            "execution_mode": "fresh",
+            "command": [
+              "/home/lutica/personal/skid/skid-desion/results/vision-optimized-20260926/baseline-runtime/l2s1",
+              "--model",
+              "/home/lutica/personal/skid/skid-desion/models/SmolVLM-256M-Instruct-Q8_0.gguf",
+              "--mmproj",
+              "/home/lutica/personal/skid/skid-desion/models/mmproj-SmolVLM-256M-Instruct-Q8_0.gguf",
+              "--device",
+              "cuda",
+              "--context",
+              "4096",
+              "--threads",
+              "4",
+              "--model-load-mode",
+              "read",
+              "--listen",
+              "127.0.0.1:18778",
+              "--min-top-probability",
+              "0.8",
+              "--min-candidate-mass",
+              "0.05",
+              "--execution-mode",
+              "fresh",
+              "--parallel-width",
+              "4",
+              "--batch",
+              "256",
+              "--ubatch",
+              "256",
+              "--flash-attention",
+              "off",
+              "--evidence-transfer",
+              "full",
+              "--preparation-cache-bytes",
+              "0"
+            ],
+            "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+            "runtime_override": "results/vision-optimized-20260926/baseline-runtime",
+            "image_evaluations": 120,
+            "startup_to_health_ms": 1762.778285,
+            "warmup_group_ms": 755.593293,
+            "group_latency_ms": {
+              "mean": 437.2376211,
+              "p50": 433.1351985,
+              "p95_nearest_rank": 500.919297
+            },
+            "effective_ms_per_image": 109.309405275,
+            "images_per_second": 9.14834361676569,
+            "http_latency_sum_ms": 13117.128633,
+            "pass_http_latency_sum_ms": [
+              13117.128633
+            ]
+          },
+          "parallel": {
+            "mode": "parallel",
+            "images_per_request": 4,
+            "request_count": 30,
+            "execution_mode": "fresh",
+            "command": [
+              "/home/lutica/personal/skid/skid-desion/target/cuda-architectures/sm_86/release/l2s1",
+              "--model",
+              "/home/lutica/personal/skid/skid-desion/models/SmolVLM-256M-Instruct-Q8_0.gguf",
+              "--mmproj",
+              "/home/lutica/personal/skid/skid-desion/models/mmproj-SmolVLM-256M-Instruct-Q8_0.gguf",
+              "--device",
+              "cuda",
+              "--context",
+              "4096",
+              "--threads",
+              "4",
+              "--model-load-mode",
+              "read",
+              "--listen",
+              "127.0.0.1:18778",
+              "--min-top-probability",
+              "0.8",
+              "--min-candidate-mass",
+              "0.05",
+              "--execution-mode",
+              "fresh",
+              "--parallel-width",
+              "4",
+              "--batch",
+              "256",
+              "--ubatch",
+              "256",
+              "--flash-attention",
+              "off",
+              "--evidence-transfer",
+              "full",
+              "--preparation-cache-bytes",
+              "0"
+            ],
+            "binary_sha256": "067bcc5ff58b6e9b0739c697035d4f9a62f2f0542afc4687c0ee3841d54e02ae",
+            "runtime_override": null,
+            "image_evaluations": 120,
+            "startup_to_health_ms": 1511.8706,
+            "warmup_group_ms": 709.9964,
+            "group_latency_ms": {
+              "mean": 430.34280966666665,
+              "p50": 428.98064999999997,
+              "p95_nearest_rank": 471.6226
+            },
+            "effective_ms_per_image": 107.58570241666666,
+            "images_per_second": 9.294915379435073,
+            "http_latency_sum_ms": 12910.28429,
+            "pass_http_latency_sum_ms": [
+              12910.28429
+            ]
+          }
+        },
+        "repetitions": 1,
+        "raw_summary": "results/vision-optimized-20260926/smolvlm-fresh-control-final/summary.json"
+      },
+      "optimized_server_log": {
+        "lines": 3,
+        "sha256": "c3c7d68ec83a7553946c033c5993a74cb87668feff269f45c8b4b897d9f998bd"
+      },
+      "raw_summary": "results/vision-optimized-20260926/smolvlm-optimized-final/summary.json"
+    }
+  },
+  "real_model_tests": [
+    {
+      "model": "qwen3vl",
+      "test": "real_vision_optimizations_preserve_full_evidence_and_recover",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final2-qwen3vl-real_vision_optimizations_preserve_full_evidence_and_recover.log"
+    },
+    {
+      "model": "qwen3vl",
+      "test": "real_vision_batch_preserves_image_state_order_and_recovers_after_errors",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final2-qwen3vl-real_vision_batch_preserves_image_state_order_and_recovers_after_errors.log"
+    },
+    {
+      "model": "gemma4",
+      "test": "real_vision_optimizations_preserve_full_evidence_and_recover",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final2-gemma4-real_vision_optimizations_preserve_full_evidence_and_recover.log"
+    },
+    {
+      "model": "gemma4",
+      "test": "real_vision_batch_preserves_image_state_order_and_recovers_after_errors",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final2-gemma4-real_vision_batch_preserves_image_state_order_and_recovers_after_errors.log"
+    },
+    {
+      "model": "smolvlm",
+      "test": "real_vision_optimizations_preserve_full_evidence_and_recover",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final2-smolvlm-real_vision_optimizations_preserve_full_evidence_and_recover.log"
+    },
+    {
+      "model": "smolvlm",
+      "test": "real_vision_batch_preserves_image_state_order_and_recovers_after_errors",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final2-smolvlm-real_vision_batch_preserves_image_state_order_and_recovers_after_errors.log"
+    },
+    {
+      "test": "real_model_prefix_reuse",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final-real_model_prefix_reuse.log"
+    },
+    {
+      "test": "shared_state_supports_dynamic_questions_and_clears_boundaries",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final-shared_state_supports_dynamic_questions_and_clears_boundaries.log"
+    },
+    {
+      "test": "compact_native_matches_full_logits_and_clears_failed_requests",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final-compact_native_matches_full_logits_and_clears_failed_requests.log"
+    },
+    {
+      "test": "hybrid_state_restore_reuses_prefix_and_recovers_after_budget_fallback",
+      "exit_code": 0,
+      "log": "results/vision-optimized-20260926/final-hybrid_state_restore_reuses_prefix_and_recovers_after_budget_fallback.log"
+    }
+  ],
+  "general_tests": {
+    "release_featured_library": {
+      "passed": 20,
+      "ignored": 1
+    },
+    "cli": {
+      "passed": 1
+    },
+    "compute": {
+      "passed": 3,
+      "ignored": 3
+    },
+    "optimization_contract": {
+      "passed": 6
+    },
+    "prepared_cache": {
+      "passed": 1,
+      "ignored": 1
+    }
+  },
+  "limitations": [
+    "All fresh-versus-optimized comparisons fail the unchanged equivalence criterion.",
+    "Metal runtime and performance unverified.",
+    "Distinct images do not reuse projector embeddings; preparation-cache hits are not KV reuse.",
+    "Compact evidence still computes and transfers the full model output to the native host."
+  ]
+}

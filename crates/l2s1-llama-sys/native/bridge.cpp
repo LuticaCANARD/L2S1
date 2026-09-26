@@ -20,6 +20,7 @@
 #include <mutex>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -85,6 +86,9 @@ struct vision_batch_metrics {
     size_t projector_batch_max = 0;
     size_t decoder_calls = 0;
     size_t decoder_batch_max_sequences = 0;
+    size_t projector_reused_chunks = 0;
+    size_t kv_clear_calls = 0;
+    size_t kv_clear_skipped = 0;
 };
 
 struct engine {
@@ -107,6 +111,8 @@ struct engine {
     std::string runtime_libraries;
     std::vector<int32_t> cached_tokens;
     vision_batch_metrics vision_metrics;
+    bool memory_dirty = false;
+    bool vision_projector_reuse = false;
     // Own pattern strings for at least the model lifetime; no static leaks.
     std::vector<std::string> cpu_moe_patterns;
     std::vector<llama_model_tensor_buft_override> placement_overrides;
@@ -144,6 +150,8 @@ extern "C" engine * sd_open_loading(const char * path, uint32_t context, uint32_
                 else if (level == "debug") native_log.threshold = GGML_LOG_LEVEL_DEBUG;
             }
             llama_log_set(llama_log_callback, nullptr);
+            // Vision/helper/CLIP logging has a separate upstream callback.
+            mtmd_helper_log_set(llama_log_callback, nullptr);
             ggml_backend_load_all();
             llama_backend_init();
         });
@@ -283,6 +291,7 @@ extern "C" bool sd_load_vision_projector(engine * e, const char * path,
         if (!e || !e->model || !path || !*path) throw std::runtime_error("invalid vision projector path");
         if (e->vision) throw std::runtime_error("vision projector already loaded");
         auto params = mtmd_context_params_default();
+        params.print_timings = log_info_enabled();
         params.use_gpu = e->devices[0] != nullptr;
         params.device = e->devices[0];
         params.n_threads = e->context_params.n_threads;
@@ -336,11 +345,26 @@ extern "C" int32_t sd_tokenize(const engine * e, const char * text, int32_t leng
 }
 
 extern "C" void sd_clear(engine * e) noexcept {
+    if (!e) return;
     e->cached_tokens.clear();
     e->last_feature_row = -1;
-    if (e->ctx) {
-        if (auto memory = llama_get_memory(e->ctx)) llama_memory_clear(memory, true);
+    // Every operation that can write KV marks it dirty before entering llama.cpp.
+    // Failed decodes/restores may have written partial state and still need zeroing.
+    if (!e->memory_dirty) {
+        ++e->vision_metrics.kv_clear_skipped;
+        return;
     }
+    if (e->ctx) {
+        if (auto memory = llama_get_memory(e->ctx)) {
+            llama_memory_clear(memory, true);
+            ++e->vision_metrics.kv_clear_calls;
+        }
+    }
+    e->memory_dirty = false;
+}
+
+extern "C" void sd_set_vision_projector_reuse(engine * e, bool enabled) noexcept {
+    if (e) e->vision_projector_reuse = enabled;
 }
 
 // Unmasked NextN exposes Gemma4's post-norm LM-head input without forcing
@@ -467,6 +491,7 @@ static const float * forward_logits(engine * e, const int32_t * tokens, int32_t 
             b.value.seq_id[j][0] = 0;
             b.value.logits[j] = start + j == count - 1;
         }
+        e->memory_dirty = true;
         if (llama_decode(e->ctx, b.value) != 0) throw std::runtime_error("llama_decode failed");
         e->last_feature_row = b.value.n_tokens - 1;
         start += b.value.n_tokens;
@@ -493,9 +518,40 @@ extern "C" bool sd_forward(engine * e, const int32_t * tokens, int32_t count,
     return false;
 }
 
+// Match the text compact path's full-vocabulary f64 normalization exactly.
+// This reduces bridge copies; llama.cpp still computes the full vocabulary.
+static void validate_candidate_bank(const int32_t * ids, size_t count, int32_t vocab) {
+    if (!ids || count < 2 || count > 26 || vocab <= 0)
+        throw std::runtime_error("invalid vision compact candidate bank");
+    for (size_t i = 0; i < count; ++i) {
+        if (ids[i] < 0 || ids[i] >= vocab) throw std::runtime_error("candidate token outside vocabulary");
+        for (size_t j = 0; j < i; ++j)
+            if (ids[i] == ids[j]) throw std::runtime_error("duplicate candidate token");
+    }
+}
+static void copy_compact_logits(const float * output, int32_t vocab,
+        const int32_t * ids, size_t count, float * logits, double * log_normalizer) {
+    double maximum = -std::numeric_limits<double>::infinity();
+    for (int32_t i = 0; i < vocab; ++i) {
+        const double value = output[i];
+        if (std::isnan(value) || value == std::numeric_limits<double>::infinity())
+            throw std::runtime_error("invalid vocabulary logit");
+        maximum = std::max(maximum, value);
+    }
+    if (!std::isfinite(maximum)) throw std::runtime_error("no finite vocabulary logit");
+    for (size_t i = 0; i < count; ++i)
+        if (!std::isfinite(output[ids[i]])) throw std::runtime_error("nonfinite candidate logit");
+    double sum = 0;
+    for (int32_t i = 0; i < vocab; ++i) sum += std::exp(double(output[i]) - maximum);
+    const double normalizer = maximum + std::log(sum);
+    if (!std::isfinite(normalizer)) throw std::runtime_error("invalid vocabulary normalizer");
+    for (size_t i = 0; i < count; ++i) logits[i] = output[ids[i]];
+    *log_normalizer = normalizer;
+}
+
 // Vision input is evaluated from fresh request-local state. The five prompt
 // parts preserve the trust boundary between template control tokens and data.
-extern "C" bool sd_forward_vision(engine * e,
+static bool forward_vision(engine * e,
         const char * prefix, size_t prefix_len,
         const char * data_before, size_t before_len,
         const uint8_t * image, size_t image_len,
@@ -503,13 +559,19 @@ extern "C" bool sd_forward_vision(engine * e,
         const char * suffix, size_t suffix_len,
         const int32_t * continuation, size_t continuation_count,
         float * logits, size_t logits_count, size_t * input_tokens,
+        const int32_t * candidate_ids, size_t candidate_count, double * log_normalizer,
         char * error, size_t error_cap) noexcept {
     try {
         if (!e || !e->vision || !prefix || !data_before || !image || !image_len ||
                 !data_after || !suffix || (continuation_count && !continuation) ||
                 !logits || !input_tokens ||
-                logits_count != size_t(sd_vocab_size(e)))
+                logits_count != (candidate_ids ? candidate_count : size_t(sd_vocab_size(e))))
             throw std::runtime_error("invalid vision inference arguments");
+        e->vision_metrics = {};
+        if (candidate_ids) {
+            if (!log_normalizer) throw std::runtime_error("missing vision compact normalizer");
+            validate_candidate_bank(candidate_ids, candidate_count, sd_vocab_size(e));
+        }
         ensure_sequences(e, 1);
         sd_clear(e);
         auto init_opt = mtmd_helper_init_opt_default();
@@ -543,6 +605,7 @@ extern "C" bool sd_forward_vision(engine * e,
                 continuation_count > e->context_size - size_t(positions))
             throw std::runtime_error("vision input exceeds context; truncation is disabled");
         llama_pos end = 0;
+        e->memory_dirty = true;
         if (mtmd_helper_eval_chunks(e->vision, e->ctx, chunks.get(), 0, 0,
                     int32_t(e->batch_size), true, &end) != 0 || end != positions)
             throw std::runtime_error("vision decode failed");
@@ -566,6 +629,7 @@ extern "C" bool sd_forward_vision(engine * e,
                     b.value.seq_id[j][0] = 0;
                     b.value.logits[j] = index + 1 == continuation_count;
                 }
+                e->memory_dirty = true;
                 if (llama_decode(e->ctx, b.value) != 0)
                     throw std::runtime_error("vision continuation decode failed");
                 start += size_t(b.value.n_tokens);
@@ -573,7 +637,8 @@ extern "C" bool sd_forward_vision(engine * e,
         }
         const float * output = llama_get_logits_ith(e->ctx, -1);
         if (!output) throw std::runtime_error("missing vision final logits");
-        std::copy_n(output, logits_count, logits);
+        if (candidate_ids) copy_compact_logits(output, sd_vocab_size(e), candidate_ids, candidate_count, logits, log_normalizer);
+        else std::copy_n(output, logits_count, logits);
         *input_tokens = tokens;
         sd_clear(e);
         return true;
@@ -581,6 +646,28 @@ extern "C" bool sd_forward_vision(engine * e,
       catch (...) { report(error, error_cap, "unknown native exception"); }
     if (e) sd_clear(e);
     return false;
+}
+
+extern "C" bool sd_forward_vision(engine * e,
+        const char * prefix, size_t prefix_len, const char * data_before, size_t before_len,
+        const uint8_t * image, size_t image_len, const char * data_after, size_t after_len,
+        const char * suffix, size_t suffix_len, const int32_t * continuation, size_t continuation_count,
+        float * logits, size_t logits_count, size_t * input_tokens, char * error, size_t error_cap) noexcept {
+    return forward_vision(e, prefix, prefix_len, data_before, before_len, image, image_len,
+        data_after, after_len, suffix, suffix_len, continuation, continuation_count,
+        logits, logits_count, input_tokens, nullptr, 0, nullptr, error, error_cap);
+}
+extern "C" bool sd_forward_vision_compact(engine * e,
+        const char * prefix, size_t prefix_len, const char * data_before, size_t before_len,
+        const uint8_t * image, size_t image_len, const char * data_after, size_t after_len,
+        const char * suffix, size_t suffix_len, const int32_t * continuation, size_t continuation_count,
+        const int32_t * candidate_ids, size_t candidate_count,
+        float * logits, size_t logits_count, double * log_normalizer,
+        size_t * input_tokens, char * error, size_t error_cap) noexcept {
+    if (!candidate_ids || !log_normalizer) { if (e) sd_clear(e); report(error, error_cap, "null vision compact argument"); return false; }
+    return forward_vision(e, prefix, prefix_len, data_before, before_len, image, image_len,
+        data_after, after_len, suffix, suffix_len, continuation, continuation_count,
+        logits, logits_count, input_tokens, candidate_ids, candidate_count, log_normalizer, error, error_cap);
 }
 
 // Independent media inputs retain their own sequence IDs and trust-separated
@@ -600,9 +687,10 @@ extern "C" bool sd_vision_batch_metrics(const engine * e, vision_batch_metrics *
     return true;
 }
 
-extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inputs,
+static bool forward_vision_parallel(engine * e, const vision_input * inputs,
         int32_t sequences, uint32_t capacity, bool dynamic_context,
         float * logits, size_t logits_count, size_t * input_tokens,
+        const int32_t * const * candidate_ids, const size_t * candidate_counts, double * log_normalizers,
         char * error, size_t error_cap) noexcept {
     try {
         if (!e || !e->vision || !inputs || !logits || !input_tokens ||
@@ -612,13 +700,23 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
         if (llama_model_is_recurrent(e->model) || llama_model_is_hybrid(e->model))
             throw std::runtime_error("parallel vision is unsupported for recurrent/hybrid models");
         const size_t vocab = size_t(sd_vocab_size(e));
-        if (logits_count != vocab * size_t(sequences))
+        std::vector<size_t> candidate_offsets(size_t(sequences) + 1, 0);
+        if (candidate_ids) {
+            if (!candidate_counts || !log_normalizers) throw std::runtime_error("missing parallel compact arguments");
+            for (int32_t i = 0; i < sequences; ++i) {
+                validate_candidate_bank(candidate_ids[i], candidate_counts[i], int32_t(vocab));
+                candidate_offsets[size_t(i) + 1] = candidate_offsets[size_t(i)] + candidate_counts[i];
+            }
+        }
+        if (logits_count != (candidate_ids ? candidate_offsets.back() : vocab * size_t(sequences)))
             throw std::runtime_error("wrong parallel vision logits buffer size");
         using chunks_owner = std::unique_ptr<mtmd_input_chunks, decltype(&mtmd_input_chunks_free)>;
         struct segment {
             const mtmd_input_chunk * chunk;
-            std::vector<float> embeddings;
+            std::shared_ptr<std::vector<float>> embeddings;
             size_t offset = 0;
+            int32_t source = 0;
+            size_t image_ordinal = 0;
         };
         struct sequence {
             chunks_owner chunks{nullptr, mtmd_input_chunks_free};
@@ -667,13 +765,15 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
             maximum_tokens = std::max(maximum_tokens, tokens);
             const size_t size = mtmd_input_chunks_size(seq.chunks.get());
             seq.segments.reserve(size);
+            size_t image_ordinal = 0;
             for (size_t c = 0; c < size; ++c) {
                 auto * chunk = mtmd_input_chunks_get(seq.chunks.get(), c);
                 if (!mtmd_input_chunk_get_n_tokens(chunk)) continue;
                 const auto type = mtmd_input_chunk_get_type(chunk);
                 if (type != MTMD_INPUT_CHUNK_TYPE_TEXT && type != MTMD_INPUT_CHUNK_TYPE_IMAGE)
                     throw std::runtime_error("parallel vision only supports text and image chunks");
-                seq.segments.push_back({chunk, {}, 0});
+                seq.segments.push_back({chunk, nullptr, 0, s,
+                    type == MTMD_INPUT_CHUNK_TYPE_IMAGE ? image_ordinal++ : 0});
             }
             if (seq.segments.empty() || mtmd_input_chunk_get_type(seq.segments.back().chunk) != MTMD_INPUT_CHUNK_TYPE_TEXT)
                 throw std::runtime_error("parallel vision requires a final text suffix for decision logits");
@@ -681,6 +781,45 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
         // Segment addresses are stable after every sequence has finished building.
         for (auto & seq : seqs) for (auto & seg : seq.segments)
             if (mtmd_input_chunk_get_type(seg.chunk) == MTMD_INPUT_CHUNK_TYPE_IMAGE) media.push_back(&seg);
+        // Reuse projector work only within this call. Exact encoded bytes plus
+        // the same preprocessed image ordinal and decoder shape prevent mixing
+        // resolution tiles or M-RoPE positions. Each sequence keeps its own chunk,
+        // positions and independent KV stream; only immutable embeddings alias.
+        std::vector<std::pair<segment *, segment *>> duplicates;
+        if (e->vision_projector_reuse) {
+            std::vector<segment *> unique;
+            auto equal_image = [&](const segment & a, const segment & b) {
+                const auto & ai = inputs[a.source];
+                const auto & bi = inputs[b.source];
+                if (a.image_ordinal != b.image_ordinal || ai.image_len != bi.image_len ||
+                        std::memcmp(ai.image, bi.image, ai.image_len) != 0 ||
+                        mtmd_input_chunk_get_n_tokens(a.chunk) != mtmd_input_chunk_get_n_tokens(b.chunk) ||
+                        mtmd_input_chunk_get_n_pos(a.chunk) != mtmd_input_chunk_get_n_pos(b.chunk) ||
+                        mtmd_decode_use_non_causal(e->vision, a.chunk) != mtmd_decode_use_non_causal(e->vision, b.chunk))
+                    return false;
+                const auto * aid = mtmd_input_chunk_get_id(a.chunk);
+                const auto * bid = mtmd_input_chunk_get_id(b.chunk);
+                if ((aid == nullptr) != (bid == nullptr) || (aid && std::strcmp(aid, bid) != 0)) return false;
+                if (mrope) {
+                    const auto * at = mtmd_input_chunk_get_tokens_image(a.chunk);
+                    const auto * bt = mtmd_input_chunk_get_tokens_image(b.chunk);
+                    if (!at || !bt) return false;
+                    for (size_t t = 0; t < mtmd_input_chunk_get_n_tokens(a.chunk); ++t) {
+                        const auto ap = mtmd_image_tokens_get_decoder_pos(at, 0, t);
+                        const auto bp = mtmd_image_tokens_get_decoder_pos(bt, 0, t);
+                        if (ap.t != bp.t || ap.y != bp.y || ap.x != bp.x || ap.z != bp.z) return false;
+                    }
+                }
+                return true;
+            };
+            for (auto * seg : media) {
+                const auto same = std::find_if(unique.begin(), unique.end(),
+                    [&](const segment * other) { return equal_image(*seg, *other); });
+                if (same == unique.end()) unique.push_back(seg);
+                else duplicates.emplace_back(seg, *same);
+            }
+            media = std::move(unique);
+        }
         const uint64_t maximum = uint64_t(e->context_size) * capacity;
         if (maximum > uint64_t(INT_MAX)) throw std::runtime_error("parallel vision context exceeds INT_MAX");
         // Separate streams divide the context evenly. Reserve the longest
@@ -692,15 +831,22 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
             uint32_t(per_sequence * capacity) : uint32_t(maximum);
         ensure_sequences(e, capacity, requested, dynamic_context, false);
         sd_clear(e);
-        // Upstream can decline a projector batch for incompatible resolutions or
-        // architectures. Encode those smaller groups, but keep decoder batching.
+        // Reuse encodes each unique image chunk independently: changing a
+        // different image must not change this image's projector batch shape or
+        // order. Embedding reuse and projector batching are alternative paths;
+        // decoder rows still batch across all independent sequences below.
+        // The default path retains upstream compatible projector batching.
         for (size_t start = 0; start < media.size();) {
             std::unique_ptr<mtmd_batch, decltype(&mtmd_batch_free)> batch(mtmd_batch_init(e->vision), mtmd_batch_free);
             if (!batch) throw std::runtime_error("vision projector batch allocation failed");
             size_t end = start;
             while (end < media.size()) {
                 const int rc = mtmd_batch_add_chunk(batch.get(), media[end]->chunk);
-                if (rc == 0) { ++end; continue; }
+                if (rc == 0) {
+                    ++end;
+                    if (e->vision_projector_reuse) break;
+                    continue;
+                }
                 if (end > start && (rc == 2 || rc == 3)) break;
                 throw std::runtime_error("vision projector batch preparation failed");
             }
@@ -712,10 +858,12 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
                 const auto * embd = mtmd_batch_get_output_embd(batch.get(), media[i]->chunk);
                 if (!embd) throw std::runtime_error("missing batched vision embeddings");
                 const size_t count = mtmd_input_chunk_get_n_tokens(media[i]->chunk) * n_embd;
-                media[i]->embeddings.assign(embd, embd + count);
+                media[i]->embeddings = std::make_shared<std::vector<float>>(embd, embd + count);
             }
             start = end;
         }
+        for (const auto & duplicate : duplicates) duplicate.first->embeddings = duplicate.second->embeddings;
+        e->vision_metrics.projector_reused_chunks = duplicates.size();
         auto advance = [&](sequence & seq) {
             while (seq.current < seq.segments.size()) {
                 auto & seg = seq.segments[seq.current];
@@ -793,7 +941,7 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
                     tokens[i] = ts[row.offset];
                     positions[i] = row.base + llama_pos(row.offset);
                 } else {
-                    std::copy_n(row.seg->embeddings.data() + row.offset * n_embd, n_embd, embeddings.data() + i * n_embd);
+                    std::copy_n(row.seg->embeddings->data() + row.offset * n_embd, n_embd, embeddings.data() + i * n_embd);
                     if (mrope) {
                         const auto * image = mtmd_input_chunk_get_tokens_image(row.seg->chunk);
                         if (!image) throw std::runtime_error("missing image position metadata");
@@ -812,6 +960,7 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
                 ~attention_guard() { if (non_causal) llama_set_causal_attn(ctx, true); }
             } guard{e->ctx, non_causal};
             if (non_causal) llama_set_causal_attn(e->ctx, false);
+            e->memory_dirty = true;
             const int rc = llama_decode(e->ctx, batch);
             if (rc != 0) throw std::runtime_error("parallel vision decode failed (llama_decode=" + std::to_string(rc) + ")");
             ++e->vision_metrics.decoder_calls;
@@ -820,7 +969,10 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
             for (size_t i = 0; i < count; ++i) if (rows[i].output) {
                 const auto * output = llama_get_logits_ith(e->ctx, int32_t(i));
                 if (!output) throw std::runtime_error("missing parallel vision final logits");
-                std::copy_n(output, vocab, logits + size_t(rows[i].seq) * vocab);
+                const size_t seq = size_t(rows[i].seq);
+                if (candidate_ids) copy_compact_logits(output, int32_t(vocab), candidate_ids[seq],
+                    candidate_counts[seq], logits + candidate_offsets[seq], log_normalizers + seq);
+                else std::copy_n(output, vocab, logits + seq * vocab);
                 ++completed;
             }
         }
@@ -830,6 +982,23 @@ extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inpu
       catch (...) { report(error, error_cap, "unknown native exception"); }
     if (e) sd_clear(e);
     return false;
+}
+
+extern "C" bool sd_forward_vision_parallel(engine * e, const vision_input * inputs,
+        int32_t sequences, uint32_t capacity, bool dynamic_context,
+        float * logits, size_t logits_count, size_t * input_tokens,
+        char * error, size_t error_cap) noexcept {
+    return forward_vision_parallel(e, inputs, sequences, capacity, dynamic_context,
+        logits, logits_count, input_tokens, nullptr, nullptr, nullptr, error, error_cap);
+}
+extern "C" bool sd_forward_vision_parallel_compact(engine * e, const vision_input * inputs,
+        int32_t sequences, uint32_t capacity, bool dynamic_context,
+        const int32_t * const * candidate_ids, const size_t * candidate_counts,
+        float * logits, size_t logits_count, double * log_normalizers, size_t * input_tokens,
+        char * error, size_t error_cap) noexcept {
+    if (!candidate_ids || !candidate_counts || !log_normalizers) { if (e) sd_clear(e); report(error, error_cap, "null parallel vision compact argument"); return false; }
+    return forward_vision_parallel(e, inputs, sequences, capacity, dynamic_context,
+        logits, logits_count, input_tokens, candidate_ids, candidate_counts, log_normalizers, error, error_cap);
 }
 
 // Compact transfer only: llama.cpp still computes and exposes the entire
@@ -937,6 +1106,7 @@ extern "C" bool sd_forward_parallel(engine * e, const int32_t * const * tokens,
         for (int32_t start = 0; start < common;) {
             b.value.n_tokens = 0;
             while (start < common && b.value.n_tokens < int32_t(e->batch_size)) add(0, start++, false);
+            e->memory_dirty = true;
             const int32_t rc = llama_decode(e->ctx, b.value);
             if (rc != 0) {
                 throw std::runtime_error("parallel shared prefill failed (llama_decode=" + std::to_string(rc) +
@@ -969,6 +1139,7 @@ extern "C" bool sd_forward_parallel(engine * e, const int32_t * const * tokens,
                 }
             }
             if (b.value.n_tokens == 0) throw std::runtime_error("parallel scheduler made no progress");
+            e->memory_dirty = true;
             const int32_t rc = llama_decode(e->ctx, b.value);
             if (rc != 0) {
                 throw std::runtime_error("parallel suffix decode failed (llama_decode=" + std::to_string(rc) +
@@ -1051,6 +1222,7 @@ extern "C" bool sd_forward_restore(engine * e, const int32_t * const * tokens,
                     b.value.n_seq_id[j]=1; b.value.seq_id[j][0]=0;
                     b.value.logits[j]=final && start+j==end-1;
                 }
+                e->memory_dirty = true;
                 if (llama_decode(e->ctx,b.value)!=0) throw std::runtime_error("snapshot decode failed");
                 start+=b.value.n_tokens;
             }
@@ -1076,6 +1248,7 @@ extern "C" bool sd_forward_restore(engine * e, const int32_t * const * tokens,
             if (s > 0) {
                 start=clock::now();
                 sd_clear(e);
+                e->memory_dirty = true;
                 if (llama_state_seq_set_data(e->ctx,snapshot.data(),bytes,0)!=bytes) {
                     metrics->fallback=4; metrics->restores=0; return fresh();
                 }
