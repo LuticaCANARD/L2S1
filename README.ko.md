@@ -2,7 +2,7 @@
 
 **로컬 GGUF 모델의 점수를 타입이 있는 판단으로 바꿉니다.**
 
-[English](README.md) · 한국어 · [문서 색인](docs/README.md) · [모델 측정 결과](docs/MODEL_RESULTS.md)
+[English](README.md) · 한국어 · [日本語](README.ja.md) · [문서 색인](docs/README.md) · [모델 측정 결과](docs/MODEL_RESULTS.md)
 
 L2S1은 로컬 채팅 모델로 이진·선택·서열 판단을 수행하는 Rust 라이브러리와 CLI입니다. JSON 상태, 질문, 후보별 판단 기준을 전달하면 타입이 있는 결과와 모델 점수를 반환합니다. 수락 정책을 충족하지 못하면 판단을 보류하고 그 이유를 알려줍니다.
 
@@ -340,7 +340,7 @@ MCP에서 문서 조회, 요청 형식 검증, 상주 HTTP 백엔드의 추론�
 | [`docs/`](docs/README.md) | 상세 가이드, 설계 설명, 평가 보고서 |
 | [`web/`](web) | Svelte 문서 사이트 |
 
-순수 Rust 검증은 `cargo test --locked`로 실행합니다. 네이티브와 모델별 검증은 [VERIFICATION.md](docs/VERIFICATION.md)에 정리되어 있습니다. 버그를 보고할 때는 실행 명령, 체크포인트·양자화, 런타임·장치, 오류 내용을 포함해 [GitHub 이슈](https://github.com/LuticaCANARD/L2S1/issues)를 작성하세요. 문서를 수정할 때는 영어와 한국어 README의 내용을 함께 맞춰주세요.
+순수 Rust 검증은 `cargo test --locked`로 실행합니다. 네이티브와 모델별 검증은 [VERIFICATION.md](docs/VERIFICATION.md)에 정리되어 있습니다. 버그를 보고할 때는 실행 명령, 체크포인트·양자화, 런타임·장치, 오류 내용을 포함해 [GitHub 이슈](https://github.com/LuticaCANARD/L2S1/issues)를 작성하세요. 문서를 수정할 때는 영어·한국어·일본어 README의 내용을 함께 맞춰주세요.
 
 ## 라이선스
 

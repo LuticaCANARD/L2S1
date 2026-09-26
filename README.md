@@ -2,7 +2,7 @@
 
 **Turn local GGUF model scores into typed decisions.**
 
-English · [한국어](README.ko.md) · [Documentation](docs/README.md) · [Model results](docs/MODEL_RESULTS.md)
+English · [한국어](README.ko.md) · [日本語](README.ja.md) · [Documentation](docs/README.md) · [Model results](docs/MODEL_RESULTS.md)
 
 L2S1 is a Rust library and CLI for binary, choice, and ordinal decisions with local chat models. Give it JSON state, a question, and candidate criteria; receive a typed value, model scores, and an explicit abstention when the acceptance policy is not met.
 
@@ -338,7 +338,7 @@ resident HTTP backend's decisions. See [agent setup](docs/AGENT_INTEGRATION.md).
 | [`docs/`](docs/README.md) | Detailed guides, design notes, and evaluation reports |
 | [`web/`](web) | Svelte documentation site |
 
-Run the pure Rust checks with `cargo test --locked`. Native and model-specific checks are documented in [VERIFICATION.md](docs/VERIFICATION.md). For a bug report, open a [GitHub issue](https://github.com/LuticaCANARD/L2S1/issues) with the command, checkpoint/quantization, runtime/device, and error. Keep English and Korean README changes aligned when submitting documentation updates.
+Run the pure Rust checks with `cargo test --locked`. Native and model-specific checks are documented in [VERIFICATION.md](docs/VERIFICATION.md). For a bug report, open a [GitHub issue](https://github.com/LuticaCANARD/L2S1/issues) with the command, checkpoint/quantization, runtime/device, and error. Keep English, Korean, and Japanese README changes aligned when submitting documentation updates.
 
 ## License
 
