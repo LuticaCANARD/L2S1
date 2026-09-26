@@ -1,0 +1,341 @@
+{
+  "title": "TrashNet 첫 사진: 실제 추론과 오판 확인",
+  "image_url": "/demo/sample.jpg",
+  "image_alt": "TrashNet glass192: 유리병의 바닥과 라벨을 촬영한 사진",
+  "recorded_at": "2026-09-26T09:42:17.003391+00:00",
+  "model": "Qwen3-VL-2B-Instruct-Q8_0",
+  "runtime": "local-libllama-mtmd / RTX 3080",
+  "source": {
+    "dataset": "TrashNet / dataset-resized/glass/glass192.jpg (source label: glass)",
+    "url": "https://github.com/garythung/trashnet",
+    "license": "MIT; /demo/THIRD_PARTY_NOTICE.txt"
+  },
+  "request": {
+    "state": {
+      "task": "Inspect the visible object for recycling. Use the photograph as evidence; do not infer hidden contents."
+    },
+    "decisions": [
+      {
+        "id": "material",
+        "instruction": "Which material best describes the main object visible in this photograph?",
+        "kind": {
+          "type": "choice",
+          "options": [
+            {
+              "id": "glass",
+              "criterion": "glass object or bottle"
+            },
+            {
+              "id": "paper",
+              "criterion": "thin paper or printed sheets"
+            },
+            {
+              "id": "cardboard",
+              "criterion": "cardboard packaging or box"
+            },
+            {
+              "id": "plastic",
+              "criterion": "plastic container or object"
+            },
+            {
+              "id": "metal",
+              "criterion": "metal can or object"
+            },
+            {
+              "id": "trash",
+              "criterion": "other or mixed non-recyclable material"
+            }
+          ]
+        },
+        "media_ids": [
+          "photo"
+        ]
+      },
+      {
+        "id": "single_object",
+        "instruction": "Is there one distinct main object in the photograph?",
+        "kind": {
+          "type": "binary",
+          "false_label": "No, there are multiple separate main objects or no identifiable main object.",
+          "true_label": "Yes, there is one distinct main object."
+        },
+        "media_ids": [
+          "photo"
+        ]
+      },
+      {
+        "id": "transparency",
+        "instruction": "How transparent is the main object's material, based only on its visible appearance?",
+        "kind": {
+          "type": "ordinal",
+          "levels": [
+            {
+              "id": "opaque",
+              "criterion": "opaque; cannot see through the material",
+              "value": 0
+            },
+            {
+              "id": "partial",
+              "criterion": "partially transparent or translucent",
+              "value": 1
+            },
+            {
+              "id": "transparent",
+              "criterion": "transparent; can clearly see through the material",
+              "value": 2
+            }
+          ]
+        },
+        "media_ids": [
+          "photo"
+        ]
+      }
+    ]
+  },
+  "response": {
+    "api_version": 1,
+    "backend": {
+      "details": {
+        "compute": {
+          "batch": 256,
+          "context": 4096,
+          "flash_attention": "off",
+          "model_load_mode": "read",
+          "threads": 4,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "qwen3vl",
+        "model_description": "qwen3vl 1.7B Q8_0",
+        "model_path": "/home/lutica/personal/skid/skid-desion/models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3080",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "legacy",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-decision-v1/vision-image-v1",
+        "runtime": "local-libllama-mtmd",
+        "vision_kv_clear": {
+          "calls": 1,
+          "scope": "since_last_native_vision_start",
+          "skipped": 1
+        },
+        "vision_preparation": {
+          "cache": {
+            "candidates": {
+              "entries": 0,
+              "evictions": 0,
+              "hits": 0,
+              "insertions": 0,
+              "misses": 0,
+              "retained_bytes": 0,
+              "skipped": 0
+            },
+            "prompts": {
+              "entries": 0,
+              "evictions": 0,
+              "hits": 0,
+              "insertions": 0,
+              "misses": 0,
+              "retained_bytes": 0,
+              "skipped": 0
+            },
+            "vision": {
+              "entries": 0,
+              "evictions": 0,
+              "hits": 0,
+              "insertions": 0,
+              "misses": 0,
+              "retained_bytes": 0,
+              "skipped": 0
+            }
+          },
+          "scope": "backend_lifetime_since_cache_configuration"
+        },
+        "vision_projector_path": "models/mmproj-Qwen3-VL-2B-Instruct-Q8_0.gguf",
+        "vision_projector_sha256": "69066c8f279ec85ff48ab4059f6ebba0d2932ca57667f2bbdac7d9805bca9e7b"
+      },
+      "model": "/home/lutica/personal/skid/skid-desion/models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+      "runtime": "local-libllama-mtmd"
+    },
+    "policy": {
+      "min_candidate_mass": 0.05,
+      "min_top_probability": 0.8
+    },
+    "request_id": "req-1",
+    "results": [
+      {
+        "abstention_reasons": [],
+        "evidence": {
+          "calibration_id": null,
+          "candidate_mass": 0.999962836806943,
+          "code_evaluated_tokens": 0,
+          "code_prefix_evaluations": 0,
+          "entropy_confidence": 0.9714948327798163,
+          "estimate": {},
+          "scores": [
+            {
+              "code": "A",
+              "id": "glass",
+              "option_probability": 0.0006769414441733197,
+              "raw_logit": 27.613073348999023,
+              "token_id": 32
+            },
+            {
+              "code": "B",
+              "id": "paper",
+              "option_probability": 0.002359762811185111,
+              "raw_logit": 28.861804962158203,
+              "token_id": 33
+            },
+            {
+              "code": "C",
+              "id": "cardboard",
+              "option_probability": 0.0002672568233390932,
+              "raw_logit": 26.683698654174805,
+              "token_id": 34
+            },
+            {
+              "code": "D",
+              "id": "plastic",
+              "option_probability": 0.003793469787458234,
+              "raw_logit": 29.336524963378906,
+              "token_id": 35
+            },
+            {
+              "code": "E",
+              "id": "metal",
+              "option_probability": 0.9927557214227788,
+              "raw_logit": 34.90372848510742,
+              "token_id": 36
+            },
+            {
+              "code": "F",
+              "id": "trash",
+              "option_probability": 0.00014684771106476685,
+              "raw_logit": 26.084884643554688,
+              "token_id": 37
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9927557214227788,
+          "truncated": false,
+          "type": "model_scored"
+        },
+        "id": "material",
+        "status": "selected",
+        "usage": {
+          "input_tokens": 367,
+          "reused_prefix_tokens": 0
+        },
+        "value": {
+          "selected": "metal",
+          "type": "choice"
+        }
+      },
+      {
+        "abstention_reasons": [],
+        "evidence": {
+          "calibration_id": null,
+          "candidate_mass": 0.9999117509863792,
+          "code_evaluated_tokens": 0,
+          "code_prefix_evaluations": 0,
+          "entropy_confidence": 0.871099498330421,
+          "estimate": {
+            "p_true": 0.9822004796542488
+          },
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.017799520345751656,
+              "raw_logit": 29.126888275146484,
+              "token_id": 32
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9822004796542488,
+              "raw_logit": 33.13751220703125,
+              "token_id": 33
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9822004796542488,
+          "truncated": false,
+          "type": "model_scored"
+        },
+        "id": "single_object",
+        "status": "selected",
+        "usage": {
+          "input_tokens": 325,
+          "reused_prefix_tokens": 0
+        },
+        "value": {
+          "type": "binary",
+          "value": true
+        }
+      },
+      {
+        "abstention_reasons": [
+          "low_top_probability"
+        ],
+        "evidence": {
+          "calibration_id": null,
+          "candidate_mass": 0.9997077991578732,
+          "code_evaluated_tokens": 0,
+          "code_prefix_evaluations": 0,
+          "entropy_confidence": 0.1724330712939548,
+          "estimate": {
+            "expected_value": 0.6369202348030473
+          },
+          "scores": [
+            {
+              "code": "A",
+              "id": "opaque",
+              "option_probability": 0.6174849952425646,
+              "raw_logit": 31.16649055480957,
+              "token_id": 32
+            },
+            {
+              "code": "B",
+              "id": "partial",
+              "option_probability": 0.1281097747118202,
+              "raw_logit": 29.59372329711914,
+              "token_id": 33
+            },
+            {
+              "code": "C",
+              "id": "transparent",
+              "option_probability": 0.25440523004561355,
+              "raw_logit": 30.27976417541504,
+              "token_id": 34
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.6174849952425646,
+          "truncated": false,
+          "type": "model_scored"
+        },
+        "id": "transparency",
+        "status": "abstained",
+        "usage": {
+          "input_tokens": 336,
+          "reused_prefix_tokens": 0
+        },
+        "value": {
+          "selected": null,
+          "type": "ordinal"
+        }
+      }
+    ]
+  },
+  "elapsed_ms": 761.066099,
+  "verification": {
+    "source_label": "glass",
+    "model_material_prediction": "metal",
+    "material_correct": false,
+    "sample_selection": "first ZIP glass entry; not selected for model correctness",
+    "scope": "single-image demonstration; not an accuracy benchmark"
+  }
+}

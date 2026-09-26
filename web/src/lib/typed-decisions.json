@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-26",
+  "gpu": "RTX 3080 10 GiB, WSL2",
+  "cases": 400,
+  "decisions": 2000,
+  "protocol": "Frozen all/test; direct, fresh/legacy; no calibration or training; latency per five-question case, load/warmup excluded. JevBench and typed-decisions are separate datasets.",
+  "models": [
+    {
+      "model": "Gemma 4 E2B Q8_0",
+      "accuracy": 54.300000000000004,
+      "coverage": 92.75,
+      "acceptedAccuracy": 55.68733153638814,
+      "correctAll": 51.65,
+      "p50Ms": 322.64065100000005,
+      "p95Ms": 370.9781752
+    },
+    {
+      "model": "Qwen3 0.6B Q8_0",
+      "accuracy": 31.25,
+      "coverage": 55.60000000000001,
+      "acceptedAccuracy": 34.352517985611506,
+      "correctAll": 19.1,
+      "p50Ms": 173.45825200000002,
+      "p95Ms": 204.21810405
+    }
+  ]
+}

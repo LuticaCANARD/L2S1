@@ -1,0 +1,93 @@
+{
+  "schema": "l2s1.shared-state.highlight.v1",
+  "date": "2026-09-25",
+  "model": "Gemma 4 E2B Q8_0",
+  "gpu": "NVIDIA GeForce RTX 3080",
+  "workload": "Synthetic warehouse state, 200 filler words, 16 distinct questions",
+  "questions": 16,
+  "repeats": 5,
+  "freshMedianMs": 2735.538154,
+  "sharedMedianMs": 985.41985,
+  "speedup": 2.776012837573751,
+  "configuration": {
+    "batch": 32,
+    "context": 2048,
+    "cuda": true,
+    "repeats": 5,
+    "threads": 4
+  },
+  "differences": [
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    },
+    {
+      "changed_abstention_reasons": 0,
+      "changed_values": 0,
+      "max_candidate_mass_delta": 0.0,
+      "max_probability_delta": 0.0,
+      "max_raw_logit_delta": 0.0
+    }
+  ],
+  "source": "benchmarks/shared-state-cache-20260925/gemma4-e2b-sm86.json",
+  "sourceSha256": "ec8c2e5ac45a217a0f3ddcb49929021e3a75d80c9873090e87e5c2fc43563266"
+}

@@ -1,0 +1,119 @@
+{
+  "title": "텍스트 실제 모델 실행: direct",
+  "image_url": "",
+  "image_alt": "",
+  "recorded_at": "2026-09-26T09:44:11.358034+00:00",
+  "model": "Qwen3-0.6B-Q8_0",
+  "runtime": "local-libllama / CPU 4 threads",
+  "request": {
+    "state": {
+      "text": "The animal is a cat."
+    },
+    "decisions": [
+      {
+        "id": "animal",
+        "instruction": "Does the text explicitly name a cat?",
+        "kind": {
+          "type": "binary",
+          "false_label": "No",
+          "true_label": "Yes"
+        }
+      }
+    ],
+    "reasoning": {
+      "mode": "direct",
+      "max_tokens": 128
+    },
+    "policy": {
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05
+    },
+    "failure_reasons": {
+      "low_top_probability": "후보의 확신이 설정 기준보다 낮습니다.",
+      "reasoning_limit": "생각 토큰 한도를 초과했습니다."
+    }
+  },
+  "response": {
+    "api_version": 1,
+    "backend": {
+      "details": {
+        "compute": {
+          "batch": 256,
+          "context": 4096,
+          "flash_attention": "off",
+          "model_load_mode": "read",
+          "threads": 4,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "qwen3",
+        "model_description": "qwen3 0.6B Q8_0",
+        "model_path": "/home/lutica/personal/skid/skid-desion/models/Qwen3-0.6B-Q8_0.gguf",
+        "offload_device": null,
+        "offload_requested": false,
+        "parallel_width": 1,
+        "prompt_layout": "legacy",
+        "prompt_profile": "qwen3",
+        "prompt_version": "qwen3-no-thinking-decision-v1",
+        "runtime": "local-libllama"
+      },
+      "model": "/home/lutica/personal/skid/skid-desion/models/Qwen3-0.6B-Q8_0.gguf",
+      "runtime": "local-libllama"
+    },
+    "policy": {
+      "min_candidate_mass": 0.05,
+      "min_top_probability": 0.8
+    },
+    "reasoning": {
+      "max_tokens": 128,
+      "mode": "direct"
+    },
+    "request_id": "req-1",
+    "results": [
+      {
+        "abstention_reasons": [],
+        "evidence": {
+          "calibration_id": null,
+          "candidate_mass": 0.9999891637546557,
+          "code_evaluated_tokens": 0,
+          "code_prefix_evaluations": 0,
+          "entropy_confidence": 0.9994424110448323,
+          "estimate": {
+            "p_true": 0.9999657413120119
+          },
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 3.425868798698317e-05,
+              "raw_logit": 21.384140014648438,
+              "token_id": 32
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9999657413120119,
+              "raw_logit": 31.66567611694336,
+              "token_id": 33
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999657413120119,
+          "truncated": false,
+          "type": "model_scored"
+        },
+        "id": "animal",
+        "status": "selected",
+        "usage": {
+          "input_tokens": 98,
+          "reused_prefix_tokens": 0
+        },
+        "value": {
+          "type": "binary",
+          "value": true
+        }
+      }
+    ]
+  },
+  "elapsed_ms": 547.2763910001959
+}

@@ -17,7 +17,10 @@ const documentTarget = new URL('docs/', target);
 await mkdir(documentTarget, { recursive: true });
 await copyFile(new URL('translations.json', documents), new URL('translations.json', documentTarget));
 function publicEvidenceLinks(markdown) {
-  return markdown.replace(new RegExp(`(?:\\.\\./)+benchmarks/${publicStudy}/([^\\s)]+\\.jsonl?)`, 'g'), `/benchmarks/${publicStudy}/$1`);
+  for (const study of [publicStudy, 'rtx3060-20260926']) {
+    markdown = markdown.replace(new RegExp(`(?:\\.\\./)+benchmarks/${study}/([^\\s)]+\\.jsonl?)`, 'g'), `/benchmarks/${study}/$1`);
+  }
+  return markdown;
 }
 for (const entry of await readdir(documents, { withFileTypes: true })) {
   if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
@@ -118,3 +121,15 @@ for (const name of [
     await copyFile(source, destination);
   }
 }
+
+// Fixed aggregate exports: source records and local environments stay outside this allowlist.
+const rtxStudy = 'rtx3060-20260926';
+const rtxTarget = new URL(`../static/benchmarks/${rtxStudy}/`, import.meta.url);
+await rm(rtxTarget, { recursive: true, force: true });
+await mkdir(rtxTarget, { recursive: true });
+for (const name of ['summary.json', 'manifest.json', 'README.md']) {
+  await copyFile(new URL(`benchmarks/${rtxStudy}/${name}`, root), new URL(name, rtxTarget));
+}
+const sharedTarget = new URL('../static/benchmarks/shared-state-cache-20260925/', import.meta.url);
+await mkdir(sharedTarget, { recursive: true });
+await copyFile(new URL('../src/lib/shared-state-highlight.json', import.meta.url), new URL('highlight.json', sharedTarget));
