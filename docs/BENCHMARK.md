@@ -134,3 +134,11 @@ SKID_BENCH_OUTPUT=results/benchmark/single-model.json \
 ```
 
 Direct runs accept `SKID_CONTEXT`, `SKID_BATCH`, `SKID_THREADS`, `SKID_MIN_TOP_PROBABILITY`, and `SKID_MIN_CANDIDATE_MASS`. The Rust runner adds checkpoint hashes and the comparison table. The earlier `tests/performance.rs` remains available for repeated measurements of the single warehouse example.
+
+## Comparing execution and cache settings
+
+`benchmark-models` accepts `--device metal` on macOS (builds `llama-metal`), and `--execution-mode fresh|prefix-reuse|parallel|state-restore`. CUDA and Metal require separate builds. `--parallel-width` is 1–32 (default 3); increasing it increases KV capacity and memory pressure. Parallel and state-restore are opt-in measurements and can be slower than fresh.
+
+`--evidence-transfer full|compact` defaults to full; compact text evidence requires fresh or prefix-reuse. It keeps the full-vocabulary probability normalizer but returns compact candidate evidence. `--preparation-cache-bytes 8388608` enables bounded preparation caching (default 0, disabled; at most 128 entries per cache). Per-run reports retain cache counters before/after the measured passes; warmup can populate them. Preparation hits avoid rendering/tokenization, not transformer inference, and repeating the same fixture can overstate gains for new states. Check actual `reused_prefix_tokens` separately.
+
+For the direct ignored test, the corresponding environment variables are `SKID_DEVICE`, `SKID_EXECUTION_MODE`, `SKID_PARALLEL_WIDTH`, `SKID_EVIDENCE_TRANSFER` and `SKID_PREPARATION_CACHE_BYTES`. `SKID_CUDA` remains a legacy fallback when `SKID_DEVICE` is absent. Ordinary requests remain isolated even with prefix-reuse; use the separate [fixed-schema session experiment](SEMIF_ALGORITHM.md#fixed-schema-sessions) to measure reuse across changing states. Its grouped timings are not the original three-decision request p50.

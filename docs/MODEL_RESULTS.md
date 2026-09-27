@@ -17,34 +17,41 @@ The September 23, 2026 JevBench matrix measured **22 GGUF checkpoints on all 231
 
 The original 22 matrix rows use identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration. The explicit GPT-OSS exception is marked below. Rows marked † are separate September 24 runs; ‡ is a separate September 23 run.
 
-| Checkpoint | Argmax accuracy | Hard accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms | typed-decisions raw / coverage / accepted accuracy / correct-all |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| [Gemma 4 31B Q4_K_M](https://huggingface.co/google/gemma-4-31B-it) † | 89.61% | 78.38% | 22 | 3 | 2287.40 / 24524.56 | — |
-| Gemma 4 26B A4B UD-Q4_K_M ‡ | 84.85% | 70.27% | 29 | 11 | 787.01 / 8814.01 | — |
-| Qwen3.5-4B-Q8_0 | 79.65% | 61.26% | 9 | 93 | 86.88 / 1137.30 | — |
-| Qwen3.5-9B-Q4_K_M | 77.92% | 58.56% | 13 | 64 | 130.55 / 1697.14 | — |
-| Qwen3.5-9B-Q8_0 | 77.92% | 56.76% | 14 | 66 | 124.68 / 1613.79 | — |
-| gemma-4-E4B-it-Q4_K_M | 77.49% | 55.86% | 30 | 37 | 86.62 / 1186.47 | — |
-| gemma-4-E4B-it-Q8_0 | 76.62% | 54.05% | 32 | 37 | 85.04 / 1146.21 | — |
-| Qwen3.5-4B-Q4_K_M | 76.19% | 55.86% | 10 | 91 | 88.47 / 1175.18 | — |
-| [Ternary Bonsai 27B Q2_g64](https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf) † | 75.32% | 53.15% | 15 | 80 | 187.15 / 2462.18 | — |
-| Qwen3.8-27B-UD-IQ2_XXS | 73.16% | 47.75% | 18 | 84 | 414.61 / 5460.22 | — |
-| Qwen3-8B-Q8_0 | 71.43% | 48.65% | 56 | 15 | 121.45 / 1817.94 | — |
-| [Bonsai 27B Q1_0](https://huggingface.co/prism-ml/Bonsai-27B-gguf) † | 71.00% | 46.85% | 14 | 91 | 184.51 / 2489.64 | — |
-| gemma-4-E2B-it-Q8_0 | 67.97% | 43.24% | 58 | 22 | 46.79 / 701.11 | 54.30% / 92.75% / 55.69% / 51.65% § |
-| Qwen3-4B-Q8_0 | 65.80% | 44.14% | 63 | 29 | 85.26 / 1349.28 | — |
-| Ministral-3-8B-Instruct-2512-Q4_K_M | 65.37% | 47.75% | 23 | 93 | 441.43 / 2399.70 | — |
-| gpt-oss-20b-Q4_K_M (CUDA Graphs off) | 64.94% | 48.65% | 31 | 82 | 181.93 / 2262.28 | — |
-| Qwen3.5-2B-Q8_0 | 62.34% | 48.65% | 15 | 133 | 40.99 / 513.03 | — |
-| gemma-3-4b-it-Q8_0 | 59.74% | 36.04% | 88 | 9 | 74.71 / 879.92 | — |
-| Phi-4-mini-instruct.Q8_0 | 56.71% | 42.34% | 30 | 115 | 70.50 / 971.95 | — |
-| Qwen3.5-0.8B-Q8_0 | 51.95% | 42.34% | 16 | 183 | 27.93 / 350.53 | — |
-| SmolLM3-3B-Q8_0 | 46.32% | 31.53% | 41 | 127 | 71.47 / 884.76 | — |
-| Llama-3.2-3B-Instruct-Q8_0 | 43.72% | 30.63% | 46 | 147 | 68.18 / 884.75 | — |
-| gemma-3-1b-it-Q8_0 | 38.96% | 28.83% | 121 | 30 | 25.06 / 309.24 | — |
-| tinyllama-1.1b-chat-v1.0.Q4_K_M | 33.77% | 36.04% | 1 | 230 | 30.08 / 702.65 | — |
-| Qwen3-0.6B-Q8_0 | 31.60% | 31.53% | 129 | 41 | 34.01 / 445.12 | 31.25% / 55.60% / 34.35% / 19.10% § |
-| SmolLM2-135M-Instruct-Q8_0 | 30.30% | 29.73% | 8 | 211 | 14.88 / 253.65 | — |
+| Checkpoint | Argmax accuracy | Hard accuracy | Jev coverage | Jev accepted accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms | typed-decisions raw / coverage / accepted accuracy / correct-all |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| [Gemma 4 31B Q4_K_M](https://huggingface.co/google/gemma-4-31B-it) † | 89.61% | 78.38% | 98.70% | 90.35% | 22 | 3 | 2287.40 / 24524.56 | — |
+| Gemma 4 26B A4B UD-Q4_K_M ‡ | 84.85% | 70.27% | 95.24% | 86.82% | 29 | 11 | 787.01 / 8814.01 | — |
+| Qwen3.5-4B-Q8_0 | 79.65% | 61.26% | 59.74% | 93.48% | 9 | 93 | 86.88 / 1137.30 | — |
+| Qwen3.5-9B-Q4_K_M | 77.92% | 58.56% | 72.29% | 92.22% | 13 | 64 | 130.55 / 1697.14 | — |
+| Qwen3.5-9B-Q8_0 | 77.92% | 56.76% | 71.43% | 91.52% | 14 | 66 | 124.68 / 1613.79 | — |
+| gemma-4-E4B-it-Q4_K_M | 77.49% | 55.86% | 83.98% | 84.54% | 30 | 37 | 86.62 / 1186.47 | — |
+| gemma-4-E4B-it-Q8_0 | 76.62% | 54.05% | 83.98% | 83.51% | 32 | 37 | 85.04 / 1146.21 | — |
+| Qwen3.5-4B-Q4_K_M | 76.19% | 55.86% | 60.61% | 92.86% | 10 | 91 | 88.47 / 1175.18 | — |
+| [Ternary Bonsai 27B Q2_g64](https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf) † | 75.32% | 53.15% | 65.37% | 90.07% | 15 | 80 | 187.15 / 2462.18 | — |
+| Qwen3.8-27B-UD-IQ2_XXS | 73.16% | 47.75% | 63.64% | 87.76% | 18 | 84 | 414.61 / 5460.22 | — |
+| Qwen3-8B-Q8_0 | 71.43% | 48.65% | 93.51% | 74.07% | 56 | 15 | 121.45 / 1817.94 | — |
+| [Bonsai 27B Q1_0](https://huggingface.co/prism-ml/Bonsai-27B-gguf) † | 71.00% | 46.85% | 60.61% | 90.00% | 14 | 91 | 184.51 / 2489.64 | — |
+| gemma-4-E2B-it-Q8_0 ¶ | 68.83% | 43.24% | 92.21% | 71.83% | 60 | 18 | 39.66 / 442.13 | — |
+| gemma-4-E2B-it-Q8_0 | 67.97% | 43.24% | 90.48% | 72.25% | 58 | 22 | 46.79 / 701.11 | 54.30% / 92.75% / 55.69% / 51.65% § |
+| Qwen3-4B-Q8_0 | 65.80% | 44.14% | 87.45% | 68.81% | 63 | 29 | 85.26 / 1349.28 | — |
+| Ministral-3-8B-Instruct-2512-Q4_K_M | 65.37% | 47.75% | 59.74% | 83.33% | 23 | 93 | 441.43 / 2399.70 | — |
+| gpt-oss-20b-Q4_K_M (CUDA Graphs off) | 64.94% | 48.65% | 64.50% | 79.19% | 31 | 82 | 181.93 / 2262.28 | — |
+| Qwen3.5-2B-Q8_0 | 62.34% | 48.65% | 42.42% | 84.69% | 15 | 133 | 40.99 / 513.03 | — |
+| gemma-3-4b-it-Q8_0 | 59.74% | 36.04% | 96.10% | 60.36% | 88 | 9 | 74.71 / 879.92 | — |
+| Phi-4-mini-instruct.Q8_0 | 56.71% | 42.34% | 50.22% | 74.14% | 30 | 115 | 70.50 / 971.95 | — |
+| Qwen3.5-0.8B-Q8_0 | 51.95% | 42.34% | 20.78% | 66.67% | 16 | 183 | 27.93 / 350.53 | — |
+| SmolLM3-3B-Q8_0 | 46.32% | 31.53% | 45.02% | 60.58% | 41 | 127 | 71.47 / 884.76 | — |
+| Llama-3.2-3B-Instruct-Q8_0 | 43.72% | 30.63% | 36.36% | 45.24% | 46 | 147 | 68.18 / 884.75 | — |
+| gemma-3-1b-it-Q8_0 ¶ | 40.26% | 28.83% | 85.71% | 41.41% | 116 | 33 | 28.01 / 232.58 | — |
+| gemma-3-1b-it-Q8_0 | 38.96% | 28.83% | 87.01% | 39.80% | 121 | 30 | 25.06 / 309.24 | — |
+| tinyllama-1.1b-chat-v1.0.Q4_K_M | 33.77% | 36.04% | 0.43% | 0.00% | 1 | 230 | 30.08 / 702.65 | — |
+| tinyllama-1.1b-chat-v1.0.Q4_K_M ¶ | 33.33% | 36.04% | 0.00% | n/a | 0 | 231 | 20.04 / 393.66 | — |
+| Qwen3-0.6B-Q8_0 | 31.60% | 31.53% | 82.25% | 32.11% | 129 | 41 | 34.01 / 445.12 | 31.25% / 55.60% / 34.35% / 19.10% § |
+| Qwen3-0.6B-Q8_0 ¶ | 31.60% | 31.53% | 80.09% | 30.81% | 128 | 46 | 28.04 / 281.52 | — |
+| SmolLM2-135M-Instruct-Q8_0 ¶ | 30.74% | 28.83% | 7.36% | 64.71% | 6 | 214 | 25.22 / 228.48 | — |
+| SmolLM2-135M-Instruct-Q8_0 | 30.30% | 29.73% | 8.66% | 60.00% | 8 | 211 | 14.88 / 253.65 | — |
+
+¶ September 27 rerun: five checkpoints, 231 public items each, RTX 3080 10 GiB / WSL2, CUDA, fresh/legacy, context 16384, batch/ubatch 256, four threads, FlashAttention off, full evidence and default 0.8 probability / 0.05 mass gates. All 1,155 outputs were valid without errors or truncation. These rows use a separately frozen evaluator; hardware, context and build differ from earlier rows and the supplied M5/MLX report, so latency is not a controlled cross-run comparison. [Audited evidence](../benchmarks/jevbench-rtx3080-20260927/summary.json) includes model/source/request hashes, tier counts, calibration diagnostics and [per-case predictions](../benchmarks/jevbench-rtx3080-20260927/predictions.jsonl). Coverage and accepted accuracy are shown separately from raw argmax, and are derived from the accepted/abstained counts for older rows. [Protocol and prefix-reuse diagnostics](JEVBENCH.md#rtx3080-rerun-20260927).
 
 § The September 26 [typed-decisions measurement](TYPED_DECISIONS_BENCHMARK.md) covers all 400 test cases / 2,000 judgments on an RTX 3080 with a separate frozen direct-mode evaluator. This added column uses a different dataset and hardware from JevBench. Its case p50/p95 were 322.64/370.98 ms for Gemma 4 E2B and 173.46/204.22 ms for Qwen3 0.6B; the existing latency column remains JevBench latency. Raw accuracy is measured before abstention; coverage, accepted accuracy, and correct/all measure the acceptance policy separately.
 

@@ -163,3 +163,11 @@ SKID_BENCH_OUTPUT=results/benchmark/single-model.json \
 ```
 
 직접 실행에서는 `SKID_DEVICE`(`cpu`, `cuda`, `metal`. 해당 기능으로 빌드해야 합니다), `SKID_CONTEXT`, `SKID_BATCH`, `SKID_THREADS`, `SKID_MIN_TOP_PROBABILITY` 및 `SKID_MIN_CANDIDATE_MASS`를 허용합니다. Rust 실행기는 체크포인트 해시와 비교 테이블을 추가합니다. 이전 `tests/performance.rs`는 단일 창고 예의 반복 측정에 계속 사용할 수 있습니다.
+
+## 실행·캐시 설정 비교
+
+`benchmark-models`는 macOS에서 `--device metal` (`llama-metal` 빌드)과 `--execution-mode fresh|prefix-reuse|parallel|state-restore`를 지원한다. CUDA와 Metal은 별도 빌드가 필요하다. `--parallel-width`는 1–32이며 기본값은 3이다. 늘리면 KV 용량과 메모리 부담이 커진다. Parallel과 state-restore는 명시적으로 비교할 실험 설정이며 fresh보다 느릴 수도 있다.
+
+`--evidence-transfer full|compact`의 기본값은 full이며, 텍스트 compact는 fresh 또는 prefix-reuse에서 사용한다. 전체 어휘 확률 정규화는 유지하면서 후보 증거를 작게 반환한다. `--preparation-cache-bytes 8388608`은 크기가 제한된 준비 캐시를 켠다(기본 0으로 비활성, 캐시별 최대 128개 항목). 보고서는 측정 전후 카운터를 기록하며 워밍업에서 캐시가 채워질 수 있다. 준비 캐시 적중은 렌더링·토큰화를 줄이지 transformer 추론을 줄이지 않으며, 동일 fixture 반복은 새로운 state에서의 이득을 과장할 수 있다. 실제 `reused_prefix_tokens`를 별도로 확인한다.
+
+직접 실행하는 ignored test의 대응 환경변수는 `SKID_DEVICE`, `SKID_EXECUTION_MODE`, `SKID_PARALLEL_WIDTH`, `SKID_EVIDENCE_TRANSFER`, `SKID_PREPARATION_CACHE_BYTES`다. `SKID_DEVICE`가 없으면 기존 `SKID_CUDA`를 사용한다. 일반 요청은 prefix-reuse에서도 격리된다. state가 바뀌는 요청 간 재사용은 별도 [고정 스키마 세션 실험](SEMIF_ALGORITHM.md#fixed-schema-sessions)으로 측정한다. 그룹 전체 시간은 기존 판단 3개 요청의 p50과 다른 지표다.

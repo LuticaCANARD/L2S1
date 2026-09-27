@@ -574,6 +574,12 @@ fn metric(tasks: &[&Value], records: &[Value]) -> Result<Value> {
         .iter()
         .map(|r| r["cost_basis"].as_str().unwrap_or("unknown").to_owned())
         .collect::<std::collections::BTreeSet<_>>();
+    let planned_labeled = tasks
+        .iter()
+        .filter(|task| {
+            !task["expected"].is_null() && task["provenance"]["exclude_reason"].is_null()
+        })
+        .count();
     Ok(
         json!({"n_planned":tasks.len(),"n_attempted":rs.len(),"n_scorable":scorable.len(),
         "n_valid":valid,"n_correct":correct,"accuracy":optional_rate(correct,scorable.len()),
@@ -582,6 +588,7 @@ fn metric(tasks: &[&Value], records: &[Value]) -> Result<Value> {
         "n_renormalized":rs.iter().filter(|r|r["renormalized"]==true).count(),
         "operational_success":optional_rate(rs.iter().filter(|r|r["ok"]==true).count(),rs.len()),
         "calibration_n":probs.len(),"brier_mean":mean(&brier),"ece":if pairs.is_empty(){Value::Null}else{ece(&pairs)},
+        "risk_coverage":crate::selective_metrics::risk_coverage(&pairs, planned_labeled),
         "ordinal_mae":mean(&mae),"latency":latency_summary(&latencies),"latency_failures":latency_summary(&failures),
         "price_per_1000_decisions_usd":null,"cost_basis":cost_basis}),
     )
@@ -1035,6 +1042,21 @@ pub fn run(args: Args) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn risk_coverage_counts_missing_labeled_tasks_but_not_excluded_tasks() {
+        let task = json!({"id":"one","labels":["a","b"],"expected":"a",
+            "question":{"type":"choice"}});
+        let mut missing = task.clone();
+        missing["id"] = json!("missing");
+        let mut excluded = task.clone();
+        excluded["id"] = json!("excluded");
+        excluded["provenance"] = json!({"exclude_reason":"not labeled"});
+        let record = json!({"task_id":"one","valid":true,"correct":true,
+            "probs":{"a":0.9,"b":0.1}});
+        let m = metric(&[&task, &missing, &excluded], &[record]).unwrap();
+        assert_eq!(m["risk_coverage"]["planned"], 2);
+        assert_eq!(m["risk_coverage"]["at_error_budget"][1]["coverage"], 0.5);
+    }
     #[test]
     fn request_excludes_gold_and_preserves_canonical_label_order() {
         let task = json!({"id":"case","family":"intent","split":"public","state":{"text":"payload"},

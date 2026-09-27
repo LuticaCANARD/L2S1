@@ -18,10 +18,12 @@ mod code_sequences;
 mod interchange;
 mod model_hash;
 mod prepared_cache;
+mod shared_decision;
 mod shared_state;
 mod vision;
 pub use prepared_cache::CacheMetrics;
 use prepared_cache::{BoundedTokenCache, CandidateTokens};
+pub use shared_decision::SharedDecisionSession;
 pub use shared_state::SharedStateSession;
 
 #[derive(Debug, Clone, Copy, Default, serde::Serialize)]

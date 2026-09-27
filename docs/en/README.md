@@ -39,6 +39,7 @@ Start with the [English README](../../README.md) to build L2S1 and run a first d
 | [Synthetic benchmark](BENCHMARK.md) | Correctness, abstention, consistency, latency on rule fixtures |
 | [JevBench](JEVBENCH.md) | Public task mapping, upstream scoring, acceptance metrics |
 | [Ollaya comparison](OLLAYA_COMPARISON.md) | Evidence-based differences and remaining quality/product gaps |
+| [Decision-model architecture review](DECISION_MODEL_REVIEW.md) | Confidence, decoder cost, scheduling gaps and error-budget diagnostics |
 | [typed-decisions](TYPED_DECISIONS_BENCHMARK.md) | Complete 2,000-judgment test, calibration, measured protocol |
 | [Intent classification](INTENT_BENCHMARK.md) | Wide answer codes, BANKING77, MASSIVE Korean |
 | [AG News](KAGGLE_BENCHMARK.md) | Frozen classification protocol |

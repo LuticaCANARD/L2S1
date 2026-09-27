@@ -125,3 +125,27 @@ The measured fresh/legacy inference p50/p95 was 787.01/8814.01 ms, excluding mod
 The current Rust source and native C++ bridge were freshly compiled in a separate directory on an RTX 3060 host, reusing the pinned llama.cpp CUDA libraries. Gemma 4 E2B Q8_0, E4B Q8_0 and E4B Q4_K_M each completed the same public 231 items with the baseline settings above. They scored 157/231 (67.97%), 177/231 (76.62%) and 179/231 (77.49%), respectively. All 693 candidate probability vectors and decision values exactly matched the previous RTX 3060 matrix; no inference errors or truncation occurred.
 
 The rebuild report (local artifact: `results/gemma4-rebuild-20260923T103912Z/REPORT.md`, not committed) records the before/after comparison, latency, source and binary hashes, and build logs. Default tests passed 49/49; the llama feature suite passed 59 tests with 18 ignored, followed by a separately executed Gemma 4 CUDA integration test and six mapping tests. These results cover the frozen source and baseline path; optional optimization modes were not enabled for this rerun.
+
+Reports now include `risk_coverage`: a maximum-candidate-probability ranking of raw argmax answers with equal-confidence samples kept together, plus maximum coverage at empirical 1%, 5% and 10% error budgets. Coverage retains all planned labeled decisions. This ignores native acceptance gates and uses test labels for descriptive analysis; it is not a deployment threshold or an error guarantee. See the [architecture review](DECISION_MODEL_REVIEW.md).
+
+<a id="rtx3080-rerun-20260927"></a>
+## RTX 3080 rerun and schema reuse (2026-09-27)
+
+[Existing comparison table](MODEL_RESULTS.md#recorded-model-comparison) now includes five new ¶ rows, with separate raw accuracy, native coverage, accepted accuracy and latency. Each model completed all 231 public items: 1,155 valid outputs, no errors or truncation. An independent Python recount reproduced raw/accepted counts, all tier counts, Brier, 10-bin ECE and p50/p95. [Summary](../../benchmarks/jevbench-rtx3080-20260927/summary.json) and [1,155 compact predictions](../../benchmarks/jevbench-rtx3080-20260927/predictions.jsonl) preserve model, evaluator, request and source identities; task labels derive from the pinned MIT-licensed JevBench source. Full native responses and logs remain ignored local artifacts.
+
+Measured on RTX 3080 10 GiB / WSL2, CUDA architecture 86, context 16384, batch/ubatch 256, four threads, FlashAttention off, full evidence, fresh/legacy, default 0.8 top-probability / 0.05 candidate-mass gates. Loading and one warmup are excluded; each item is timed once. The frozen evaluator was built from the original dirty `03d5bc0` / v0.1.1 checkout. This PR uses a newer v0.1.2 base retaining upstream Metal support; these are not measurements of the final PR binary. No M5, MLX or 26B rerun was performed here, and earlier hardware/build timings are not controlled comparisons.
+
+Gemma 4 E2B scored 159/231 raw; it accepted 213 with 153 correct and 60 wrong (71.83% accepted accuracy at 92.21% coverage). Qwen3 accepted 185, only 57 correct (30.81%). At an empirical 5% error budget, the raw-confidence ranking retained 65/231 Gemma items with three errors; all four smaller models retained zero. These thresholds were selected using test labels, ignore native mass/tie gates and are descriptive, not deployable error guarantees.
+
+### Paired fixed-schema diagnostic
+
+The identical unlabeled requests contain 117 exact schemas; 96 occur once and only 21 repeat. Grouping permits 114 post-first calls. Both paths use the same grouped order and one decision per call, a full untimed warmup per path and one measured full pass. Timings include session creation/drop, preparation and scoring. They are whole-pass seconds, not per-item p50 or stable speed estimates; preparation caching is disabled.
+
+| Model | Batch | Fresh, s | Session, s | Reused / input tokens |
+| --- | ---: | ---: | ---: | ---: |
+| Qwen3 0.6B | 64 | 29.028 | 27.175 | 11,200 / 155,600 |
+| Qwen3 0.6B | 256 | 16.807 | 16.917 | 0 / 155,600 |
+| Gemma 4 E2B | 64 | 47.341 | 45.501 | 9,984 / 154,166 |
+| Gemma 4 E2B | 256 | 27.002 | 26.925 | 0 / 154,166 |
+
+All four matched fresh/session pairs have exactly zero probability and candidate-mass deltas and unchanged top-1, accepted selections and abstentions. At batch 64, only 7.20% of Qwen and 6.48% of Gemma input tokens are reused. The fastest fresh batch 256 beats batch-64 reuse for both models. Batch 256 reuses zero tokens, so its small timing differences do not establish a KV speedup. Reducing batch size itself changes five Qwen top-1 answers (73→72 correct) and one Gemma answer (159→158); this is a cross-batch numerical effect, separate from reuse equivalence. Prefix reuse remains useful for repeated rules with a long fixed prefix, but this public JevBench workload does not justify making a smaller batch the default.

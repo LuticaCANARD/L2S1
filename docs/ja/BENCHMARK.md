@@ -163,3 +163,11 @@ SKID_BENCH_OUTPUT=results/benchmark/single-model.json \
 ```
 
 直接実行では、`SKID_DEVICE`(`cpu`、`cuda`、`metal`。対応する機能でビルドします)、`SKID_CONTEXT`、`SKID_BATCH`、`SKID_THREADS`、`SKID_MIN_TOP_PROBABILITY`、および `SKID_MIN_CANDIDATE_MASS` を受け入れます。 Rust ランナーは、チェックポイント ハッシュと比較テーブルを追加します。以前の `tests/performance.rs` は、単一の倉庫の例を繰り返し測定するために引き続き使用できます。
+
+## 実行・キャッシュ設定の比較
+
+`benchmark-models`はmacOSで`--device metal`（`llama-metal`をビルド）と`--execution-mode fresh|prefix-reuse|parallel|state-restore`を受け付ける。CUDAとMetalには別々のビルドが必要である。`--parallel-width`は1–32、既定値は3であり、増やすとKV容量とメモリ負荷も増える。Parallelとstate-restoreは明示的な比較設定で、freshより遅い場合もある。
+
+`--evidence-transfer full|compact`の既定値はfullで、テキストcompactはfreshまたはprefix-reuseで利用する。全語彙の確率正規化を維持しつつ、候補の証拠を小さく返す。`--preparation-cache-bytes 8388608`で上限付き準備キャッシュを有効化する（既定0で無効、各キャッシュ最大128項目）。レポートは測定前後のカウンターを保持し、ウォームアップでキャッシュが埋まる場合がある。準備キャッシュのヒットは描画・トークン化を省くが、transformer推論は省かない。同じfixtureの反復は新しいstateでの利得を過大評価し得るため、実際の`reused_prefix_tokens`を別に確認する。
+
+直接実行するignored testの対応環境変数は`SKID_DEVICE`、`SKID_EXECUTION_MODE`、`SKID_PARALLEL_WIDTH`、`SKID_EVIDENCE_TRANSFER`、`SKID_PREPARATION_CACHE_BYTES`である。`SKID_DEVICE`がない場合は従来の`SKID_CUDA`を使用する。通常のリクエストはprefix-reuseでも分離される。stateが変わるリクエスト間の再利用は別の[固定スキーマセッション実験](SEMIF_ALGORITHM.md#fixed-schema-sessions)で測定する。グループ全体の時間は従来の3判断リクエストp50とは異なる指標である。

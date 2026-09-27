@@ -425,7 +425,7 @@ fn score_decision(decision: &Value, result: &Value, gold: Option<&Value>) -> Res
         }
     } else {
         p.iter()
-            .max_by(|a, b| a.1.total_cmp(b.1))
+            .min_by(|a, b| b.1.total_cmp(a.1))
             .unwrap()
             .0
             .clone()
@@ -435,7 +435,7 @@ fn score_decision(decision: &Value, result: &Value, gold: Option<&Value>) -> Res
         value["type"] == decision["kind"]["type"],
         "Typed value does not match the decision kind"
     );
-    let accepted = if kind == "binary" {
+    let accepted_selection = if kind == "binary" {
         let true_prob = value["p_true"].as_f64().context("p_true")?;
         ensure!(
             true_prob.is_finite()
@@ -443,18 +443,19 @@ fn score_decision(decision: &Value, result: &Value, gold: Option<&Value>) -> Res
                 && (value["value"].is_null() || value["value"].is_boolean()),
             "Invalid binary value"
         );
-        !value["value"].is_null()
+        value["value"].as_bool().map(|v| v.to_string())
     } else {
         ensure!(
             value["selected"].is_null() || p.contains_key(nonempty(&value["selected"])?),
             "Selected label outside candidate set"
         );
-        !value["selected"].is_null()
+        value["selected"].as_str().map(str::to_owned)
     };
     let confidence = p.values().copied().fold(0., f64::max);
-    let mut row = json!({"id":decision["id"],"probabilities":p,"predicted":selected,"confidence":confidence,
+    let mut row = json!({"id":decision["id"],"type":kind,"probabilities":p,"predicted":selected,"confidence":confidence,
         "entropy_confidence":result["entropy_confidence"],"candidate_mass":result["candidate_mass"],
-        "accepted":accepted,"input_tokens":result["input_tokens"],"reused_prefix_tokens":result["reused_prefix_tokens"]});
+        "accepted":accepted_selection.is_some(),"accepted_predicted":accepted_selection,
+        "input_tokens":result["input_tokens"],"reused_prefix_tokens":result["reused_prefix_tokens"]});
     let Some(gold) = gold else { return Ok(row) };
     let expected = if kind == "binary" {
         nonempty(&gold["label"])?.to_lowercase()
@@ -467,6 +468,8 @@ fn score_decision(decision: &Value, result: &Value, gold: Option<&Value>) -> Res
     );
     row["expected"] = json!(expected);
     row["correct"] = json!(selected == expected);
+    row["accepted_correct"] = json!(accepted_selection.as_ref() == Some(&expected));
+    row["nll_hard"] = json!(-p[&expected].max(1e-12).ln());
     let mut gp = gold.get("probabilities").filter(|v| !v.is_null()).cloned();
     if kind == "binary" {
         let v = gold
@@ -587,6 +590,10 @@ fn metrics(rows: &[Value], attempted: usize) -> Value {
         .filter(|r| r["accepted"] == true)
         .collect::<Vec<_>>();
     let correct = labeled.iter().filter(|r| r["correct"] == true).count();
+    let accepted_correct = accepted
+        .iter()
+        .filter(|r| r["accepted_correct"] == true)
+        .count();
     let mut bins = BTreeMap::<usize, Vec<&Value>>::new();
     for row in &labeled {
         let bucket = (row["confidence"].as_f64().unwrap() * 10.) as usize;
@@ -610,10 +617,30 @@ fn metrics(rows: &[Value], attempted: usize) -> Value {
         "accuracy":if attempted==0{Value::Null}else{json!(correct as f64/attempted as f64)},
         "valid_accuracy":mean(&labeled.iter().map(|r|f64::from(r["correct"]==true)).collect::<Vec<_>>()),
         "ece_hard":ece,"accepted":accepted.len(),
-        "accepted_accuracy":mean(&accepted.iter().map(|r|f64::from(r["correct"]==true)).collect::<Vec<_>>()),
-        "wrong_accepted":accepted.iter().filter(|r|r["correct"]==false).count(),
+        "raw_top1_accuracy":if attempted==0{Value::Null}else{json!(correct as f64/attempted as f64)},
+        "correct_accepted":accepted_correct,
+        "accepted_correct_all":if attempted==0{Value::Null}else{json!(accepted_correct as f64/attempted as f64)},
+        "accepted_accuracy":mean(&accepted.iter().map(|r|f64::from(r["accepted_correct"]==true)).collect::<Vec<_>>()),
+        "wrong_accepted":accepted.len()-accepted_correct,
         "coverage":if attempted==0{Value::Null}else{json!(accepted.len() as f64/attempted as f64)}});
+    let pairs = labeled
+        .iter()
+        .map(|r| (r["confidence"].as_f64().unwrap(), r["correct"] == true))
+        .collect::<Vec<_>>();
+    m["risk_coverage"] = crate::selective_metrics::risk_coverage(&pairs, attempted);
+    let mut bins15 = [(0usize, 0.0); 15];
+    for &(confidence, correct) in &pairs {
+        let bin = &mut bins15[((confidence * 15.) as usize).min(14)];
+        bin.0 += 1;
+        bin.1 += confidence - f64::from(correct);
+    }
+    m["ece_hard_15"] = if pairs.is_empty() {
+        Value::Null
+    } else {
+        json!(bins15.iter().map(|(_, delta)| delta.abs()).sum::<f64>() / pairs.len() as f64)
+    };
     for field in [
+        "nll_hard",
         "soft_accuracy",
         "brier_soft",
         "brier_hard",
@@ -786,6 +813,32 @@ fn score(prepared: &Path, predictions: &Path) -> Result<(Value, Vec<Value>)> {
             by_workflow.insert(workflow.to_owned(), metrics(&rows, total));
         }
         measured["by_workflow"] = json!(by_workflow);
+        let mut by_type = Map::new();
+        for kind in ["binary", "choice", "ordinal"] {
+            let rows = chosen
+                .iter()
+                .filter(|r| r["type"] == kind)
+                .cloned()
+                .collect::<Vec<_>>();
+            let total = subset
+                .iter()
+                .map(|case| {
+                    case["request"]["decisions"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .filter(|d| {
+                            d["kind"]["type"] == kind
+                                && case["gold"].get(d["id"].as_str().unwrap()).is_some()
+                        })
+                        .count()
+                })
+                .sum::<usize>();
+            if total > 0 {
+                by_type.insert(kind.to_owned(), metrics(&rows, total));
+            }
+        }
+        measured["by_type"] = json!(by_type);
         if manifest["suite"] == "phish" {
             let y = chosen
                 .iter()
@@ -862,6 +915,9 @@ fn score(prepared: &Path, predictions: &Path) -> Result<(Value, Vec<Value>)> {
         .map(|r| r["reused_prefix_tokens"].as_u64().unwrap())
         .sum::<u64>();
     let summary = json!({"suite":manifest["suite"],"limited":manifest["limited"],"logical_cases":manifest["logical_cases"],
+        "scorer":{"version":2,"adapter_sha256":digest_bytes(include_bytes!("laya_benchmark.rs")),
+            "selective_metrics_sha256":digest_bytes(include_bytes!("selective_metrics.rs")),
+            "predictions_sha256":sha256(predictions)?,"prepared_manifest_sha256":sha256(&prepared.join("manifest.json"))?},
         "decisions":manifest["decisions"],"per_repeat":per_repeat,"errors":errors,"cache":cache,"profile":profile,
         "unique_batch_elapsed_ms":elapsed,"logical_input_tokens":input_tokens,"reused_prefix_tokens":reused,
         "evaluated_input_tokens":input_tokens-reused,"scope":SCOPE,"boundary_and_other_ms":(elapsed-profile_total).max(0.)});
@@ -1140,6 +1196,80 @@ pub fn run(args: Args) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn choice_fixture() -> (Value, Value) {
+        let decision = json!({"id":"q","kind":{"type":"choice","options":[
+            {"id":"z","criterion":"Z"},{"id":"a","criterion":"A"}]}});
+        let result = json!({"id":"q","scores":[{"id":"z","option_probability":0.5},
+            {"id":"a","option_probability":0.5}],"truncated":false,
+            "value":{"type":"choice","selected":null},"entropy_confidence":0.0,
+            "candidate_mass":0.9,"input_tokens":10,"reused_prefix_tokens":0});
+        (decision, result)
+    }
+
+    #[test]
+    fn choice_tie_uses_source_order_and_acceptance_uses_returned_value() {
+        let (decision, mut result) = choice_fixture();
+        let gold = json!({"label":"z"});
+        let row = score_decision(&decision, &result, Some(&gold)).unwrap();
+        assert_eq!(row["predicted"], "z");
+        assert_eq!(row["accepted_correct"], false);
+        // An imported result can select a different tied answer. It must not
+        // inherit the correctness of our raw argmax convention.
+        result["value"]["selected"] = json!("a");
+        let row = score_decision(&decision, &result, Some(&gold)).unwrap();
+        let report = metrics(&[row], 2);
+        assert_eq!(report["raw_top1_accuracy"], 0.5);
+        assert_eq!(report["accepted_accuracy"], 0.0);
+        assert_eq!(report["wrong_accepted"], 1);
+        assert_eq!(report["coverage"], 0.5);
+        assert_eq!(report["accepted_correct_all"], 0.0);
+    }
+
+    #[test]
+    fn binary_acceptance_is_scored_independently_and_nll_is_finite() {
+        let d = json!({"id":"q","kind":{"type":"binary"}});
+        let (_, mut r) = choice_fixture();
+        r["scores"] = json!([{"id":"false","option_probability":1.0},
+            {"id":"true","option_probability":0.0}]);
+        r["value"] = json!({"type":"binary","value":true,"p_true":0.0});
+        let row = score_decision(&d, &r, Some(&json!({"label":"true"}))).unwrap();
+        assert_eq!(row["correct"], false);
+        assert_eq!(row["accepted_correct"], true);
+        assert!((row["nll_hard"].as_f64().unwrap() + 1e-12_f64.ln()).abs() < 1e-10);
+        let report = metrics(&[row], 1);
+        assert_eq!(report["correct_accepted"], 1);
+        assert_eq!(report["ece_hard_15"], 1.0);
+    }
+
+    #[test]
+    fn missing_cases_remain_in_type_denominators() {
+        let dir = std::env::temp_dir().join(format!("l2s1-missing-cases-{}", std::process::id()));
+        fs::create_dir(&dir).unwrap();
+        let (d, _) = choice_fixture();
+        write_jsonl(
+            &dir.join("cases-with-gold.jsonl"),
+            &[json!({"id":"c/r0","repeat":0,
+            "request":{"decisions":[d]},"gold":{"q":{"label":"z"}}})],
+        )
+        .unwrap();
+        write_jsonl(&dir.join("predictions.jsonl"), &[]).unwrap();
+        let hash = sha256(&dir.join("cases-with-gold.jsonl")).unwrap();
+        write_json(
+            &dir.join("manifest.json"),
+            &json!({"suite":"typed","repeats":1,
+            "files":{"cases-with-gold.jsonl":hash}}),
+        )
+        .unwrap();
+        let (report, _) = score(&dir, &dir.join("predictions.jsonl")).unwrap();
+        fs::remove_dir_all(&dir).unwrap();
+        let choice = &report["per_repeat"]["0"]["by_type"]["choice"];
+        assert_eq!(choice["attempted"], 1);
+        assert_eq!(choice["valid"], 0);
+        assert_eq!(choice["coverage"], 0.0);
+        assert!(choice["accepted_accuracy"].is_null());
+        assert_eq!(choice["risk_coverage"]["planned"], 1);
+        assert_eq!(report["errors"].as_array().unwrap().len(), 1);
+    }
     #[test]
     fn typed_question_order_and_gold_boundary() {
         let row = json!({"state":"{\"text\":\"Input only\"}","questions":"{\"route\":{\"type\":\"choice\",\"instructions\":\"Choose.\",\"criteria\":{\"z\":\"Z\",\"a\":\"A\"}}}",

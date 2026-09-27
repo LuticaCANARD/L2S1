@@ -39,6 +39,7 @@
 | [합성 벤치마크](BENCHMARK.md) | 규칙 기반 픽스처의 정답, 판단 보류, 일관성, 지연 시간 |
 | [JevBench](JEVBENCH.md) | 공개 작업 매핑, 원본 채점, 수락 지표 |
 | [Ollaya 비교](OLLAYA_COMPARISON.md) | 근거에 기반한 차이와 남은 품질·제품 격차 |
+| [결정 모델 구조 검토](DECISION_MODEL_REVIEW.md) | 신뢰도, 디코더 비용, 스케줄링 한계와 오류 예산 진단 |
 | [typed-decisions](TYPED_DECISIONS_BENCHMARK.md) | 전체 2,000개 판단 테스트, 보정, 측정 절차 |
 | [의도 분류](INTENT_BENCHMARK.md) | 넓은 답변 코드, BANKING77, MASSIVE 한국어 |
 | [AG News](KAGGLE_BENCHMARK.md) | 고정된 분류 절차 |

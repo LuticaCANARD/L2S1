@@ -53,3 +53,50 @@ target/release/l2s1-tools benchmark-models --model qwen3 --device cpu \
 ```
 
 Use separate output directories and preserve model hashes, prompt versions, device, batch, context, and policy. The runner records reused and evaluated token counts; logical input-token throughput alone does not measure actual compute saved.
+
+<a id="fixed-schema-sessions"></a>
+## Fixed-schema sessions across changing states
+
+`LlamaBackend::shared_decision(decision)` is the counterpart to `shared_state(state)`: keep the instruction and candidate schema fixed, then evaluate multiple changing states. It retains real decoder KV across calls, while ordinary `decide()` still clears KV at every request boundary. `PreparedDecision` in the Python/TypeScript SDKs is a definition snapshot and does not enable this native session.
+
+```rust
+backend.set_execution_mode(l2s1::ExecutionMode::PrefixReuse);
+backend.set_prompt_layout(l2s1::PromptLayout::Legacy);
+let mut session = backend.shared_decision(decision)?;
+let first = session.decide(first_state)?;
+let next = session.decide(next_state)?;
+println!("reused: {}", next.results[0].reused_prefix_tokens);
+```
+
+With the repository's default sorted JSON maps, legacy/minimal layout puts instruction and options before the changing state; downstream `serde_json/preserve_order` can change legacy ordering. Check actual reused tokens; state-first is suited to the opposite workload (fixed state, changing questions). The session exclusively borrows the backend, keeping model, policy and schema immutable. It clears KV on creation, errors and drop, replaces the previous state suffix, and does not cache answers. Recurrent/hybrid models and output heads are rejected. This is one retained sequence, not an automatic multi-schema HTTP cache.
+
+Batch alignment remains deliberate: a 180-token common prefix reuses zero tokens at batch 256, 128 at batch 128, and 128 at batch 64. Smaller batches can reduce prefill throughput. Compare fresh and reuse at each batch size and also compare the fastest fresh baseline; do not infer a net speedup from a reuse counter alone.
+
+`examples/benchmark_schema_reuse.rs` replays all 36 labeled `decision-rules-v1` decisions, grouping the exact instruction, candidate order and schema into ten groups. It compares fresh versus shared-decision sessions with one decision per call in both paths, alternating order and checking probabilities, mass, argmax, accepted answers and abstention reasons. This grouped throughput measurement is separate from the original three-decision request latency. No labels, prompt text or candidate order are changed.
+
+```sh
+mkdir -p results
+cargo build --release --locked --features llama --example benchmark_schema_reuse
+cargo run --release --locked --features llama --example benchmark_schema_reuse -- \
+  --model models/Qwen3-0.6B-Q8_0.gguf --device cpu --batch 64 --rounds 3 \
+  --output results/schema-reuse-b64.json
+```
+
+Repeat at batch 256 with a new output path. On macOS use `llama-metal` and `--device metal`; CUDA uses `llama-cuda` and `--device cuda`. Session construction/drop, token preparation and scoring are timed. Loading and warmups are excluded; preparation caching is disabled. Error/selection checks do not establish accuracy on independent data.
+
+### Recorded CPU verification (2026-09-27)
+
+Qwen3-0.6B-Q8_0 on Linux/WSL2, four logical CPUs reporting i9-9900K, four threads, context 2048, full evidence, preparation cache off. Each cell is the median of three full 36-decision grouped passes, with separate untimed warmups and alternating fresh/reuse order within each pair. These are **whole-pass seconds**, not original request p50 values.
+
+| Batch | Fresh | Shared decision | Reused / input tokens |
+| --- | ---: | ---: | ---: |
+| 64 | 33.311 s | 22.068 s | 1,984 / 4,983 |
+| 256 | 31.691 s | 31.589 s | 0 / 4,983 |
+
+Reuse at batch 64 is 1.51x faster than matched fresh and **1.44x faster than the fastest measured fresh setting** (batch 256). Logical input lengths are 120–165 tokens, so the complete-batch rule permits no reuse at 256. Native calls dominate: the first batch-64 fresh pass took 33.311 s overall, including 32.806 s native and 0.039 s preparation.
+
+All within-batch pairs, repeated passes and the cross-batch comparison have zero probability, candidate-mass, raw top-1, accepted-selection and abstention differences. Raw top-1 remains 13/36; 30 are accepted and 10 of those are correct. Faster execution did not improve quality. Session failure recovery and request/session isolation also passed with real native inference. This does not measure M5 Max/Metal, jv.py, concurrent HTTP, memory use or general model accuracy. [Compact evidence](../benchmarks/schema-reuse-20260927/summary.json) and [provenance](../benchmarks/schema-reuse-20260927/provenance.json) retain run timings, first-pass scores, hashes and scope; complete response/log files remain local ignored artifacts.
+
+For another workload, pass `--input requests.jsonl --context 16384`. Input rows are unlabeled `{ "id": "unique-case", "request": { "state": ..., "decisions": [...] } }` objects, compatible with `evaluate_jsonl`. Grouping retains exact instructions and candidate order. External input reports test fresh/session equivalence; score accuracy separately against the held-out labels.
+
+The [231-item RTX 3080 JevBench check](JEVBENCH.md#rtx3080-rerun-20260927) found only 6.48–7.20% token reuse at batch 64. It preserved matched-batch outputs but was slower than batch-256 fresh for both Qwen3 0.6B and Gemma 4 E2B. Batch size itself changed several top-1 answers. Thus the CPU rule-fixture gain is workload-specific; keep batching and accuracy checks in the optimization loop.

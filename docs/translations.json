@@ -18,7 +18,7 @@
     {
       "source": "docs/BENCHMARK.md",
       "path": "BENCHMARK.md",
-      "source_sha256": "45956e79aa5bebe633887a1aea861c3c04b1cbbbd7f1c82246de6b110c4bc76c",
+      "source_sha256": "d33b6d295372c3cfc29d90f9d02e09846c60fdc218b37661a174b3f0af15205e",
       "languages": [
         "en",
         "ko",
@@ -68,7 +68,7 @@
     {
       "source": "docs/JEVBENCH.md",
       "path": "JEVBENCH.md",
-      "source_sha256": "2b579793cdf1c02b8042e3dba987800329ecfa8fa1d9605f327a97af53a26397",
+      "source_sha256": "25b8e7f13695d49425da8e1515a14914c5eed2b695da12eb6062945d6af10bd2",
       "languages": [
         "en",
         "ko",
@@ -88,7 +88,7 @@
     {
       "source": "docs/LAYA_BENCHMARK.md",
       "path": "LAYA_BENCHMARK.md",
-      "source_sha256": "d2c3bf787146ca711b57e18b25648ad3a25c31061596d8c61e8da6f6d9f2e315",
+      "source_sha256": "22561e9d520aa256e42e95992e1652afa09222030cf11487f2cb6cc6b80b9ba1",
       "languages": [
         "en",
         "ko",
@@ -118,7 +118,7 @@
     {
       "source": "docs/MODEL_RESULTS.md",
       "path": "MODEL_RESULTS.md",
-      "source_sha256": "c4ed413a66d805c6f4509c0817dc996a47f3fd5f34f23fa88a82f9e4cb8b29da",
+      "source_sha256": "a22634248cd8496f81e12bacb5e5f30e6d80d2936da04ce607b5faeca5c97a6c",
       "languages": [
         "en",
         "ko",
@@ -178,7 +178,7 @@
     {
       "source": "docs/SEMIF_ALGORITHM.md",
       "path": "SEMIF_ALGORITHM.md",
-      "source_sha256": "0c87591e2dc8c174e4688f011565ae4d8e34d83c1e46fc0a344d108570aa7122",
+      "source_sha256": "d35869e60bba92cd485ed143b3e1998437c316548584c84815cf2ae53a288bbf",
       "languages": [
         "en",
         "ko",
@@ -439,6 +439,16 @@
       "source": "sdks/python/README.md",
       "path": "python/README.md",
       "source_sha256": "e5007b035c1db21e8d30f042397f74b8dfafd3b88523531b1697b1e0e200681d",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/DECISION_MODEL_REVIEW.md",
+      "path": "DECISION_MODEL_REVIEW.md",
+      "source_sha256": "989f98784a1efeb9a9f53b81fc8e873ea59786bc7a3726bfe916b64c1f63e16c",
       "languages": [
         "en",
         "ko",

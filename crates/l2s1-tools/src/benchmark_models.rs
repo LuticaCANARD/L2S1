@@ -21,8 +21,14 @@ pub struct Args {
     model: Vec<String>,
     #[arg(long, num_args = 1.., value_parser = ["cpu", "cuda", "metal"], default_value = "cpu")]
     device: Vec<String>,
-    #[arg(long, default_value = "fresh", value_parser = ["fresh", "prefix-reuse"])]
+    #[arg(long, default_value = "fresh", value_parser = ["fresh", "prefix-reuse", "parallel", "state-restore"])]
     execution_mode: String,
+    #[arg(long, default_value_t = 3)]
+    parallel_width: u32,
+    #[arg(long, default_value = "full", value_parser = ["full", "compact"])]
+    evidence_transfer: String,
+    #[arg(long, default_value_t = 0)]
+    preparation_cache_bytes: u32,
     #[arg(long, default_value = "legacy", value_parser = ["legacy", "state-first"])]
     prompt_layout: String,
     #[arg(long, default_value_t = 3)]
@@ -194,6 +200,7 @@ fn run_test(
         ])
         .current_dir(root)
         .env("SKID_MODEL", model)
+        .env("SKID_CUDA", if device == "cuda" { "1" } else { "0" })
         .env("SKID_DEVICE", device)
         .env("SKID_BENCH_OUTPUT", report)
         .env("SKID_BENCH_ITERATIONS", args.iterations.to_string())
@@ -210,6 +217,12 @@ fn run_test(
             args.min_candidate_mass.to_string(),
         )
         .env("SKID_EXECUTION_MODE", &args.execution_mode)
+        .env("SKID_PARALLEL_WIDTH", args.parallel_width.to_string())
+        .env("SKID_EVIDENCE_TRANSFER", &args.evidence_transfer)
+        .env(
+            "SKID_PREPARATION_CACHE_BYTES",
+            args.preparation_cache_bytes.to_string(),
+        )
         .env("SKID_PROMPT_LAYOUT", &args.prompt_layout)
         .stdout(Stdio::from(log.try_clone()?))
         .stderr(Stdio::from(log))
@@ -241,8 +254,22 @@ pub fn run(root: &Path, args: Args) -> Result<()> {
         || args.batch == 0
         || args.threads == 0
         || args.timeout == 0
+        || args.parallel_width == 0
     {
-        bail!("iterations, context, batch, threads, and timeout must be positive");
+        bail!("iterations, context, batch, threads, timeout and parallel width must be positive");
+    }
+    if args.device.iter().any(|d| d == "metal")
+        && (!cfg!(target_os = "macos") || args.device.iter().any(|d| d == "cuda"))
+    {
+        bail!("Metal benchmarks require macOS and cannot share a CUDA build");
+    }
+    if args.evidence_transfer == "compact"
+        && !matches!(args.execution_mode.as_str(), "fresh" | "prefix-reuse")
+    {
+        bail!("compact text evidence requires fresh or prefix-reuse execution");
+    }
+    if args.parallel_width > 32 {
+        bail!("parallel width must be at most 32");
     }
     for probability in [args.min_top_probability, args.min_candidate_mass] {
         if !(0.0..=1.0).contains(&probability) {
@@ -288,6 +315,8 @@ pub fn run(root: &Path, args: Args) -> Result<()> {
         "repository_revision": git_revision(root), "llama_cpp_revision": llama_revision,
         "settings": {"model": args.model, "device": args.device, "execution_mode": args.execution_mode,
             "prompt_layout": args.prompt_layout, "iterations": args.iterations, "warmup": args.warmup,
+            "parallel_width": args.parallel_width, "evidence_transfer":args.evidence_transfer,
+            "preparation_cache_bytes":args.preparation_cache_bytes,
             "context": args.context, "batch": args.batch, "threads": args.threads,
             "min_top_probability": args.min_top_probability, "min_candidate_mass": args.min_candidate_mass,
             "timeout": args.timeout}, "runs": []

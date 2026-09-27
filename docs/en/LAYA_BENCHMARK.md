@@ -224,3 +224,5 @@ inference. Quantization, CPU thread count and layer placement are separate tunin
 axes; each must preserve an independently checked quality baseline. A smaller
 first-stage model with 31B fallback would also change the inference policy and
 needs its own accuracy/coverage evaluation.
+
+Reports now include `risk_coverage`: a maximum-candidate-probability ranking of raw argmax answers with equal-confidence samples kept together, plus maximum coverage at empirical 1%, 5% and 10% error budgets. Coverage retains all planned labeled decisions. This ignores native acceptance gates and uses test labels for descriptive analysis; it is not a deployment threshold or an error guarantee. See the [architecture review](DECISION_MODEL_REVIEW.md).
