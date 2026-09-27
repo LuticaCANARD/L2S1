@@ -1,0 +1,132 @@
+{
+  "command": [
+    "/home/lutica/l2s1-arm64-fresh-20260927/state-cache/before/probe",
+    "--model",
+    "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+    "--batch",
+    "256"
+  ],
+  "binary_sha256": "ee88fffd2f1a143109aa27e1dc5229cee7fd6cb4e3689caa4e64abf1cf9e0706",
+  "library_path": "/home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64/bin",
+  "libraries": {
+    "/home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-base.so.0": "60a15970cf74cedb3a55f3b0d740c0cd14d4aed89aa4a694321e53990a2fa353",
+    "/home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-cpu-armv8.2_2.so": "5f95cad1ec06373a9787d8fadc430835d660577916a870c829048bab3bf9e6b2",
+    "/home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64/bin/libggml.so.0": "0847ab96c8f5c470c5a3a0fb7d4289a992fcb6e12b1c06be898d22afb175f367",
+    "/home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64/bin/libllama.so.0": "e8c08f1531bd137d5737087100b968b1d59a20635a8de9f43ddfc23935f5e56b",
+    "/home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64/bin/libmtmd.so.0": "ee2f883cc7095706e6c468bd7b2cde752253f766cdef3ddf0ee404acaaa97606"
+  },
+  "runtime_manifest": {
+    "platform": "linux-arm64",
+    "version": "0.1.3",
+    "devices": [
+      "cpu"
+    ],
+    "files": [
+      {
+        "path": "bin/l2s1",
+        "bytes": 3978616,
+        "sha256": "5cba35864488f8e39efdf04e4100607b621053bf43dab6108fe9b8c419f55784"
+      },
+      {
+        "path": "bin/libggml-base.so",
+        "bytes": 826280,
+        "sha256": "60a15970cf74cedb3a55f3b0d740c0cd14d4aed89aa4a694321e53990a2fa353"
+      },
+      {
+        "path": "bin/libggml-base.so.0",
+        "bytes": 826280,
+        "sha256": "60a15970cf74cedb3a55f3b0d740c0cd14d4aed89aa4a694321e53990a2fa353"
+      },
+      {
+        "path": "bin/libggml-base.so.0.24.0",
+        "bytes": 826280,
+        "sha256": "60a15970cf74cedb3a55f3b0d740c0cd14d4aed89aa4a694321e53990a2fa353"
+      },
+      {
+        "path": "bin/libggml-cpu-armv8.0_1.so",
+        "bytes": 1011760,
+        "sha256": "0a172680495c8aea9fe557d41fb7d30c816314bfedfd943dd9470ff3eddb8806"
+      },
+      {
+        "path": "bin/libggml-cpu-armv8.2_1.so",
+        "bytes": 1013448,
+        "sha256": "269a8a9f1406bef804a74f2b49623288e67f35ca7fb3a8a9952268c636520da4"
+      },
+      {
+        "path": "bin/libggml-cpu-armv8.2_2.so",
+        "bytes": 1013448,
+        "sha256": "5f95cad1ec06373a9787d8fadc430835d660577916a870c829048bab3bf9e6b2"
+      },
+      {
+        "path": "bin/libggml-cpu-armv8.2_3.so",
+        "bytes": 1013376,
+        "sha256": "46b9b6354ba1fd0f24ee74d6ede0db4d6c7f3065700ade027626a55aee47c3a0"
+      },
+      {
+        "path": "bin/libggml-cpu-armv8.6_1.so",
+        "bytes": 1013736,
+        "sha256": "38cbc31ad3a8f9bf1885566935098b08e7a4c5bcb8f97b2852367be65b04bc31"
+      },
+      {
+        "path": "bin/libggml-cpu-armv8.6_2.so",
+        "bytes": 1013736,
+        "sha256": "a9dab165e2b44280237cab3b07c0c1f6c257a06fc41101263ec27b880f16c272"
+      },
+      {
+        "path": "bin/libggml-cpu-armv9.2_1.so",
+        "bytes": 1079248,
+        "sha256": "9335ade5d5ad3e869b0dc0c84a3817c58fa7dc9c24084e7341e20f263197496a"
+      },
+      {
+        "path": "bin/libggml-cpu-armv9.2_2.so",
+        "bytes": 1079248,
+        "sha256": "6346eb1186034cc6ccaf4b9f0f88f8a1ba29cb9220750f8029c57fa190cb3445"
+      },
+      {
+        "path": "bin/libggml.so",
+        "bytes": 78024,
+        "sha256": "0847ab96c8f5c470c5a3a0fb7d4289a992fcb6e12b1c06be898d22afb175f367"
+      },
+      {
+        "path": "bin/libggml.so.0",
+        "bytes": 78024,
+        "sha256": "0847ab96c8f5c470c5a3a0fb7d4289a992fcb6e12b1c06be898d22afb175f367"
+      },
+      {
+        "path": "bin/libggml.so.0.24.0",
+        "bytes": 78024,
+        "sha256": "0847ab96c8f5c470c5a3a0fb7d4289a992fcb6e12b1c06be898d22afb175f367"
+      },
+      {
+        "path": "bin/libllama.so",
+        "bytes": 4373288,
+        "sha256": "e8c08f1531bd137d5737087100b968b1d59a20635a8de9f43ddfc23935f5e56b"
+      },
+      {
+        "path": "bin/libllama.so.0",
+        "bytes": 4373288,
+        "sha256": "e8c08f1531bd137d5737087100b968b1d59a20635a8de9f43ddfc23935f5e56b"
+      },
+      {
+        "path": "bin/libllama.so.0.4.1",
+        "bytes": 4373288,
+        "sha256": "e8c08f1531bd137d5737087100b968b1d59a20635a8de9f43ddfc23935f5e56b"
+      },
+      {
+        "path": "bin/libmtmd.so",
+        "bytes": 1711864,
+        "sha256": "ee2f883cc7095706e6c468bd7b2cde752253f766cdef3ddf0ee404acaaa97606"
+      },
+      {
+        "path": "bin/libmtmd.so.0",
+        "bytes": 1711864,
+        "sha256": "ee2f883cc7095706e6c468bd7b2cde752253f766cdef3ddf0ee404acaaa97606"
+      },
+      {
+        "path": "bin/libmtmd.so.0.4.1",
+        "bytes": 1711864,
+        "sha256": "ee2f883cc7095706e6c468bd7b2cde752253f766cdef3ddf0ee404acaaa97606"
+      }
+    ]
+  }
+}

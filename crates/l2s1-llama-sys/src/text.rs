@@ -546,6 +546,12 @@ pub unsafe extern "C" fn sd_forward_restore(
             metrics.fallback = 1;
             return fresh(e, reused, metrics);
         }
+        // A disabled snapshot budget cannot retain even one byte. Avoid doing
+        // a common-prefix prefill that the fresh fallback would repeat.
+        if limit == 0 {
+            metrics.fallback = 2;
+            return fresh(e, reused, metrics);
+        }
         let mut b = Batch::new(e.batch_size)?;
         let start = Instant::now();
         decode_range(e, &mut b, inputs[0], 0, common, false)?;
@@ -570,7 +576,14 @@ pub unsafe extern "C" fn sd_forward_restore(
         for (s, tokens) in inputs.iter().enumerate() {
             if s > 0 {
                 let start = Instant::now();
-                e.clear();
+                // For the single dense sequence, upstream state_read_meta
+                // removes the old sequence before restoring its cells. A full
+                // KV-buffer memset here duplicates that work. Keep the existing
+                // clear for recurrent/hybrid memory and the diagnostic override;
+                // request boundaries and every error still clear the engine.
+                if e.recurrent() || e.force_kv_clear {
+                    e.clear();
+                }
                 e.memory_dirty = true;
                 if llama_state_seq_set_data(e.ctx, snapshot.as_ptr(), bytes, 0) != bytes {
                     metrics.fallback = 4;

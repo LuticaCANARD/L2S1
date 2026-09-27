@@ -1,0 +1,2 @@
+# Preserve captured native build and runtime output byte-for-byte.
+*.log -whitespace

@@ -1,0 +1,365 @@
+{
+  "suite_sha256": "f9d5380fdafe1bb686c9f4f1d44003a9f71c6f47fddd59063c62d3301b7d6c04",
+  "model_sha256": "b205840c5dcef55078e37d344677869a714ffd42a4ae448c48dcfb52e4bb10d5",
+  "performance_cases": [
+    {
+      "id": "warehouse-01",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "ambient",
+          "hours_until_dispatch": 0
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                },
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "ambient",
+        "cold_chain_required": "false",
+        "dispatch_priority": "high"
+      }
+    },
+    {
+      "id": "warehouse-02",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "chilled",
+          "hours_until_dispatch": 6,
+          "note": "This is an unrelated inventory note. The box label is blue."
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                },
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "chilled",
+        "cold_chain_required": "true",
+        "dispatch_priority": "high"
+      }
+    },
+    {
+      "id": "warehouse-03",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "frozen",
+          "hours_until_dispatch": 7
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                },
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "frozen",
+        "cold_chain_required": "true",
+        "dispatch_priority": "medium"
+      }
+    },
+    {
+      "id": "warehouse-01-long-state",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "ambient",
+          "hours_until_dispatch": 0,
+          "irrelevant_packing_notes": "packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing "
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                },
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "ambient",
+        "cold_chain_required": "false",
+        "dispatch_priority": "high"
+      }
+    },
+    {
+      "id": "warehouse-01-zero-budget",
+      "domain": "warehouse",
+      "request": {
+        "state": {
+          "storage_requirement": "ambient",
+          "hours_until_dispatch": 0,
+          "irrelevant_packing_notes": "packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing packing "
+        },
+        "decisions": [
+          {
+            "id": "storage_zone",
+            "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+            "kind": {
+              "type": "choice",
+              "options": [
+                {
+                  "id": "ambient",
+                  "criterion": "The shipment requires ambient storage."
+                },
+                {
+                  "id": "chilled",
+                  "criterion": "The shipment requires chilled storage."
+                },
+                {
+                  "id": "frozen",
+                  "criterion": "The shipment requires frozen storage."
+                }
+              ]
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+            "kind": {
+              "type": "binary",
+              "false_label": "No temperature control is required.",
+              "true_label": "Temperature control is required."
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+            "kind": {
+              "type": "ordinal",
+              "levels": [
+                {
+                  "id": "low",
+                  "criterion": "More than 24 hours remain until dispatch.",
+                  "value": 0
+                },
+                {
+                  "id": "medium",
+                  "criterion": "More than 6 hours and at most 24 hours remain until dispatch.",
+                  "value": 1
+                },
+                {
+                  "id": "high",
+                  "criterion": "At most 6 hours remain until dispatch.",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "expected": {
+        "storage_zone": "ambient",
+        "cold_chain_required": "false",
+        "dispatch_priority": "high"
+      },
+      "snapshot_limit": 0
+    }
+  ]
+}
