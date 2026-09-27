@@ -26,7 +26,7 @@ def prepare(root: Path, output: Path) -> None:
     assert not any(isinstance(dep, dict) and 'git' in dep for dep in parsed['dependencies'].values())
     output.mkdir(parents=True)
     (output / 'Cargo.toml').write_text(text)
-    for name in ('src', 'examples', 'crates/l2s1-llama-sys'):
+    for name in ('src', 'examples', 'crates/l2s1-llama-sys', 'third_party', 'tests/fixtures'):
         shutil.copytree(root / name, output / name)
     # wgpu remains source-checkout only; do not trigger unknown-feature warnings.
     for path in (output / 'src').rglob('*.rs'):
@@ -38,7 +38,7 @@ def prepare(root: Path, output: Path) -> None:
         shutil.copyfile(root / name, output / name)
     # The staged source is immutable after packaging and all publication jobs use it.
     (output / 'README.md').write_text((output / 'README.md').read_text() +
-        '\n\nCargo registry distribution: native CPU/CUDA/Metal and OpenRouter only. '
+        '\n\nCargo registry distribution: native CPU/CUDA/Metal, optional Laya ONNX CPU/CUDA and OpenRouter. '
         'WGPU requires the source checkout because its engine dependency is unpublished.\n')
 
 

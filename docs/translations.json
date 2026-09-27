@@ -308,7 +308,7 @@
     {
       "source": "sdks/typescript/README.md",
       "path": "typescript/README.md",
-      "source_sha256": "5fd425d80243ad70d404a2aa0f025e82e173fdb8e953321bbf3e6551c6e3a494",
+      "source_sha256": "5df35d6d6d2e2b00e59610934b520ef36a0e6630b1f4a2ef7dae122be50c7dae",
       "languages": [
         "en",
         "ko",
@@ -438,7 +438,7 @@
     {
       "source": "sdks/python/README.md",
       "path": "python/README.md",
-      "source_sha256": "e5007b035c1db21e8d30f042397f74b8dfafd3b88523531b1697b1e0e200681d",
+      "source_sha256": "d5f0aac98801e57e3a0ed21e9fa06d7e586f740722d1f8ae96bd6bee59f5f8be",
       "languages": [
         "en",
         "ko",
