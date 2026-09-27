@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/home/lutica/l2s1-pi-20260927/source/target/release/deps/benchmark-1634f2fff2589970",
+    "--exact",
+    "native::model_decision_benchmark",
+    "--ignored",
+    "--nocapture"
+  ],
+  "cwd": "/home/lutica/l2s1-pi-20260927/source",
+  "settings": {
+    "SKID_MODEL": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+    "SKID_CUDA": "0",
+    "SKID_BENCH_ITERATIONS": "3",
+    "SKID_BENCH_WARMUP": "1",
+    "SKID_CONTEXT": "2048",
+    "SKID_BATCH": "256",
+    "SKID_THREADS": "4",
+    "SKID_PROMPT_LAYOUT": "legacy",
+    "SKID_EXECUTION_MODE": "fresh",
+    "SKID_BENCH_OUTPUT": "/home/lutica/l2s1-pi-20260927/runs/gemma3-q8-rules/benchmark.json"
+  },
+  "timeout_seconds": 3600
+}

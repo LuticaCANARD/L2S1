@@ -237,7 +237,7 @@ npm pack
 npm run test:package -- l2s1-node-0.1.3.tgz l2s1-runtime-linux-x64-0.1.3.tgz
 ```
 
-ランタイムを再構築するときは、新しい出力ディレクトリを使用します。 `L2S1_PORTABLE_BUILD=1` は、ビルドホスト CPU 命令と OpenMP 依存関係を無効にします。一般的な CPU カーネルは、ホストに最適化されたカスタム ビルドよりも遅い可能性があります。各アーティファクトには、ライセンス通知と SHA-256 マニフェストが含まれています。ベリファイアは、Linux llama.cpp/GGML の依存関係がバンドル ディレクトリから解決されることを確認します。
+ランタイムの再ビルドには新しい出力ディレクトリを使ってください。`L2S1_PORTABLE_BUILD=1` はビルドホスト専用 CPU 命令と OpenMP 依存関係を無効にします。Linux ARM64 パッケージは実行時の CPU 機能に応じた GGML カーネルを選択し、ARMv8 fallback を含みます。パッケージ CI は Ubuntu 24.04 / GCC 14 を使う設定です。移動時はすべての CPU モジュールを同梱してください。比較ビルドと独自 OpenMP 依存関係は[ネイティブビルド設定](../crates/l2s1-llama-sys/README.md#portable-linux-arm64)を参照してください。各パッケージにはライセンスと SHA-256 マニフェストがあり、検証は llama.cpp/GGML の依存関係がパッケージ内で解決されることを確認します。
 
 [配布パイプライン](../RELEASE_PIPELINE.md)で SDK と native runtime の自動公開・認証設定を確認してください。
 

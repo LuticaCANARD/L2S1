@@ -78,12 +78,14 @@ were closed on completion. No password is stored in this evidence.
 The earlier 12-case suite reported 4.766 s p50. Restricting its raw samples to
 exactly warehouse-01/02/03 and passes 0/1 matches this smoke run's six requests:
 
-| Same three cases, two passes | Earlier source build, fresh | v0.1.3 portable, fresh | v0.1.3 portable, reuse |
-| --- | ---: | ---: | ---: |
-| p50 / three-decision request | 4.743 s | 16.874 s | 4.091 s |
-| Raw top-1 | 55.6% | 55.6% | 55.6% |
-| Coverage | 100% | 88.9% | 88.9% |
-| Accepted-only accuracy | 55.6% | 62.5% | 62.5% |
+| Three-case subset | Earlier source, fresh | v0.1.3 portable, fresh | v0.1.3 portable, reuse | Current baseline, fresh | Current kernels, fresh | Current OpenMP, fresh | Current combined, fresh |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| p50 / three-decision request | 4.743 s | 16.874 s | 4.091 s | 15.643 s | 4.450 s | 15.685 s | 4.459 s |
+| Raw top-1 | 55.6% | 55.6% | 55.6% | 55.6% | 55.6% | 55.6% | 55.6% |
+| Coverage | 100% | 88.9% | 88.9% | 88.9% | 100.0% | 88.9% | 100.0% |
+| Accepted-only accuracy | 55.6% | 62.5% | 62.5% | 62.5% | 55.6% | 62.5% | 55.6% |
+
+Historical columns contain six requests each. Current columns contain 12 requests each from a same-source four-build crossover, with identical stdio, three-case warmup, compute settings and explicit fresh execution. Active undervoltage/throttling remained present. The current columns are controlled against each other at the software level, not against the historical columns. See the [fresh kernel investigation](../pi5-arm64-fresh-20260927/README.md) for p95, memory, power/clock telemetry, all 36 decisions, numerical changes and regression scope.
 
 The portable fresh path was **3.56x slower** than the older build. With reuse,
 latency was 13.8% lower than that historical fresh result. The 4.125x ratio is
@@ -97,8 +99,7 @@ A read-only inspection of the older Pi build confirmed `GGML_NATIVE=ON`,
 `GGML_OPENMP=ON`, and `-mcpu=cortex-a76+crc+crypto+dotprod+noi8mm+nosve+nosme`.
 The v0.1.3 portable release configuration explicitly turns `GGML_NATIVE` and
 `GGML_OPENMP` off. This makes lost CPU-specific optimization a strong hypothesis;
-its causal contribution has not been isolated by rebuilding the same source with
-only these options changed. The new Rust NEON evidence scan does not replace the
+the [same-source follow-up](../pi5-arm64-fresh-20260927/README.md) now isolates the ARM kernel configuration and OpenMP as separate software factors. Power remains uncontrolled, so it does not establish a sole cause for the exact historical ratio. The new Rust NEON evidence scan does not replace the
 GGML matrix kernels that dominate inference.
 
 All nine unique top-1 predictions match the older build, but probability values

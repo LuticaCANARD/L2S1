@@ -1,0 +1,63 @@
+{
+  "api_version": 1,
+  "artifact_id": "e51697b79c3a011f119c1443de0744c5361378be2d736a66f84b50049b57f1d5",
+  "backend": {
+    "model": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+    "runtime": "local-libllama"
+  },
+  "batch": {
+    "enabled": false,
+    "execution": "native_parallel",
+    "image": false,
+    "max_decisions": 128,
+    "max_decisions_per_wave": 1,
+    "max_requests": 128,
+    "mixed_media": false,
+    "reasoning_modes": [
+      "direct"
+    ],
+    "supported": true,
+    "text": true
+  },
+  "decision_types": [
+    "binary",
+    "choice",
+    "ordinal"
+  ],
+  "evidence": "model_scored",
+  "limits": {
+    "max_body_bytes": 46137344,
+    "max_connections": 32,
+    "max_decisions": 128,
+    "max_inflight_body_bytes": 201326592,
+    "max_media": 4,
+    "queued_inference_requests": 16
+  },
+  "media": {
+    "image": {
+      "format_support": "runtime_dependent",
+      "formats": [],
+      "max_bytes_each": 8388608,
+      "max_per_decision": 1,
+      "parallel": {
+        "enabled": false,
+        "isolated_sequences": true,
+        "max_decisions_per_wave": 1,
+        "max_options_per_decision": 26,
+        "projector_encoding": "batched_when_compatible",
+        "supported": false
+      },
+      "supported": false
+    }
+  },
+  "reasoning": {
+    "modes": [
+      "direct"
+    ],
+    "thinking_supported": false
+  },
+  "request_policy": {
+    "supported": true,
+    "target_error_rate": "maps to a model-score threshold; not a guaranteed correctness error rate"
+  }
+}

@@ -42,7 +42,8 @@ const pattern = process.platform === 'win32' ? /^(?:lib)?(?:llama|mtmd|ggml).*\.
   : process.platform === 'darwin' ? /^lib(?:llama|mtmd|ggml).*\.dylib$/ : /^lib(?:llama|mtmd|ggml).*\.so(?:\..*)?$/;
 const libraries = (await readdir(libraryDirectory)).filter((name) => pattern.test(name)).sort();
 for (const required of ['llama', 'mtmd', 'ggml', 'ggml-base', 'ggml-cpu']) {
-  if (!libraries.some((name) => name.startsWith(`lib${required}.`) || name.startsWith(`${required}.`))) {
+  if (!libraries.some((name) => name.startsWith(`lib${required}.`) || name.startsWith(`${required}.`)
+    || (required === 'ggml-cpu' && name === 'libggml-cpu-armv8.0_1.so'))) {
     throw new Error(`Missing runtime library ${required} in ${libraryDirectory}`);
   }
 }

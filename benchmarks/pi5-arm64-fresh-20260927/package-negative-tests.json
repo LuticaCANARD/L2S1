@@ -1,0 +1,12 @@
+[
+  {
+    "case": "missing-fallback",
+    "exit_code": 1,
+    "matched_diagnostic": "missing the ARMv8 fallback"
+  },
+  {
+    "case": "module-only-missing-dependency",
+    "exit_code": 1,
+    "matched_diagnostic": "Missing dependency in bin/libggml-cpu-test.so"
+  }
+]

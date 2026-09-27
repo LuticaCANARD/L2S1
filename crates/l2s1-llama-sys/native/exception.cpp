@@ -1,6 +1,11 @@
 #include "exception.h"
 #include <cstdio>
 #include <exception>
+#ifdef L2S1_ARM64_DISPATCH
+#include <dlfcn.h>
+#include <filesystem>
+#include <stdexcept>
+#endif
 namespace {
 thread_local char error[1024] = {};
 void record(const char * message) noexcept {
@@ -67,7 +72,20 @@ extern "C" int32_t sd_native_mtmd_batch_encode(mtmd_batch * batch) noexcept {
     try { return mtmd_batch_encode(batch); } L2S1_CATCH(-1)
 }
 extern "C" void sd_native_ggml_backend_load_all() noexcept {
-    try { return ggml_backend_load_all(); } L2S1_CATCH()
+    try {
+#ifdef L2S1_ARM64_DISPATCH
+        // Resolve modules beside the linked GGML, including during cargo test.
+        // Do not search the cwd or another build's absolute install directory.
+        Dl_info info{};
+        if (!dladdr(reinterpret_cast<void *>(&ggml_backend_load_all_from_path), &info) || !info.dli_fname) {
+            throw std::runtime_error("cannot locate matching GGML backend directory");
+        }
+        const auto directory = std::filesystem::canonical(info.dli_fname).parent_path().string();
+        ggml_backend_load_all_from_path(directory.c_str());
+#else
+        ggml_backend_load_all();
+#endif
+    } L2S1_CATCH()
 }
 extern "C" void sd_native_llama_backend_init() noexcept {
     try { return llama_backend_init(); } L2S1_CATCH()
