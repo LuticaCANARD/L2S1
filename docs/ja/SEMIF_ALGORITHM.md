@@ -57,3 +57,52 @@ target/release/l2s1-tools benchmark-models --model qwen3 --device cpu \
 ```
 
 個別の出力ディレクトリを使用し、モデル ハッシュ、プロンプト バージョン、デバイス、バッチ、コンテキスト、およびポリシーを保存します。ランナーは、再利用および評価されたトークン数を記録します。論理入力トークンのスループットだけでは、実際に節約されたコンピューティングを測定することはできません。
+
+<a id="fixed-schema-sessions"></a>
+## 変化する状態を評価する固定スキーマセッション
+
+`LlamaBackend::shared_decision(decision)` は `shared_state(state)` の逆の用途である。指示・候補スキーマを固定して変化する状態を評価する。呼び出し間で実際のデコーダ KV を保持するが、通常の `decide()` はリクエスト境界で KV を消去する。Python/TypeScript SDK の `PreparedDecision` は定義のスナップショットであり、このネイティブセッションを有効にしない。
+
+```rust
+backend.set_execution_mode(l2s1::ExecutionMode::PrefixReuse);
+backend.set_prompt_layout(l2s1::PromptLayout::Legacy);
+let mut session = backend.shared_decision(decision)?;
+let first = session.decide(first_state)?;
+let next = session.decide(next_state)?;
+println!("reused: {}", next.results[0].reused_prefix_tokens);
+```
+
+既定のJSONマップ順序ではLegacy/minimal は指示・候補を可変状態の前に置く。依存関係で`serde_json/preserve_order`を有効にするとlegacyの順序が変わり得るため、実際の再利用トークンを確認する。State-first は固定状態と可変質問という逆の用途に適する。セッションがバックエンドを排他的に借用し、モデル・ポリシー・スキーマを固定する。生成・失敗・終了時に KV を消去し、前の状態の接尾部を置換する。回答はキャッシュしない。Recurrent/hybrid モデルと出力ヘッドは拒否する。保持するのは一つのシーケンスであり、自動的な複数スキーマ HTTP キャッシュではない。
+
+バッチ境界を維持する。共通接頭辞が180トークンなら、バッチ256で0、128で128、64でも128トークンを再利用する。小さいバッチは prefill の処理量を下げ得る。各バッチで fresh/reuse を比較し、最速の fresh 基準とも比較する。再利用カウンタだけから実際の高速化を推定しない。
+
+`examples/benchmark_schema_reuse.rs` は `decision-rules-v1` のラベル付き36決定を、完全に同じ指示・候補順・スキーマの10グループに分けて再生する。両経路とも呼び出し当たり一決定とし、順序を交代して fresh とセッションを比較する。確率、候補質量、argmax、受理回答、棄権理由を確認する。このグループ処理量は元の三決定リクエストの遅延とは別測定。正答、プロンプト、候補順は変更しない。
+
+```sh
+mkdir -p results
+cargo build --release --locked --features llama --example benchmark_schema_reuse
+cargo run --release --locked --features llama --example benchmark_schema_reuse -- \
+  --model models/Qwen3-0.6B-Q8_0.gguf --device cpu --batch 64 --rounds 3 \
+  --output results/schema-reuse-b64.json
+```
+
+バッチ256でも別の出力パスで繰り返す。macOS は `llama-metal` と `--device metal`、CUDA は `llama-cuda` と `--device cuda` を使う。セッション生成・破棄、トークン準備、採点を計時に含む。ロードとウォームアップは除外し、準備キャッシュは無効。結果一致は独立データでの精度を証明しない。
+
+### CPU実測検証（2026-09-27）
+
+Linux/WSL2、i9-9900Kと表示される論理CPU 4個、4スレッドでQwen3-0.6B-Q8_0を実行した。Context 2048、full evidence、準備キャッシュ無効。各セルは36判断全体をグループ処理した3回の中央値である。各経路を別途ウォームアップし、ペア内のfresh/reuse順序を交互にした。**全パスの秒数**であり、従来のリクエストp50ではない。
+
+| Batch | Fresh | Shared decision | Reused / input tokens |
+| --- | ---: | ---: | ---: |
+| 64 | 33.311 s | 22.068 s | 1,984 / 4,983 |
+| 256 | 31.691 s | 31.589 s | 0 / 4,983 |
+
+バッチ64の再利用は同じバッチのfreshより1.51倍、**測定した最速のfresh設定（バッチ256）より1.44倍速い**。論理入力長は120–165トークンなので、完全なバッチ単位の規則では256で再利用できない。ネイティブ呼出しが時間を占める。バッチ64の最初のfreshパスは全体33.311秒、うちネイティブ32.806秒、準備0.039秒だった。
+
+同一バッチの全ペア、反復パス、バッチ間の比較で、確率・候補質量・raw top-1・受理回答・棄権の差はすべて0だった。Raw top-1は13/36、受理30件、うち正解10件で変わらない。高速化は精度改善ではない。実際のネイティブ推論で失敗後の回復とリクエスト・セッション分離も通過した。M5 Max/Metal、jv.py、同時HTTP、メモリ使用量や一般精度の測定ではない。[縮約証拠](../../benchmarks/schema-reuse-20260927/summary.json)と[出所](../../benchmarks/schema-reuse-20260927/provenance.json)に時間、初回スコア、ハッシュと範囲を記録した。完全な応答・ログはローカルのignoredファイルである。
+
+別のワークロードは`--input requests.jsonl --context 16384`で実行する。入力は`evaluate_jsonl`と同じ、正解を含まない`{ "id": "unique-case", "request": { "state": ..., "decisions": [...] } }`行である。グループ化でも指示・候補順序を維持する。外部入力レポートはfreshとセッションの結果一致を検査し、精度は分離した正解データで別途採点する。
+
+[RTX 3080 JevBench 231問の検証](JEVBENCH.md#rtx3080-rerun-20260927)ではbatch 64の再利用は入力トークンの6.48–7.20%でした。同一batchの出力は保持しましたが、Qwen3 0.6B・Gemma 4 E2Bともbatch 256 freshより遅く、batch変更自体で一部のtop-1が変化しました。CPUルールフィクスチャの効果はワークロードに依存し、最適化にはbatch処理量と正解変化の確認も必要です。
+
+大きいMoEモデルのCUDA比較では`--cpu-moe-layers N`、`--gpu-layers N`も指定できます。両経路で同じ配置を使い、モデル識別情報に記録します。速度比較ではcontext・batch・配置を揃えてください。CPU expert offloadは全GPU推論ではありません。[26B追加検証](JEVBENCH.md#gemma26-rtx3080-20260927)でこの経路を使用します。

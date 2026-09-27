@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-27",
+  "environment": {
+    "os": "Linux",
+    "release": "6.18.33.2-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "cpu_reported": "Intel Core i9-9900K @ 3.60GHz",
+    "logical_cpus": 4,
+    "hypervisor_reported": "Microsoft",
+    "threads": 4
+  },
+  "git_revision": "03d5bc052154b3dbe6d4cfb4842dd5291a7eae9f",
+  "working_tree_dirty": true,
+  "llama_cpp_pinned_commit": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "model_identity": {
+    "adapter_sha256": null,
+    "compute": {
+      "batch": 64,
+      "context": 2048,
+      "flash_attention": "off",
+      "threads": 4,
+      "ubatch": 64
+    },
+    "device": "CPU",
+    "execution_mode": "fresh",
+    "head_sha256": null,
+    "loaded_runtime_sha256": "59a7bf9bf82dc25e286815ec0c1be6e840d548fd3132b1626e952e1ae6ecc28e",
+    "parallel_width": 1,
+    "prompt_profile": "qwen3",
+    "prompt_version": "qwen3-no-thinking-decision-v1",
+    "runtime_build_sha256": "60ba79ec93058df6a7f39ed54180818ac48f37a77e05740b3a8eec6d49dbd9ca",
+    "template_sha256": "57f1fd00f0013a2be96aa79b857391f27e23df5b5f847072b524c897e24d0361",
+    "weights_sha256": "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
+  },
+  "sha256": {
+    "examples/benchmark_schema_reuse.rs": "b6e0d0e9a1ae030d07160de8e8ec1711035984c6d79352939060654877464b36",
+    "src/llama/shared_decision.rs": "be7dbb3e14429be945c0007e8169b474f99301764503b882e03c41f37c750bcf",
+    "tests/fixtures/decision_benchmark.json": "f9d5380fdafe1bb686c9f4f1d44003a9f71c6f47fddd59063c62d3301b7d6c04",
+    "target/release/examples/benchmark_schema_reuse": "118eb442828ae27a4fb0d20abd1344042ddb09ef74094d345f15427c9d6554c1"
+  },
+  "scope": "Linux virtualized CPU measurements; not M5 Max/Metal or jv.py. The source has uncommitted changes. Full raw responses/logs are local ignored results/schema-reuse-20260927 files.",
+  "validation": {
+    "shared_decision_native": "passed with real Qwen3-0.6B-Q8_0 inference, including errors and isolation",
+    "shared_state_native_regression": "passed with real Qwen3-0.6B-Q8_0 inference",
+    "benchmark_fixture_tests": "2 passed",
+    "tools_tests": "13 passed",
+    "tools_clippy": "passed with -D warnings",
+    "native_clippy": "strict check reports 3 pre-existing collapsible_if diagnostics in unchanged src/llama/model_hash.rs; targeted check passed with only that lint allowed",
+    "performance_runs": "finished before validation builds; no concurrent task-driven build/inference during the paired measurements",
+    "runner_smoke": {
+      "status": "passed",
+      "model": "SmolLM2-135M-Instruct-Q8_0",
+      "measured_decisions": 36,
+      "compact_evidence": true,
+      "preparation_cache_bytes": 8388608,
+      "measured_prompt_cache_hits": 36,
+      "reused_prefix_tokens": 0,
+      "report_sha256": "06bcef2ec2d4b26dcac200d210704ebab437300c4020b3ca94232ce6eb185304",
+      "timing_scope": "functional smoke only; concurrent validation builds exclude these timings from performance claims"
+    }
+  }
+}

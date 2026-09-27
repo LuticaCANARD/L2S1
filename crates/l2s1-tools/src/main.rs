@@ -23,6 +23,7 @@ mod report_intents;
 mod report_intents_wide;
 mod report_jevbench_matrix;
 mod report_output_head;
+mod selective_metrics;
 mod summarize_output_head_runtime;
 mod tune_compute;
 

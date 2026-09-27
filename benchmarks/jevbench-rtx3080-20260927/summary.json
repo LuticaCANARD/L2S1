@@ -1,0 +1,614 @@
+{
+  "date": "2026-09-27",
+  "device": "NVIDIA GeForce RTX 3080 10 GiB",
+  "runs": [
+    {
+      "model": "smollm2",
+      "checkpoint": "SmolLM2-135M-Instruct-Q8_0.gguf",
+      "total": 231,
+      "correct": 71,
+      "accuracy": 0.30735930735930733,
+      "accepted": 17,
+      "accepted_correct": 11,
+      "wrong_accepted": 6,
+      "abstained": 214,
+      "coverage": 0.0735930735930736,
+      "accepted_accuracy": 0.6470588235294118,
+      "p50_ms": 25.222201,
+      "p95_ms": 228.4762525,
+      "total_ms": 13856.398709,
+      "brier": 0.9512806501836539,
+      "ece": 0.3823751494839481,
+      "tiers": {
+        "easy": {
+          "correct": 14,
+          "total": 48
+        },
+        "original": {
+          "correct": 25,
+          "total": 72
+        },
+        "hard": {
+          "correct": 32,
+          "total": 111
+        }
+      },
+      "backend": {
+        "compute": {
+          "batch": 256,
+          "context": 16384,
+          "flash_attention": "off",
+          "threads": 4,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "llama",
+        "model_description": "llama 256M Q8_0",
+        "model_path": "/home/lutica/personal/skid/skid-desion/models/SmolLM2-135M-Instruct-Q8_0.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3080",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "legacy",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-decision-v1",
+        "runtime": "local-libllama"
+      },
+      "input_tokens": 168121,
+      "reused_prefix_tokens": 0,
+      "risk_coverage_at_error_budget": [
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.01,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        },
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.05,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        },
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.1,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        }
+      ],
+      "gpu_memory": {
+        "peak_board_used_mib": 2556.0,
+        "sampling_ms": 200,
+        "scope": "whole GPU, includes baseline and other processes"
+      },
+      "identity": {
+        "model_sha256": "5a1395716f7913741cc51d98581b9b1228d80987a9f7d3664106742eb06bba83",
+        "evaluator_sha256": "768d914e6441ca61f163f074f767584ed9e0f611c6902c2789a164209451dcc2",
+        "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "adapter_sha256": "28b0736077c5d87a54b0df4cdd656f3086922bee483deddac0a9635568ce3468"
+      },
+      "predictions_sha256": "abaead743d498a250ac8ae10c7037a3d585e8d4634a95b7a761ecf51dc9d5536",
+      "summary_sha256": "b1b4f637a44406ee4738ab62aaf2ba3c9163efe63edff49dc1476c10c2d7bba3"
+    },
+    {
+      "model": "qwen3",
+      "checkpoint": "Qwen3-0.6B-Q8_0.gguf",
+      "total": 231,
+      "correct": 73,
+      "accuracy": 0.31601731601731603,
+      "accepted": 185,
+      "accepted_correct": 57,
+      "wrong_accepted": 128,
+      "abstained": 46,
+      "coverage": 0.8008658008658008,
+      "accepted_accuracy": 0.3081081081081081,
+      "p50_ms": 28.039903000000002,
+      "p95_ms": 281.51785400000006,
+      "total_ms": 16725.15825,
+      "brier": 1.2386500876310869,
+      "ece": 0.5898009146265542,
+      "tiers": {
+        "easy": {
+          "correct": 15,
+          "total": 48
+        },
+        "original": {
+          "correct": 23,
+          "total": 72
+        },
+        "hard": {
+          "correct": 35,
+          "total": 111
+        }
+      },
+      "backend": {
+        "compute": {
+          "batch": 256,
+          "context": 16384,
+          "flash_attention": "off",
+          "threads": 4,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "qwen3",
+        "model_description": "qwen3 0.6B Q8_0",
+        "model_path": "/home/lutica/personal/skid/skid-desion/models/Qwen3-0.6B-Q8_0.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3080",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "legacy",
+        "prompt_profile": "qwen3",
+        "prompt_version": "qwen3-no-thinking-decision-v1",
+        "runtime": "local-libllama"
+      },
+      "input_tokens": 155600,
+      "reused_prefix_tokens": 0,
+      "risk_coverage_at_error_budget": [
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.01,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        },
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.05,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        },
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.1,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        }
+      ],
+      "gpu_memory": {
+        "peak_board_used_mib": 4592.0,
+        "sampling_ms": 200,
+        "scope": "whole GPU, includes baseline and other processes"
+      },
+      "identity": {
+        "model_sha256": "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031",
+        "evaluator_sha256": "768d914e6441ca61f163f074f767584ed9e0f611c6902c2789a164209451dcc2",
+        "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "adapter_sha256": "28b0736077c5d87a54b0df4cdd656f3086922bee483deddac0a9635568ce3468"
+      },
+      "predictions_sha256": "eea13dd1d69f3ffb08ea6e600388d241c9eb0a76923388d30620393df5113e15",
+      "summary_sha256": "66b94a42ea4b2eff4246a8926f66b0379a262e7d46db5af624dc7f55313f065c"
+    },
+    {
+      "model": "gemma3",
+      "checkpoint": "gemma-3-1b-it-Q8_0.gguf",
+      "total": 231,
+      "correct": 93,
+      "accuracy": 0.4025974025974026,
+      "accepted": 198,
+      "accepted_correct": 82,
+      "wrong_accepted": 116,
+      "abstained": 33,
+      "coverage": 0.8571428571428571,
+      "accepted_accuracy": 0.41414141414141414,
+      "p50_ms": 28.0112,
+      "p95_ms": 232.5751525,
+      "total_ms": 15492.665187,
+      "brier": 1.1170402833860755,
+      "ece": 0.5358555687875565,
+      "tiers": {
+        "easy": {
+          "correct": 28,
+          "total": 48
+        },
+        "original": {
+          "correct": 33,
+          "total": 72
+        },
+        "hard": {
+          "correct": 32,
+          "total": 111
+        }
+      },
+      "backend": {
+        "compute": {
+          "batch": 256,
+          "context": 16384,
+          "flash_attention": "off",
+          "threads": 4,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "gemma3",
+        "model_description": "gemma3 1B Q8_0",
+        "model_path": "/home/lutica/personal/skid/skid-desion/models/gemma-3-1b-it-Q8_0.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3080",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "legacy",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-decision-v1",
+        "runtime": "local-libllama"
+      },
+      "input_tokens": 154166,
+      "reused_prefix_tokens": 0,
+      "risk_coverage_at_error_budget": [
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.01,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        },
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.05,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        },
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.1,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        }
+      ],
+      "gpu_memory": {
+        "peak_board_used_mib": 3581.0,
+        "sampling_ms": 200,
+        "scope": "whole GPU, includes baseline and other processes"
+      },
+      "identity": {
+        "model_sha256": "b205840c5dcef55078e37d344677869a714ffd42a4ae448c48dcfb52e4bb10d5",
+        "evaluator_sha256": "768d914e6441ca61f163f074f767584ed9e0f611c6902c2789a164209451dcc2",
+        "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "adapter_sha256": "28b0736077c5d87a54b0df4cdd656f3086922bee483deddac0a9635568ce3468"
+      },
+      "predictions_sha256": "95519c470559832499711747b074e6c8343c022550f092e5abf0b28dd2cc7412",
+      "summary_sha256": "efbf304730d67a0226cbe7905662b22c6267dd2457f2e6ef8d1808c8dcedb2d9"
+    },
+    {
+      "model": "tinyllama",
+      "checkpoint": "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+      "total": 231,
+      "correct": 77,
+      "accuracy": 0.3333333333333333,
+      "accepted": 0,
+      "accepted_correct": 0,
+      "wrong_accepted": 0,
+      "abstained": 231,
+      "coverage": 0.0,
+      "accepted_accuracy": null,
+      "p50_ms": 20.042101,
+      "p95_ms": 393.661473,
+      "total_ms": 20567.389628,
+      "brier": 0.797078638144756,
+      "ece": 0.22921870271082878,
+      "tiers": {
+        "easy": {
+          "correct": 14,
+          "total": 48
+        },
+        "original": {
+          "correct": 23,
+          "total": 72
+        },
+        "hard": {
+          "correct": 40,
+          "total": 111
+        }
+      },
+      "backend": {
+        "compute": {
+          "batch": 256,
+          "context": 16384,
+          "flash_attention": "off",
+          "threads": 4,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "llama",
+        "model_description": "llama 1B Q4_K - Medium",
+        "model_path": "/home/lutica/personal/skid/skid-desion/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3080",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "legacy",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-decision-v1",
+        "runtime": "local-libllama"
+      },
+      "input_tokens": 179556,
+      "reused_prefix_tokens": 0,
+      "risk_coverage_at_error_budget": [
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.01,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        },
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.05,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        },
+        {
+          "accepted": 0,
+          "coverage": 0.0,
+          "error_budget": 0.1,
+          "errors": 0,
+          "min_confidence": null,
+          "risk": null
+        }
+      ],
+      "gpu_memory": {
+        "peak_board_used_mib": 3435.0,
+        "sampling_ms": 200,
+        "scope": "whole GPU, includes baseline and other processes"
+      },
+      "identity": {
+        "model_sha256": "9fecc3b3cd76bba89d504f29b616eedf7da85b96540e490ca5824d3f7d2776a0",
+        "evaluator_sha256": "768d914e6441ca61f163f074f767584ed9e0f611c6902c2789a164209451dcc2",
+        "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "adapter_sha256": "28b0736077c5d87a54b0df4cdd656f3086922bee483deddac0a9635568ce3468"
+      },
+      "predictions_sha256": "8b28f0e7245744bb7e65ad5ee18db8fbfb828f4ecd4ca4677b43adee77b4f853",
+      "summary_sha256": "cc58bfb231b4cb82bbbb8dc686e5979ca054e8b3a7e3cab2dce343353dbe20e2"
+    },
+    {
+      "model": "gemma4",
+      "checkpoint": "gemma-4-E2B-it-Q8_0.gguf",
+      "total": 231,
+      "correct": 159,
+      "accuracy": 0.6883116883116883,
+      "accepted": 213,
+      "accepted_correct": 153,
+      "wrong_accepted": 60,
+      "abstained": 18,
+      "coverage": 0.922077922077922,
+      "accepted_accuracy": 0.7183098591549296,
+      "p50_ms": 39.656899,
+      "p95_ms": 442.12694550000003,
+      "total_ms": 26768.16492,
+      "brier": 0.5652021439386112,
+      "ece": 0.26695429735391435,
+      "tiers": {
+        "easy": {
+          "correct": 48,
+          "total": 48
+        },
+        "original": {
+          "correct": 63,
+          "total": 72
+        },
+        "hard": {
+          "correct": 48,
+          "total": 111
+        }
+      },
+      "backend": {
+        "compute": {
+          "batch": 256,
+          "context": 16384,
+          "flash_attention": "off",
+          "threads": 4,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "gemma4",
+        "model_description": "gemma4 E2B Q8_0",
+        "model_path": "/home/lutica/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3080",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "legacy",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-decision-v1",
+        "runtime": "local-libllama"
+      },
+      "input_tokens": 154166,
+      "reused_prefix_tokens": 0,
+      "risk_coverage_at_error_budget": [
+        {
+          "accepted": 42,
+          "coverage": 0.18181818181818182,
+          "error_budget": 0.01,
+          "errors": 0,
+          "min_confidence": 0.9999999907881421,
+          "risk": 0.0
+        },
+        {
+          "accepted": 65,
+          "coverage": 0.2813852813852814,
+          "error_budget": 0.05,
+          "errors": 3,
+          "min_confidence": 0.9999998063795213,
+          "risk": 0.046153846153846156
+        },
+        {
+          "accepted": 121,
+          "coverage": 0.5238095238095238,
+          "error_budget": 0.1,
+          "errors": 12,
+          "min_confidence": 0.9998878929793368,
+          "risk": 0.09917355371900827
+        }
+      ],
+      "gpu_memory": {
+        "peak_board_used_mib": 4917.0,
+        "sampling_ms": 200,
+        "scope": "whole GPU, includes baseline and other processes"
+      },
+      "identity": {
+        "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+        "evaluator_sha256": "768d914e6441ca61f163f074f767584ed9e0f611c6902c2789a164209451dcc2",
+        "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "adapter_sha256": "28b0736077c5d87a54b0df4cdd656f3086922bee483deddac0a9635568ce3468"
+      },
+      "predictions_sha256": "d3bde6aa3470d887e8ed8e1ed4e6c0179226aa9ce423c75286825995303e889f",
+      "summary_sha256": "02d81dfbc8f84288517a2b0e9ac75e86edac8ba3621b490bd153d5e18f1e27f0"
+    }
+  ],
+  "schema_diagnostics": [
+    {
+      "model": "qwen3",
+      "batch": 64,
+      "rounds": 1,
+      "schemas": 117,
+      "fresh_ms": 29027.81405,
+      "reused_ms": 27175.392474,
+      "speed_ratio": 1.068165402864827,
+      "input_tokens": 155600,
+      "reused_prefix_tokens": 11200,
+      "probability_delta": 0.0,
+      "mass_delta": 0.0,
+      "changed": {
+        "predicted": 0,
+        "selected": 0
+      },
+      "equivalence_passed": true,
+      "correct_fresh": 72,
+      "correct_reuse": 72,
+      "vs_standard256_changed_top1": 5,
+      "raw_report_sha256": "7f20b62d2f63c64744cf1b4283f83b05bca9510dc3990288f042cc26c2a888a9"
+    },
+    {
+      "model": "qwen3",
+      "batch": 256,
+      "rounds": 1,
+      "schemas": 117,
+      "fresh_ms": 16806.717455,
+      "reused_ms": 16916.585683,
+      "speed_ratio": 0.9935052953321184,
+      "input_tokens": 155600,
+      "reused_prefix_tokens": 0,
+      "probability_delta": 0.0,
+      "mass_delta": 0.0,
+      "changed": {
+        "predicted": 0,
+        "selected": 0
+      },
+      "equivalence_passed": true,
+      "correct_fresh": 73,
+      "correct_reuse": 73,
+      "vs_standard256_changed_top1": 0,
+      "raw_report_sha256": "47f44eadc8a6b02146321244605cf54e03c4849724157ae2486c1d8752ad6050"
+    },
+    {
+      "model": "gemma4",
+      "batch": 64,
+      "rounds": 1,
+      "schemas": 117,
+      "fresh_ms": 47340.893813,
+      "reused_ms": 45500.617729,
+      "speed_ratio": 1.0404450791187192,
+      "input_tokens": 154166,
+      "reused_prefix_tokens": 9984,
+      "probability_delta": 0.0,
+      "mass_delta": 0.0,
+      "changed": {
+        "predicted": 0,
+        "selected": 0
+      },
+      "equivalence_passed": true,
+      "correct_fresh": 158,
+      "correct_reuse": 158,
+      "vs_standard256_changed_top1": 1,
+      "raw_report_sha256": "8a706d32e7c90490ac6f62bd81244e9afa0c85451f8940854adb483264f144c6"
+    },
+    {
+      "model": "gemma4",
+      "batch": 256,
+      "rounds": 1,
+      "schemas": 117,
+      "fresh_ms": 27002.206235999998,
+      "reused_ms": 26925.24215,
+      "speed_ratio": 1.0028584361682333,
+      "input_tokens": 154166,
+      "reused_prefix_tokens": 0,
+      "probability_delta": 0.0,
+      "mass_delta": 0.0,
+      "changed": {
+        "predicted": 0,
+        "selected": 0
+      },
+      "equivalence_passed": true,
+      "correct_fresh": 159,
+      "correct_reuse": 159,
+      "vs_standard256_changed_top1": 0,
+      "raw_report_sha256": "458b0237a786821960bd99b12176e2be4576366d48c49da5182431c330477dde"
+    }
+  ],
+  "input_manifest": {
+    "dataset_hash": "dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51",
+    "jevbench_revision": "f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84",
+    "label_order": "canonical task.labels; binary false/true mapped to no/yes",
+    "planned": 231,
+    "probability_origin": "native candidate-token softmax, not learned calibration",
+    "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+    "scope": "Public 231 items only; no official full-suite score or rank; no training or tuning",
+    "source_sha256": {
+      "easy.jsonl": "231df3c2c8e88a1a8c137ebe85de96ba70fabd330849098ac7b3c52c70b7172b",
+      "hard.jsonl": "89e9e6becb33ed88c1de7d42dcc87531b2fb64cfaef4e1986faf7c37b3f80ebb",
+      "original.jsonl": "5c2414edb3006b8bfcb70fda433f0f9ca015759433849f8d3104328a1f7c4180"
+    },
+    "tier_counts": {
+      "easy": 48,
+      "hard": 111,
+      "original": 72
+    }
+  },
+  "source": {
+    "git_revision": "03d5bc052154b3dbe6d4cfb4842dd5291a7eae9f",
+    "working_tree_dirty": true,
+    "scoped_source_sha256": {
+      "Cargo.toml": "d32a85fe2b93fe95f13d56679249ae1f72c06bef9f4c7231e595fe754212a5af",
+      "Cargo.lock": "2f113353691faa90d22e97712393a06b27b88a18b64d35bf885063fdc2961ac7",
+      "examples/evaluate_jsonl.rs": "37985f900ee7daddeab6d2a40f5efe0e66b859a117e5b8679f3b68a2f5778f84",
+      "examples/benchmark_schema_reuse.rs": "c51ca2a0ec697bc3c92e2da6f7a6830a9976e275b6237e852aa481d7dd34bacc",
+      "src/llama.rs": "6bc9e32dd123c8f4cdde3282652f1d6cbafb8cd002f10b5490e0012b22f5861b",
+      "src/llama/shared_decision.rs": "be7dbb3e14429be945c0007e8169b474f99301764503b882e03c41f37c750bcf",
+      "crates/l2s1-tools/src/jevbench_public.rs": "28b0736077c5d87a54b0df4cdd656f3086922bee483deddac0a9635568ce3468",
+      "crates/l2s1-tools/src/selective_metrics.rs": "48542fbd4513e558c75e5cb00ec1f6d2bc9e3513637eacc475630713a7bca283",
+      "build.rs": "e376029a1a2d52972e52d057a1cfeaa514034045487b109b52aeb46a53ccfa16"
+    },
+    "tools_sha256": "ac66bf4a7cfac71f0b3e5a26f29982a2590aef74403b4c5588f9affac26a4586",
+    "scope": "Measured from the original working checkout; PR rebased onto newer main retaining upstream Metal support and package version changes. Source and binary identities retained separately.",
+    "binaries_sha256": {
+      "/tmp/l2s1-jev-current-evaluate": "768d914e6441ca61f163f074f767584ed9e0f611c6902c2789a164209451dcc2",
+      "/tmp/l2s1-jev-current-schema-reuse": "a9f44ae7c8f0dc924486b0adb56fbcbdb16a455df541a5fd9bdae92f0da31bee",
+      "/tmp/l2s1-jev-measured-tools": "ac66bf4a7cfac71f0b3e5a26f29982a2590aef74403b4c5588f9affac26a4586"
+    },
+    "native_source_commit": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+    "cuda_architecture": "86",
+    "context": 16384,
+    "threads": 4
+  },
+  "audit_sha256": "8eee822b7585a7550fed7b2f6e3eaece14fbe468353e3afba4421463a4b9b052",
+  "schema_counts": {
+    "total": 117,
+    "singletons": 96,
+    "repeated": 21,
+    "post_first_calls": 114
+  },
+  "scope": "Public 231 items per model, not full 534 or official scores. Five serial fresh runs. Schema diagnostics are one paired grouped pass after per-path warmups; not stable percentiles or an accuracy gain. Latency comparisons across previous hardware/builds are uncontrolled. Full native responses and logs remain local ignored artifacts."
+}

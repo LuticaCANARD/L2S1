@@ -21,6 +21,7 @@ fn main() {
         "src/llama/interchange.rs",
         "src/llama/model_hash.rs",
         "src/llama/prepared_cache.rs",
+        "src/llama/shared_decision.rs",
         "src/llama/shared_state.rs",
         "src/llama/batching.rs",
         "src/optimization.rs",

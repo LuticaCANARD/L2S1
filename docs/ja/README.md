@@ -39,6 +39,7 @@
 | [合成ベンチマーク](BENCHMARK.md) | ルールに基づくテストデータの正解、判断保留、一貫性、レイテンシ |
 | [JevBench](JEVBENCH.md) | 公開タスクの対応付け、元の採点方法、採用指標 |
 | [Ollaya 比較](OLLAYA_COMPARISON.md) | 根拠に基づく違いと、残る品質・製品面の課題 |
+| [決定モデル構造レビュー](DECISION_MODEL_REVIEW.md) | 信頼度、デコーダ費用、スケジューリングとエラー予算診断 |
 | [typed-decisions](TYPED_DECISIONS_BENCHMARK.md) | 2,000 判断の全テスト、校正、測定手順 |
 | [意図分類](INTENT_BENCHMARK.md) | 多候補の回答コード、BANKING77、MASSIVE 韓国語 |
 | [AG News](KAGGLE_BENCHMARK.md) | 固定された分類手順 |

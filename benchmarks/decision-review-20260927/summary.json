@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-09-27",
+  "scope": "Offline replay of recorded 2026-09-26 typed-decisions outputs, 400 cases and 2000 synthetic teacher-labeled decisions per model. No new inference, training, calibration or timing measurement. Risk coverage is descriptive test-label-selected raw-argmax ranking, ignores native acceptance gates, and is not a deployment policy or guaranteed error rate. Confidence ties stay whole. Original quality metrics reproduced; model accuracy did not improve.",
+  "models": [
+    {
+      "model": "gemma4-e2b",
+      "source_summary": "benchmarks/typed-decisions-20260926/gemma4-e2b-summary.json",
+      "source_summary_sha256": "838a68ff86d003bdace5bc444f69084e90ce1c60a5adc235a56729436a1e930c",
+      "source_scored": "benchmarks/typed-decisions-20260926/gemma4-e2b-scored.jsonl",
+      "source_scored_sha256": "1a064b29250a6ded6f43e92e72a7c008f1ee635cc292e9fb3fb1f5b041156c2f",
+      "scorer": {
+        "adapter_sha256": "a3894b09cb4e4157a0491a22f128daaec0d3cdddc7868e15cc800a717cea127a",
+        "predictions_sha256": "5b79452b41f4b3fd4ec9565d040bcd4531895cb4697011b69567888b2461ac06",
+        "prepared_manifest_sha256": "729821e37249791f474825903bbcfe6e7048c61dc69e06054dcabca478ee509b",
+        "selective_metrics_sha256": "48542fbd4513e558c75e5cb00ec1f6d2bc9e3513637eacc475630713a7bca283",
+        "version": 2
+      },
+      "published_metric_scalars_verified": 180,
+      "independent_curve_points_verified": 2000,
+      "metrics": {
+        "attempted": 2000,
+        "correct": 1086,
+        "raw_top1_accuracy": 0.543,
+        "accepted": 1855,
+        "correct_accepted": 1033,
+        "wrong_accepted": 822,
+        "coverage": 0.9275,
+        "accepted_accuracy": 0.5568733153638814,
+        "accepted_correct_all": 0.5165,
+        "nll_hard": 3.4974610060451314,
+        "ece_hard_15": 0.42018999728713013
+      },
+      "at_error_budget": [
+        {
+          "accepted": 44,
+          "coverage": 0.022,
+          "error_budget": 0.01,
+          "errors": 0,
+          "min_confidence": 0.9999999983950971,
+          "risk": 0.0
+        },
+        {
+          "accepted": 120,
+          "coverage": 0.06,
+          "error_budget": 0.05,
+          "errors": 6,
+          "min_confidence": 0.999999993000035,
+          "risk": 0.05
+        },
+        {
+          "accepted": 150,
+          "coverage": 0.075,
+          "error_budget": 0.1,
+          "errors": 15,
+          "min_confidence": 0.9999999864764854,
+          "risk": 0.1
+        }
+      ]
+    },
+    {
+      "model": "qwen3-06b",
+      "source_summary": "benchmarks/typed-decisions-20260926/qwen3-06b-summary.json",
+      "source_summary_sha256": "a5db2576fc642f3427bd3f5e547e76d3fad60412006a054e34b04a98bb3d05fe",
+      "source_scored": "benchmarks/typed-decisions-20260926/qwen3-06b-scored.jsonl",
+      "source_scored_sha256": "48310c8b47a3bb55132849ef2c15666d39b3c7c314db8595ef3e35c671520972",
+      "scorer": {
+        "adapter_sha256": "a3894b09cb4e4157a0491a22f128daaec0d3cdddc7868e15cc800a717cea127a",
+        "predictions_sha256": "3c076f746fa8bb108e70888990220b83a9f8947dc8245777b5c00de6e7ded752",
+        "prepared_manifest_sha256": "729821e37249791f474825903bbcfe6e7048c61dc69e06054dcabca478ee509b",
+        "selective_metrics_sha256": "48542fbd4513e558c75e5cb00ec1f6d2bc9e3513637eacc475630713a7bca283",
+        "version": 2
+      },
+      "published_metric_scalars_verified": 180,
+      "independent_curve_points_verified": 2000,
+      "metrics": {
+        "attempted": 2000,
+        "correct": 625,
+        "raw_top1_accuracy": 0.3125,
+        "accepted": 1112,
+        "correct_accepted": 382,
+        "wrong_accepted": 730,
+        "coverage": 0.556,
+        "accepted_accuracy": 0.3435251798561151,
+        "accepted_correct_all": 0.191,
+        "nll_hard": 3.337854279988964,
+        "ece_hard_15": 0.49122578356378166
+      },
+      "at_error_budget": [
+        {
+          "accepted": 1,
+          "coverage": 0.0005,
+          "error_budget": 0.01,
+          "errors": 0,
+          "min_confidence": 0.9999102889448053,
+          "risk": 0.0
+        },
+        {
+          "accepted": 1,
+          "coverage": 0.0005,
+          "error_budget": 0.05,
+          "errors": 0,
+          "min_confidence": 0.9999102889448053,
+          "risk": 0.0
+        },
+        {
+          "accepted": 1,
+          "coverage": 0.0005,
+          "error_budget": 0.1,
+          "errors": 0,
+          "min_confidence": 0.9999102889448053,
+          "risk": 0.0
+        }
+      ]
+    }
+  ]
+}

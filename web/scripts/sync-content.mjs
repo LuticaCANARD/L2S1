@@ -5,6 +5,12 @@ const rules = await loadDecisionRules();
 const root = new URL('../../', import.meta.url);
 const target = new URL('../static/docs/', import.meta.url);
 const publicStudy = 'typed-decisions-20260926';
+const reviewEvidence = {
+  'decision-review-20260927': ['summary.json'],
+  'schema-reuse-20260927': ['summary.json', 'provenance.json'],
+  'jevbench-rtx3080-20260927': ['summary.json', 'predictions.jsonl', 'JEVBENCH-LICENSE'],
+  'jevbench-gemma26-rtx3080-20260927': ['summary.json', 'predictions.jsonl', 'JEVBENCH-LICENSE'],
+};
 // This directory is generated; remove obsolete paths after documentation moves.
 await rm(target, { recursive: true, force: true });
 await mkdir(target, { recursive: true });
@@ -24,7 +30,7 @@ const documentTarget = new URL('docs/', target);
 await mkdir(documentTarget, { recursive: true });
 await copyFile(new URL('translations.json', documents), new URL('translations.json', documentTarget));
 function publicEvidenceLinks(markdown) {
-  for (const study of [publicStudy, 'rtx3060-20260926', rulesStudy]) {
+  for (const study of [publicStudy, 'rtx3060-20260926', rulesStudy, ...Object.keys(reviewEvidence)]) {
     markdown = markdown.replace(new RegExp(`(?:\\.\\./)*benchmarks/${study}/([^\\s)]+\\.jsonl?)`, 'g'), `/benchmarks/${study}/$1`);
   }
   return markdown;
@@ -158,3 +164,13 @@ for (const name of ['summary.json', 'provenance.json']) {
 }
 await writeFile(new URL('README.md', rulesTarget), rulesReportLinks(await readFile(new URL(`benchmarks/${rulesStudy}/README.md`, root), 'utf8')));
 await writeFile(new URL('audit.json', rulesTarget), JSON.stringify(rules.audit, null, 2) + '\n');
+
+// Explicit review evidence only: do not publish arbitrary local run artifacts.
+for (const [study, files] of Object.entries(reviewEvidence)) {
+  const destination = new URL(`../static/benchmarks/${study}/`, import.meta.url);
+  await rm(destination, { recursive: true, force: true });
+  await mkdir(destination, { recursive: true });
+  for (const name of files) {
+    await copyFile(new URL(`benchmarks/${study}/${name}`, root), new URL(name, destination));
+  }
+}

@@ -57,3 +57,52 @@ target/release/l2s1-tools benchmark-models --model qwen3 --device cpu \
 ```
 
 별도의 출력 디렉터리를 사용하고 모델 해시, 프롬프트 버전, 장치, 배치, 컨텍스트 및 정책을 보존합니다. 실행기는 재사용 및 평가된 토큰 수를 기록합니다. 논리적 입력 토큰 처리량만으로는 저장된 실제 컴퓨팅을 측정할 수 없습니다.
+
+<a id="fixed-schema-sessions"></a>
+## 가변 상태 사이의 고정 스키마 세션
+
+`LlamaBackend::shared_decision(decision)`은 `shared_state(state)`의 반대 용도다. 질문·선택지 스키마를 고정하고 바뀌는 상태들을 평가한다. 실제 디코더 KV를 호출 사이에서 유지하지만 일반 `decide()`의 요청 경계에서는 계속 KV를 지운다. Python/TypeScript SDK의 `PreparedDecision`은 정의 스냅샷이며 이 네이티브 세션을 활성화하지 않는다.
+
+```rust
+backend.set_execution_mode(l2s1::ExecutionMode::PrefixReuse);
+backend.set_prompt_layout(l2s1::PromptLayout::Legacy);
+let mut session = backend.shared_decision(decision)?;
+let first = session.decide(first_state)?;
+let next = session.decide(next_state)?;
+println!("reused: {}", next.results[0].reused_prefix_tokens);
+```
+
+기본 JSON 맵 정렬에서 Legacy/minimal은 질문과 선택지를 가변 상태 앞에 둔다. 의존성에서 `serde_json/preserve_order`를 켜면 legacy 순서가 달라질 수 있으므로 실제 재사용 토큰을 확인한다. State-first는 고정 상태에 질문이 바뀌는 반대 작업에 맞는다. 세션은 백엔드를 독점 차용하므로 모델·정책·스키마가 고정된다. 생성·오류·종료 시 KV를 비우고 이전 상태의 뒷부분을 교체하며 답을 캐시하지 않는다. Recurrent/hybrid 모델과 출력 헤드는 거부한다. 하나의 시퀀스만 유지하며 자동 다중 스키마 HTTP 캐시는 아니다.
+
+배치 정렬은 유지한다. 공통 프리픽스가 180토큰이면 배치 256에서 0토큰, 128에서 128토큰, 64에서도 128토큰을 재사용한다. 작은 배치는 prefill 처리량을 낮출 수 있다. 배치별 fresh/reuse 비교와 가장 빠른 fresh 기준을 모두 비교해야 하며 재사용 카운터만으로 순속도 향상을 판단하지 않는다.
+
+`examples/benchmark_schema_reuse.rs`는 `decision-rules-v1`의 라벨 있는 36개 결정을 정확히 같은 질문·선택지 순서·스키마에 따라 10개 그룹으로 재생한다. 두 경로 모두 호출당 결정 하나를 처리하며 순서를 교대해 fresh와 세션을 비교하고 확률·후보 질량·argmax·채택 답·보류 사유를 확인한다. 이 그룹별 처리량은 원래 결정 세 개짜리 요청의 지연과 별도 측정이다. 정답·프롬프트·선택지 순서는 변경하지 않는다.
+
+```sh
+mkdir -p results
+cargo build --release --locked --features llama --example benchmark_schema_reuse
+cargo run --release --locked --features llama --example benchmark_schema_reuse -- \
+  --model models/Qwen3-0.6B-Q8_0.gguf --device cpu --batch 64 --rounds 3 \
+  --output results/schema-reuse-b64.json
+```
+
+배치 256에서도 새 출력 경로로 반복한다. macOS는 `llama-metal`과 `--device metal`, CUDA는 `llama-cuda`와 `--device cuda`를 사용한다. 세션 생성·종료, 토큰 준비, 채점을 시간에 포함한다. 로딩·워밍업은 제외하고 준비 캐시는 끈다. 결과 일치 검증은 독립 데이터 정확도의 증명이 아니다.
+
+### CPU 실측 검증 (2026-09-27)
+
+Linux/WSL2, i9-9900K로 표시되는 논리 CPU 4개, 스레드 4개에서 Qwen3-0.6B-Q8_0을 실행했다. Context 2048, full evidence, 준비 캐시 비활성이다. 각 셀은 36개 판단 전체를 그룹으로 처리한 세 번의 중앙값이다. 각 경로에 별도 워밍업을 수행하고 쌍 내 fresh/reuse 순서를 교대했다. **전체 패스의 초 단위 시간**이며 기존 요청 p50이 아니다.
+
+| Batch | Fresh | Shared decision | Reused / input tokens |
+| --- | ---: | ---: | ---: |
+| 64 | 33.311 s | 22.068 s | 1,984 / 4,983 |
+| 256 | 31.691 s | 31.589 s | 0 / 4,983 |
+
+배치 64 재사용은 같은 배치의 fresh보다 1.51배, **측정한 가장 빠른 fresh 설정(배치 256)보다 1.44배 빠르다**. 논리 입력 길이는 120–165토큰이므로 전체 배치 단위 규칙상 배치 256에서는 재사용이 없다. 네이티브 호출이 시간을 지배한다. 배치 64 첫 fresh 패스의 전체 33.311초 중 네이티브는 32.806초, 준비는 0.039초다.
+
+동일 배치의 모든 쌍, 반복 패스, 배치 간 비교에서 확률·후보 질량·raw top-1·수락 답·기권 차이는 0이었다. Raw top-1은 13/36, 수락은 30개, 그중 정답은 10개로 그대로다. 빨라졌다고 정답률이 개선된 것은 아니다. 실제 네이티브 추론으로 세션 오류 후 복구와 요청·세션 격리도 통과했다. M5 Max/Metal, jv.py, 동시 HTTP, 메모리 사용량이나 일반 정답률을 측정한 결과는 아니다. [축약 증거](../../benchmarks/schema-reuse-20260927/summary.json)와 [출처](../../benchmarks/schema-reuse-20260927/provenance.json)에 실행 시간, 첫 패스 점수, 해시와 범위를 남겼다. 전체 응답·로그는 로컬 ignored 파일이다.
+
+다른 작업은 `--input requests.jsonl --context 16384`로 실행한다. 입력은 `evaluate_jsonl`과 같은 정답 없는 `{ "id": "unique-case", "request": { "state": ..., "decisions": [...] } }` 행이다. 그룹화에서도 질문·선택지 순서를 그대로 유지한다. 외부 입력 보고서는 fresh/세션의 결과 일치를 검사하며, 정답률은 분리된 정답 데이터로 별도 채점한다.
+
+[RTX 3080 JevBench 231문항 검증](JEVBENCH.md#rtx3080-rerun-20260927)에서는 batch 64에서 토큰 6.48–7.20%만 재사용했습니다. 같은 batch의 출력은 보존했지만 Qwen3 0.6B·Gemma 4 E2B 모두 batch 256 fresh보다 느렸고, batch 변경 자체는 일부 top-1을 바꿨습니다. CPU 규칙 픽스처의 이득은 워크로드에 한정되며 최적화할 때 배치 처리량과 정답 변화도 함께 확인해야 합니다.
+
+큰 MoE 모델을 CUDA에서 비교할 때는 `--cpu-moe-layers N`, `--gpu-layers N`도 지정할 수 있습니다. 두 경로에 동일한 배치를 적용하고 모델 식별 정보에 기록합니다. 속도를 비교할 때 컨텍스트·batch·배치를 맞춰야 하며 CPU expert offload는 전체 GPU 추론과 다릅니다. [26B 추가 검증](JEVBENCH.md#gemma26-rtx3080-20260927)에서 이 경로를 사용합니다.
