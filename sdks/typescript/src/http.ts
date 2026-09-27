@@ -81,7 +81,7 @@ export class L2S1Client {
     const value = await this.request('/v1/capabilities', undefined, options);
     if (!object(value) || value.api_version !== 1 || !object(value.backend)
       || typeof value.backend.runtime !== 'string' || typeof value.backend.model !== 'string'
-      || !Array.isArray(value.decision_types) || !['model_scored', 'selection_only'].includes(String(value.evidence))
+      || !Array.isArray(value.decision_types) || !['model_scored', 'selection_only', 'discriminative', 'mixed'].includes(String(value.evidence))
       || !object(value.media) || !object(value.limits)) {
       throw new L2S1Error('Invalid v1 capabilities response', 'invalid_response');
     }
@@ -116,7 +116,7 @@ export function decisionResponse(value: unknown, request: DecisionRequest): Deci
       || value.results.some((result, index) => !object(result) || result.id !== request.decisions[index]?.id
         || !object(result.value) || result.value.type !== request.decisions[index]?.kind.type
         || !['selected', 'abstained'].includes(String(result.status)) || !Array.isArray(result.abstention_reasons)
-        || !object(result.evidence) || !['model_scored', 'selection_only'].includes(String(result.evidence.type))
+        || !object(result.evidence) || !['model_scored', 'selection_only', 'discriminative'].includes(String(result.evidence.type))
         || !object(result.usage))) {
       throw new L2S1Error('Server response does not match the v1 decision contract', 'invalid_response');
     }

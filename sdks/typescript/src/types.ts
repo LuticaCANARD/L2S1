@@ -41,6 +41,13 @@ export interface ModelScoredEvidence {
   code_prefix_evaluations: number; code_evaluated_tokens: number;
   estimate: { p_true?: number; expected_value?: number };
 }
+export interface DiscriminativeEvidence {
+  type: 'discriminative'; schema_sha256: string;
+  scores: { id: string; raw_logit: number; option_probability: number }[];
+  top_option_probability: number; entropy_confidence: number;
+  scoring_method: string; calibration_id: string; temperature: number;
+  truncated: false; estimate: { p_true?: number; expected_value?: number };
+}
 export interface SelectionOnlyEvidence {
   type: 'selection_only'; selected_code: string | null; provider_model: string | null;
 }
@@ -48,7 +55,8 @@ export interface DecisionResult {
   id: string; value: DecisionValue; status: 'selected' | 'abstained';
   abstention_reasons: string[];
   reason_messages?: { code: string; message: string; user_defined: true }[];
-  evidence: ModelScoredEvidence | SelectionOnlyEvidence;
+  evidence: ModelScoredEvidence | DiscriminativeEvidence | SelectionOnlyEvidence;
+  routing?: { stage: 'fast' | 'slow'; reason: string; backend: JsonValue; guaranteed: false; threshold?: number };
   usage: {
     input_tokens: number | null; reused_prefix_tokens?: number; output_tokens?: number | null;
     reasoning?: { mode: 'direct' | 'thinking'; generated_tokens: number; completed: boolean };
@@ -56,6 +64,7 @@ export interface DecisionResult {
 }
 export interface DecisionResponse {
   api_version: 1; request_id: string;
+  scheduling?: { coalesced_requests: number; queue_ms: number };
   backend: { runtime: string; model: string; details: JsonValue };
   policy: DecisionPolicy | null; results: DecisionResult[];
   reasoning?: ReasoningOptions;
@@ -64,7 +73,10 @@ export interface DecisionResponse {
 export interface Capabilities {
   api_version: 1; backend: { runtime: string; model: string };
   decision_types: ('binary' | 'choice' | 'ordinal')[];
-  evidence: 'model_scored' | 'selection_only';
+  evidence: 'model_scored' | 'selection_only' | 'discriminative' | 'mixed';
+  artifact_id?: string;
+  prefix_reuse?: { supported: boolean; enabled: boolean; plan: string; kv_slots: number; [key: string]: JsonValue };
+  routing?: JsonValue;
   media: { image: { supported: boolean; max_per_decision: number; max_bytes_each: number; [key: string]: JsonValue } };
   limits: { [key: string]: number };
   reasoning?: { modes: string[]; thinking_supported: boolean; [key: string]: JsonValue };

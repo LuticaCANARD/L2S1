@@ -8,11 +8,11 @@ use std::{
     net::{TcpListener, TcpStream},
     sync::{
         Arc,
-        atomic::{AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
         mpsc::{self, SyncSender, TrySendError},
     },
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 const MAX_HEADER: usize = 16 * 1024;
@@ -26,7 +26,7 @@ const MAX_INFLIGHT_BODY_BYTES: usize = 192 * 1024 * 1024;
 static NEXT_REQUEST_ID: AtomicU64 = AtomicU64::new(1);
 static INFLIGHT_BODY_BYTES: AtomicUsize = AtomicUsize::new(0);
 
-mod contract;
+pub(crate) mod contract;
 pub use contract::HttpDecisionBackend;
 use contract::run_request;
 pub(crate) use contract::user_failure_messages;
@@ -35,6 +35,8 @@ struct Job {
     body: Vec<u8>,
     request_id: String,
     batch: bool,
+    admitted: Instant,
+    cancelled: Arc<AtomicBool>,
     reply: mpsc::Sender<Result<Value, Error>>,
 }
 
@@ -44,14 +46,74 @@ pub fn serve<B: HttpDecisionBackend>(
     backend: &mut B,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let (sender, receiver) = mpsc::sync_channel(QUEUE_DEPTH);
-    let capabilities = backend.capabilities();
-    let _listener = start_listener(address, capabilities, sender)?;
-    for job in receiver {
-        let result = execute_job(backend, &job);
-        let _ = job.reply.send(result.map(|mut value| {
-            value["request_id"] = json!(job.request_id);
-            value
-        }));
+    let mut capabilities = backend.capabilities();
+    capabilities["http_scheduler"] = json!({"max_requests":8,"max_decisions":128,"max_body_bytes":MAX_BODY,"max_wait_ms":1,"deadline_ms":180000,"native_cancellation":false});
+    let _listener = start_listener(address, capabilities.clone(), sender)?;
+    let can_batch = capabilities
+        .pointer("/batch/enabled")
+        .and_then(Value::as_bool)
+        == Some(true);
+    let mut pending = None;
+    loop {
+        let first = match pending.take().or_else(|| receiver.recv().ok()) {
+            Some(job) => job,
+            None => break,
+        };
+        let mut decisions = if can_batch && !first.batch {
+            contract::coalescing_decisions(&first.body)
+        } else {
+            None
+        };
+        let mut bytes = first.body.len();
+        let mut jobs = vec![first];
+        let deadline = Instant::now() + Duration::from_millis(1);
+        while decisions.is_some() && jobs.len() < 8 {
+            let Ok(job) = receiver.recv_timeout(deadline.saturating_duration_since(Instant::now()))
+            else {
+                break;
+            };
+            let count = (!job.batch)
+                .then(|| contract::coalescing_decisions(&job.body))
+                .flatten();
+            if let Some(count) = count
+                && decisions.unwrap() + count <= MAX_DECISIONS
+                && bytes + job.body.len() <= MAX_BODY
+            {
+                decisions = Some(decisions.unwrap() + count);
+                bytes += job.body.len();
+                jobs.push(job);
+            } else {
+                pending = Some(job);
+                break;
+            }
+        }
+        jobs.retain(|job| {
+            let live = !job.cancelled.load(Ordering::Acquire)
+                && job.admitted.elapsed() < Duration::from_secs(180);
+            if !live {
+                let _ = job.reply.send(Err(Error::Backend(
+                    "deadline_exceeded: request expired before inference".into(),
+                )));
+            }
+            live
+        });
+        let dispatched_at = Instant::now();
+        let coalesced_requests = jobs.len();
+        let outputs = if jobs.len() > 1 {
+            contract::run_coalesced(
+                backend,
+                &jobs.iter().map(|j| j.body.as_slice()).collect::<Vec<_>>(),
+            )
+        } else {
+            jobs.iter().map(|job| execute_job(backend, job)).collect()
+        };
+        for (job, result) in jobs.into_iter().zip(outputs) {
+            let _ = job.reply.send(result.map(|mut value| {
+                value["request_id"] = json!(job.request_id);
+                value["scheduling"] = json!({"coalesced_requests":coalesced_requests,"queue_ms":dispatched_at.duration_since(job.admitted).as_secs_f64()*1000.0});
+                value
+            }));
+        }
     }
     Ok(())
 }
@@ -198,10 +260,13 @@ fn handle(
     }
     let (reply, receiver) = mpsc::channel();
     let failure_messages = contract::user_failure_messages(&request.body);
+    let cancelled = Arc::new(AtomicBool::new(false));
     match sender.try_send(Job {
         body: std::mem::take(&mut request.body),
         request_id: request_id.into(),
         batch,
+        admitted: Instant::now(),
+        cancelled: Arc::clone(&cancelled),
         reply,
     }) {
         Ok(()) => {}
@@ -218,7 +283,17 @@ fn handle(
             );
         }
     }
-    match receiver.recv() {
+    match receiver.recv_timeout(Duration::from_secs(180)) {
+        Err(mpsc::RecvTimeoutError::Timeout) => {
+            cancelled.store(true, Ordering::Release);
+            respond_error(
+                stream,
+                504,
+                "deadline_exceeded",
+                "request deadline exceeded; queued work is cancelled",
+                request_id,
+            )
+        }
         Ok(Ok(output)) => respond(stream, 200, &output),
         Ok(Err(Error::Invalid(message))) => {
             let code = if message.starts_with("batch_unsupported:") {
@@ -231,7 +306,9 @@ fn handle(
             respond_error(stream, 400, code, &message, request_id)
         }
         Ok(Err(Error::Backend(message))) => {
-            let (status, code, user_reason) = if message.starts_with("reasoning_limit:") {
+            let (status, code, user_reason) = if message.starts_with("deadline_exceeded:") {
+                (504, "deadline_exceeded", None)
+            } else if message.starts_with("reasoning_limit:") {
                 (
                     422,
                     "reasoning_limit",
@@ -590,6 +667,12 @@ mod tests {
     fn custom_failure_text_keeps_status_code_and_native_diagnostics() {
         for (native_message, status, code, reason_code) in [
             (
+                "deadline_exceeded: request expired before inference",
+                504,
+                "deadline_exceeded",
+                "native_failure",
+            ),
+            (
                 "reasoning_limit: incomplete; generated=1 max_tokens=1",
                 422,
                 "reasoning_limit",
@@ -631,7 +714,11 @@ mod tests {
             assert_eq!(output["error"]["code"], code);
             assert_eq!(output["error"]["message"], native_message);
             assert_eq!(output["error"]["request_id"], "req-custom");
-            assert_eq!(output["error"]["user_reason"], "요청에 지정한 실패 안내");
+            if status == 504 {
+                assert!(output["error"]["user_reason"].is_null());
+            } else {
+                assert_eq!(output["error"]["user_reason"], "요청에 지정한 실패 안내");
+            }
             server.join().unwrap();
         }
     }

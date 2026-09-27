@@ -1,0 +1,8 @@
+This product includes Python-compatible JSON serialization from Ollaya.
+Copyright 2026 Ollaya contributors.
+Source: https://github.com/ollaya-dev/ollaya
+Revision: 6d121dd45162b222bc4deb971c5975875f538fa8
+File: crates/ollaya-decision/src/pyjson.rs -> src/onnx/pyjson.rs (adapted header and map-order test to L2S1 sorted JSON maps).
+Licensed under Apache License 2.0; see LICENSE in this directory.
+Laya marker input layout and model graph conventions follow Ollaya and Convai
+Innovations Laya. Model weights are downloaded separately under their license.

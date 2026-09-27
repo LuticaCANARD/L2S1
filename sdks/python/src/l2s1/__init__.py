@@ -4,6 +4,7 @@ from .backend import BatchDecisionBackend, DecisionBackend, L2S1Error
 from .engine import L2S1, PreparedDecision
 from .http import L2S1Client
 from .models import (
+    DiscriminativeEvidence, DiscriminativeScore,
     BackendInfo, BatchCapability, BatchResponse, BinaryKind, BinaryValue, Capabilities, CapabilityBackend, ChoiceKind,
     ChoiceValue, Decision, DecisionKind, DecisionPolicy, DecisionRequest, DecisionResponse,
     DecisionResult, DecisionValue, ErrorBudget, Estimate, Evidence, FailureReasonCode,
@@ -15,6 +16,7 @@ from .native import LoadOptions, RustProcessBackend
 
 __version__ = "0.1.2"
 __all__ = [
+    "DiscriminativeEvidence", "DiscriminativeScore",
     "BatchDecisionBackend", "BatchCapability", "BatchResponse",
     "L2S1", "PreparedDecision", "L2S1Client", "DecisionBackend", "L2S1Error", "LoadOptions", "RustProcessBackend", "JsonValue",
     "BackendInfo", "BinaryKind", "BinaryValue", "Capabilities", "CapabilityBackend", "ChoiceKind", "ChoiceValue",

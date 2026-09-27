@@ -110,6 +110,18 @@ unsafe extern "C" {
         engine: *const c_void,
         metrics: *mut NativeVisionBatchMetrics,
     ) -> bool;
+    pub fn sd_forward_split(
+        engine: *mut c_void,
+        tokens: *const i32,
+        count: i32,
+        boundary: usize,
+        reuse: bool,
+        reused: *mut i32,
+        logits: *mut f32,
+        logits_count: usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
     pub fn sd_forward_compact(
         engine: *mut c_void,
         tokens: *const i32,

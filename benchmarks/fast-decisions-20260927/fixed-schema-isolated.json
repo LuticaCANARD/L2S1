@@ -1,0 +1,43 @@
+{
+  "batch": 256,
+  "fresh_ms": [
+    29131.502392000002
+  ],
+  "identity": {
+    "adapter_sha256": null,
+    "compute": {
+      "batch": 256,
+      "context": 2048,
+      "flash_attention": "off",
+      "threads": 4,
+      "ubatch": 256
+    },
+    "device": "CPU",
+    "execution_mode": "fresh",
+    "head_sha256": null,
+    "loaded_runtime_sha256": "a6d47ce2bf5f243325567094943b8d466865b4e57c02c11cdf81d44205168f61",
+    "parallel_width": 1,
+    "prompt_profile": "qwen3",
+    "prompt_version": "qwen3-no-thinking-decision-v1",
+    "runtime_build_sha256": "a003ab0be63b5300bc80160f5d85f9ef818da1ff13d374278db60cfd0351ab45",
+    "template_sha256": "57f1fd00f0013a2be96aa79b857391f27e23df5b5f847072b524c897e24d0361",
+    "weights_sha256": "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
+  },
+  "passes": [
+    {
+      "cold_warm_max_delta": 0.0,
+      "flat_split_max_probability_delta": 0.0,
+      "flat_split_selection_changes": 0,
+      "input_tokens": 4983,
+      "reused_tokens": 2799
+    }
+  ],
+  "rounds": 1,
+  "scope": "decision-rules-v1, original multi-decision requests, one full warmup then paired passes; whole-pass milliseconds",
+  "split_cold_ms": [
+    31061.791275
+  ],
+  "split_reuse_ms": [
+    14962.220764
+  ]
+}

@@ -97,7 +97,7 @@ fn local_decide_json<B: VisionDecisionBackend>(
 }
 
 #[cfg(any(feature = "llama", feature = "wgpu", test))]
-fn local_response_json(response: crate::DecisionResponse) -> crate::Result<Value> {
+pub(crate) fn local_response_json(response: crate::DecisionResponse) -> crate::Result<Value> {
     let results = response.results.into_iter().map(|result| {
         let (value, estimate) = match result.value {
             crate::DecisionValue::Binary { value, p_true } => (json!({"type":"binary","value":value}), json!({"p_true":p_true})),
@@ -126,6 +126,7 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
     fn capabilities(&self) -> Value {
         let info = self.info();
         let mut capabilities = local_capabilities(&info);
+        capabilities["artifact_id"] = self.serving_artifact_id().into();
         capabilities["media"]["image"]["parallel"] = json!({
             "supported": info.vision_projector_path.is_some(),
             "enabled": info.execution_mode == crate::ExecutionMode::Parallel,
@@ -498,6 +499,17 @@ fn prepare_request<B: HttpDecisionBackend>(
         ));
     }
     validate_failure_reasons(&wire.failure_reasons)?;
+    if (wire.policy.is_some() || wire.target_error_rate.is_some())
+        && backend
+            .capabilities()
+            .pointer("/request_policy/supported")
+            .and_then(Value::as_bool)
+            == Some(false)
+    {
+        return Err(Error::Invalid(
+            "request acceptance policy unsupported by this backend".into(),
+        ));
+    }
     if (wire.policy.is_some() || wire.target_error_rate.is_some())
         && backend
             .capabilities()
@@ -1065,6 +1077,26 @@ mod tests {
         )
     }
 
+    #[test]
+    fn coalesced_jobs_validate_independently_and_never_retry() {
+        let (_, body) = policy_fixture();
+        let valid = serde_json::to_vec(&body).unwrap();
+        let mut backend = NativeProbe::default();
+        let results = run_coalesced(&mut backend, &[&valid, b"bad json", &valid]);
+        assert_eq!(backend.calls, 1);
+        assert!(results[0].is_ok());
+        assert!(results[1].is_err());
+        assert!(results[2].is_ok());
+        assert_eq!(backend.states.len(), 2);
+        backend.fail = true;
+        assert!(
+            run_coalesced(&mut backend, &[&valid, &valid])
+                .iter()
+                .all(Result::is_err)
+        );
+        assert_eq!(backend.calls, 2);
+    }
+
     #[derive(Default)]
     struct NativeProbe {
         calls: usize,
@@ -1437,4 +1469,76 @@ mod tests {
             assert!(user_failure_messages(body).is_empty());
         }
     }
+}
+
+/// Independently validate queued requests, then execute their text groups in one native batch.
+/// Wire validation failures are isolated. Native batch failures fan out without retry.
+pub(super) fn run_coalesced<B: HttpDecisionBackend>(
+    backend: &mut B,
+    bodies: &[&[u8]],
+) -> Vec<crate::Result<Value>> {
+    let prepared: Vec<_> = bodies
+        .iter()
+        .map(|body| prepare_request(backend, body))
+        .collect();
+    let groups: Vec<_> = prepared
+        .iter()
+        .filter_map(|p| p.as_ref().ok())
+        .flat_map(|p| p.groups.iter().cloned())
+        .collect();
+    let images: Vec<Vec<&[u8]>> = vec![Vec::new(); groups.len()];
+    if groups.is_empty() {
+        return prepared
+            .into_iter()
+            .map(|p| p.and_then(|p| finish_request(p, vec![])))
+            .collect();
+    }
+    let outputs = backend.decide_native_batch_json(&groups, &images);
+    match outputs {
+        Ok(outputs) if outputs.len() == groups.len() => {
+            let mut outputs = outputs.into_iter();
+            prepared
+                .into_iter()
+                .map(|p| {
+                    p.and_then(|p| {
+                        let count = p.groups.len();
+                        finish_request(p, outputs.by_ref().take(count).collect())
+                    })
+                })
+                .collect()
+        }
+        other => {
+            let message = match other {
+                Err(e) => e.to_string(),
+                _ => "coalesced result count mismatch".into(),
+            };
+            prepared
+                .into_iter()
+                .map(|p| p.and_then(|_| Err(Error::Backend(message.clone()))))
+                .collect()
+        }
+    }
+}
+/// Admission for text/direct jobs only; all actual validation still runs before inference.
+pub(super) fn coalescing_decisions(body: &[u8]) -> Option<usize> {
+    let wire: WireRequest = serde_json::from_slice(body).ok()?;
+    if !wire.media.is_empty()
+        || wire
+            .reasoning
+            .is_some_and(|r| r.mode == crate::ReasoningMode::Thinking)
+    {
+        return None;
+    }
+    let n = wire.decisions.len();
+    if wire.decisions.iter().any(|d| {
+        let decision = Decision {
+            id: d.id.clone(),
+            instruction: d.instruction.clone(),
+            kind: d.kind.clone(),
+        };
+        decision.options().len() > 26
+    }) {
+        return None;
+    }
+    (n > 0 && n <= MAX_DECISIONS).then_some(n)
 }

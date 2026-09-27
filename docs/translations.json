@@ -454,6 +454,16 @@
         "ko",
         "ja"
       ]
+    },
+    {
+      "source": "docs/FAST_DECISIONS.md",
+      "path": "FAST_DECISIONS.md",
+      "source_sha256": "8a529118bd651f1f46c7df802e337b2a5975d6c18b0b9d28c896f5a6adf85cd7",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
     }
   ]
 }

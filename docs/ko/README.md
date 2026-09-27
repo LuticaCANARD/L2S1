@@ -75,3 +75,5 @@
 | [스킬 인터페이스 참조](skills/l2s1/references/interfaces.md) | 빌드, CLI, HTTP, MCP, Rust 통합 |
 
 소스·의존성 고지: [LICENSE](../../LICENSE), [THIRD_PARTY_LICENSES.txt](../../THIRD_PARTY_LICENSES.txt). 모델 가중치는 별도로 준비하며 각각의 약관을 따릅니다. 보고서는 명시된 범위의 실험 기록입니다. 정답률, 수락된 판단의 정답률, 수락률을 구분하세요.
+
+- [빠른 판정 서버](FAST_DECISIONS.md): fixed prefix / ONNX / cascade.

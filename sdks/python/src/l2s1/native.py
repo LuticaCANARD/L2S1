@@ -38,6 +38,7 @@ class LoadOptions:
     ubatch: int | None = None
     threads: int | None = None
     gpu_layers: int | None = None
+    fixed_schema: bool = False
     execution_mode: ExecutionMode | None = None
     parallel_width: int | None = None
     prompt_layout: Literal["legacy", "state-first"] | None = None
@@ -61,6 +62,12 @@ def _arguments(options: LoadOptions) -> list[str]:
     positive_timeout(options.startup_timeout_ms)
     positive_timeout(options.timeout_ms)
     args = ["--model", options.model]
+    if options.fixed_schema:
+        if options.execution_mode not in (None, "prefix-reuse"):
+            raise ValueError("fixed_schema requires prefix-reuse")
+        args.append("--fixed-schema")
+        if options.execution_mode is None:
+            args.extend(["--execution-mode", "prefix-reuse"])
     if options.device != "cpu":
         args.extend(["--device", options.device])
     for name in ("mmproj", "lora", "context", "batch", "ubatch", "threads", "gpu_layers", "execution_mode",
