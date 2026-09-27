@@ -1,0 +1,7 @@
+{
+  "/home/lutica/l2s1-arm64-fresh-20260927/installed/openmp/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-base.so.0": "69866905df22b55827b2bdf500ebf804f89f110b4eaacbbe0e22312dc3fc921d",
+  "/home/lutica/l2s1-arm64-fresh-20260927/installed/openmp/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-cpu.so.0": "b2a2209ea5077571c92e7fd7aa090528fb1ada70f9526d5a23250b538edac4a9",
+  "/home/lutica/l2s1-arm64-fresh-20260927/installed/openmp/node_modules/@l2s1/runtime-linux-arm64/bin/libggml.so.0": "f33047674b9ffe6e7773aa862d6ed3f9028beabcbb19d752edda91865d8994b3",
+  "/home/lutica/l2s1-arm64-fresh-20260927/installed/openmp/node_modules/@l2s1/runtime-linux-arm64/bin/libllama.so.0": "b33b76f710b348463df1ef5479e81a859a248a6d7334027ea366ac1b69ccbbb7",
+  "/home/lutica/l2s1-arm64-fresh-20260927/installed/openmp/node_modules/@l2s1/runtime-linux-arm64/bin/libmtmd.so.0": "59791181c177d0f733a36dc0e7d871ff6e72cce190522ddebf3dfef49903ecd7"
+}

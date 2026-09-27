@@ -1,0 +1,173 @@
+{
+  "historical_native": {
+    "directory": "/home/lutica/l2s1-pi-20260927/source/target/release/build/l2s1-llama-sys-9cfda74417688248/out/llama/ab4ffa5492aefbc1/lib",
+    "probe": "{\"system_info\": \"CPU : NEON = 1 | ARM_FMA = 1 | FP16_VA = 1 | DOTPROD = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | \", \"scores\": {}}\n",
+    "instructions": {
+      "libggml-cpu.so": {
+        "sha256": "f2c4ea36c35d67763c4be52f8d3eb90220d77d9904433798d020387856ea2d71",
+        "sdot": 1184,
+        "smmla": 0
+      }
+    },
+    "symbol_versions": [
+      "CXXABI_1.3",
+      "CXXABI_1.3.11",
+      "CXXABI_1.3.13",
+      "CXXABI_1.3.2",
+      "CXXABI_1.3.3",
+      "CXXABI_1.3.5",
+      "CXXABI_1.3.9",
+      "GLIBCXX_3.4",
+      "GLIBCXX_3.4.11",
+      "GLIBCXX_3.4.14",
+      "GLIBCXX_3.4.15",
+      "GLIBCXX_3.4.17",
+      "GLIBCXX_3.4.18",
+      "GLIBCXX_3.4.19",
+      "GLIBCXX_3.4.20",
+      "GLIBCXX_3.4.21",
+      "GLIBCXX_3.4.22",
+      "GLIBCXX_3.4.25",
+      "GLIBCXX_3.4.26",
+      "GLIBCXX_3.4.29",
+      "GLIBCXX_3.4.9",
+      "GLIBC_2.17",
+      "GLIBC_2.27",
+      "GLIBC_2.29",
+      "GLIBC_2.32",
+      "GLIBC_2.33",
+      "GLIBC_2.34",
+      "GLIBC_2.38"
+    ]
+  },
+  "released_v013": {
+    "directory": "/home/lutica/l2s1-v013-validation-20260927/runtime/package/bin",
+    "probe": "{\"system_info\": \"CPU : NEON = 1 | ARM_FMA = 1 | LLAMAFILE = 1 | REPACK = 1 | \", \"scores\": {}}\n",
+    "instructions": {
+      "libggml-cpu.so": {
+        "sha256": "23f4f453e49ec9a081763f6963012ab0d0bb450a09eed9956b2cee6a0305b196",
+        "sdot": 0,
+        "smmla": 0
+      }
+    },
+    "symbol_versions": [
+      "CXXABI_1.3",
+      "CXXABI_1.3.11",
+      "CXXABI_1.3.13",
+      "CXXABI_1.3.2",
+      "CXXABI_1.3.3",
+      "CXXABI_1.3.5",
+      "CXXABI_1.3.9",
+      "GLIBCXX_3.4",
+      "GLIBCXX_3.4.11",
+      "GLIBCXX_3.4.14",
+      "GLIBCXX_3.4.15",
+      "GLIBCXX_3.4.17",
+      "GLIBCXX_3.4.18",
+      "GLIBCXX_3.4.19",
+      "GLIBCXX_3.4.20",
+      "GLIBCXX_3.4.21",
+      "GLIBCXX_3.4.22",
+      "GLIBCXX_3.4.25",
+      "GLIBCXX_3.4.26",
+      "GLIBCXX_3.4.29",
+      "GLIBCXX_3.4.9",
+      "GLIBC_2.17",
+      "GLIBC_2.18",
+      "GLIBC_2.25",
+      "GLIBC_2.27",
+      "GLIBC_2.28",
+      "GLIBC_2.29",
+      "GLIBC_2.30",
+      "GLIBC_2.32",
+      "GLIBC_2.33",
+      "GLIBC_2.34"
+    ]
+  },
+  "candidate_kernels": {
+    "directory": "/home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64/bin",
+    "probe": "load_backend: loaded CPU backend from /home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-cpu-armv8.2_2.so\n{\"system_info\": \"CPU : NEON = 1 | ARM_FMA = 1 | FP16_VA = 1 | DOTPROD = 1 | LLAMAFILE = 1 | REPACK = 1 | \", \"scores\": {\"libggml-cpu-armv8.0_1.so\": 1, \"libggml-cpu-armv8.2_1.so\": 3, \"libggml-cpu-armv8.2_2.so\": 7, \"libggml-cpu-armv8.2_3.so\": 0, \"libggml-cpu-armv8.6_1.so\": 0, \"libggml-cpu-armv8.6_2.so\": 0, \"libggml-cpu-armv9.2_1.so\": 0, \"libggml-cpu-armv9.2_2.so\": 0}}\n",
+    "instructions": {
+      "libggml-cpu-armv8.2_1.so": {
+        "sha256": "269a8a9f1406bef804a74f2b49623288e67f35ca7fb3a8a9952268c636520da4",
+        "sdot": 1200,
+        "smmla": 0
+      },
+      "libggml-cpu-armv8.6_2.so": {
+        "sha256": "a9dab165e2b44280237cab3b07c0c1f6c257a06fc41101263ec27b880f16c272",
+        "sdot": 1269,
+        "smmla": 402
+      },
+      "libggml-cpu-armv9.2_1.so": {
+        "sha256": "9335ade5d5ad3e869b0dc0c84a3817c58fa7dc9c24084e7341e20f263197496a",
+        "sdot": 1269,
+        "smmla": 402
+      },
+      "libggml-cpu-armv8.2_3.so": {
+        "sha256": "46b9b6354ba1fd0f24ee74d6ede0db4d6c7f3065700ade027626a55aee47c3a0",
+        "sdot": 1251,
+        "smmla": 0
+      },
+      "libggml-cpu-armv8.6_1.so": {
+        "sha256": "38cbc31ad3a8f9bf1885566935098b08e7a4c5bcb8f97b2852367be65b04bc31",
+        "sdot": 1269,
+        "smmla": 402
+      },
+      "libggml-cpu-armv8.2_2.so": {
+        "sha256": "5f95cad1ec06373a9787d8fadc430835d660577916a870c829048bab3bf9e6b2",
+        "sdot": 1200,
+        "smmla": 0
+      },
+      "libggml-cpu-armv9.2_2.so": {
+        "sha256": "6346eb1186034cc6ccaf4b9f0f88f8a1ba29cb9220750f8029c57fa190cb3445",
+        "sdot": 1269,
+        "smmla": 402
+      },
+      "libggml-cpu-armv8.0_1.so": {
+        "sha256": "0a172680495c8aea9fe557d41fb7d30c816314bfedfd943dd9470ff3eddb8806",
+        "sdot": 0,
+        "smmla": 0
+      }
+    },
+    "symbol_versions": [
+      "CXXABI_1.3",
+      "CXXABI_1.3.11",
+      "CXXABI_1.3.13",
+      "CXXABI_1.3.2",
+      "CXXABI_1.3.3",
+      "CXXABI_1.3.5",
+      "CXXABI_1.3.9",
+      "GLIBCXX_3.4",
+      "GLIBCXX_3.4.11",
+      "GLIBCXX_3.4.14",
+      "GLIBCXX_3.4.15",
+      "GLIBCXX_3.4.17",
+      "GLIBCXX_3.4.18",
+      "GLIBCXX_3.4.19",
+      "GLIBCXX_3.4.20",
+      "GLIBCXX_3.4.21",
+      "GLIBCXX_3.4.22",
+      "GLIBCXX_3.4.25",
+      "GLIBCXX_3.4.26",
+      "GLIBCXX_3.4.29",
+      "GLIBCXX_3.4.9",
+      "GLIBC_2.17",
+      "GLIBC_2.18",
+      "GLIBC_2.25",
+      "GLIBC_2.27",
+      "GLIBC_2.28",
+      "GLIBC_2.29",
+      "GLIBC_2.30",
+      "GLIBC_2.32",
+      "GLIBC_2.33",
+      "GLIBC_2.34",
+      "GLIBC_2.38"
+    ]
+  },
+  "released_ldd": "\tlinux-vdso.so.1 (0x00007ffef74b8000)\n\tlibstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x00007ffef6f50000)\n\tlibllama.so.0 => /home/lutica/l2s1-v013-validation-20260927/runtime/package/bin/libllama.so.0 (0x00007ffef6bd0000)\n\tlibmtmd.so.0 => /home/lutica/l2s1-v013-validation-20260927/runtime/package/bin/libmtmd.so.0 (0x00007ffef6a40000)\n\tlibggml.so.0 => /home/lutica/l2s1-v013-validation-20260927/runtime/package/bin/libggml.so.0 (0x00007ffef6a20000)\n\tlibggml-base.so.0 => /home/lutica/l2s1-v013-validation-20260927/runtime/package/bin/libggml-base.so.0 (0x00007ffef6950000)\n\tlibgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x00007ffef6910000)\n\tlibm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x00007ffef6860000)\n\tlibc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x00007ffef6690000)\n\t/lib/ld-linux-aarch64.so.1 (0x00007ffef7480000)\n\tlibggml-cpu.so.0 => /home/lutica/l2s1-v013-validation-20260927/runtime/package/bin/libggml-cpu.so.0 (0x00007ffef6510000)\n",
+  "openmp_system_package": "libgomp1:arm64\t14.2.0-19\n",
+  "openmp_system_library": {
+    "path": "/usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0",
+    "sha256": "a2286e5fa0f7601afdfae2a750536f409bc8c3cc5b0bb9e93a4afc5c3779a510"
+  }
+}

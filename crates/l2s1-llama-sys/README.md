@@ -68,3 +68,28 @@ See the [C++ application SDK](../../sdks/cpp/README.md) for typed resident-proce
 
 See [migration validation](../../docs/RUST_BRIDGE_MIGRATION.md) for the exact
 C++/Rust comparison scope and opt-in reproduction commands.
+
+
+## Portable Linux ARM64
+
+`L2S1_PORTABLE_BUILD=1` keeps `GGML_NATIVE=OFF`. On Linux aarch64 it
+builds upstream's loadable ARM CPU variants, including the ARMv8 baseline.
+GGML checks Linux HWCAP/HWCAP2 before selecting dotprod, FP16, SVE, i8mm or SME
+variants. Feature checks are compiled without the variant ISA flags and with
+LTO disabled. The bridge loads modules beside the linked GGML library; keep the
+whole matching library set when moving a binary. Cargo tests use that same set.
+GCC 14 is the validated compiler for this upstream variant list (including ARMv9.2/SME). The packaged
+Linux ARM64 CI build uses Ubuntu 24.04 and GCC 14; it requires a compatible glibc
+and C++ runtime (older Linux distributions need a source build).
+
+`L2S1_ARM64_DISPATCH=0` selects the former portable CPU implementation for
+controlled comparisons. `L2S1_OPENMP=0` or `1` independently disables or enables
+OpenMP. These switches are part of the native build cache key. Portable builds
+keep OpenMP off by default; custom OpenMP bundles require their compiler's
+OpenMP runtime, such as `libgomp.so.1` with GCC. The package verifier checks
+runtime dependencies of every shared library, including dynamically loaded CPU
+modules. Do not substitute a library from another build or upstream revision.
+
+The Rust evidence SIMD scan does not accelerate GGML matrix multiplication.
+Measure inference with `--execution-mode fresh` when comparing CPU kernels;
+resident prefix reuse changes the amount of work performed.

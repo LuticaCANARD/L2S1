@@ -237,7 +237,7 @@ npm pack
 npm run test:package -- l2s1-node-0.1.3.tgz l2s1-runtime-linux-x64-0.1.3.tgz
 ```
 
-런타임을 다시 빌드할 때 새로운 출력 디렉터리를 사용하세요. `L2S1_PORTABLE_BUILD=1`는 빌드 호스트 CPU 지침 및 OpenMP 종속성을 비활성화합니다. 일반 CPU 커널은 호스트 최적화 사용자 정의 빌드보다 느릴 수 있습니다. 각 아티팩트에는 라이선스 알림과 SHA-256 매니페스트가 포함되어 있습니다. 검증자는 Linux llama.cpp/GGML 종속성이 번들 디렉터리에서 해결되는지 확인합니다.
+런타임을 다시 빌드할 때 새 출력 디렉터리를 사용하세요. `L2S1_PORTABLE_BUILD=1`은 빌드 호스트 전용 CPU 명령과 OpenMP 의존성을 끕니다. Linux ARM64 패키지는 런타임 CPU 기능에 맞는 GGML 커널을 선택하며 ARMv8 fallback을 포함합니다. 패키지 CI는 Ubuntu 24.04 / GCC 14를 사용하도록 설정했습니다. 런타임을 옮길 때 모든 CPU 모듈을 함께 옮기세요. 비교 빌드와 사용자 지정 OpenMP 의존성은 [네이티브 빌드 옵션](../crates/l2s1-llama-sys/README.md#portable-linux-arm64)을 참고하세요. 각 패키지에는 라이선스와 SHA-256 매니페스트가 포함되며 검증기는 llama.cpp/GGML 의존성이 패키지 안에서 해결되는지 확인합니다.
 
 [배포 파이프라인](../RELEASE_PIPELINE.md)에서 SDK와 native runtime의 자동 게시·인증 설정을 확인하세요.
 

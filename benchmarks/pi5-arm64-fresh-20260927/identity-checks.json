@@ -1,0 +1,9 @@
+{
+  "published_archive_matches_sealed_release": true,
+  "published_source_commit": "57a73657bd9ad4d97b29e12d1400b304839d0d27",
+  "historical_executable_matches_recorded_identity": true,
+  "all_four_upstream_source_trees_match_historical": true,
+  "upstream_commit": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "source_digest": "4e7573a940fb0882afbd60cd787c6acc3c38745e8a264454c7375ada36e4f0b3",
+  "method": "Source archive pin and CMake provenance, whole upstream code-tree digests, installed file manifests, ldd and live process maps. Shared libraries do not independently attest a Git SHA."
+}

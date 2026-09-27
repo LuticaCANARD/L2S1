@@ -308,7 +308,7 @@
     {
       "source": "sdks/typescript/README.md",
       "path": "typescript/README.md",
-      "source_sha256": "69e36b9e6a50ca038e36377aae5c458ac67b3b2dab9166eef490db19e7502926",
+      "source_sha256": "8280a0988b3ce919605903ad8b2973ca132aab3bdb69d0acb133b18a5e1e6451",
       "languages": [
         "en",
         "ko",
@@ -318,7 +318,7 @@
     {
       "source": "crates/l2s1-llama-sys/README.md",
       "path": "crates/l2s1-llama-sys/README.md",
-      "source_sha256": "4c7c93acbc6ba0c498fef157e26f4f1c4a422a2579c4eab97d5b96c8997d6117",
+      "source_sha256": "b663234d088fb445976ad878c24df3f2b63cada701287b0b9987de34409176a3",
       "languages": [
         "en",
         "ko",

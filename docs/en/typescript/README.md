@@ -242,7 +242,7 @@ npm pack
 npm run test:package -- l2s1-node-0.1.3.tgz l2s1-runtime-linux-x64-0.1.3.tgz
 ```
 
-Use a fresh output directory when rebuilding a runtime. `L2S1_PORTABLE_BUILD=1` disables build-host CPU instructions and OpenMP dependencies; its general CPU kernels may be slower than a host-optimized custom build. Each artifact includes license notices and a SHA-256 manifest. The verifier checks that Linux llama.cpp/GGML dependencies resolve from the bundle directory.
+Use a fresh output directory when rebuilding a runtime. `L2S1_PORTABLE_BUILD=1` disables build-host CPU instructions and OpenMP dependencies. Linux ARM64 packages use runtime-selected GGML CPU variants with an ARMv8 fallback; the package CI is configured for Ubuntu 24.04 / GCC 14. Keep every bundled CPU module when moving the runtime. See [native build options](../crates/l2s1-llama-sys/README.md#portable-linux-arm64) for controlled comparisons and custom OpenMP dependencies. Each artifact includes license notices and a SHA-256 manifest. The verifier checks that Linux llama.cpp/GGML dependencies resolve from the bundle directory.
 
 The [release pipeline](../RELEASE_PIPELINE.md) publishes verified SDK and native runtime packages.
 

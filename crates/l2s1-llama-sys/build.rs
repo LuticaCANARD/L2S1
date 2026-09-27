@@ -41,6 +41,8 @@ fn main() {
     println!("cargo:rerun-if-env-changed=L2S1_CUDA_ARCHITECTURES");
     println!("cargo:rerun-if-env-changed=L2S1_NATIVE_COMPILER_LAUNCHER");
     println!("cargo:rerun-if-env-changed=L2S1_PORTABLE_BUILD");
+    println!("cargo:rerun-if-env-changed=L2S1_ARM64_DISPATCH");
+    println!("cargo:rerun-if-env-changed=L2S1_OPENMP");
     let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let selected = env::var_os("L2S1_LLAMA_CPP_SOURCE")
         .or_else(|| env::var_os("LLAMA_CPP_DIR"))
@@ -84,6 +86,21 @@ fn main() {
         _ => ".so",
     };
     let portable = env::var_os("L2S1_PORTABLE_BUILD").is_some_and(|v| v == "1");
+    let arm64_linux =
+        target_os == "linux" && env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("aarch64");
+    // Overrides support controlled build comparisons without editing source.
+    let option = |name: &str, default: bool| match env::var(name).as_deref() {
+        Ok("1") => true,
+        Ok("0") => false,
+        Err(env::VarError::NotPresent) => default,
+        _ => panic!("{name} must be 0 or 1"),
+    };
+    let arm64_dispatch = option("L2S1_ARM64_DISPATCH", portable && arm64_linux);
+    assert!(
+        !arm64_dispatch || arm64_linux,
+        "ARM64 dispatch requires Linux aarch64"
+    );
+    let openmp = option("L2S1_OPENMP", !portable);
     let backend = if cuda {
         "cuda"
     } else if metal {
@@ -128,6 +145,7 @@ fn main() {
     if let Some(architectures) = &cuda_architectures {
         build_key.update(architectures.as_bytes());
     }
+    build_key.update([u8::from(arm64_dispatch), u8::from(openmp)]);
     let build_dir = format!("{:x}", build_key.finalize());
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
     let mut cmake = cmake::Config::new(manifest.join("cmake"));
@@ -188,6 +206,18 @@ fn main() {
         ] {
             cmake.define(option, "OFF");
         }
+    }
+    cmake.define("GGML_OPENMP", if openmp { "ON" } else { "OFF" });
+    cmake.define("GGML_BACKEND_DL", if arm64_dispatch { "ON" } else { "OFF" });
+    cmake.define(
+        "GGML_CPU_ALL_VARIANTS",
+        if arm64_dispatch { "ON" } else { "OFF" },
+    );
+    if arm64_dispatch {
+        cmake.define("GGML_NATIVE", "OFF");
+        // Upstream installs loadable CPU modules in bindir. Keep the complete
+        // matching runtime together for hashing, packaging and library lookup.
+        cmake.define("CMAKE_INSTALL_BINDIR", "lib");
     }
     let install = cmake.build();
     let lib = install.join("lib");
@@ -347,6 +377,9 @@ fn main() {
         .include(source.join("vendor"))
         .file(manifest.join("native/chat.cpp"))
         .file(manifest.join("native/exception.cpp"));
+    if arm64_dispatch {
+        bridge.define("L2S1_ARM64_DISPATCH", None);
+    }
     for file in JINJA_FILES {
         bridge.file(source.join("common").join(file));
     }

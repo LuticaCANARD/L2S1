@@ -1,0 +1,58 @@
+5555ba000000-5555ba288000 r-xp 00000000 b3:02 1189431                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/l2s1
+5555ba290000-5555ba2a0000 r--p 00290000 b3:02 1189431                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/l2s1
+5555ba2a0000-5555ba2a4000 rw-p 002a0000 b3:02 1189431                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/l2s1
+5555f2fc0000-5555f674c000 rw-p 00000000 00:00 0                          [heap]
+7ffe9b7b8000-7ffef0fa0000 rw-p 00000000 00:00 0 
+7ffef15d8000-7fff30b68000 r--s 00638000 b3:02 524299                     /home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf
+7fff31b70000-7fff31c50000 r-xp 00000000 b3:02 1189447                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-cpu-armv8.2_2.so
+7fff31c50000-7fff31c5c000 ---p 000e0000 b3:02 1189447                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-cpu-armv8.2_2.so
+7fff31c5c000-7fff31c60000 r--p 000dc000 b3:02 1189447                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-cpu-armv8.2_2.so
+7fff31c60000-7fff31c64000 rw-p 000e0000 b3:02 1189447                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-cpu-armv8.2_2.so
+7fff31c64000-7fff31ce8000 rw-p 00000000 00:00 0 
+7fff31cf0000-7fff31d40000 r-xp 00000000 b3:02 9096                       /usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0
+7fff31d40000-7fff31d4c000 ---p 00050000 b3:02 9096                       /usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0
+7fff31d4c000-7fff31d50000 r--p 0004c000 b3:02 9096                       /usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0
+7fff31d50000-7fff31d54000 rw-p 00050000 b3:02 9096                       /usr/lib/aarch64-linux-gnu/libgomp.so.1.0.0
+7fff31d60000-7fff31efc000 r-xp 00000000 b3:02 8698                       /usr/lib/aarch64-linux-gnu/libc.so.6
+7fff31efc000-7fff31f0c000 ---p 0019c000 b3:02 8698                       /usr/lib/aarch64-linux-gnu/libc.so.6
+7fff31f0c000-7fff31f10000 r--p 0019c000 b3:02 8698                       /usr/lib/aarch64-linux-gnu/libc.so.6
+7fff31f10000-7fff31f14000 rw-p 001a0000 b3:02 8698                       /usr/lib/aarch64-linux-gnu/libc.so.6
+7fff31f14000-7fff31f20000 rw-p 00000000 00:00 0 
+7fff31f30000-7fff31fc0000 r-xp 00000000 b3:02 9521                       /usr/lib/aarch64-linux-gnu/libm.so.6
+7fff31fc0000-7fff31fcc000 ---p 00090000 b3:02 9521                       /usr/lib/aarch64-linux-gnu/libm.so.6
+7fff31fcc000-7fff31fd0000 r--p 0008c000 b3:02 9521                       /usr/lib/aarch64-linux-gnu/libm.so.6
+7fff31fd0000-7fff31fd4000 rw-p 00090000 b3:02 9521                       /usr/lib/aarch64-linux-gnu/libm.so.6
+7fff31fe0000-7fff32000000 r-xp 00000000 b3:02 9020                       /usr/lib/aarch64-linux-gnu/libgcc_s.so.1
+7fff32000000-7fff3200c000 ---p 00020000 b3:02 9020                       /usr/lib/aarch64-linux-gnu/libgcc_s.so.1
+7fff3200c000-7fff32010000 r--p 0001c000 b3:02 9020                       /usr/lib/aarch64-linux-gnu/libgcc_s.so.1
+7fff32010000-7fff32014000 rw-p 00020000 b3:02 9020                       /usr/lib/aarch64-linux-gnu/libgcc_s.so.1
+7fff32020000-7fff320cc000 r-xp 00000000 b3:02 1189433                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-base.so.0
+7fff320cc000-7fff320dc000 ---p 000ac000 b3:02 1189433                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-base.so.0
+7fff320dc000-7fff320e0000 r--p 000ac000 b3:02 1189433                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-base.so.0
+7fff320e0000-7fff320e4000 rw-p 000b0000 b3:02 1189433                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml-base.so.0
+7fff320f0000-7fff320f8000 r-xp 00000000 b3:02 1189435                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml.so.0
+7fff320f8000-7fff3210c000 ---p 00008000 b3:02 1189435                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml.so.0
+7fff3210c000-7fff32110000 r--p 0000c000 b3:02 1189435                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml.so.0
+7fff32110000-7fff32114000 rw-p 00010000 b3:02 1189435                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libggml.so.0
+7fff32120000-7fff32290000 r-xp 00000000 b3:02 1189438                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libmtmd.so.0
+7fff32290000-7fff3229c000 ---p 00170000 b3:02 1189438                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libmtmd.so.0
+7fff3229c000-7fff322a0000 r--p 0016c000 b3:02 1189438                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libmtmd.so.0
+7fff322a0000-7fff322a4000 rw-p 00170000 b3:02 1189438                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libmtmd.so.0
+7fff322b0000-7fff32608000 r-xp 00000000 b3:02 1189437                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libllama.so.0
+7fff32608000-7fff32610000 ---p 00358000 b3:02 1189437                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libllama.so.0
+7fff32610000-7fff32620000 r--p 00360000 b3:02 1189437                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libllama.so.0
+7fff32620000-7fff32628000 rw-p 00370000 b3:02 1189437                    /home/lutica/l2s1-arm64-fresh-20260927/installed/combined/node_modules/@l2s1/runtime-linux-arm64/bin/libllama.so.0
+7fff32628000-7fff32630000 rw-p 00000000 00:00 0 
+7fff32630000-7fff3287c000 r-xp 00000000 b3:02 10047                      /usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33
+7fff3287c000-7fff32884000 ---p 0024c000 b3:02 10047                      /usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33
+7fff32884000-7fff32890000 r--p 00254000 b3:02 10047                      /usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33
+7fff32890000-7fff32894000 rw-p 00260000 b3:02 10047                      /usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33
+7fff32894000-7fff328a0000 rw-p 00000000 00:00 0 
+7fff328ac000-7fff328b0000 ---p 00000000 00:00 0 
+7fff328b0000-7fff328b4000 rw-p 00000000 00:00 0 
+7fff328b4000-7fff328dc000 r-xp 00000000 b3:02 7755                       /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+7fff328dc000-7fff328ec000 r--p 00000000 00:00 0                          [vvar]
+7fff328ec000-7fff328f0000 r-xp 00000000 00:00 0                          [vdso]
+7fff328f0000-7fff328f4000 r--p 0002c000 b3:02 7755                       /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+7fff328f4000-7fff328f8000 rw-p 00030000 b3:02 7755                       /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+7fffcc290000-7fffcc2b4000 rw-p 00000000 00:00 0                          [stack]

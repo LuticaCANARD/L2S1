@@ -1,0 +1,29 @@
+[
+  {
+    "utc": "2026-09-27T14:34:09.444607+00:00",
+    "monotonic": 5381.217989425,
+    "temperature_c": 64.45,
+    "throttled": 327680,
+    "arm_clock_hz": 2400017408,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 10992
+  },
+  {
+    "utc": "2026-09-27T14:34:11.458061+00:00",
+    "monotonic": 5383.231447469,
+    "temperature_c": 60.6,
+    "throttled": 327680,
+    "arm_clock_hz": 2400033792,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 10992
+  },
+  {
+    "utc": "2026-09-27T14:34:13.471443+00:00",
+    "monotonic": 5385.244828819,
+    "temperature_c": 56.2,
+    "throttled": 327680,
+    "arm_clock_hz": 1500016128,
+    "scaling_cur_freq_khz": 1500000,
+    "swap_kib": 10992
+  }
+]

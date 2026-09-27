@@ -1,0 +1,832 @@
+{
+  "sdk_version": "0.1.3",
+  "runtime_package": "/home/lutica/l2s1-arm64-fresh-20260927/installed/kernels/node_modules/@l2s1/runtime-linux-arm64",
+  "runs": [
+    {
+      "execution_override": "fresh",
+      "warm_reused_tokens": 0,
+      "cold": {
+        "api_version": 1,
+        "request_id": "local-2",
+        "scheduling": null,
+        "backend": {
+          "runtime": "local-libllama",
+          "model": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+          "details": {
+            "compute": {
+              "batch": 256,
+              "context": 2048,
+              "flash_attention": "off",
+              "threads": 4,
+              "ubatch": 256
+            },
+            "execution_mode": "fresh",
+            "model_architecture": "gemma3",
+            "model_description": "gemma3 1B Q8_0",
+            "model_path": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+            "offload_device": null,
+            "offload_requested": false,
+            "parallel_width": 1,
+            "prompt_layout": "legacy",
+            "prompt_profile": "model",
+            "prompt_version": "gguf-jinja-decision-v1",
+            "runtime": "local-libllama"
+          }
+        },
+        "policy": {
+          "min_top_probability": 0.8,
+          "min_candidate_mass": 0.05
+        },
+        "results": [
+          {
+            "id": "storage_zone",
+            "value": {
+              "type": "choice",
+              "selected": "ambient"
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "ambient",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 39.995361328125,
+                  "option_probability": 0.9999719534562083
+                },
+                {
+                  "id": "chilled",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 29.21575355529785,
+                  "option_probability": 2.081918126987319e-05
+                },
+                {
+                  "id": "frozen",
+                  "code": "C",
+                  "token_id": 236780,
+                  "token_ids": null,
+                  "raw_logit": 28.157752990722656,
+                  "option_probability": 7.227362524980715e-06
+                }
+              ],
+              "candidate_mass": 0.9999998579574297,
+              "top_option_probability": 0.9999719534562083,
+              "entropy_confidence": 0.9996923170842764,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": null,
+                "expected_value": null
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 123,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "value": {
+              "type": "binary",
+              "value": true
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "false",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 26.237926483154297,
+                  "option_probability": 0.0076015625024096894
+                },
+                {
+                  "id": "true",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 31.109697341918945,
+                  "option_probability": 0.9923984374975887
+                }
+              ],
+              "candidate_mass": 0.9998646241552549,
+              "top_option_probability": 0.9923984374975887,
+              "entropy_confidence": 0.9355639414440979,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": 0.9923984374975887,
+                "expected_value": null
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 116,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "value": {
+              "type": "ordinal",
+              "selected": "low",
+              "level_value": null
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "low",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 33.12242126464844,
+                  "option_probability": 0.9899526487409191
+                },
+                {
+                  "id": "medium",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 27.562557220458984,
+                  "option_probability": 0.003810624430543071
+                },
+                {
+                  "id": "high",
+                  "code": "C",
+                  "token_id": 236780,
+                  "token_ids": null,
+                  "raw_logit": 28.055219650268555,
+                  "option_probability": 0.006236726828540039
+                }
+              ],
+              "candidate_mass": 0.9999797734529862,
+              "top_option_probability": 0.9899526487409191,
+              "entropy_confidence": 0.9427573556094572,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": null,
+                "expected_value": 0.01628407808762315
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 143,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          }
+        ],
+        "reasoning": null,
+        "error_budget": null
+      },
+      "warm": {
+        "api_version": 1,
+        "request_id": "local-3",
+        "scheduling": null,
+        "backend": {
+          "runtime": "local-libllama",
+          "model": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+          "details": {
+            "compute": {
+              "batch": 256,
+              "context": 2048,
+              "flash_attention": "off",
+              "threads": 4,
+              "ubatch": 256
+            },
+            "execution_mode": "fresh",
+            "model_architecture": "gemma3",
+            "model_description": "gemma3 1B Q8_0",
+            "model_path": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+            "offload_device": null,
+            "offload_requested": false,
+            "parallel_width": 1,
+            "prompt_layout": "legacy",
+            "prompt_profile": "model",
+            "prompt_version": "gguf-jinja-decision-v1",
+            "runtime": "local-libllama"
+          }
+        },
+        "policy": {
+          "min_top_probability": 0.8,
+          "min_candidate_mass": 0.05
+        },
+        "results": [
+          {
+            "id": "storage_zone",
+            "value": {
+              "type": "choice",
+              "selected": "ambient"
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "ambient",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 39.995361328125,
+                  "option_probability": 0.9999719534562083
+                },
+                {
+                  "id": "chilled",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 29.21575355529785,
+                  "option_probability": 2.081918126987319e-05
+                },
+                {
+                  "id": "frozen",
+                  "code": "C",
+                  "token_id": 236780,
+                  "token_ids": null,
+                  "raw_logit": 28.157752990722656,
+                  "option_probability": 7.227362524980715e-06
+                }
+              ],
+              "candidate_mass": 0.9999998579574297,
+              "top_option_probability": 0.9999719534562083,
+              "entropy_confidence": 0.9996923170842764,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": null,
+                "expected_value": null
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 123,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "value": {
+              "type": "binary",
+              "value": true
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "false",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 26.237926483154297,
+                  "option_probability": 0.0076015625024096894
+                },
+                {
+                  "id": "true",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 31.109697341918945,
+                  "option_probability": 0.9923984374975887
+                }
+              ],
+              "candidate_mass": 0.9998646241552549,
+              "top_option_probability": 0.9923984374975887,
+              "entropy_confidence": 0.9355639414440979,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": 0.9923984374975887,
+                "expected_value": null
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 116,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "value": {
+              "type": "ordinal",
+              "selected": "low",
+              "level_value": null
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "low",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 33.12242126464844,
+                  "option_probability": 0.9899526487409191
+                },
+                {
+                  "id": "medium",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 27.562557220458984,
+                  "option_probability": 0.003810624430543071
+                },
+                {
+                  "id": "high",
+                  "code": "C",
+                  "token_id": 236780,
+                  "token_ids": null,
+                  "raw_logit": 28.055219650268555,
+                  "option_probability": 0.006236726828540039
+                }
+              ],
+              "candidate_mass": 0.9999797734529862,
+              "top_option_probability": 0.9899526487409191,
+              "entropy_confidence": 0.9427573556094572,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": null,
+                "expected_value": 0.01628407808762315
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 143,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          }
+        ],
+        "reasoning": null,
+        "error_budget": null
+      }
+    },
+    {
+      "execution_override": null,
+      "warm_reused_tokens": 322,
+      "cold": {
+        "api_version": 1,
+        "request_id": "local-2",
+        "scheduling": null,
+        "backend": {
+          "runtime": "local-libllama",
+          "model": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+          "details": {
+            "compute": {
+              "batch": 256,
+              "context": 2048,
+              "flash_attention": "off",
+              "threads": 4,
+              "ubatch": 256
+            },
+            "execution_mode": "prefix_reuse",
+            "model_architecture": "gemma3",
+            "model_description": "gemma3 1B Q8_0",
+            "model_path": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+            "offload_device": null,
+            "offload_requested": false,
+            "parallel_width": 1,
+            "prefix_plan": "fixed-schema-split-v1",
+            "prompt_layout": "legacy",
+            "prompt_profile": "model",
+            "prompt_version": "gguf-jinja-decision-v1",
+            "runtime": "local-libllama"
+          }
+        },
+        "policy": {
+          "min_top_probability": 0.8,
+          "min_candidate_mass": 0.05
+        },
+        "results": [
+          {
+            "id": "storage_zone",
+            "value": {
+              "type": "choice",
+              "selected": "ambient"
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "ambient",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 37.59353256225586,
+                  "option_probability": 0.9999642813859563
+                },
+                {
+                  "id": "chilled",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 27.03942108154297,
+                  "option_probability": 2.608507620809248e-05
+                },
+                {
+                  "id": "frozen",
+                  "code": "C",
+                  "token_id": 236780,
+                  "token_ids": null,
+                  "raw_logit": 26.04330825805664,
+                  "option_probability": 9.633537832508954e-06
+                }
+              ],
+              "candidate_mass": 0.9999997537212143,
+              "top_option_probability": 0.9999642813859563,
+              "entropy_confidence": 0.9996156118210072,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": null,
+                "expected_value": null
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 123,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "value": {
+              "type": "binary",
+              "value": true
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "false",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 26.237926483154297,
+                  "option_probability": 0.0076015625024096894
+                },
+                {
+                  "id": "true",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 31.109697341918945,
+                  "option_probability": 0.9923984374975887
+                }
+              ],
+              "candidate_mass": 0.9998646241552549,
+              "top_option_probability": 0.9923984374975887,
+              "entropy_confidence": 0.9355639414440979,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": 0.9923984374975887,
+                "expected_value": null
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 116,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "value": {
+              "type": "ordinal",
+              "selected": "low",
+              "level_value": null
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "low",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 33.19160461425781,
+                  "option_probability": 0.9928813165461965
+                },
+                {
+                  "id": "medium",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 27.397815704345703,
+                  "option_probability": 0.0030247311965671416
+                },
+                {
+                  "id": "high",
+                  "code": "C",
+                  "token_id": 236780,
+                  "token_ids": null,
+                  "raw_logit": 27.700504302978516,
+                  "option_probability": 0.004093952257234438
+                }
+              ],
+              "candidate_mass": 0.9999857871135663,
+              "top_option_probability": 0.9928813165461965,
+              "entropy_confidence": 0.9570830408169891,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": null,
+                "expected_value": 0.011212635711036019
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 143,
+              "reused_prefix_tokens": 0,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          }
+        ],
+        "reasoning": null,
+        "error_budget": null
+      },
+      "warm": {
+        "api_version": 1,
+        "request_id": "local-3",
+        "scheduling": null,
+        "backend": {
+          "runtime": "local-libllama",
+          "model": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+          "details": {
+            "compute": {
+              "batch": 256,
+              "context": 2048,
+              "flash_attention": "off",
+              "threads": 4,
+              "ubatch": 256
+            },
+            "execution_mode": "prefix_reuse",
+            "model_architecture": "gemma3",
+            "model_description": "gemma3 1B Q8_0",
+            "model_path": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+            "offload_device": null,
+            "offload_requested": false,
+            "parallel_width": 1,
+            "prefix_plan": "fixed-schema-split-v1",
+            "prompt_layout": "legacy",
+            "prompt_profile": "model",
+            "prompt_version": "gguf-jinja-decision-v1",
+            "runtime": "local-libllama"
+          }
+        },
+        "policy": {
+          "min_top_probability": 0.8,
+          "min_candidate_mass": 0.05
+        },
+        "results": [
+          {
+            "id": "storage_zone",
+            "value": {
+              "type": "choice",
+              "selected": "ambient"
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "ambient",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 37.59353256225586,
+                  "option_probability": 0.9999642813859563
+                },
+                {
+                  "id": "chilled",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 27.03942108154297,
+                  "option_probability": 2.608507620809248e-05
+                },
+                {
+                  "id": "frozen",
+                  "code": "C",
+                  "token_id": 236780,
+                  "token_ids": null,
+                  "raw_logit": 26.04330825805664,
+                  "option_probability": 9.633537832508954e-06
+                }
+              ],
+              "candidate_mass": 0.9999997537212143,
+              "top_option_probability": 0.9999642813859563,
+              "entropy_confidence": 0.9996156118210072,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": null,
+                "expected_value": null
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 123,
+              "reused_prefix_tokens": 103,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          },
+          {
+            "id": "cold_chain_required",
+            "value": {
+              "type": "binary",
+              "value": true
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "false",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 26.237926483154297,
+                  "option_probability": 0.0076015625024096894
+                },
+                {
+                  "id": "true",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 31.109697341918945,
+                  "option_probability": 0.9923984374975887
+                }
+              ],
+              "candidate_mass": 0.9998646241552549,
+              "top_option_probability": 0.9923984374975887,
+              "entropy_confidence": 0.9355639414440979,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": 0.9923984374975887,
+                "expected_value": null
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 116,
+              "reused_prefix_tokens": 96,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          },
+          {
+            "id": "dispatch_priority",
+            "value": {
+              "type": "ordinal",
+              "selected": "low",
+              "level_value": null
+            },
+            "status": "selected",
+            "abstention_reasons": [],
+            "reason_messages": null,
+            "evidence": {
+              "type": "model_scored",
+              "scores": [
+                {
+                  "id": "low",
+                  "code": "A",
+                  "token_id": 236776,
+                  "token_ids": null,
+                  "raw_logit": 33.19160461425781,
+                  "option_probability": 0.9928813165461965
+                },
+                {
+                  "id": "medium",
+                  "code": "B",
+                  "token_id": 236799,
+                  "token_ids": null,
+                  "raw_logit": 27.397815704345703,
+                  "option_probability": 0.0030247311965671416
+                },
+                {
+                  "id": "high",
+                  "code": "C",
+                  "token_id": 236780,
+                  "token_ids": null,
+                  "raw_logit": 27.700504302978516,
+                  "option_probability": 0.004093952257234438
+                }
+              ],
+              "candidate_mass": 0.9999857871135663,
+              "top_option_probability": 0.9928813165461965,
+              "entropy_confidence": 0.9570830408169891,
+              "scoring_method": "single_token_conditional_softmax_v1",
+              "calibration_id": null,
+              "truncated": false,
+              "code_prefix_evaluations": 0,
+              "code_evaluated_tokens": 0,
+              "estimate": {
+                "p_true": null,
+                "expected_value": 0.011212635711036019
+              }
+            },
+            "routing": null,
+            "usage": {
+              "input_tokens": 143,
+              "reused_prefix_tokens": 123,
+              "output_tokens": null,
+              "reasoning": null
+            }
+          }
+        ],
+        "reasoning": null,
+        "error_budget": null
+      }
+    }
+  ]
+}

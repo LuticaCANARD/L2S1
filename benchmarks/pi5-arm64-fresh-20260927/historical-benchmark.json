@@ -1,0 +1,4714 @@
+{
+  "accepted_correct_decisions_per_second": 0.30983684787498655,
+  "backend": {
+    "compute": {
+      "batch": 256,
+      "context": 2048,
+      "flash_attention": "off",
+      "threads": 4,
+      "ubatch": 256
+    },
+    "execution_mode": "fresh",
+    "model_architecture": "gemma3",
+    "model_description": "gemma3 1B Q8_0",
+    "model_path": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+    "offload_device": null,
+    "offload_requested": false,
+    "parallel_width": 1,
+    "prompt_layout": "legacy",
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-decision-v1",
+    "runtime": "local-libllama"
+  },
+  "batch": 256,
+  "build_profile": "release",
+  "by_group": {
+    "domain/access": {
+      "abstention_rate": 0.16666666666666666,
+      "accepted_accuracy": 0.4666666666666667,
+      "correct_fraction": 0.3888888888888889,
+      "counts": {
+        "abstained": 9,
+        "accepted": 45,
+        "accepted_correct": 21,
+        "accepted_wrong": 24,
+        "decisions": 54,
+        "top1_correct": 27
+      },
+      "coverage": 0.8333333333333334,
+      "top1_accuracy_before_abstention": 0.5
+    },
+    "domain/warehouse": {
+      "abstention_rate": 0.0,
+      "accepted_accuracy": 0.6111111111111112,
+      "correct_fraction": 0.6111111111111112,
+      "counts": {
+        "abstained": 0,
+        "accepted": 54,
+        "accepted_correct": 33,
+        "accepted_wrong": 21,
+        "decisions": 54,
+        "top1_correct": 33
+      },
+      "coverage": 1.0,
+      "top1_accuracy_before_abstention": 0.6111111111111112
+    },
+    "kind/binary": {
+      "abstention_rate": 0.25,
+      "accepted_accuracy": 0.6666666666666666,
+      "correct_fraction": 0.5,
+      "counts": {
+        "abstained": 9,
+        "accepted": 27,
+        "accepted_correct": 18,
+        "accepted_wrong": 9,
+        "decisions": 36,
+        "top1_correct": 24
+      },
+      "coverage": 0.75,
+      "top1_accuracy_before_abstention": 0.6666666666666666
+    },
+    "kind/choice": {
+      "abstention_rate": 0.0,
+      "accepted_accuracy": 0.75,
+      "correct_fraction": 0.75,
+      "counts": {
+        "abstained": 0,
+        "accepted": 36,
+        "accepted_correct": 27,
+        "accepted_wrong": 9,
+        "decisions": 36,
+        "top1_correct": 27
+      },
+      "coverage": 1.0,
+      "top1_accuracy_before_abstention": 0.75
+    },
+    "kind/ordinal": {
+      "abstention_rate": 0.0,
+      "accepted_accuracy": 0.25,
+      "correct_fraction": 0.25,
+      "counts": {
+        "abstained": 0,
+        "accepted": 36,
+        "accepted_correct": 9,
+        "accepted_wrong": 27,
+        "decisions": 36,
+        "top1_correct": 9
+      },
+      "coverage": 1.0,
+      "top1_accuracy_before_abstention": 0.25
+    }
+  },
+  "context": 2048,
+  "crate_version": "0.1.1",
+  "decisions_per_second": 0.6196736957499731,
+  "evaluated_tokens": 14319,
+  "first_request_ms": 4855.414218,
+  "host": {
+    "arch": "aarch64",
+    "os": "linux"
+  },
+  "input_tokens": 14319,
+  "input_tokens_per_second": 82.15840416151727,
+  "iterations": 3,
+  "latency_ms": {
+    "max": 5227.476732,
+    "mean": 4841.2576176388875,
+    "min": 4423.901025,
+    "p50": 4766.433835,
+    "p95": 5196.9306480000005,
+    "samples": [
+      4746.807903999999,
+      5083.214478000001,
+      4682.0270390000005,
+      5099.559389999999,
+      4694.887418,
+      5137.297423,
+      4551.139669,
+      4937.492941,
+      4477.329822,
+      5118.8268800000005,
+      4423.901025,
+      5090.624287,
+      5075.055262,
+      4739.565227,
+      5196.9306480000005,
+      4726.187859000001,
+      5113.329207,
+      4498.501294000001,
+      5049.077916,
+      4495.527851000001,
+      4958.367682,
+      4531.392763999999,
+      5112.492488,
+      4704.910510999999,
+      4635.445337,
+      5227.476732,
+      4766.433835,
+      5112.512479,
+      4547.019633,
+      5067.535128,
+      4442.08133,
+      5038.435357,
+      4559.448198,
+      4974.673411999999,
+      4626.536534999999,
+      5043.229273999999
+    ]
+  },
+  "load_ms": 7721.262206,
+  "measured_inference_seconds": 174.28527423499997,
+  "measurement": "Sequential end-to-end decide calls, including prefill and scoring; no generated tokens. Warmups/loading excluded. Repeated passes are not additional independent accuracy examples.",
+  "model_bytes": 1069306368,
+  "policy": {
+    "min_candidate_mass": 0.05,
+    "min_top_probability": 0.8
+  },
+  "quality": {
+    "abstention_rate": 0.08333333333333333,
+    "accepted_accuracy": 0.5454545454545454,
+    "correct_fraction": 0.5,
+    "counts": {
+      "abstained": 9,
+      "accepted": 99,
+      "accepted_correct": 54,
+      "accepted_wrong": 45,
+      "decisions": 108,
+      "top1_correct": 60
+    },
+    "coverage": 0.9166666666666666,
+    "top1_accuracy_before_abstention": 0.5555555555555556
+  },
+  "repeat_consistency": {
+    "changed_outputs": 0,
+    "comparisons": 72
+  },
+  "requests_per_second": 0.20655789858332438,
+  "reused_prefix_tokens": 0,
+  "samples": [
+    {
+      "case": "warehouse-01",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "false",
+        "dispatch_priority": "high",
+        "storage_zone": "ambient"
+      },
+      "latency_ms": 4746.807903999999,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999998579574297,
+          "entropy_confidence": 0.9996923170842764,
+          "id": "storage_zone",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "ambient",
+              "option_probability": 0.9999719534562083,
+              "raw_logit": 39.995361328125,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "chilled",
+              "option_probability": 0.00002081918126987319,
+              "raw_logit": 29.21575355529785,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "frozen",
+              "option_probability": 7.227362524980715e-6,
+              "raw_logit": 28.157752990722656,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999719534562083,
+          "truncated": false,
+          "value": {
+            "selected": "ambient",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998646241552549,
+          "entropy_confidence": 0.9355639414440979,
+          "id": "cold_chain_required",
+          "input_tokens": 116,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0076015625024096894,
+              "raw_logit": 26.237926483154297,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9923984374975887,
+              "raw_logit": 31.109697341918945,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9923984374975887,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9923984374975887,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999797734529862,
+          "entropy_confidence": 0.9427573556094572,
+          "id": "dispatch_priority",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9899526487409191,
+              "raw_logit": 33.12242126464844,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.003810624430543071,
+              "raw_logit": 27.562557220458984,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.006236726828540039,
+              "raw_logit": 28.055219650268555,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9899526487409191,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.01628407808762315,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-02",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "high",
+        "storage_zone": "chilled"
+      },
+      "latency_ms": 5083.214478000001,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999987973757867,
+          "entropy_confidence": 0.999223464315641,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "ambient",
+              "option_probability": 0.000010023743446646476,
+              "raw_logit": 23.361141204833984,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "chilled",
+              "option_probability": 0.9999212271861423,
+              "raw_logit": 34.87161636352539,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "frozen",
+              "option_probability": 0.00006874907041047904,
+              "raw_logit": 25.28664779663086,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999212271861423,
+          "truncated": false,
+          "value": {
+            "selected": "chilled",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999837902591863,
+          "entropy_confidence": 0.9865677948439153,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0012060542547249861,
+              "raw_logit": 25.397127151489258,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9987939457452776,
+              "raw_logit": 32.1163215637207,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9987939457452776,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9987939457452776,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999978029094542,
+          "entropy_confidence": 0.7198539420100261,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9134191033342997,
+              "raw_logit": 37.675968170166016,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.0030548618819333222,
+              "raw_logit": 31.975507736206055,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.08352603478376432,
+              "raw_logit": 35.283931732177734,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9134191033342997,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.17010693144946196,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-03",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "medium",
+        "storage_zone": "frozen"
+      },
+      "latency_ms": 4682.0270390000005,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999965623251696,
+          "entropy_confidence": 0.9991196850653793,
+          "id": "storage_zone",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "chilled",
+              "option_probability": 0.00002987273967162426,
+              "raw_logit": 26.628406524658203,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "frozen",
+              "option_probability": 0.9999118985153447,
+              "raw_logit": 37.04688262939453,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "ambient",
+              "option_probability": 0.00005822874498508769,
+              "raw_logit": 27.295839309692383,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999118985153447,
+          "truncated": false,
+          "value": {
+            "selected": "frozen",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999843877209434,
+          "entropy_confidence": 0.9956713206523053,
+          "id": "cold_chain_required",
+          "input_tokens": 116,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.00033312661284606,
+              "raw_logit": 26.389970779418945,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9996668733871508,
+              "raw_logit": 34.39662551879883,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9996668733871508,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9996668733871508,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999589187618152,
+          "entropy_confidence": 0.8662473127700414,
+          "id": "dispatch_priority",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9703666303418558,
+              "raw_logit": 35.144229888916016,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.0050172046908361695,
+              "raw_logit": 29.87942886352539,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.02461616496731117,
+              "raw_logit": 31.469959259033203,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9703666303418558,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.05424953462545851,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-04",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "false",
+        "dispatch_priority": "medium",
+        "storage_zone": "ambient"
+      },
+      "latency_ms": 5099.559389999999,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999999882775868,
+          "entropy_confidence": 0.9999986750894235,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "chilled",
+              "option_probability": 1.898002554633373e-8,
+              "raw_logit": 24.74308967590332,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "frozen",
+              "option_probability": 6.249181714044332e-8,
+              "raw_logit": 25.934738159179688,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "ambient",
+              "option_probability": 0.9999999185281572,
+              "raw_logit": 42.52296829223633,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999999185281572,
+          "truncated": false,
+          "value": {
+            "selected": "ambient",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999750176931632,
+          "entropy_confidence": 0.9912647949045356,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0007372954013551071,
+              "raw_logit": 23.315988540649414,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9992627045986453,
+              "raw_logit": 30.527772903442383,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9992627045986453,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9992627045986453,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999660631556407,
+          "entropy_confidence": 0.9003073517127008,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9790963489743914,
+              "raw_logit": 33.671199798583984,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.002671026560479639,
+              "raw_logit": 27.767032623291016,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.018232624465125812,
+              "raw_logit": 29.687782287597656,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9790963489743914,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.039136275490731266,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-05",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "low",
+        "storage_zone": "chilled"
+      },
+      "latency_ms": 4694.887418,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999999825134865,
+          "entropy_confidence": 0.9999986515048305,
+          "id": "storage_zone",
+          "input_tokens": 125,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "frozen",
+              "option_probability": 1.8881164106776922e-8,
+              "raw_logit": 28.888181686401367,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "ambient",
+              "option_probability": 6.416109860461866e-8,
+              "raw_logit": 30.111413955688477,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "chilled",
+              "option_probability": 0.999999916957737,
+              "raw_logit": 46.673282623291016,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.999999916957737,
+          "truncated": false,
+          "value": {
+            "selected": "chilled",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999249414417503,
+          "entropy_confidence": 0.9187758947852899,
+          "id": "cold_chain_required",
+          "input_tokens": 118,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.010065055639446622,
+              "raw_logit": 29.746417999267578,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9899349443605512,
+              "raw_logit": 34.33498764038086,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9899349443605512,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9899349443605512,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999919308285444,
+          "entropy_confidence": 0.7995287891685932,
+          "id": "dispatch_priority",
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9510910136907452,
+              "raw_logit": 36.34836959838867,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.010130540073521257,
+              "raw_logit": 31.80631446838379,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.03877844623573011,
+              "raw_logit": 33.148624420166016,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9510910136907452,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.08768743254498147,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-06",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "low",
+        "storage_zone": "frozen"
+      },
+      "latency_ms": 5137.297423,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999998821330868,
+          "entropy_confidence": 0.9994220536893086,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "frozen",
+              "option_probability": 0.9999445843092707,
+              "raw_logit": 36.41164779663086,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "ambient",
+              "option_probability": 0.00003509981191258161,
+              "raw_logit": 26.154388427734375,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "chilled",
+              "option_probability": 0.00002031587881326321,
+              "raw_logit": 25.607595443725586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999445843092707,
+          "truncated": false,
+          "value": {
+            "selected": "frozen",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999929178283403,
+          "entropy_confidence": 0.9991050595765085,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.00005764472469323625,
+              "raw_logit": 22.466747283935547,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9999423552753036,
+              "raw_logit": 32.227901458740234,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999423552753036,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9999423552753036,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9997459064519728,
+          "entropy_confidence": 0.6261356758782448,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.1054488046396983,
+              "raw_logit": 33.55539321899414,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.014423503156361147,
+              "raw_logit": 31.56602668762207,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.8801276922039406,
+              "raw_logit": 35.6772346496582,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8801276922039406,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.7746788875642423,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-01",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "low",
+        "role_scope": "read"
+      },
+      "latency_ms": 4551.139669,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999996656554718,
+          "entropy_confidence": 0.9997085349345766,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "read",
+              "option_probability": 0.9999735230448821,
+              "raw_logit": 33.26243591308594,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "edit",
+              "option_probability": 0.000020041471902978967,
+              "raw_logit": 22.44475555419922,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "administer",
+              "option_probability": 6.435483218057747e-6,
+              "raw_logit": 21.308778762817383,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999735230448821,
+          "truncated": false,
+          "value": {
+            "selected": "read",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998085439506359,
+          "entropy_confidence": 0.8023460823502986,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.030652557247057944,
+              "raw_logit": 25.938480377197266,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9693474427529413,
+              "raw_logit": 29.39238739013672,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9693474427529413,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9693474427529413,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999992130693362,
+          "entropy_confidence": 0.9986034924637152,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.000043631456688320674,
+              "raw_logit": 23.490245819091797,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00010342828001249896,
+              "raw_logit": 24.35334587097168,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998529402632991,
+              "raw_logit": 33.52983093261719,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998529402632991,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9998093088066107,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-02",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "medium",
+        "role_scope": "edit"
+      },
+      "latency_ms": 4937.492941,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999958642264463,
+          "entropy_confidence": 0.9971697843914966,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "read",
+              "option_probability": 0.00002302757020850043,
+              "raw_logit": 21.299327850341797,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "edit",
+              "option_probability": 0.0003132154139743219,
+              "raw_logit": 23.909526824951172,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "administer",
+              "option_probability": 0.9996637570158167,
+              "raw_logit": 31.97780990600586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9996637570158167,
+          "truncated": false,
+          "value": {
+            "selected": "administer",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999616857458451,
+          "entropy_confidence": 0.3411073597064307,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.8294801301454936,
+              "raw_logit": 30.403884887695312,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.17051986985450657,
+              "raw_logit": 28.821937561035156,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8294801301454936,
+          "truncated": false,
+          "value": {
+            "p_true": 0.17051986985450657,
+            "type": "binary",
+            "value": false
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999957108391909,
+          "entropy_confidence": 0.9992535181879119,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.00002251099145257263,
+              "raw_logit": 24.504262924194336,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00005116356409659108,
+              "raw_logit": 25.325286865234375,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999263254444493,
+              "raw_logit": 35.20569610595703,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999263254444493,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.999903814452995,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-03",
+      "domain": "access",
+      "expected": {
+        "can_edit": "true",
+        "review_priority": "medium",
+        "role_scope": "administer"
+      },
+      "latency_ms": 4477.329822,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998984531135338,
+          "entropy_confidence": 0.6711218639706675,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "edit",
+              "option_probability": 0.0931405267652874,
+              "raw_logit": 31.7330379486084,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "administer",
+              "option_probability": 0.00923863984122578,
+              "raw_logit": 29.42232322692871,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "read",
+              "option_probability": 0.8976208333934897,
+              "raw_logit": 33.99867630004883,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8976208333934897,
+          "truncated": false,
+          "value": {
+            "selected": "read",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9989416073975395,
+          "entropy_confidence": 0.0036643034037423527,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.46437872491740084,
+              "raw_logit": 30.883535385131836,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.5356212750826006,
+              "raw_logit": 31.026262283325195,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.5356212750826006,
+          "truncated": false,
+          "value": {
+            "p_true": 0.5356212750826006,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999977739829595,
+          "entropy_confidence": 0.9997915491691914,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 2.9535198644855975e-6,
+              "raw_logit": 24.095901489257812,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.000015616537168492387,
+              "raw_logit": 25.761234283447266,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999814299429683,
+              "raw_logit": 36.82839584350586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999814299429683,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9999784764231052,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-04",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "high",
+        "role_scope": "read"
+      },
+      "latency_ms": 5118.8268800000005,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999833860450958,
+          "entropy_confidence": 0.9293194146271094,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "edit",
+              "option_probability": 0.9857127462500472,
+              "raw_logit": 31.049524307250977,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "administer",
+              "option_probability": 0.000691344719107167,
+              "raw_logit": 23.78704261779785,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "read",
+              "option_probability": 0.013595909030845262,
+              "raw_logit": 26.765928268432617,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9857127462500472,
+          "truncated": false,
+          "value": {
+            "selected": "edit",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9993632877138577,
+          "entropy_confidence": 0.26157818584397896,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.20840444972583141,
+              "raw_logit": 27.369478225708008,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.7915955502741687,
+              "raw_logit": 28.70404815673828,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.7915955502741687,
+          "truncated": false,
+          "value": {
+            "p_true": 0.7915955502741687,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999866708851939,
+          "entropy_confidence": 0.9985307599806192,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.000038091186701338124,
+              "raw_logit": 24.795869827270508,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00011834929637388477,
+              "raw_logit": 25.929527282714844,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998435595169246,
+              "raw_logit": 34.97124099731445,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998435595169246,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.999805468330223,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-05",
+      "domain": "access",
+      "expected": {
+        "can_edit": "true",
+        "review_priority": "high",
+        "role_scope": "edit"
+      },
+      "latency_ms": 4423.901025,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999868933696932,
+          "entropy_confidence": 0.9973423265375554,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "administer",
+              "option_probability": 0.0001758481233882001,
+              "raw_logit": 20.127239227294922,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "read",
+              "option_probability": 0.00012224236240518277,
+              "raw_logit": 19.76362419128418,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "edit",
+              "option_probability": 0.999701909514207,
+              "raw_logit": 28.772830963134766,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.999701909514207,
+          "truncated": false,
+          "value": {
+            "selected": "edit",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9996608631787027,
+          "entropy_confidence": 0.4963119265489365,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.11125440730797787,
+              "raw_logit": 26.814422607421875,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.8887455926920218,
+              "raw_logit": 28.892414093017578,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8887455926920218,
+          "truncated": false,
+          "value": {
+            "p_true": 0.8887455926920218,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999914138993637,
+          "entropy_confidence": 0.9994494869432741,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 6.747526924074e-6,
+              "raw_logit": 22.00556182861328,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00004723527047513675,
+              "raw_logit": 23.951526641845703,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999460172026028,
+              "raw_logit": 33.911842346191406,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999460172026028,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9999392696756808,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-06",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "low",
+        "role_scope": "administer"
+      },
+      "latency_ms": 5090.624287,
+      "pass": 0,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999986204185513,
+          "entropy_confidence": 0.9996084101312813,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "administer",
+              "option_probability": 0.9999638091707477,
+              "raw_logit": 33.389793395996094,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "read",
+              "option_probability": 0.00002269722757658756,
+              "raw_logit": 22.696561813354492,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "edit",
+              "option_probability": 0.0000134936016763413,
+              "raw_logit": 22.17653465270996,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999638091707477,
+          "truncated": false,
+          "value": {
+            "selected": "administer",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9987032708211638,
+          "entropy_confidence": 0.00979379384227641,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.5581943519608374,
+              "raw_logit": 32.11861038208008,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.44180564803916417,
+              "raw_logit": 31.88477325439453,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.5581943519608374,
+          "truncated": false,
+          "value": {
+            "p_true": 0.44180564803916417,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999940064897417,
+          "entropy_confidence": 0.9989224485219085,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.00003721848044074047,
+              "raw_logit": 24.966196060180664,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00007286246422948128,
+              "raw_logit": 25.637964248657227,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998899190553272,
+              "raw_logit": 35.164791107177734,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998899190553272,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9998527005748838,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-02",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "high",
+        "storage_zone": "chilled"
+      },
+      "latency_ms": 5075.055262,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999987973757867,
+          "entropy_confidence": 0.999223464315641,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "ambient",
+              "option_probability": 0.000010023743446646476,
+              "raw_logit": 23.361141204833984,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "chilled",
+              "option_probability": 0.9999212271861423,
+              "raw_logit": 34.87161636352539,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "frozen",
+              "option_probability": 0.00006874907041047904,
+              "raw_logit": 25.28664779663086,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999212271861423,
+          "truncated": false,
+          "value": {
+            "selected": "chilled",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999837902591863,
+          "entropy_confidence": 0.9865677948439153,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0012060542547249861,
+              "raw_logit": 25.397127151489258,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9987939457452776,
+              "raw_logit": 32.1163215637207,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9987939457452776,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9987939457452776,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999978029094542,
+          "entropy_confidence": 0.7198539420100261,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9134191033342997,
+              "raw_logit": 37.675968170166016,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.0030548618819333222,
+              "raw_logit": 31.975507736206055,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.08352603478376432,
+              "raw_logit": 35.283931732177734,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9134191033342997,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.17010693144946196,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-03",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "medium",
+        "storage_zone": "frozen"
+      },
+      "latency_ms": 4739.565227,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999965623251696,
+          "entropy_confidence": 0.9991196850653793,
+          "id": "storage_zone",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "chilled",
+              "option_probability": 0.00002987273967162426,
+              "raw_logit": 26.628406524658203,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "frozen",
+              "option_probability": 0.9999118985153447,
+              "raw_logit": 37.04688262939453,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "ambient",
+              "option_probability": 0.00005822874498508769,
+              "raw_logit": 27.295839309692383,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999118985153447,
+          "truncated": false,
+          "value": {
+            "selected": "frozen",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999843877209434,
+          "entropy_confidence": 0.9956713206523053,
+          "id": "cold_chain_required",
+          "input_tokens": 116,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.00033312661284606,
+              "raw_logit": 26.389970779418945,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9996668733871508,
+              "raw_logit": 34.39662551879883,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9996668733871508,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9996668733871508,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999589187618152,
+          "entropy_confidence": 0.8662473127700414,
+          "id": "dispatch_priority",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9703666303418558,
+              "raw_logit": 35.144229888916016,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.0050172046908361695,
+              "raw_logit": 29.87942886352539,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.02461616496731117,
+              "raw_logit": 31.469959259033203,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9703666303418558,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.05424953462545851,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-04",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "false",
+        "dispatch_priority": "medium",
+        "storage_zone": "ambient"
+      },
+      "latency_ms": 5196.9306480000005,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999999882775868,
+          "entropy_confidence": 0.9999986750894235,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "chilled",
+              "option_probability": 1.898002554633373e-8,
+              "raw_logit": 24.74308967590332,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "frozen",
+              "option_probability": 6.249181714044332e-8,
+              "raw_logit": 25.934738159179688,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "ambient",
+              "option_probability": 0.9999999185281572,
+              "raw_logit": 42.52296829223633,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999999185281572,
+          "truncated": false,
+          "value": {
+            "selected": "ambient",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999750176931632,
+          "entropy_confidence": 0.9912647949045356,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0007372954013551071,
+              "raw_logit": 23.315988540649414,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9992627045986453,
+              "raw_logit": 30.527772903442383,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9992627045986453,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9992627045986453,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999660631556407,
+          "entropy_confidence": 0.9003073517127008,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9790963489743914,
+              "raw_logit": 33.671199798583984,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.002671026560479639,
+              "raw_logit": 27.767032623291016,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.018232624465125812,
+              "raw_logit": 29.687782287597656,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9790963489743914,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.039136275490731266,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-05",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "low",
+        "storage_zone": "chilled"
+      },
+      "latency_ms": 4726.187859000001,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999999825134865,
+          "entropy_confidence": 0.9999986515048305,
+          "id": "storage_zone",
+          "input_tokens": 125,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "frozen",
+              "option_probability": 1.8881164106776922e-8,
+              "raw_logit": 28.888181686401367,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "ambient",
+              "option_probability": 6.416109860461866e-8,
+              "raw_logit": 30.111413955688477,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "chilled",
+              "option_probability": 0.999999916957737,
+              "raw_logit": 46.673282623291016,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.999999916957737,
+          "truncated": false,
+          "value": {
+            "selected": "chilled",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999249414417503,
+          "entropy_confidence": 0.9187758947852899,
+          "id": "cold_chain_required",
+          "input_tokens": 118,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.010065055639446622,
+              "raw_logit": 29.746417999267578,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9899349443605512,
+              "raw_logit": 34.33498764038086,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9899349443605512,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9899349443605512,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999919308285444,
+          "entropy_confidence": 0.7995287891685932,
+          "id": "dispatch_priority",
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9510910136907452,
+              "raw_logit": 36.34836959838867,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.010130540073521257,
+              "raw_logit": 31.80631446838379,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.03877844623573011,
+              "raw_logit": 33.148624420166016,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9510910136907452,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.08768743254498147,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-06",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "low",
+        "storage_zone": "frozen"
+      },
+      "latency_ms": 5113.329207,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999998821330868,
+          "entropy_confidence": 0.9994220536893086,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "frozen",
+              "option_probability": 0.9999445843092707,
+              "raw_logit": 36.41164779663086,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "ambient",
+              "option_probability": 0.00003509981191258161,
+              "raw_logit": 26.154388427734375,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "chilled",
+              "option_probability": 0.00002031587881326321,
+              "raw_logit": 25.607595443725586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999445843092707,
+          "truncated": false,
+          "value": {
+            "selected": "frozen",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999929178283403,
+          "entropy_confidence": 0.9991050595765085,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.00005764472469323625,
+              "raw_logit": 22.466747283935547,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9999423552753036,
+              "raw_logit": 32.227901458740234,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999423552753036,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9999423552753036,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9997459064519728,
+          "entropy_confidence": 0.6261356758782448,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.1054488046396983,
+              "raw_logit": 33.55539321899414,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.014423503156361147,
+              "raw_logit": 31.56602668762207,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.8801276922039406,
+              "raw_logit": 35.6772346496582,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8801276922039406,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.7746788875642423,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-01",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "low",
+        "role_scope": "read"
+      },
+      "latency_ms": 4498.501294000001,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999996656554718,
+          "entropy_confidence": 0.9997085349345766,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "read",
+              "option_probability": 0.9999735230448821,
+              "raw_logit": 33.26243591308594,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "edit",
+              "option_probability": 0.000020041471902978967,
+              "raw_logit": 22.44475555419922,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "administer",
+              "option_probability": 6.435483218057747e-6,
+              "raw_logit": 21.308778762817383,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999735230448821,
+          "truncated": false,
+          "value": {
+            "selected": "read",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998085439506359,
+          "entropy_confidence": 0.8023460823502986,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.030652557247057944,
+              "raw_logit": 25.938480377197266,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9693474427529413,
+              "raw_logit": 29.39238739013672,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9693474427529413,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9693474427529413,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999992130693362,
+          "entropy_confidence": 0.9986034924637152,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.000043631456688320674,
+              "raw_logit": 23.490245819091797,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00010342828001249896,
+              "raw_logit": 24.35334587097168,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998529402632991,
+              "raw_logit": 33.52983093261719,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998529402632991,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9998093088066107,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-02",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "medium",
+        "role_scope": "edit"
+      },
+      "latency_ms": 5049.077916,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999958642264463,
+          "entropy_confidence": 0.9971697843914966,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "read",
+              "option_probability": 0.00002302757020850043,
+              "raw_logit": 21.299327850341797,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "edit",
+              "option_probability": 0.0003132154139743219,
+              "raw_logit": 23.909526824951172,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "administer",
+              "option_probability": 0.9996637570158167,
+              "raw_logit": 31.97780990600586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9996637570158167,
+          "truncated": false,
+          "value": {
+            "selected": "administer",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999616857458451,
+          "entropy_confidence": 0.3411073597064307,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.8294801301454936,
+              "raw_logit": 30.403884887695312,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.17051986985450657,
+              "raw_logit": 28.821937561035156,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8294801301454936,
+          "truncated": false,
+          "value": {
+            "p_true": 0.17051986985450657,
+            "type": "binary",
+            "value": false
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999957108391909,
+          "entropy_confidence": 0.9992535181879119,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.00002251099145257263,
+              "raw_logit": 24.504262924194336,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00005116356409659108,
+              "raw_logit": 25.325286865234375,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999263254444493,
+              "raw_logit": 35.20569610595703,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999263254444493,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.999903814452995,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-03",
+      "domain": "access",
+      "expected": {
+        "can_edit": "true",
+        "review_priority": "medium",
+        "role_scope": "administer"
+      },
+      "latency_ms": 4495.527851000001,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998984531135338,
+          "entropy_confidence": 0.6711218639706675,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "edit",
+              "option_probability": 0.0931405267652874,
+              "raw_logit": 31.7330379486084,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "administer",
+              "option_probability": 0.00923863984122578,
+              "raw_logit": 29.42232322692871,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "read",
+              "option_probability": 0.8976208333934897,
+              "raw_logit": 33.99867630004883,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8976208333934897,
+          "truncated": false,
+          "value": {
+            "selected": "read",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9989416073975395,
+          "entropy_confidence": 0.0036643034037423527,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.46437872491740084,
+              "raw_logit": 30.883535385131836,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.5356212750826006,
+              "raw_logit": 31.026262283325195,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.5356212750826006,
+          "truncated": false,
+          "value": {
+            "p_true": 0.5356212750826006,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999977739829595,
+          "entropy_confidence": 0.9997915491691914,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 2.9535198644855975e-6,
+              "raw_logit": 24.095901489257812,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.000015616537168492387,
+              "raw_logit": 25.761234283447266,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999814299429683,
+              "raw_logit": 36.82839584350586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999814299429683,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9999784764231052,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-04",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "high",
+        "role_scope": "read"
+      },
+      "latency_ms": 4958.367682,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999833860450958,
+          "entropy_confidence": 0.9293194146271094,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "edit",
+              "option_probability": 0.9857127462500472,
+              "raw_logit": 31.049524307250977,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "administer",
+              "option_probability": 0.000691344719107167,
+              "raw_logit": 23.78704261779785,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "read",
+              "option_probability": 0.013595909030845262,
+              "raw_logit": 26.765928268432617,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9857127462500472,
+          "truncated": false,
+          "value": {
+            "selected": "edit",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9993632877138577,
+          "entropy_confidence": 0.26157818584397896,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.20840444972583141,
+              "raw_logit": 27.369478225708008,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.7915955502741687,
+              "raw_logit": 28.70404815673828,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.7915955502741687,
+          "truncated": false,
+          "value": {
+            "p_true": 0.7915955502741687,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999866708851939,
+          "entropy_confidence": 0.9985307599806192,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.000038091186701338124,
+              "raw_logit": 24.795869827270508,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00011834929637388477,
+              "raw_logit": 25.929527282714844,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998435595169246,
+              "raw_logit": 34.97124099731445,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998435595169246,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.999805468330223,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-05",
+      "domain": "access",
+      "expected": {
+        "can_edit": "true",
+        "review_priority": "high",
+        "role_scope": "edit"
+      },
+      "latency_ms": 4531.392763999999,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999868933696932,
+          "entropy_confidence": 0.9973423265375554,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "administer",
+              "option_probability": 0.0001758481233882001,
+              "raw_logit": 20.127239227294922,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "read",
+              "option_probability": 0.00012224236240518277,
+              "raw_logit": 19.76362419128418,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "edit",
+              "option_probability": 0.999701909514207,
+              "raw_logit": 28.772830963134766,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.999701909514207,
+          "truncated": false,
+          "value": {
+            "selected": "edit",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9996608631787027,
+          "entropy_confidence": 0.4963119265489365,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.11125440730797787,
+              "raw_logit": 26.814422607421875,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.8887455926920218,
+              "raw_logit": 28.892414093017578,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8887455926920218,
+          "truncated": false,
+          "value": {
+            "p_true": 0.8887455926920218,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999914138993637,
+          "entropy_confidence": 0.9994494869432741,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 6.747526924074e-6,
+              "raw_logit": 22.00556182861328,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00004723527047513675,
+              "raw_logit": 23.951526641845703,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999460172026028,
+              "raw_logit": 33.911842346191406,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999460172026028,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9999392696756808,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-06",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "low",
+        "role_scope": "administer"
+      },
+      "latency_ms": 5112.492488,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999986204185513,
+          "entropy_confidence": 0.9996084101312813,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "administer",
+              "option_probability": 0.9999638091707477,
+              "raw_logit": 33.389793395996094,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "read",
+              "option_probability": 0.00002269722757658756,
+              "raw_logit": 22.696561813354492,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "edit",
+              "option_probability": 0.0000134936016763413,
+              "raw_logit": 22.17653465270996,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999638091707477,
+          "truncated": false,
+          "value": {
+            "selected": "administer",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9987032708211638,
+          "entropy_confidence": 0.00979379384227641,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.5581943519608374,
+              "raw_logit": 32.11861038208008,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.44180564803916417,
+              "raw_logit": 31.88477325439453,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.5581943519608374,
+          "truncated": false,
+          "value": {
+            "p_true": 0.44180564803916417,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999940064897417,
+          "entropy_confidence": 0.9989224485219085,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.00003721848044074047,
+              "raw_logit": 24.966196060180664,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00007286246422948128,
+              "raw_logit": 25.637964248657227,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998899190553272,
+              "raw_logit": 35.164791107177734,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998899190553272,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9998527005748838,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-01",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "false",
+        "dispatch_priority": "high",
+        "storage_zone": "ambient"
+      },
+      "latency_ms": 4704.910510999999,
+      "pass": 1,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999998579574297,
+          "entropy_confidence": 0.9996923170842764,
+          "id": "storage_zone",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "ambient",
+              "option_probability": 0.9999719534562083,
+              "raw_logit": 39.995361328125,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "chilled",
+              "option_probability": 0.00002081918126987319,
+              "raw_logit": 29.21575355529785,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "frozen",
+              "option_probability": 7.227362524980715e-6,
+              "raw_logit": 28.157752990722656,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999719534562083,
+          "truncated": false,
+          "value": {
+            "selected": "ambient",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998646241552549,
+          "entropy_confidence": 0.9355639414440979,
+          "id": "cold_chain_required",
+          "input_tokens": 116,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0076015625024096894,
+              "raw_logit": 26.237926483154297,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9923984374975887,
+              "raw_logit": 31.109697341918945,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9923984374975887,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9923984374975887,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999797734529862,
+          "entropy_confidence": 0.9427573556094572,
+          "id": "dispatch_priority",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9899526487409191,
+              "raw_logit": 33.12242126464844,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.003810624430543071,
+              "raw_logit": 27.562557220458984,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.006236726828540039,
+              "raw_logit": 28.055219650268555,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9899526487409191,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.01628407808762315,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-03",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "medium",
+        "storage_zone": "frozen"
+      },
+      "latency_ms": 4635.445337,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999965623251696,
+          "entropy_confidence": 0.9991196850653793,
+          "id": "storage_zone",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "chilled",
+              "option_probability": 0.00002987273967162426,
+              "raw_logit": 26.628406524658203,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "frozen",
+              "option_probability": 0.9999118985153447,
+              "raw_logit": 37.04688262939453,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "ambient",
+              "option_probability": 0.00005822874498508769,
+              "raw_logit": 27.295839309692383,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999118985153447,
+          "truncated": false,
+          "value": {
+            "selected": "frozen",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999843877209434,
+          "entropy_confidence": 0.9956713206523053,
+          "id": "cold_chain_required",
+          "input_tokens": 116,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.00033312661284606,
+              "raw_logit": 26.389970779418945,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9996668733871508,
+              "raw_logit": 34.39662551879883,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9996668733871508,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9996668733871508,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999589187618152,
+          "entropy_confidence": 0.8662473127700414,
+          "id": "dispatch_priority",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9703666303418558,
+              "raw_logit": 35.144229888916016,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.0050172046908361695,
+              "raw_logit": 29.87942886352539,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.02461616496731117,
+              "raw_logit": 31.469959259033203,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9703666303418558,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.05424953462545851,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-04",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "false",
+        "dispatch_priority": "medium",
+        "storage_zone": "ambient"
+      },
+      "latency_ms": 5227.476732,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999999882775868,
+          "entropy_confidence": 0.9999986750894235,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "chilled",
+              "option_probability": 1.898002554633373e-8,
+              "raw_logit": 24.74308967590332,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "frozen",
+              "option_probability": 6.249181714044332e-8,
+              "raw_logit": 25.934738159179688,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "ambient",
+              "option_probability": 0.9999999185281572,
+              "raw_logit": 42.52296829223633,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999999185281572,
+          "truncated": false,
+          "value": {
+            "selected": "ambient",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999750176931632,
+          "entropy_confidence": 0.9912647949045356,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0007372954013551071,
+              "raw_logit": 23.315988540649414,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9992627045986453,
+              "raw_logit": 30.527772903442383,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9992627045986453,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9992627045986453,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999660631556407,
+          "entropy_confidence": 0.9003073517127008,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9790963489743914,
+              "raw_logit": 33.671199798583984,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.002671026560479639,
+              "raw_logit": 27.767032623291016,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.018232624465125812,
+              "raw_logit": 29.687782287597656,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9790963489743914,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.039136275490731266,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-05",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "low",
+        "storage_zone": "chilled"
+      },
+      "latency_ms": 4766.433835,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999999825134865,
+          "entropy_confidence": 0.9999986515048305,
+          "id": "storage_zone",
+          "input_tokens": 125,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "frozen",
+              "option_probability": 1.8881164106776922e-8,
+              "raw_logit": 28.888181686401367,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "ambient",
+              "option_probability": 6.416109860461866e-8,
+              "raw_logit": 30.111413955688477,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "chilled",
+              "option_probability": 0.999999916957737,
+              "raw_logit": 46.673282623291016,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.999999916957737,
+          "truncated": false,
+          "value": {
+            "selected": "chilled",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999249414417503,
+          "entropy_confidence": 0.9187758947852899,
+          "id": "cold_chain_required",
+          "input_tokens": 118,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.010065055639446622,
+              "raw_logit": 29.746417999267578,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9899349443605512,
+              "raw_logit": 34.33498764038086,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9899349443605512,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9899349443605512,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999919308285444,
+          "entropy_confidence": 0.7995287891685932,
+          "id": "dispatch_priority",
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9510910136907452,
+              "raw_logit": 36.34836959838867,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.010130540073521257,
+              "raw_logit": 31.80631446838379,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.03877844623573011,
+              "raw_logit": 33.148624420166016,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9510910136907452,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.08768743254498147,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-06",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "low",
+        "storage_zone": "frozen"
+      },
+      "latency_ms": 5112.512479,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999998821330868,
+          "entropy_confidence": 0.9994220536893086,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "frozen",
+              "option_probability": 0.9999445843092707,
+              "raw_logit": 36.41164779663086,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "ambient",
+              "option_probability": 0.00003509981191258161,
+              "raw_logit": 26.154388427734375,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "chilled",
+              "option_probability": 0.00002031587881326321,
+              "raw_logit": 25.607595443725586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999445843092707,
+          "truncated": false,
+          "value": {
+            "selected": "frozen",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999929178283403,
+          "entropy_confidence": 0.9991050595765085,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.00005764472469323625,
+              "raw_logit": 22.466747283935547,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9999423552753036,
+              "raw_logit": 32.227901458740234,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999423552753036,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9999423552753036,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9997459064519728,
+          "entropy_confidence": 0.6261356758782448,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.1054488046396983,
+              "raw_logit": 33.55539321899414,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.014423503156361147,
+              "raw_logit": 31.56602668762207,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.8801276922039406,
+              "raw_logit": 35.6772346496582,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8801276922039406,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.7746788875642423,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-01",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "low",
+        "role_scope": "read"
+      },
+      "latency_ms": 4547.019633,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999996656554718,
+          "entropy_confidence": 0.9997085349345766,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "read",
+              "option_probability": 0.9999735230448821,
+              "raw_logit": 33.26243591308594,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "edit",
+              "option_probability": 0.000020041471902978967,
+              "raw_logit": 22.44475555419922,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "administer",
+              "option_probability": 6.435483218057747e-6,
+              "raw_logit": 21.308778762817383,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999735230448821,
+          "truncated": false,
+          "value": {
+            "selected": "read",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998085439506359,
+          "entropy_confidence": 0.8023460823502986,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.030652557247057944,
+              "raw_logit": 25.938480377197266,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9693474427529413,
+              "raw_logit": 29.39238739013672,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9693474427529413,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9693474427529413,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999992130693362,
+          "entropy_confidence": 0.9986034924637152,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.000043631456688320674,
+              "raw_logit": 23.490245819091797,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00010342828001249896,
+              "raw_logit": 24.35334587097168,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998529402632991,
+              "raw_logit": 33.52983093261719,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998529402632991,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9998093088066107,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-02",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "medium",
+        "role_scope": "edit"
+      },
+      "latency_ms": 5067.535128,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999958642264463,
+          "entropy_confidence": 0.9971697843914966,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "read",
+              "option_probability": 0.00002302757020850043,
+              "raw_logit": 21.299327850341797,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "edit",
+              "option_probability": 0.0003132154139743219,
+              "raw_logit": 23.909526824951172,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "administer",
+              "option_probability": 0.9996637570158167,
+              "raw_logit": 31.97780990600586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9996637570158167,
+          "truncated": false,
+          "value": {
+            "selected": "administer",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999616857458451,
+          "entropy_confidence": 0.3411073597064307,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.8294801301454936,
+              "raw_logit": 30.403884887695312,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.17051986985450657,
+              "raw_logit": 28.821937561035156,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8294801301454936,
+          "truncated": false,
+          "value": {
+            "p_true": 0.17051986985450657,
+            "type": "binary",
+            "value": false
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999957108391909,
+          "entropy_confidence": 0.9992535181879119,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.00002251099145257263,
+              "raw_logit": 24.504262924194336,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00005116356409659108,
+              "raw_logit": 25.325286865234375,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999263254444493,
+              "raw_logit": 35.20569610595703,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999263254444493,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.999903814452995,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-03",
+      "domain": "access",
+      "expected": {
+        "can_edit": "true",
+        "review_priority": "medium",
+        "role_scope": "administer"
+      },
+      "latency_ms": 4442.08133,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998984531135338,
+          "entropy_confidence": 0.6711218639706675,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "edit",
+              "option_probability": 0.0931405267652874,
+              "raw_logit": 31.7330379486084,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "administer",
+              "option_probability": 0.00923863984122578,
+              "raw_logit": 29.42232322692871,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "read",
+              "option_probability": 0.8976208333934897,
+              "raw_logit": 33.99867630004883,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8976208333934897,
+          "truncated": false,
+          "value": {
+            "selected": "read",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9989416073975395,
+          "entropy_confidence": 0.0036643034037423527,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.46437872491740084,
+              "raw_logit": 30.883535385131836,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.5356212750826006,
+              "raw_logit": 31.026262283325195,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.5356212750826006,
+          "truncated": false,
+          "value": {
+            "p_true": 0.5356212750826006,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999977739829595,
+          "entropy_confidence": 0.9997915491691914,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 2.9535198644855975e-6,
+              "raw_logit": 24.095901489257812,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.000015616537168492387,
+              "raw_logit": 25.761234283447266,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999814299429683,
+              "raw_logit": 36.82839584350586,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999814299429683,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9999784764231052,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-04",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "high",
+        "role_scope": "read"
+      },
+      "latency_ms": 5038.435357,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999833860450958,
+          "entropy_confidence": 0.9293194146271094,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "edit",
+              "option_probability": 0.9857127462500472,
+              "raw_logit": 31.049524307250977,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "administer",
+              "option_probability": 0.000691344719107167,
+              "raw_logit": 23.78704261779785,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "read",
+              "option_probability": 0.013595909030845262,
+              "raw_logit": 26.765928268432617,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9857127462500472,
+          "truncated": false,
+          "value": {
+            "selected": "edit",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9993632877138577,
+          "entropy_confidence": 0.26157818584397896,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.20840444972583141,
+              "raw_logit": 27.369478225708008,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.7915955502741687,
+              "raw_logit": 28.70404815673828,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.7915955502741687,
+          "truncated": false,
+          "value": {
+            "p_true": 0.7915955502741687,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999866708851939,
+          "entropy_confidence": 0.9985307599806192,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.000038091186701338124,
+              "raw_logit": 24.795869827270508,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00011834929637388477,
+              "raw_logit": 25.929527282714844,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998435595169246,
+              "raw_logit": 34.97124099731445,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998435595169246,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.999805468330223,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-05",
+      "domain": "access",
+      "expected": {
+        "can_edit": "true",
+        "review_priority": "high",
+        "role_scope": "edit"
+      },
+      "latency_ms": 4559.448198,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999868933696932,
+          "entropy_confidence": 0.9973423265375554,
+          "id": "role_scope",
+          "input_tokens": 127,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "administer",
+              "option_probability": 0.0001758481233882001,
+              "raw_logit": 20.127239227294922,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "read",
+              "option_probability": 0.00012224236240518277,
+              "raw_logit": 19.76362419128418,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "edit",
+              "option_probability": 0.999701909514207,
+              "raw_logit": 28.772830963134766,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.999701909514207,
+          "truncated": false,
+          "value": {
+            "selected": "edit",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9996608631787027,
+          "entropy_confidence": 0.4963119265489365,
+          "id": "can_edit",
+          "input_tokens": 113,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.11125440730797787,
+              "raw_logit": 26.814422607421875,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.8887455926920218,
+              "raw_logit": 28.892414093017578,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.8887455926920218,
+          "truncated": false,
+          "value": {
+            "p_true": 0.8887455926920218,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999914138993637,
+          "entropy_confidence": 0.9994494869432741,
+          "id": "review_priority",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 6.747526924074e-6,
+              "raw_logit": 22.00556182861328,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00004723527047513675,
+              "raw_logit": 23.951526641845703,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9999460172026028,
+              "raw_logit": 33.911842346191406,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999460172026028,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9999392696756808,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "access-06",
+      "domain": "access",
+      "expected": {
+        "can_edit": "false",
+        "review_priority": "low",
+        "role_scope": "administer"
+      },
+      "latency_ms": 4974.673411999999,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999986204185513,
+          "entropy_confidence": 0.9996084101312813,
+          "id": "role_scope",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "administer",
+              "option_probability": 0.9999638091707477,
+              "raw_logit": 33.389793395996094,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "read",
+              "option_probability": 0.00002269722757658756,
+              "raw_logit": 22.696561813354492,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "edit",
+              "option_probability": 0.0000134936016763413,
+              "raw_logit": 22.17653465270996,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999638091707477,
+          "truncated": false,
+          "value": {
+            "selected": "administer",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [
+            "low_top_probability"
+          ],
+          "calibration_id": null,
+          "candidate_mass": 0.9987032708211638,
+          "entropy_confidence": 0.00979379384227641,
+          "id": "can_edit",
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.5581943519608374,
+              "raw_logit": 32.11861038208008,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.44180564803916417,
+              "raw_logit": 31.88477325439453,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.5581943519608374,
+          "truncated": false,
+          "value": {
+            "p_true": 0.44180564803916417,
+            "type": "binary",
+            "value": null
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999940064897417,
+          "entropy_confidence": 0.9989224485219085,
+          "id": "review_priority",
+          "input_tokens": 139,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.00003721848044074047,
+              "raw_logit": 24.966196060180664,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.00007286246422948128,
+              "raw_logit": 25.637964248657227,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.9998899190553272,
+              "raw_logit": 35.164791107177734,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9998899190553272,
+          "truncated": false,
+          "value": {
+            "expected_value": 1.9998527005748838,
+            "selected": "high",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-01",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "false",
+        "dispatch_priority": "high",
+        "storage_zone": "ambient"
+      },
+      "latency_ms": 4626.536534999999,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999998579574297,
+          "entropy_confidence": 0.9996923170842764,
+          "id": "storage_zone",
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "ambient",
+              "option_probability": 0.9999719534562083,
+              "raw_logit": 39.995361328125,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "chilled",
+              "option_probability": 0.00002081918126987319,
+              "raw_logit": 29.21575355529785,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "frozen",
+              "option_probability": 7.227362524980715e-6,
+              "raw_logit": 28.157752990722656,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999719534562083,
+          "truncated": false,
+          "value": {
+            "selected": "ambient",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9998646241552549,
+          "entropy_confidence": 0.9355639414440979,
+          "id": "cold_chain_required",
+          "input_tokens": 116,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0076015625024096894,
+              "raw_logit": 26.237926483154297,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9923984374975887,
+              "raw_logit": 31.109697341918945,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9923984374975887,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9923984374975887,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999797734529862,
+          "entropy_confidence": 0.9427573556094572,
+          "id": "dispatch_priority",
+          "input_tokens": 143,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9899526487409191,
+              "raw_logit": 33.12242126464844,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.003810624430543071,
+              "raw_logit": 27.562557220458984,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.006236726828540039,
+              "raw_logit": 28.055219650268555,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9899526487409191,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.01628407808762315,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    },
+    {
+      "case": "warehouse-02",
+      "domain": "warehouse",
+      "expected": {
+        "cold_chain_required": "true",
+        "dispatch_priority": "high",
+        "storage_zone": "chilled"
+      },
+      "latency_ms": 5043.229273999999,
+      "pass": 2,
+      "results": [
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999987973757867,
+          "entropy_confidence": 0.999223464315641,
+          "id": "storage_zone",
+          "input_tokens": 140,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "ambient",
+              "option_probability": 0.000010023743446646476,
+              "raw_logit": 23.361141204833984,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "chilled",
+              "option_probability": 0.9999212271861423,
+              "raw_logit": 34.87161636352539,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "frozen",
+              "option_probability": 0.00006874907041047904,
+              "raw_logit": 25.28664779663086,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9999212271861423,
+          "truncated": false,
+          "value": {
+            "selected": "chilled",
+            "type": "choice"
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.9999837902591863,
+          "entropy_confidence": 0.9865677948439153,
+          "id": "cold_chain_required",
+          "input_tokens": 133,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "false",
+              "option_probability": 0.0012060542547249861,
+              "raw_logit": 25.397127151489258,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "true",
+              "option_probability": 0.9987939457452776,
+              "raw_logit": 32.1163215637207,
+              "token_id": 236799
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9987939457452776,
+          "truncated": false,
+          "value": {
+            "p_true": 0.9987939457452776,
+            "type": "binary",
+            "value": true
+          }
+        },
+        {
+          "abstention_reasons": [],
+          "calibration_id": null,
+          "candidate_mass": 0.999978029094542,
+          "entropy_confidence": 0.7198539420100261,
+          "id": "dispatch_priority",
+          "input_tokens": 160,
+          "reused_prefix_tokens": 0,
+          "scores": [
+            {
+              "code": "A",
+              "id": "low",
+              "option_probability": 0.9134191033342997,
+              "raw_logit": 37.675968170166016,
+              "token_id": 236776
+            },
+            {
+              "code": "B",
+              "id": "medium",
+              "option_probability": 0.0030548618819333222,
+              "raw_logit": 31.975507736206055,
+              "token_id": 236799
+            },
+            {
+              "code": "C",
+              "id": "high",
+              "option_probability": 0.08352603478376432,
+              "raw_logit": 35.283931732177734,
+              "token_id": 236780
+            }
+          ],
+          "scoring_method": "single_token_conditional_softmax_v1",
+          "top_option_probability": 0.9134191033342997,
+          "truncated": false,
+          "value": {
+            "expected_value": 0.17010693144946196,
+            "selected": "low",
+            "type": "ordinal"
+          }
+        }
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "suite": "decision-rules-v1",
+  "threads": 4,
+  "unique_cases": 12,
+  "unique_decisions": 36,
+  "warmup_passes": 1
+}

@@ -1,0 +1,22 @@
+{
+  "model_sha256": "b205840c5dcef55078e37d344677869a714ffd42a4ae448c48dcfb52e4bb10d5",
+  "suite_sha256": "f9d5380fdafe1bb686c9f4f1d44003a9f71c6f47fddd59063c62d3301b7d6c04",
+  "host": {
+    "system": "Linux",
+    "node": "hilbert-no-1",
+    "release": "6.18.50+rpt-rpi-2712",
+    "version": "#1 SMP PREEMPT Debian 1:6.18.50-1+rpt1 (2026-09-11)",
+    "machine": "aarch64",
+    "processor": ""
+  },
+  "settings": {
+    "context": 2048,
+    "batch": 256,
+    "ubatch": 256,
+    "threads": 4,
+    "transport": "direct stdio",
+    "warmup": "all warehouse-01/02/03 once per block",
+    "cooling": "60 C or timeout 120s"
+  },
+  "cpuinfo": "processor\t: 0\nBogoMIPS\t: 108.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x4\nCPU part\t: 0xd0b\nCPU revision\t: 1\n\nprocessor\t: 1\nBogoMIPS\t: 108.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x4\nCPU part\t: 0xd0b\nCPU revision\t: 1\n\nprocessor\t: 2\nBogoMIPS\t: 108.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x4\nCPU part\t: 0xd0b\nCPU revision\t: 1\n\nprocessor\t: 3\nBogoMIPS\t: 108.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x4\nCPU part\t: 0xd0b\nCPU revision\t: 1\n\nRevision\t: c04170\nModel\t\t: Raspberry Pi 5 Model B Rev 1.0"
+}

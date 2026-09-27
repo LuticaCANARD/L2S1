@@ -1,0 +1,11 @@
+[
+  {
+    "utc": "2026-09-27T14:18:25.230004+00:00",
+    "monotonic": 4437.00339046,
+    "temperature_c": 52.9,
+    "throttled": 327680,
+    "arm_clock_hz": 2400027136,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 0
+  }
+]
