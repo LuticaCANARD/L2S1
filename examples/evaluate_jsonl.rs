@@ -41,6 +41,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         output: PathBuf,
         #[arg(long)]
         cuda: bool,
+        #[arg(long, conflicts_with = "cuda")]
+        metal: bool,
         #[arg(long, default_value_t = 2048)]
         context: u32,
         #[arg(long, default_value_t = 256)]
@@ -110,22 +112,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .open(&args.output)?,
     );
     let started = Instant::now();
-    let mut backend = LlamaBackend::load_with_options(
-        &args.model,
-        ComputeOptions {
-            context: args.context,
-            batch: args.batch,
-            ubatch: args.ubatch.unwrap_or(args.batch),
-            threads: args.threads,
-            flash_attention: args.flash_attention,
-            gpu_layers: args.gpu_layers,
-            cpu_moe_layers: args.cpu_moe_layers,
-            model_load_mode: args.model_load_mode,
-        },
-        args.cuda,
-        DecisionPolicy::default(),
-        PromptProfile::Auto,
-    )?;
+    let compute = ComputeOptions {
+        context: args.context,
+        batch: args.batch,
+        ubatch: args.ubatch.unwrap_or(args.batch),
+        threads: args.threads,
+        flash_attention: args.flash_attention,
+        gpu_layers: args.gpu_layers,
+        cpu_moe_layers: args.cpu_moe_layers,
+        model_load_mode: args.model_load_mode,
+    };
+    let mut backend = if args.metal {
+        LlamaBackend::load_with_metal_options(
+            &args.model,
+            compute,
+            DecisionPolicy::default(),
+            PromptProfile::Auto,
+        )?
+    } else {
+        LlamaBackend::load_with_options(
+            &args.model,
+            compute,
+            args.cuda,
+            DecisionPolicy::default(),
+            PromptProfile::Auto,
+        )?
+    };
     if let Some(path) = &args.lora {
         backend.load_lora(path)?;
     }
