@@ -190,13 +190,32 @@ class ModelScoredEvidence(ResponseModel):
     estimate: Estimate
 
 
+class DiscriminativeScore(ResponseModel):
+    id: str
+    raw_logit: float
+    option_probability: float
+
+
+class DiscriminativeEvidence(ResponseModel):
+    type: Literal["discriminative"]
+    schema_sha256: str
+    scores: list[DiscriminativeScore]
+    top_option_probability: float
+    entropy_confidence: float
+    scoring_method: str
+    calibration_id: str
+    temperature: float
+    truncated: Literal[False]
+    estimate: Estimate
+
+
 class SelectionOnlyEvidence(ResponseModel):
     type: Literal["selection_only"]
     selected_code: str | None
     provider_model: str | None
 
 
-Evidence: TypeAlias = Annotated[ModelScoredEvidence | SelectionOnlyEvidence, Field(discriminator="type")]
+Evidence: TypeAlias = Annotated[ModelScoredEvidence | DiscriminativeEvidence | SelectionOnlyEvidence, Field(discriminator="type")]
 
 
 class ReasoningUsage(ResponseModel):
@@ -225,6 +244,7 @@ class DecisionResult(ResponseModel):
     abstention_reasons: list[str]
     reason_messages: list[ReasonMessage] | None = None
     evidence: Evidence
+    routing: dict[str, JsonValue] | None = None
     usage: Usage
 
 
@@ -244,6 +264,7 @@ class ErrorBudget(ResponseModel):
 class DecisionResponse(ResponseModel):
     api_version: ApiVersion
     request_id: str
+    scheduling: dict[str, JsonValue] | None = None
     backend: BackendInfo
     policy: DecisionPolicy | None
     results: list[DecisionResult]
@@ -307,7 +328,10 @@ class Capabilities(ResponseModel):
     api_version: ApiVersion
     backend: CapabilityBackend
     decision_types: list[Literal["binary", "choice", "ordinal"]]
-    evidence: Literal["model_scored", "selection_only"]
+    evidence: Literal["model_scored", "selection_only", "discriminative", "mixed"]
+    artifact_id: str | None = None
+    prefix_reuse: dict[str, JsonValue] | None = None
+    routing: dict[str, JsonValue] | None = None
     media: MediaCapability
     limits: dict[str, int | float]
     reasoning: ReasoningCapability | None = None

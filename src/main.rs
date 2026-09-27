@@ -31,6 +31,19 @@ struct Args {
     /// Start a JSON HTTP API at this address, for example 127.0.0.1:8080.
     #[arg(long, conflicts_with_all = ["input", "image", "inspect", "preflight", "diagnostics"])]
     listen: Option<String>,
+    /// Resident deterministic schema-prefix KV reuse (one active KV slot).
+    #[arg(long)]
+    fixed_schema: bool,
+    /// Optional Laya ONNX fast path. Without a validated cascade policy, use slow only.
+    #[cfg(feature = "onnx")]
+    #[arg(long, requires = "listen")]
+    fast_model_dir: Option<PathBuf>,
+    #[cfg(feature = "onnx")]
+    #[arg(long, requires = "fast_model_dir")]
+    fast_cuda: bool,
+    #[cfg(feature = "onnx")]
+    #[arg(long, requires = "fast_model_dir")]
+    cascade_policy: Option<PathBuf>,
     /// Resident stdin/stdout RPC without opening a network listener.
     #[arg(long, conflicts_with_all = ["listen", "input", "image", "inspect", "preflight", "diagnostics"])]
     stdio: bool,
@@ -128,6 +141,9 @@ enum Device {
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+    if args.fixed_schema && args.listen.is_none() && !args.stdio {
+        return Err("--fixed-schema requires --listen or --stdio".into());
+    }
     let policy = DecisionPolicy {
         min_top_probability: args.min_top_probability,
         min_candidate_mass: args.min_candidate_mass,
@@ -219,9 +235,16 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     if let Some(address) = &args.listen {
-        return l2s1::http::serve(address, &mut backend);
+        if args.fixed_schema {
+            let fixed = l2s1::llama::FixedSchemaBackend::new(backend)?;
+            return serve_selected(&args, address, fixed);
+        }
+        return serve_selected(&args, address, backend);
     }
     if args.stdio {
+        if args.fixed_schema {
+            return l2s1::stdio::serve(&mut l2s1::llama::FixedSchemaBackend::new(backend)?);
+        }
         return l2s1::stdio::serve(&mut backend);
     }
     let text = if args.input == "-" {
@@ -379,4 +402,29 @@ mod tests {
             .is_err()
         );
     }
+}
+
+fn serve_selected<B: l2s1::http::HttpDecisionBackend>(
+    args: &Args,
+    address: &str,
+    mut backend: B,
+) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(feature = "onnx")]
+    if let Some(directory) = &args.fast_model_dir {
+        let fast =
+            l2s1::onnx::OnnxBackend::load(directory, args.fast_cuda, args.threads as usize, 0.0)?;
+        let policy = args
+            .cascade_policy
+            .as_ref()
+            .map(|p| {
+                std::fs::read(p)
+                    .map_err(Box::<dyn std::error::Error>::from)
+                    .and_then(|b| serde_json::from_slice(&b).map_err(Into::into))
+            })
+            .transpose()?;
+        let mut cascade = l2s1::cascade::CascadeBackend::new(fast, backend, policy)?;
+        return l2s1::http::serve(address, &mut cascade);
+    }
+    let _ = args;
+    l2s1::http::serve(address, &mut backend)
 }

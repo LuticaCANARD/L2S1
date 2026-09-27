@@ -17,11 +17,11 @@ pub use prompt::{
 };
 pub use reasoning::{ReasoningMode, ReasoningOptions};
 pub mod http;
-pub mod stdio;
 #[cfg(feature = "llama")]
 pub mod llama;
 #[cfg(feature = "openrouter")]
 pub mod openrouter;
+pub mod stdio;
 mod vision;
 #[cfg(feature = "wgpu")]
 pub mod wgpu;
@@ -39,3 +39,8 @@ pub use evidence::*;
 pub use interoperability::*;
 pub use optimization::*;
 pub use worker::*;
+
+pub mod cascade;
+pub mod discriminative;
+#[cfg(feature = "onnx")]
+pub mod onnx;

@@ -19,6 +19,8 @@ export interface LoadOptions {
   ubatch?: number;
   threads?: number;
   gpuLayers?: number;
+  /** Explicit fixed-schema split plan with bounded prefix snapshots. */
+  fixedSchema?: boolean;
   executionMode?: 'fresh' | 'prefix-reuse' | 'state-restore' | 'parallel';
   parallelWidth?: number;
   promptLayout?: 'legacy' | 'state-first';
@@ -42,6 +44,11 @@ function argumentsFor(options: LoadOptions): string[] {
     throw new TypeError('--stdio/--listen are managed by L2S1.load');
   }
   const args = ['--model', options.model];
+  if (options.fixedSchema) {
+    if (options.executionMode && options.executionMode !== 'prefix-reuse') throw new TypeError('fixedSchema requires prefix-reuse');
+    args.push('--fixed-schema');
+    if (!options.executionMode) args.push('--execution-mode', 'prefix-reuse');
+  }
   const flags: [string, string | number | undefined][] = [
     ['device', options.device], ['mmproj', options.mmproj], ['lora', options.lora],
     ['context', options.context], ['batch', options.batch], ['ubatch', options.ubatch],

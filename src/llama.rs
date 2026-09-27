@@ -15,10 +15,12 @@ use std::{
 
 mod batching;
 mod code_sequences;
+mod fixed_schema;
 mod interchange;
 mod model_hash;
 mod prepared_cache;
 mod shared_decision;
+pub use fixed_schema::FixedSchemaBackend;
 mod shared_state;
 mod vision;
 pub use prepared_cache::CacheMetrics;
@@ -874,6 +876,16 @@ impl LlamaBackend {
         state: &serde_json::Value,
         decision: &Decision,
     ) -> Result<DecisionResult> {
+        self.evaluate_planned(state, decision, None, false)
+    }
+
+    fn evaluate_planned(
+        &mut self,
+        state: &serde_json::Value,
+        decision: &Decision,
+        boundary: Option<usize>,
+        reuse: bool,
+    ) -> Result<DecisionResult> {
         if decision.options().len() > 26 {
             return self.evaluate_code_sequences(state, decision);
         }
@@ -909,8 +921,24 @@ impl LlamaBackend {
         let mut candidate_logits = [0.0f32; 26];
         let mut normalizer = 0.0;
         let mut native_vocab = 0;
-        let compact = self.evidence_transfer == EvidenceTransfer::Compact;
-        let ok = if compact {
+        let compact = boundary.is_none() && self.evidence_transfer == EvidenceTransfer::Compact;
+        let ok = if let Some(boundary) = boundary {
+            self.logits_buffer.resize(size as usize, 0.0);
+            unsafe {
+                sd_forward_split(
+                    self.engine.as_ptr(),
+                    input.as_ptr(),
+                    input.len() as i32,
+                    boundary,
+                    reuse,
+                    &mut reused,
+                    self.logits_buffer.as_mut_ptr(),
+                    self.logits_buffer.len(),
+                    error.as_mut_ptr(),
+                    error.len(),
+                )
+            }
+        } else if compact {
             unsafe {
                 sd_forward_compact(
                     self.engine.as_ptr(),

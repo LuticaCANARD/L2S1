@@ -2,6 +2,20 @@ use super::*;
 use crate::interoperability::digest;
 
 impl LlamaBackend {
+    pub fn serving_artifact_id(&self) -> String {
+        digest(
+            &serde_json::to_vec(&(
+                self.identity(),
+                self.prompt_layout,
+                self.prompt_detail,
+                self.code_rotation,
+                &self.policy,
+                &self.calibrations,
+            ))
+            .expect("serializable backend settings"),
+        )
+    }
+
     pub fn identity(&self) -> ModelIdentity {
         let info = self.info();
         let template = unsafe { CStr::from_ptr(sd_chat_template(self.engine.as_ptr())) }.to_bytes();

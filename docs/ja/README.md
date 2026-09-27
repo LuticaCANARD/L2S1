@@ -75,3 +75,5 @@
 | [スキルのインターフェース参照](skills/l2s1/references/interfaces.md) | ビルド、CLI、HTTP、MCP、Rust の統合 |
 
 ソース・依存関係の表記: [LICENSE](../../LICENSE)、[THIRD_PARTY_LICENSES.txt](../../THIRD_PARTY_LICENSES.txt)。モデルの重みは別途用意し、それぞれの条件に従います。レポートは記載された範囲での実験記録です。正解率、採用された判断の正解率、採用率を区別してください。
+
+- [高速判定サーバー](FAST_DECISIONS.md): fixed prefix / ONNX / cascade.

@@ -1,0 +1,217 @@
+{
+  "backend": {
+    "details": {
+      "device": "cpu",
+      "layout": "laya-markers-v1",
+      "strict_input": true
+    },
+    "model": "88d2aae99e7d0bfdab68c0390b47bb4c6ca5d603a64b350add6ed3821ac19100",
+    "runtime": "onnx-laya"
+  },
+  "policy": null,
+  "results": [
+    {
+      "abstention_reasons": [],
+      "evidence": {
+        "calibration_id": "88d2aae99e7d0bfdab68c0390b47bb4c6ca5d603a64b350add6ed3821ac19100",
+        "entropy_confidence": 0.9042763210128685,
+        "estimate": {},
+        "schema_sha256": "ab151dc4214ae403f4f966dde1ce344b6c13d225128bfd25400bb7c724437b2d",
+        "scores": [
+          {
+            "id": "billing",
+            "option_probability": 0.9814541716538828,
+            "raw_logit": 4.601296424865723
+          },
+          {
+            "id": "technical",
+            "option_probability": 0.008884868263952737,
+            "raw_logit": -3.6796648502349854
+          },
+          {
+            "id": "account",
+            "option_probability": 0.009660960082164497,
+            "raw_logit": -3.53226375579834
+          }
+        ],
+        "scoring_method": "laya_marker_softmax_v1",
+        "temperature": 1.7601518630981443,
+        "top_option_probability": 0.9814541716538828,
+        "truncated": false,
+        "type": "discriminative"
+      },
+      "id": "department",
+      "status": "selected",
+      "usage": {
+        "input_tokens": 55,
+        "reused_prefix_tokens": 0
+      },
+      "value": {
+        "selected": "billing",
+        "type": "choice"
+      }
+    },
+    {
+      "abstention_reasons": [],
+      "evidence": {
+        "calibration_id": "88d2aae99e7d0bfdab68c0390b47bb4c6ca5d603a64b350add6ed3821ac19100",
+        "entropy_confidence": 0.6328061171852359,
+        "estimate": {
+          "p_true": 0.9296592756723913
+        },
+        "schema_sha256": "bd448533073224a8c2050a07bcd27ff52e8c22a2edb584ba6d937d0016e95dc7",
+        "scores": [
+          {
+            "id": "false",
+            "option_probability": 0.07034072432760874,
+            "raw_logit": -3.580937385559082
+          },
+          {
+            "id": "true",
+            "option_probability": 0.9296592756723913,
+            "raw_logit": 1.539143443107605
+          }
+        ],
+        "scoring_method": "laya_marker_softmax_v1",
+        "temperature": 1.983399510383606,
+        "top_option_probability": 0.9296592756723913,
+        "truncated": false,
+        "type": "discriminative"
+      },
+      "id": "refund",
+      "status": "selected",
+      "usage": {
+        "input_tokens": 48,
+        "reused_prefix_tokens": 0
+      },
+      "value": {
+        "type": "binary",
+        "value": true
+      }
+    },
+    {
+      "abstention_reasons": [],
+      "evidence": {
+        "calibration_id": "88d2aae99e7d0bfdab68c0390b47bb4c6ca5d603a64b350add6ed3821ac19100",
+        "entropy_confidence": 0.3959175691851412,
+        "estimate": {
+          "expected_value": 1.7107135614364697
+        },
+        "schema_sha256": "efc5a630f6c1d48c772000ecee0d1ceb72a4738edfc8bb684c8c2a65efacbbb8",
+        "scores": [
+          {
+            "id": "low",
+            "option_probability": 0.06964612185586337,
+            "raw_logit": -1.1729693412780762
+          },
+          {
+            "id": "medium",
+            "option_probability": 0.1499941948518037,
+            "raw_logit": -0.21291029453277588
+          },
+          {
+            "id": "high",
+            "option_probability": 0.780359683292333,
+            "raw_logit": 1.8508960008621216
+          }
+        ],
+        "scoring_method": "laya_marker_softmax_v1",
+        "temperature": 1.2514300346374512,
+        "top_option_probability": 0.780359683292333,
+        "truncated": false,
+        "type": "discriminative"
+      },
+      "id": "urgency",
+      "status": "selected",
+      "usage": {
+        "input_tokens": 53,
+        "reused_prefix_tokens": 0
+      },
+      "value": {
+        "selected": "high",
+        "type": "ordinal"
+      }
+    },
+    {
+      "abstention_reasons": [],
+      "evidence": {
+        "calibration_id": "88d2aae99e7d0bfdab68c0390b47bb4c6ca5d603a64b350add6ed3821ac19100",
+        "entropy_confidence": 0.5465106406484417,
+        "estimate": {
+          "p_true": 0.09516822331039113
+        },
+        "schema_sha256": "b2dfec11ba0ef665fa052fe66bfe17d135716b68dfe454f21ad313877da65885",
+        "scores": [
+          {
+            "id": "false",
+            "option_probability": 0.9048317766896089,
+            "raw_logit": 4.243585109710693
+          },
+          {
+            "id": "true",
+            "option_probability": 0.09516822331039113,
+            "raw_logit": -0.22323477268218994
+          }
+        ],
+        "scoring_method": "laya_marker_softmax_v1",
+        "temperature": 1.983399510383606,
+        "top_option_probability": 0.9048317766896089,
+        "truncated": false,
+        "type": "discriminative"
+      },
+      "id": "polite",
+      "status": "selected",
+      "usage": {
+        "input_tokens": 46,
+        "reused_prefix_tokens": 0
+      },
+      "value": {
+        "type": "binary",
+        "value": false
+      }
+    },
+    {
+      "abstention_reasons": [],
+      "evidence": {
+        "calibration_id": "88d2aae99e7d0bfdab68c0390b47bb4c6ca5d603a64b350add6ed3821ac19100",
+        "entropy_confidence": 0.967192934645344,
+        "estimate": {},
+        "schema_sha256": "53c9b291e432e792aadf3521156d7b59532c9ea692bf1edcceacf6267d2d8846",
+        "scores": [
+          {
+            "id": "refund",
+            "option_probability": 0.9948150158354189,
+            "raw_logit": 6.547057151794434
+          },
+          {
+            "id": "debug",
+            "option_probability": 0.002462131076497726,
+            "raw_logit": -4.016546249389648
+          },
+          {
+            "id": "reset",
+            "option_probability": 0.0027228530880834315,
+            "raw_logit": -3.839381694793701
+          }
+        ],
+        "scoring_method": "laya_marker_softmax_v1",
+        "temperature": 1.7601518630981443,
+        "top_option_probability": 0.9948150158354189,
+        "truncated": false,
+        "type": "discriminative"
+      },
+      "id": "action",
+      "status": "selected",
+      "usage": {
+        "input_tokens": 51,
+        "reused_prefix_tokens": 0
+      },
+      "value": {
+        "selected": "refund",
+        "type": "choice"
+      }
+    }
+  ],
+  "api_version": 1,
+  "request_id": "fixture-discriminative"
+}

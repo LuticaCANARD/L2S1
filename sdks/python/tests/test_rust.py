@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import math
 import os
 import re
 import shutil
@@ -72,6 +73,13 @@ class RustBoundary(unittest.IsolatedAsyncioTestCase):
                 py = (await engine.decide(request)).model_dump(exclude_unset=True)
                 ts.pop("request_id")
                 py.pop("request_id")
+                # These are separate HTTP calls, so queue time is not deterministic.
+                # Validate it independently; retain all other metadata in the equality check.
+                for response in (py, ts):
+                    queue_ms = response["scheduling"].pop("queue_ms")
+                    self.assertIsInstance(queue_ms, (int, float))
+                    self.assertTrue(math.isfinite(queue_ms))
+                    self.assertGreaterEqual(queue_ms, 0)
                 self.assertEqual(py, ts)
             else:
                 self.fail("build TypeScript SDK and install Node for the cross-SDK boundary check")

@@ -12,6 +12,7 @@ unsafe fn forward_logits(
     tokens: &[i32],
     reuse: bool,
     reused: &mut i32,
+    boundary: Option<usize>,
 ) -> Result<*const f32> {
     e.ensure_sequences(1, 0, false, true)?;
     if tokens.is_empty() || tokens.len() > llama_n_ctx(e.ctx) as usize {
@@ -21,8 +22,13 @@ unsafe fn forward_logits(
     if memory.is_null() {
         return Err("decoder memory unavailable".into());
     }
+    if boundary.is_some_and(|p| p == 0 || p >= tokens.len())
+        || (boundary.is_some() && e.recurrent())
+    {
+        return Err("invalid fixed prefix boundary or unsupported recurrent model".into());
+    }
     let mut common = 0;
-    if reuse && !e.recurrent() {
+    if reuse && !e.recurrent() && e.cached_boundary == boundary {
         common = e
             .cached_tokens
             .iter()
@@ -30,15 +36,70 @@ unsafe fn forward_logits(
             .take(tokens.len() - 1)
             .take_while(|(a, b)| a == b)
             .count();
-        common -= common % e.batch_size as usize;
+        common = match boundary {
+            Some(p) if common >= p => p,
+            Some(_) => 0,
+            None => common - common % e.batch_size as usize,
+        };
     }
     if common == 0 || !llama_memory_seq_rm(memory, 0, common as i32, -1) {
+        let cache = if boundary.is_some() && reuse {
+            std::mem::take(&mut e.split_cache)
+        } else {
+            Default::default()
+        };
         e.clear();
+        e.split_cache = cache;
         common = 0;
+        if let Some(p) = boundary
+            && reuse
+            && let Some(index) = e
+                .split_cache
+                .iter()
+                .position(|(key, _)| key == &tokens[..p])
+        {
+            let entry = e.split_cache.remove(index).unwrap();
+            if llama_state_seq_set_data(e.ctx, entry.1.as_ptr(), entry.1.len(), 0) != entry.1.len()
+            {
+                return Err("fixed prefix snapshot restore failed".into());
+            }
+            e.memory_dirty = true;
+            e.split_cache.push_back(entry);
+            common = p;
+        }
     }
     e.cached_tokens.clear();
     let mut batch = Batch::new(e.batch_size)?;
-    decode_range(e, &mut batch, tokens, common, tokens.len(), true)?;
+    if let Some(p) = boundary {
+        if common == 0 {
+            decode_range(e, &mut batch, tokens, 0, p, false)?;
+            if reuse {
+                let bytes = llama_state_seq_get_size(e.ctx, 0);
+                const LIMIT: usize = 256 * 1024 * 1024;
+                if bytes > 0 && bytes <= LIMIT {
+                    while !e.split_cache.is_empty()
+                        && (e.split_cache.len() >= 8
+                            || e.split_cache
+                                .iter()
+                                .map(|(_, data)| data.len())
+                                .sum::<usize>()
+                                + bytes
+                                > LIMIT)
+                    {
+                        e.split_cache.pop_front();
+                    }
+                    let mut snapshot = vec![0; bytes];
+                    if llama_state_seq_get_data(e.ctx, snapshot.as_mut_ptr(), bytes, 0) != bytes {
+                        return Err("fixed prefix snapshot save failed".into());
+                    }
+                    e.split_cache.push_back((tokens[..p].to_vec(), snapshot));
+                }
+            }
+        }
+        decode_range(e, &mut batch, tokens, p, tokens.len(), true)?;
+    } else {
+        decode_range(e, &mut batch, tokens, common, tokens.len(), true)?;
+    }
     let output = llama_get_logits_ith(e.ctx, -1);
     if output.is_null() {
         return Err("missing final logits".into());
@@ -46,6 +107,7 @@ unsafe fn forward_logits(
     if reuse {
         e.cached_tokens.extend_from_slice(tokens);
     }
+    e.cached_boundary = boundary;
     *reused = common as i32;
     Ok(output)
 }
@@ -102,7 +164,7 @@ pub unsafe extern "C" fn sd_forward(
         if reused.is_null() || logits.is_null() || logits_count != e.vocab() as usize {
             return Err("wrong logits buffer size".into());
         }
-        let output = forward_logits(e, input(tokens, count)?, reuse, &mut *reused)?;
+        let output = forward_logits(e, input(tokens, count)?, reuse, &mut *reused, None)?;
         ptr::copy_nonoverlapping(output, logits, logits_count);
         Ok(())
     })
@@ -142,7 +204,7 @@ pub unsafe extern "C" fn sd_forward_compact(
         let ids = slice::from_raw_parts(candidate_ids, candidate_count);
         let vocab = e.vocab();
         validate_candidates(ids, vocab)?;
-        let output = forward_logits(e, input(tokens, count)?, reuse, &mut *reused)?;
+        let output = forward_logits(e, input(tokens, count)?, reuse, &mut *reused, None)?;
         *log_normalizer = compact(
             slice::from_raw_parts(output, vocab as usize),
             ids,
@@ -235,7 +297,7 @@ pub unsafe extern "C" fn sd_forward_thinking(
                     .into(),
             );
         }
-        let mut output = forward_logits(e, input(tokens, count)?, false, &mut 0)?;
+        let mut output = forward_logits(e, input(tokens, count)?, false, &mut 0, None)?;
         let mut b = Batch::new(1)?;
         let mut position = count;
         let mut decode = |e: &mut Engine, token: i32| -> Result<*const f32> {
@@ -474,7 +536,7 @@ pub unsafe extern "C" fn sd_forward_restore(
          -> Result<()> {
             for (s, tokens) in inputs.iter().enumerate() {
                 let start = Instant::now();
-                let output = forward_logits(e, tokens, false, &mut reused[s])?;
+                let output = forward_logits(e, tokens, false, &mut reused[s], None)?;
                 ptr::copy_nonoverlapping(output, logits.add(s * vocab), vocab);
                 metrics.suffix_ms += start.elapsed().as_secs_f64() * 1000.0;
             }
@@ -533,6 +595,39 @@ pub unsafe extern "C" fn sd_forward_restore(
     sd_clear(e);
     ok
 }
+/// Explicit split plan: cold and warm runs use identical decode boundaries.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn sd_forward_split(
+    e: *mut Engine,
+    tokens: *const i32,
+    count: i32,
+    boundary: usize,
+    reuse: bool,
+    reused: *mut i32,
+    logits: *mut f32,
+    logits_count: usize,
+    error: *mut c_char,
+    cap: usize,
+) -> bool {
+    if !reused.is_null() {
+        *reused = 0;
+    }
+    run(e, error, cap, |e| {
+        if reused.is_null() || logits.is_null() || logits_count != e.vocab() as usize {
+            return Err("wrong split logits buffer size".into());
+        }
+        let output = forward_logits(
+            e,
+            input(tokens, count)?,
+            reuse,
+            &mut *reused,
+            Some(boundary),
+        )?;
+        ptr::copy_nonoverlapping(output, logits, logits_count);
+        Ok(())
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

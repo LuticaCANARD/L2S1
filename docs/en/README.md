@@ -75,3 +75,5 @@ Start with the [English README](../../README.md) to build L2S1 and run a first d
 | [Skill interface reference](skills/l2s1/references/interfaces.md) | Build, CLI, HTTP, MCP and Rust integration |
 
 Source and dependency notices: [LICENSE](../../LICENSE), [THIRD_PARTY_LICENSES.txt](../../THIRD_PARTY_LICENSES.txt). Model weights are supplied separately and keep their own terms. These reports describe recorded experiments within their stated scope; report accuracy, accepted accuracy, and coverage separately.
+
+- [Fast decision serving](FAST_DECISIONS.md): fixed prefix / ONNX / cascade.

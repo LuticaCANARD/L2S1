@@ -1,0 +1,42 @@
+{
+  "base_commit": "b239214f3b65b0f57180bbfddfa02e9fa47ac817",
+  "ollaya_commit": "6d121dd45162b222bc4deb971c5975875f538fa8",
+  "llama_cpp_commit": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "laya_author_revision": "aa8c91ca088ec597df95a0d1c76b3063cb2ae5e8",
+  "laya_graph_revision": "32fdc8cc3d76e77c28ad8ad9187c0cf3bd8cc0a2",
+  "runtime_sha256": "5a140dc17c8b60b35b2ceab0bb533e65ac54f06a208948417c1f9c31df6afc4c",
+  "measured_benchmark_binary_sha256": {
+    "benchmark_onnx": "260411f60762861da63707b47e47660181c2cd7cabb8bd488811a7ff890a5b40",
+    "benchmark_fixed_schema": "a6a046fede3100693b4e990324c9dc422085e8eb09f4d170bcf76a6b5740e8e5"
+  },
+  "artifact_notes": [
+    "CPU ONNX records predate final serving identity checks; encoding/scoring/inference behavior is unchanged. CUDA records include final identity checks.",
+    "Fixed-prefix result is an isolated rerun; the earlier measurement overlapped builds and was discarded.",
+    "CUDA runs were sequential after builds completed. CPU tail latency is not a controlled performance comparison.",
+    "HTTP integration preceded the final queued-expiry HTTP-status correction; that change has a separate socket test.",
+    "Native timing predates the final lint-only function relocation/condition simplification and addition of fixed_schema.rs to build fingerprints. Measured binary digests above identify the timing artifacts; final source digests below identify the reviewed implementation.",
+    "Source digests capture the fast-path validation revision before the later SIMD evidence scan. See benchmarks/evidence-simd-20260927 for the SIMD implementation and measurements."
+  ],
+  "evidence_sha256": {
+    "summary.json": "a8222d544ca65b969730f3feb16bce19f4b1503c5d17d2e7353265b897407cf0",
+    "audit.py": "9ef9c72252895ab12b7095d85cd233d63f826e6a6184e87e92e7a1b02adf9c31",
+    "l2s1_compare.rs": "ac1d4f72c20114d44cac64038da4e924dc76c8cf5b4bf16003916a21e2099026",
+    "ollaya-cuda-final.json.gz": "5799d24284d28f1c6bf75930ee27b5c4354ed5771c604fda53829f62fbcaaadb",
+    "l2s1-cuda-final.json.gz": "6dc166d1ecc3cd392b0cb1e856950cffeac994d854e38126a6f309d020235c44",
+    "ollaya-cpu.json.gz": "16542425b8b10e7f0cfba9ff95d8acc5496c6b0782697dd22a26b770bc6d136b",
+    "l2s1-cpu.json.gz": "0a62fffa01980474be63a67b6924f190f09a3f5a04d06bd6374d5609f5df8739",
+    "fixed-schema-isolated.json": "cb5af5b20a3c1098ae2450dd73828ab2a96b29c3f75013ff3c003300893e6ba8",
+    "ollaya.jsonl": "342377bc84bb83f154f8c9d6ebde0abe27e748b2af11860403a39f9ba18c3a15",
+    "requests.jsonl": "60c1a7de0cdb1e35342e4fa1669b37836e007ce432877fb2f2bd5893760f8af6"
+  },
+  "validated_source_sha256": {
+    "build.rs": "90b3d37ca60892ec3680ea95b889fa61fa8992da31dd24e6742ba4a58925a6a9",
+    "crates/l2s1-llama-sys/src/text.rs": "9f30b2164ac8af6f6c38596c45d2b5a283aa990af58c01043dd4c1f6b77470fc",
+    "src/llama/fixed_schema.rs": "371306493e72a929281ac5f1f6064429735c39653dc0051955d868c175629511",
+    "src/onnx/mod.rs": "efb5d67f90eecc54ed06d5c1bb9e99ba768ca4a12e21948bf800ada1ac84e616",
+    "src/discriminative.rs": "31ceabe0fd2ae2253bd490ddf938e71864198cc70a260314042c8ab3126ce933",
+    "src/cascade.rs": "084dc707183d0f5469275b2d99a705c56aeaec5f6245049ba63e00c21cdac546",
+    "src/http.rs": "7d60c86c9889b3269b3ec92a69816df98b41b4c6dbd5d1d40212e026bea25afd",
+    "src/http/contract.rs": "c0d2b15bff67167f25b7c9e71e7b1ac99982e4683a1cc92ec757d5e64709304f"
+  }
+}
