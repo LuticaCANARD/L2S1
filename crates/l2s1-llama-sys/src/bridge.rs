@@ -41,7 +41,7 @@ pub(crate) struct Engine {
     pub split_cache: std::collections::VecDeque<(Vec<i32>, Vec<u8>)>,
     pub vision_metrics: NativeVisionBatchMetrics,
     pub memory_dirty: bool,
-    force_kv_clear: bool,
+    pub(crate) force_kv_clear: bool,
     pub vision_projector_reuse: bool,
     cpu_moe_patterns: Vec<CString>,
     placement_overrides: Vec<llama_model_tensor_buft_override>,

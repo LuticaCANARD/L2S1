@@ -331,7 +331,7 @@ GPU 비전 작업에서 `--vision-optimized`를 사용하면 디코더 스트림
 | --- | --- | --- |
 | decision-rules-v1 · RTX 5090 / Windows | 체크포인트 5개 × CPU/CUDA; 합성 판단 36개 × 3회. Gemma4 CUDA: 수락 정답률 94.3%, 전체 대비 정답 91.7%; CPU 시간 초과 포함 | [결과와 조건](docs/ko/BENCHMARK.md#recorded-windows-rtx-5090-results), [집계 검산](benchmarks/decision-rules-windows-20260926/audit.json) |
 | decision-rules-v1 · Apple M5 Max / macOS | 체크포인트 5개 + Gemma4 26B-A4B × CPU/Metal; 합성 판단 36개 × 3회. Gemma4 26B-A4B: 두 장치 모두 100%; Gemma4 E2B Metal: 수락 정답률 97.1%, 전체 대비 정답 91.7% | [결과와 조건](docs/ko/BENCHMARK.md#recorded-apple-m5-max-results), [요약 JSON](benchmarks/decision-rules-macos-m5max-20260927/summary.json) |
-| decision-rules-v1 · Raspberry Pi 5 4GB | Gemma3 1B Q8: 동일 소스 범용 fresh p50 15.643 → 4.450초, ARM dispatch로 3.52배. 최대 RSS 1.12 → 2.11GiB; 최적화 raw 정확도 55.6%, 수락 정확도 54.5%, coverage 91.7%. 저전압·스로틀링 관측; 확률·수락 여부 변화는 별도 보고. | [fresh 커널·정확성 실측](benchmarks/pi5-arm64-fresh-20260927/README.md) |
+| decision-rules-v1 · Raspberry Pi 5 4GB | Gemma3 1B Q8: 동일 소스 범용 fresh p50 15.643 → 4.450초, ARM dispatch로 3.52배. 최대 RSS 1.12 → 2.11GiB; 최적화 raw 정확도 55.6%, 수락 정확도 54.5%, coverage 91.7%. 저전압·스로틀링 관측; 확률·수락 여부 변화는 별도 보고. | [fresh 커널·정확성 실측](benchmarks/pi5-arm64-fresh-20260927/README.md) · [state-cache 후속 실측](benchmarks/pi5-state-cache-20260928/README.md) |
 | JevBench 공개 부분집합 | 최초 비교: 체크포인트 22개 × 항목 231개; 유효한 예측 5,082개 | [모델 결과](docs/ko/MODEL_RESULTS.md), [측정 방법](docs/ko/JEVBENCH.md) |
 | 의도 분류 | 영어 레이블 77개와 한국어 레이블 60개; 체크포인트마다 언어별 예제 200개 | [의도 분류 벤치마크](docs/ko/INTENT_BENCHMARK.md) |
 | typed-decisions | 전체 테스트: 모델별 400개 사례·2,000개 판단; Gemma 4 E2B 54.30%, Qwen3 0.6B 31.25% 원시 정확도; Gemma4 LoRA 특화 실험: 원시 정확도 57.85%, 수락률 48.35% | [방법과 결과](docs/ko/TYPED_DECISIONS_BENCHMARK.md) · [LoRA](benchmarks/jev-lora-20260927/README.md) |

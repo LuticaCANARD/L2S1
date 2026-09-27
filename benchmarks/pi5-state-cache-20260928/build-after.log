@@ -1,0 +1,45 @@
+/home/lutica/l2s1-arm64-fresh-20260927/state-cache/after/package
+Verified linux-arm64: 21 bundled files, l2s1 0.1.3
+npm notice
+npm notice 📦  @l2s1/runtime-linux-arm64@0.1.3
+npm notice Tarball Contents
+npm notice 1.1kB LICENSE
+npm notice 266B README.md
+npm notice 60.8kB THIRD_PARTY_LICENSES.txt
+npm notice 4.0MB bin/l2s1
+npm notice 826.3kB bin/libggml-base.so
+npm notice 826.3kB bin/libggml-base.so.0
+npm notice 826.3kB bin/libggml-base.so.0.24.0
+npm notice 1.0MB bin/libggml-cpu-armv8.0_1.so
+npm notice 1.0MB bin/libggml-cpu-armv8.2_1.so
+npm notice 1.0MB bin/libggml-cpu-armv8.2_2.so
+npm notice 1.0MB bin/libggml-cpu-armv8.2_3.so
+npm notice 1.0MB bin/libggml-cpu-armv8.6_1.so
+npm notice 1.0MB bin/libggml-cpu-armv8.6_2.so
+npm notice 1.1MB bin/libggml-cpu-armv9.2_1.so
+npm notice 1.1MB bin/libggml-cpu-armv9.2_2.so
+npm notice 78.0kB bin/libggml.so
+npm notice 78.0kB bin/libggml.so.0
+npm notice 78.0kB bin/libggml.so.0.24.0
+npm notice 4.4MB bin/libllama.so
+npm notice 4.4MB bin/libllama.so.0
+npm notice 4.4MB bin/libllama.so.0.4.1
+npm notice 1.7MB bin/libmtmd.so
+npm notice 1.7MB bin/libmtmd.so.0
+npm notice 1.7MB bin/libmtmd.so.0.4.1
+npm notice 641B package.json
+npm notice 3.4kB runtime-manifest.json
+npm notice Tarball Details
+npm notice name: @l2s1/runtime-linux-arm64
+npm notice version: 0.1.3
+npm notice filename: l2s1-runtime-linux-arm64-0.1.3.tgz
+npm notice package size: 12.7 MB
+npm notice unpacked size: 33.3 MB
+npm notice shasum: 71905f5ebc244fb8bba8e8dc1e7a9bd56243e7d3
+npm notice integrity: sha512-n5X11cJNKolAt[...]RR+zT4JdHC+2Q==
+npm notice total files: 26
+npm notice
+l2s1-runtime-linux-arm64-0.1.3.tgz
+
+added 1 package in 1s
+Verified linux-arm64: 21 bundled files, l2s1 0.1.3

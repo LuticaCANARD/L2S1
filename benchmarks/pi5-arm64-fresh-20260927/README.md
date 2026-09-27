@@ -191,3 +191,7 @@ then run `python3 validate.py` and `sha256sum -c SHA256SUMS`.
 Raw responses, sampled telemetry, command lines, loaded-library identities and
 native regression output accompany the report. Historical outputs are never
 substituted for the new predictions.
+
+## State-cache follow-up
+
+The [state-cache study](../pi5-state-cache-20260928/README.md) compares fresh, request-local prefix reuse, state restoration before/after two overhead fixes, and explicit shared-state sessions on the optimized ARM64 build. It uses the same state-first layout within each comparison and reports short-prefix misses, snapshot memory and copy costs. Its diagnostic transport and layout differ from this legacy-layout study, so the timing ratios must not be multiplied or merged as one controlled experiment.
