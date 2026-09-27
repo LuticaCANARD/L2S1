@@ -5,7 +5,7 @@
 
 Python 3.11+ 비동기 SDK입니다. `@l2s1/node`와 같은 Rust 상주 엔진·HTTP v1 JSON을
 사용하며, Pydantic 런타임 검증과 PEP 561 정적 타입 정보를 제공합니다.
-[l2s1-sdk 0.1.3](https://pypi.org/project/l2s1-sdk/0.1.3/)을 PyPI에 게시했습니다. import는 `import l2s1`을 유지합니다.
+[l2s1-sdk 0.1.4](https://pypi.org/project/l2s1-sdk/0.1.4/)을 PyPI에 게시했습니다. import는 `import l2s1`을 유지합니다.
 
 <a id="install"></a>
 ## 설치
@@ -13,14 +13,14 @@ Python 3.11+ 비동기 SDK입니다. `@l2s1/node`와 같은 Rust 상주 엔진·
 PyPI에서 설치합니다.
 
 ```sh
-pip install l2s1-sdk==0.1.3
+pip install l2s1-sdk==0.1.4
 ```
 
 소스 저장소 또는 빌드한 wheel에서 설치:
 
 ```sh
 python -m pip install ./sdks/python
-python -m pip install ./sdks/python/dist/l2s1_sdk-0.1.3-py3-none-any.whl
+python -m pip install ./sdks/python/dist/l2s1_sdk-0.1.4-py3-none-any.whl
 ```
 
 wheel은 Python SDK를 포함합니다. Rust 실행 파일과 GGUF는 별도로 제공합니다.
@@ -154,7 +154,7 @@ GGUF/CUDA/Metal 품질·성능 검증은 별도입니다. CI는 Linux·macOS·Wi
 Python 3.11/3.14를 대상으로 wheel/sdist를 업로드합니다. 로컬 성공은 다른 플랫폼
 성공을 뜻하지 않습니다. 릴리스 파이프라인이 검증한 wheel/sdist를 PyPI에 게시합니다.
 
-[배포 파이프라인](../RELEASE_PIPELINE.md)은 설정된 trusted publisher로 GitHub Release·npm·PyPI·Cargo에 검증한 설치 파일을 게시합니다. [v0.1.3](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.3)을 설치할 수 있습니다.
+[배포 파이프라인](../RELEASE_PIPELINE.md)은 설정된 trusted publisher로 GitHub Release·npm·PyPI·Cargo에 검증한 설치 파일을 게시합니다. [v0.1.4](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.4)을 설치할 수 있습니다.
 
 ## 상주 prefix 재사용
 
@@ -162,4 +162,4 @@ Python 3.11/3.14를 대상으로 wheel/sdist를 업로드합니다. 로컬 성�
 
 `fixed_schema`를 생략하면 런타임 기본값을 따릅니다. true는 지원을 필수로 요구하며, false는 실행 모드를 생략했을 때 fresh를 선택합니다. 명시한 실행 모드는 false보다 우선합니다.
 
-이 기본값은 v0.1.3 이후 소스 변경입니다. 배포된 v0.1.3에서는 `fixedSchema: true` / `fixed_schema=True`를 명시해야 하며, 다음 릴리스 전에는 새로 빌드한 바이너리를 사용하세요.
+이 기본값은 v0.1.4에 포함됩니다. 이전 v0.1.3에서는 `fixedSchema: true` / `fixed_schema=True`를 명시해야 합니다.

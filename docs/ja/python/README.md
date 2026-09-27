@@ -5,7 +5,7 @@
 
 Python 3.11+ の非同期 SDK です。`@l2s1/node` と同じ常駐 Rust エンジンと
 HTTP v1 JSON を使い、Pydantic の実行時検証と PEP 561 型情報を提供します。
-[l2s1-sdk 0.1.3](https://pypi.org/project/l2s1-sdk/0.1.3/) を PyPI に公開しました。import は `import l2s1` を維持します。
+[l2s1-sdk 0.1.4](https://pypi.org/project/l2s1-sdk/0.1.4/) を PyPI に公開しました。import は `import l2s1` を維持します。
 
 <a id="install"></a>
 ## インストール
@@ -13,14 +13,14 @@ HTTP v1 JSON を使い、Pydantic の実行時検証と PEP 561 型情報を提�
 PyPI からインストールします。
 
 ```sh
-pip install l2s1-sdk==0.1.3
+pip install l2s1-sdk==0.1.4
 ```
 
 ソースまたはビルド済み wheel からインストール:
 
 ```sh
 python -m pip install ./sdks/python
-python -m pip install ./sdks/python/dist/l2s1_sdk-0.1.3-py3-none-any.whl
+python -m pip install ./sdks/python/dist/l2s1_sdk-0.1.4-py3-none-any.whl
 ```
 
 wheel は Python SDK を含みます。Rust 実行ファイルと GGUF は別途用意します。
@@ -154,7 +154,7 @@ GGUF/CUDA/Metal の品質・性能証拠とは別です。CI は Linux・macOS�
 Python 3.11/3.14 を対象として wheel/sdist を保存します。ローカルの成功は他の
 プラットフォームの成功を意味しません。リリースパイプラインが検証済み wheel/sdist を PyPI に公開します。
 
-[配布パイプライン](../RELEASE_PIPELINE.md)は設定済み trusted publisher で GitHub Release・npm・PyPI・Cargo に検証済み配布物を公開します。[v0.1.3](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.3) をインストールできます。
+[配布パイプライン](../RELEASE_PIPELINE.md)は設定済み trusted publisher で GitHub Release・npm・PyPI・Cargo に検証済み配布物を公開します。[v0.1.4](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.4) をインストールできます。
 
 ## 常駐 prefix 再利用
 
@@ -162,4 +162,4 @@ Python 3.11/3.14 を対象として wheel/sdist を保存します。ローカ�
 
 `fixed_schema` を省略するとランタイムの既定値に従います。true は対応を必須にし、false は実行モード省略時に fresh を選びます。明示した実行モードは false より優先されます。
 
-この既定値は v0.1.3 後のソース変更です。公開済み v0.1.3 では `fixedSchema: true` / `fixed_schema=True` の明示が必要です。次のリリースまでは新しくビルドしたバイナリを使ってください。
+この既定値は v0.1.4 に含まれます。以前の v0.1.3 では `fixedSchema: true` / `fixed_schema=True` の明示が必要です。

@@ -14,7 +14,7 @@ from .models import (
 )
 from .native import LoadOptions, RustProcessBackend
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 __all__ = [
     "DiscriminativeEvidence", "DiscriminativeScore",
     "BatchDecisionBackend", "BatchCapability", "BatchResponse",
