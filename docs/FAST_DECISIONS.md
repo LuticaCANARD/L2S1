@@ -61,3 +61,8 @@ On the local WSL2 CPU, Qwen3 0.6B Q8_0 processed all 36 decision-rules judgments
 On RTX 3080, the English Laya fp16 path measured 19.179 ms request p50 versus Ollaya's 19.567 ms, with p95 22.165/23.338 ms. The same 20 synthetic ticket requests contain five questions each, repeated twice after 20 warmups. CPU and CUDA token IDs, marker positions and logits match exactly; probability differences are below 2.23e-16. L2S1 timing includes probability scoring, while the reference excludes it. This establishes local parity, not general accuracy or a universal speed advantage.
 
 Real HTTP testing confirmed fast acceptance, schema/input fallback, Python SDK decoding and up to six coalesced requests among 16 concurrent calls. The calibration test used toy data and does not validate production quality. See the [measurement summary](../benchmarks/fast-decisions-20260927/summary.json) and [provenance](../benchmarks/fast-decisions-20260927/provenance.json). Full records and reproduction commands are in the repository's `benchmarks/fast-decisions-20260927` directory.
+
+
+## SIMD evidence postprocessing
+
+Full-vocabulary logit validation and maximum scanning now use runtime AVX2/NEON dispatch, with scalar fallback. Exponentials and sequential f64 sums keep their original order. Local AVX2 measurements show about 10x faster scanning and 1.17–1.26x faster complete normalization for 32k–262k vocabularies; these are **not whole-inference speedups**. All 36 real SmolLM2 rule results match the pre-SIMD binary exactly. See the [SIMD measurement](../benchmarks/evidence-simd-20260927/summary.json) and [native parity](../benchmarks/evidence-simd-20260927/native-parity.json). NEON timing remains unmeasured.

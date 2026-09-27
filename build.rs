@@ -16,6 +16,7 @@ fn main() {
         "src/codes.rs",
         "src/llama/code_sequences.rs",
         "src/evidence.rs",
+        "src/evidence/simd.rs",
         "src/prompt.rs",
         "src/llama.rs",
         "src/llama/interchange.rs",

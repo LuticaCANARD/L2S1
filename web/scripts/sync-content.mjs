@@ -6,6 +6,7 @@ const root = new URL('../../', import.meta.url);
 const target = new URL('../static/docs/', import.meta.url);
 const publicStudy = 'typed-decisions-20260926';
 const reviewEvidence = {
+  'evidence-simd-20260927': ['summary.json', 'native-parity.json'],
   'fast-decisions-20260927': ['summary.json', 'provenance.json'],
   'decision-review-20260927': ['summary.json'],
   'schema-reuse-20260927': ['summary.json', 'provenance.json'],

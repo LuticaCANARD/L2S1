@@ -61,3 +61,8 @@ WSL2 CPU의 Qwen3 0.6B Q8_0에서 decision-rules 36개 판단 전체가 fresh 29
 RTX 3080의 영어 Laya fp16 경로는 요청 p50 19.179ms, 같은 모델의 Ollaya는 19.567ms였고 p95는 각각 22.165/23.338ms였습니다. 질문 5개씩 포함한 합성 티켓 입력 20개를 워밍업 20회 후 두 번 반복했습니다. CPU와 CUDA 모두 토큰 ID·marker 위치·logit이 정확히 일치했고 확률 차이는 2.23e-16 미만이었습니다. L2S1 시간에는 확률 계산이 포함되지만 비교 runner에는 포함되지 않습니다. 로컬 동등성 검증이며 일반 정확도나 보편적인 속도 우위를 뜻하지 않습니다.
 
 실제 HTTP에서 fast 채택, 스키마·입력 fallback, Python SDK 수신을 검증했고 동시 요청 16개 중 최대 6개가 한 배치로 실행됐습니다. calibration 검증에는 시험용 데이터를 사용했으므로 운영 품질 근거로 삼을 수 없습니다. [측정 요약](../../benchmarks/fast-decisions-20260927/summary.json)과 [출처](../../benchmarks/fast-decisions-20260927/provenance.json)를 참고하십시오. 원시 기록과 재현 명령은 저장소의 `benchmarks/fast-decisions-20260927`에 있습니다.
+
+
+## SIMD 점수 후처리
+
+전체 vocabulary의 logit 검증·최댓값 탐색에 AVX2/NEON 런타임 선택과 scalar fallback을 적용했습니다. 지수함수와 순차 f64 합산 순서는 유지합니다. 로컬 AVX2에서 3.2만~26.2만 vocabulary의 탐색은 약 10배, 전체 정규화는 1.17~1.26배 빨라졌습니다. **모델 추론 전체의 가속 배율은 아닙니다.** 실제 SmolLM2 규칙 판단 36개의 결과는 적용 전 바이너리와 정확히 같았습니다. [SIMD 측정](../../benchmarks/evidence-simd-20260927/summary.json)과 [native 동등성](../../benchmarks/evidence-simd-20260927/native-parity.json)을 참고하세요. NEON 속도는 아직 측정하지 않았습니다.

@@ -1,0 +1,74 @@
+{
+  "model": "SmolLM2-135M-Instruct-Q8_0",
+  "device": "CPU",
+  "decisions": 36,
+  "all_results_exactly_equal": true,
+  "scope": "Paired real model runs, complete result objects equal including probabilities, candidate mass, abstention and selected values. No latency claim.",
+  "records": [
+    {
+      "case": "warehouse-01",
+      "decisions": 3,
+      "results_sha256": "96b1f7143c48f30d361f0ee88732188a41c0139e0af986e3a121dcd64c933043"
+    },
+    {
+      "case": "warehouse-02",
+      "decisions": 3,
+      "results_sha256": "a6f540b70032838027c973a5e0a3532b16963ce0a87e1f2827000799ecf2dace"
+    },
+    {
+      "case": "warehouse-03",
+      "decisions": 3,
+      "results_sha256": "bf5d40fb77cf7c8f96a2c5e77d6275fd2fb8b2c4d42734ca0a09bd8e89a104ca"
+    },
+    {
+      "case": "warehouse-04",
+      "decisions": 3,
+      "results_sha256": "a5675b593b12de1ca3874146eb06173362ab6c18e031cdac1c5446bc4b52dc8f"
+    },
+    {
+      "case": "warehouse-05",
+      "decisions": 3,
+      "results_sha256": "d092a915eab32d826eba78eab35d20e01caf94a016b9bd44b62e4842a5a47492"
+    },
+    {
+      "case": "warehouse-06",
+      "decisions": 3,
+      "results_sha256": "a89a1b9b513ae6ef890f4b64c4162f4dd4a2d5753190523334903ea9e55e4b3a"
+    },
+    {
+      "case": "access-01",
+      "decisions": 3,
+      "results_sha256": "5a485e3b1be6ff85ee2d8b50abc8fecba6ca085d6134ef732261a9f7c5824e46"
+    },
+    {
+      "case": "access-02",
+      "decisions": 3,
+      "results_sha256": "372936584e0b294663316a961f798df66b3287d1212d807a3459eaae0357aee6"
+    },
+    {
+      "case": "access-03",
+      "decisions": 3,
+      "results_sha256": "f83ab39761a5e3d2bea06affd8b38ac11a105e787afd4f2f501a4f5d2b500328"
+    },
+    {
+      "case": "access-04",
+      "decisions": 3,
+      "results_sha256": "215935b0c9de094f5d3ebec3bf984d8da09aafec749b85c0bc6b55461dcc01b8"
+    },
+    {
+      "case": "access-05",
+      "decisions": 3,
+      "results_sha256": "fc04b8cf4c18fbe3c23981d2eef8032436c082167994be5c43d01ce7d71a3892"
+    },
+    {
+      "case": "access-06",
+      "decisions": 3,
+      "results_sha256": "1f7d25ea799e33a306e6bba65120c1b45d88c2983a6c61200cd683cb74ddf31a"
+    }
+  ],
+  "binary_sha256": {
+    "before": "7773994b1720303112f982c85920a201f1c3801955574fe8a79f182125299162",
+    "after": "48bf776b2435b71ad84f574ce97bbef4128173950b6d564619706249e1f70ada"
+  },
+  "fixture_sha256": "f9d5380fdafe1bb686c9f4f1d44003a9f71c6f47fddd59063c62d3301b7d6c04"
+}
