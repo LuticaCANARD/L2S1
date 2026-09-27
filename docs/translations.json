@@ -68,7 +68,7 @@
     {
       "source": "docs/JEVBENCH.md",
       "path": "JEVBENCH.md",
-      "source_sha256": "25b8e7f13695d49425da8e1515a14914c5eed2b695da12eb6062945d6af10bd2",
+      "source_sha256": "ab3a1fc41d600d0b34f214629579c0c9dbb616e2ae539d00c753434d05a5f4da",
       "languages": [
         "en",
         "ko",
@@ -118,7 +118,7 @@
     {
       "source": "docs/MODEL_RESULTS.md",
       "path": "MODEL_RESULTS.md",
-      "source_sha256": "a22634248cd8496f81e12bacb5e5f30e6d80d2936da04ce607b5faeca5c97a6c",
+      "source_sha256": "b7d682e6d02069321ca39441b80c2485d63a25240a36623fa97456a88f89610a",
       "languages": [
         "en",
         "ko",
@@ -178,7 +178,7 @@
     {
       "source": "docs/SEMIF_ALGORITHM.md",
       "path": "SEMIF_ALGORITHM.md",
-      "source_sha256": "d35869e60bba92cd485ed143b3e1998437c316548584c84815cf2ae53a288bbf",
+      "source_sha256": "05d737f12fa715ee5efc33b48d8f66455fde6f6e46ebace7b6f8c3c2fb49f213",
       "languages": [
         "en",
         "ko",

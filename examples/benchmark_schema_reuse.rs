@@ -33,6 +33,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         context: u32,
         #[arg(long, default_value_t = 4)]
         threads: i32,
+        /// Number of layers offloaded to CUDA; omit for automatic placement.
+        #[arg(long)]
+        gpu_layers: Option<u32>,
+        /// Keep the first N layers' MoE experts on CPU.
+        #[arg(long, default_value_t = 0)]
+        cpu_moe_layers: u32,
     }
     struct Group {
         decision: Decision,
@@ -113,6 +119,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         batch: args.batch,
         ubatch: args.batch,
         threads: args.threads,
+        gpu_layers: args.gpu_layers,
+        cpu_moe_layers: args.cpu_moe_layers,
         ..Default::default()
     };
     let load = Instant::now();
@@ -143,8 +151,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
         let mut pair = Vec::new();
         for reuse in order {
+            let mode = if reuse { "shared_decision" } else { "fresh" };
+            eprintln!("round {}: {mode} warmup", round + 1);
             run(&mut backend, &groups, reuse)?;
             backend.take_timings();
+            eprintln!("round {}: {mode} measured pass", round + 1);
             let start = Instant::now();
             let responses = run(&mut backend, &groups, reuse)?;
             let elapsed_ms = start.elapsed().as_secs_f64() * 1000.;

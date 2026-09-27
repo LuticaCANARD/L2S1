@@ -9,6 +9,7 @@ const reviewEvidence = {
   'decision-review-20260927': ['summary.json'],
   'schema-reuse-20260927': ['summary.json', 'provenance.json'],
   'jevbench-rtx3080-20260927': ['summary.json', 'predictions.jsonl', 'JEVBENCH-LICENSE'],
+  'jevbench-gemma26-rtx3080-20260927': ['summary.json', 'predictions.jsonl', 'JEVBENCH-LICENSE'],
 };
 // This directory is generated; remove obsolete paths after documentation moves.
 await rm(target, { recursive: true, force: true });

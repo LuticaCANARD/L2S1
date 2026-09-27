@@ -24,6 +24,7 @@ The original 22 matrix rows use identical request and evaluator hashes, fresh/le
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | [Gemma 4 31B Q4_K_M](https://huggingface.co/google/gemma-4-31B-it) † | 89.61% | 78.38% | 98.70% | 90.35% | 22 | 3 | 2287.40 / 24524.56 | — |
 | Gemma 4 26B A4B UD-Q4_K_M ‡ | 84.85% | 70.27% | 95.24% | 86.82% | 29 | 11 | 787.01 / 8814.01 | — |
+| gemma-4-26B-A4B-it-UD-Q4_K_M ※ | 83.55% | 67.57% | 96.54% | 86.10% | 31 | 8 | 1213.76 / 12498.79 | — |
 | Qwen3.5-4B-Q8_0 | 79.65% | 61.26% | 59.74% | 93.48% | 9 | 93 | 86.88 / 1137.30 | — |
 | Qwen3.5-9B-Q4_K_M | 77.92% | 58.56% | 72.29% | 92.22% | 13 | 64 | 130.55 / 1697.14 | — |
 | Qwen3.5-9B-Q8_0 | 77.92% | 56.76% | 71.43% | 91.52% | 14 | 66 | 124.68 / 1613.79 | — |
@@ -53,6 +54,8 @@ The original 22 matrix rows use identical request and evaluator hashes, fresh/le
 | Qwen3-0.6B-Q8_0 ¶ | 31.60% | 31.53% | 80.09% | 30.81% | 128 | 46 | 28.04 / 281.52 | — |
 | SmolLM2-135M-Instruct-Q8_0 ¶ | 30.74% | 28.83% | 7.36% | 64.71% | 6 | 214 | 25.22 / 228.48 | — |
 | SmolLM2-135M-Instruct-Q8_0 | 30.30% | 29.73% | 8.66% | 60.00% | 8 | 211 | 14.88 / 253.65 | — |
+
+※ September 27 Gemma 4 26B-A4B follow-up: RTX 3080, context 8192, 22 CPU expert layers and four threads. All 231 public items completed without errors/truncation; raw correct / total and accepted correct / accepted are 193/231; 192/223. The frozen evaluator and request hash match the five-model ¶ run, but context, quantization and CPU/GPU placement differ. [Audited evidence](../../benchmarks/jevbench-gemma26-rtx3080-20260927/summary.json), [per-item predictions](../../benchmarks/jevbench-gemma26-rtx3080-20260927/predictions.jsonl), and [paired reuse analysis](JEVBENCH.md#gemma26-rtx3080-20260927). The separate historical ‡ result remains unchanged.
 
 ¶ September 27 rerun: five checkpoints, 231 public items each, RTX 3080 10 GiB / WSL2, CUDA, fresh/legacy, context 16384, batch/ubatch 256, four threads, FlashAttention off, full evidence and default 0.8 probability / 0.05 mass gates. All 1,155 outputs were valid without errors or truncation. These rows use a separately frozen evaluator; hardware, context and build differ from earlier rows and the supplied M5/MLX report, so latency is not a controlled cross-run comparison. [Audited evidence](../../benchmarks/jevbench-rtx3080-20260927/summary.json) includes model/source/request hashes, tier counts, calibration diagnostics and [per-case predictions](../../benchmarks/jevbench-rtx3080-20260927/predictions.jsonl). Coverage and accepted accuracy are shown separately from raw argmax, and are derived from the accepted/abstained counts for older rows. [Protocol and prefix-reuse diagnostics](JEVBENCH.md#rtx3080-rerun-20260927).
 

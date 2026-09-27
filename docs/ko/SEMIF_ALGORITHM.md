@@ -104,3 +104,5 @@ Linux/WSL2, i9-9900K로 표시되는 논리 CPU 4개, 스레드 4개에서 Qwen3
 다른 작업은 `--input requests.jsonl --context 16384`로 실행한다. 입력은 `evaluate_jsonl`과 같은 정답 없는 `{ "id": "unique-case", "request": { "state": ..., "decisions": [...] } }` 행이다. 그룹화에서도 질문·선택지 순서를 그대로 유지한다. 외부 입력 보고서는 fresh/세션의 결과 일치를 검사하며, 정답률은 분리된 정답 데이터로 별도 채점한다.
 
 [RTX 3080 JevBench 231문항 검증](JEVBENCH.md#rtx3080-rerun-20260927)에서는 batch 64에서 토큰 6.48–7.20%만 재사용했습니다. 같은 batch의 출력은 보존했지만 Qwen3 0.6B·Gemma 4 E2B 모두 batch 256 fresh보다 느렸고, batch 변경 자체는 일부 top-1을 바꿨습니다. CPU 규칙 픽스처의 이득은 워크로드에 한정되며 최적화할 때 배치 처리량과 정답 변화도 함께 확인해야 합니다.
+
+큰 MoE 모델을 CUDA에서 비교할 때는 `--cpu-moe-layers N`, `--gpu-layers N`도 지정할 수 있습니다. 두 경로에 동일한 배치를 적용하고 모델 식별 정보에 기록합니다. 속도를 비교할 때 컨텍스트·batch·배치를 맞춰야 하며 CPU expert offload는 전체 GPU 추론과 다릅니다. [26B 추가 검증](JEVBENCH.md#gemma26-rtx3080-20260927)에서 이 경로를 사용합니다.

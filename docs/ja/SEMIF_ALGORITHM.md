@@ -104,3 +104,5 @@ Linux/WSL2、i9-9900Kと表示される論理CPU 4個、4スレッドでQwen3-0.
 別のワークロードは`--input requests.jsonl --context 16384`で実行する。入力は`evaluate_jsonl`と同じ、正解を含まない`{ "id": "unique-case", "request": { "state": ..., "decisions": [...] } }`行である。グループ化でも指示・候補順序を維持する。外部入力レポートはfreshとセッションの結果一致を検査し、精度は分離した正解データで別途採点する。
 
 [RTX 3080 JevBench 231問の検証](JEVBENCH.md#rtx3080-rerun-20260927)ではbatch 64の再利用は入力トークンの6.48–7.20%でした。同一batchの出力は保持しましたが、Qwen3 0.6B・Gemma 4 E2Bともbatch 256 freshより遅く、batch変更自体で一部のtop-1が変化しました。CPUルールフィクスチャの効果はワークロードに依存し、最適化にはbatch処理量と正解変化の確認も必要です。
+
+大きいMoEモデルのCUDA比較では`--cpu-moe-layers N`、`--gpu-layers N`も指定できます。両経路で同じ配置を使い、モデル識別情報に記録します。速度比較ではcontext・batch・配置を揃えてください。CPU expert offloadは全GPU推論ではありません。[26B追加検証](JEVBENCH.md#gemma26-rtx3080-20260927)でこの経路を使用します。
