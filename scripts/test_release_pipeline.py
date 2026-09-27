@@ -35,9 +35,12 @@ class ReleasePipeline(unittest.TestCase):
             manifest = tomllib.loads((output / 'Cargo.toml').read_text())
             self.assertNotIn('rullama-engine', manifest['dependencies'])
             self.assertNotIn('wgpu', manifest['features'])
-            for feature in ['llama', 'llama-cuda', 'llama-metal', 'openrouter']:
+            for feature in ['llama', 'llama-cuda', 'llama-metal', 'onnx', 'onnx-cuda', 'openrouter']:
                 self.assertIn(feature, manifest['features'])
             self.assertTrue((output / 'src/stdio.rs').is_file())
+            self.assertTrue((output / 'src/evidence/simd.rs').is_file())
+            self.assertTrue((output / 'third_party/ollaya/LICENSE').is_file())
+            self.assertTrue((output / 'tests/fixtures/decision_benchmark.json').is_file())
             self.assertNotIn('feature = "wgpu"', (output / 'src/lib.rs').read_text())
             with self.assertRaises(ValueError):
                 prepare(ROOT, output)

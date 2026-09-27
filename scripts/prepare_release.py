@@ -117,7 +117,9 @@ def seal(directory: Path, files: list[Path], tag: str, commit: str) -> None:
             hashes[path.name] = hashlib.file_digest(stream, 'sha256').hexdigest()
     (directory / 'SHA256SUMS').write_text(''.join(f'{digest}  {name}\n' for name, digest in hashes.items()))
     (directory / 'release.json').write_text(json.dumps({'tag': tag, 'commit': commit, 'files': hashes,
-        'cargo_features': ['llama', 'llama-cuda', 'llama-metal', 'openrouter'], 'wgpu': 'source checkout only'}, indent=2)+'\n')
+        'cargo_features': ['llama', 'llama-cuda', 'llama-metal', 'onnx', 'onnx-cuda', 'openrouter'],
+        'onnx_runtime': 'separately installed; not bundled in npm native runtimes',
+        'wgpu': 'source checkout only'}, indent=2)+'\n')
 
 
 if __name__ == '__main__':
