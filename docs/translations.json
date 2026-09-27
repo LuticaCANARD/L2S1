@@ -38,7 +38,7 @@
     {
       "source": "docs/GUIDE.md",
       "path": "GUIDE.md",
-      "source_sha256": "fbce0281d61d7ca690aa7df6b69b2c330ccb11993049e13c7931733f844adc25",
+      "source_sha256": "409d5b4a87067778c05ced15414c8bf3f981c5350ba02479c84793baf33eb9cf",
       "languages": [
         "en",
         "ko",
@@ -308,7 +308,7 @@
     {
       "source": "sdks/typescript/README.md",
       "path": "typescript/README.md",
-      "source_sha256": "5df35d6d6d2e2b00e59610934b520ef36a0e6630b1f4a2ef7dae122be50c7dae",
+      "source_sha256": "69e36b9e6a50ca038e36377aae5c458ac67b3b2dab9166eef490db19e7502926",
       "languages": [
         "en",
         "ko",
@@ -438,7 +438,7 @@
     {
       "source": "sdks/python/README.md",
       "path": "python/README.md",
-      "source_sha256": "d5f0aac98801e57e3a0ed21e9fa06d7e586f740722d1f8ae96bd6bee59f5f8be",
+      "source_sha256": "942ea3c60dfc7c93c7643fa70e2a3ff5913148929b3051b91f69ed28c00ae606",
       "languages": [
         "en",
         "ko",
@@ -458,7 +458,7 @@
     {
       "source": "docs/FAST_DECISIONS.md",
       "path": "FAST_DECISIONS.md",
-      "source_sha256": "8f1ee5b402771ba1f86c0731c25f6fa1aac536c9bb182c40a8d4b7420d166cfa",
+      "source_sha256": "4e63ba6b69b410cc786728c5b04bdc0465a291c461eff7be29b860a56f9edcaf",
       "languages": [
         "en",
         "ko",

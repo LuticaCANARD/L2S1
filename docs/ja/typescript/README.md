@@ -240,3 +240,11 @@ npm run test:package -- l2s1-node-0.1.3.tgz l2s1-runtime-linux-x64-0.1.3.tgz
 ランタイムを再構築するときは、新しい出力ディレクトリを使用します。 `L2S1_PORTABLE_BUILD=1` は、ビルドホスト CPU 命令と OpenMP 依存関係を無効にします。一般的な CPU カーネルは、ホストに最適化されたカスタム ビルドよりも遅い可能性があります。各アーティファクトには、ライセンス通知と SHA-256 マニフェストが含まれています。ベリファイアは、Linux llama.cpp/GGML の依存関係がバンドル ディレクトリから解決されることを確認します。
 
 [配布パイプライン](../RELEASE_PIPELINE.md)で SDK と native runtime の自動公開・認証設定を確認してください。
+
+## 常駐 prefix 再利用
+
+対応する常駐テキストサーバー（`--listen` / `--stdio`、SDK の `load` を含む）は、実行モードを省略すると容量制限付きの固定スキーマ prefix KV 再利用を既定で使用します。単発 CLI と低水準 Rust バックエンドは `fresh` を維持します。明示した実行モード、vision/projector、calibration/output head、compact evidence は従来の経路を維持し、recurrent/hybrid モデルは起動メッセージとともに fresh に切り替わります。無効化は `--execution-mode fresh`、対応を必須にする場合は `--fixed-schema` を使います。ネイティブ並列バッチには引き続き `--execution-mode parallel` が必要です。分割計画によってスコアが変わるため、capabilities と `usage.reused_prefix_tokens` を確認してください。
+
+`fixedSchema` を省略するとランタイムの既定値に従います。true は対応を必須にし、false は実行モード省略時に fresh を選びます。明示した実行モードは false より優先されます。
+
+この既定値は v0.1.3 後のソース変更です。公開済み v0.1.3 では `fixedSchema: true` / `fixed_schema=True` の明示が必要です。次のリリースまでは新しくビルドしたバイナリを使ってください。

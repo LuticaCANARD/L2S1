@@ -31,7 +31,7 @@ struct Args {
     /// Start a JSON HTTP API at this address, for example 127.0.0.1:8080.
     #[arg(long, conflicts_with_all = ["input", "image", "inspect", "preflight", "diagnostics"])]
     listen: Option<String>,
-    /// Resident deterministic schema-prefix KV reuse (one active KV slot).
+    /// Require deterministic schema-prefix KV reuse. Compatible text servers use it by default.
     #[arg(long)]
     fixed_schema: bool,
     /// Optional Laya ONNX fast path. Without a validated cascade policy, use slow only.
@@ -82,9 +82,9 @@ struct Args {
     /// Auto selects GPT-OSS final prefill, Qwen3 non-thinking, or the GGUF template.
     #[arg(long, value_enum, default_value_t = PromptProfile::Auto)]
     prompt_profile: PromptProfile,
-    /// Fresh, prefix-reuse, state-restore, or parallel questions; validate score differences.
-    #[arg(long, value_enum, default_value_t = ExecutionMode::Fresh)]
-    execution_mode: ExecutionMode,
+    /// Override automatic resident prefix reuse; use fresh for independent evaluation.
+    #[arg(long, value_enum)]
+    execution_mode: Option<ExecutionMode>,
     /// Maximum questions per parallel wave (1..32); increases KV memory use.
     #[arg(long, default_value_t = 4, value_parser = clap::value_parser!(u32).range(1..=32))]
     parallel_width: u32,
@@ -137,6 +137,28 @@ enum Device {
     Cpu,
     Cuda,
     Metal,
+}
+
+impl Args {
+    fn automatic_fixed_schema(&self) -> bool {
+        (self.listen.is_some() || self.stdio)
+            && self.execution_mode.is_none()
+            && !self.fixed_schema
+            && self.mmproj.is_none()
+            && self.output_head.is_none()
+            && self.calibration.is_empty()
+            && self.evidence_transfer == EvidenceTransfer::Full
+    }
+
+    fn selected_execution_mode(&self) -> ExecutionMode {
+        self.execution_mode.unwrap_or_else(|| {
+            if self.fixed_schema || self.automatic_fixed_schema() {
+                ExecutionMode::PrefixReuse
+            } else {
+                ExecutionMode::Fresh
+            }
+        })
+    }
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -205,7 +227,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(path) = &args.mmproj {
         backend.load_vision_projector(path)?;
     }
-    backend.set_execution_mode(args.execution_mode);
+    backend.set_execution_mode(args.selected_execution_mode());
     backend.set_parallel_width(args.parallel_width as usize)?;
     backend.set_parallel_context_dynamic(args.parallel_context_dynamic);
     backend.set_prompt_layout(args.prompt_layout);
@@ -229,20 +251,31 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     if args.vision_optimized {
         backend.enable_vision_optimizations()?;
     }
+    let mut fixed_schema = args.fixed_schema;
+    if args.automatic_fixed_schema() {
+        if l2s1::llama::FixedSchemaBackend::is_compatible(&backend) {
+            fixed_schema = true;
+        } else {
+            backend.set_execution_mode(ExecutionMode::Fresh);
+            eprintln!(
+                "l2s1: automatic fixed-schema prefix reuse is unavailable for this model; using fresh execution"
+            );
+        }
+    }
     if args.inspect {
         serde_json::to_writer_pretty(io::stdout().lock(), &backend.inspect())?;
         println!();
         return Ok(());
     }
     if let Some(address) = &args.listen {
-        if args.fixed_schema {
+        if fixed_schema {
             let fixed = l2s1::llama::FixedSchemaBackend::new(backend)?;
             return serve_selected(&args, address, fixed);
         }
         return serve_selected(&args, address, backend);
     }
     if args.stdio {
-        if args.fixed_schema {
+        if fixed_schema {
             return l2s1::stdio::serve(&mut l2s1::llama::FixedSchemaBackend::new(backend)?);
         }
         return l2s1::stdio::serve(&mut backend);
@@ -302,6 +335,49 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn resident_defaults_and_explicit_execution_contracts() {
+        let parse = |flags: &[&str]| {
+            let mut argv = vec!["l2s1", "--model", "m.gguf"];
+            argv.extend_from_slice(flags);
+            Args::try_parse_from(argv).unwrap()
+        };
+        for flags in [vec!["--stdio"], vec!["--listen", "127.0.0.1:0"]] {
+            let args = parse(&flags);
+            assert!(args.automatic_fixed_schema());
+            assert_eq!(args.selected_execution_mode(), ExecutionMode::PrefixReuse);
+        }
+        let cli = parse(&[]);
+        assert!(!cli.automatic_fixed_schema());
+        assert_eq!(cli.selected_execution_mode(), ExecutionMode::Fresh);
+        for (name, expected) in [
+            ("fresh", ExecutionMode::Fresh),
+            ("prefix-reuse", ExecutionMode::PrefixReuse),
+            ("parallel", ExecutionMode::Parallel),
+            ("state-restore", ExecutionMode::StateRestore),
+        ] {
+            let args = parse(&["--stdio", "--execution-mode", name]);
+            assert!(!args.automatic_fixed_schema());
+            assert_eq!(args.selected_execution_mode(), expected);
+        }
+        for flags in [
+            vec!["--stdio", "--mmproj", "projector.gguf"],
+            vec!["--stdio", "--calibration", "calibration.json"],
+            vec!["--stdio", "--output-head", "head.json"],
+            vec!["--stdio", "--evidence-transfer", "compact"],
+        ] {
+            let args = parse(&flags);
+            assert!(!args.automatic_fixed_schema());
+            assert_eq!(args.selected_execution_mode(), ExecutionMode::Fresh);
+        }
+        let required = parse(&["--stdio", "--fixed-schema"]);
+        assert!(!required.automatic_fixed_schema());
+        assert_eq!(
+            required.selected_execution_mode(),
+            ExecutionMode::PrefixReuse
+        );
+    }
 
     #[test]
     fn optimized_profile_requires_projector_and_rejects_partial_overrides() {

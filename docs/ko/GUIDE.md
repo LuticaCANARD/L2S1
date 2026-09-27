@@ -370,9 +370,13 @@ cargo run --release --locked --example fit_calibration -- \
 <a id="execution-and-memory"></a>
 ## 실행과 메모리
 
+호환되는 텍스트 상주 서버(`--listen` / `--stdio`, SDK `load` 포함)는 실행 모드를 생략하면 크기가 제한된 고정 스키마 prefix KV 재사용을 기본으로 사용합니다. 단발 CLI와 저수준 Rust 백엔드는 `fresh`를 유지합니다. 명시한 실행 모드, 비전/projector, calibration/output head, compact evidence는 기존 경로를 유지하며 recurrent/hybrid 모델은 시작 메시지와 함께 fresh로 전환합니다. `--execution-mode fresh`로 끄거나 `--fixed-schema`로 지원을 필수 조건으로 지정할 수 있습니다. 네이티브 병렬 배치는 여전히 `--execution-mode parallel`이 필요합니다. 분할 계획에 따라 점수가 달라질 수 있으므로 capabilities와 `usage.reused_prefix_tokens`를 확인하세요.
+
+이 기본값은 v0.1.3 이후 소스 변경입니다. 배포된 v0.1.3에서는 `fixedSchema: true` / `fixed_schema=True`를 명시해야 하며, 다음 릴리스 전에는 새로 빌드한 바이너리를 사용하세요.
+
 | `--execution-mode` | 동작 | 상태 |
 | --- | --- | --- |
-| `fresh` | 빈 시퀀스 상태에서 모든 판단을 평가합니다. | 기본값 |
+| `fresh` | 빈 시퀀스 상태에서 모든 판단을 평가합니다. | 단발 CLI / Rust 기본값 |
 | `prefix-reuse` | 한 요청 내에서 정확한 공통 토큰 접두어의 전체 사전 채우기 배치를 재사용합니다. | 선택; 반복/하이브리드 메모리가 새로운 메모리로 돌아갑니다. |
 | `state-restore` | 공통 접두사의 전체 시퀀스 상태를 저장하고 나중에 독립된 접미사를 위해 복원합니다. | 지원됨, 선택 가능; 테스트된 하이브리드 Bonsai GGUF와 함께 작동 |
 | `parallel` | 공유 접두사 미리 채우기를 사용하여 독립적인 질문을 격리된 시퀀스로 일괄 처리 | 지원됨; 반복/하이브리드 모델을 거부하고 점수를 변경할 수 있습니다. |
@@ -386,7 +390,7 @@ cargo run --release --locked --example fit_calibration -- \
   --snapshot-limit-bytes 268435456 --diagnostics
 ```
 
-상태 복원은 기본적으로 스냅샷 버퍼를 256 MiB로 제한하고 스냅샷을 사용할 수 없는 경우 새로운 대체를 보고합니다. 완전한 증거 이전이 필요합니다. `prefix-reuse`는 여전히 해당 모델에서 최신 상태로 돌아가기 때문에 순환/하이브리드 모델에 대해 명시적으로 `state-restore`를 사용하세요. `--parallel-width`는 병렬 웨이브당 질문을 제한하고 컨텍스트 메모리를 늘립니다. 일반 요청은 요청 경계 및 오류 이후 네이티브 KV 상태를 지웁니다. 스냅샷은 네이티브 호출에서 유지되지 않습니다. 스냅샷 제한이나 작업자 예약은 전체 프로세스 메모리 제한이 아닙니다.
+상태 복원은 기본적으로 스냅샷 버퍼를 256 MiB로 제한하고 스냅샷을 사용할 수 없는 경우 새로운 대체를 보고합니다. 완전한 증거 이전이 필요합니다. `prefix-reuse`는 여전히 해당 모델에서 최신 상태로 돌아가기 때문에 순환/하이브리드 모델에 대해 명시적으로 `state-restore`를 사용하세요. `--parallel-width`는 병렬 웨이브당 질문을 제한하고 컨텍스트 메모리를 늘립니다. 고정 스키마 상주 세션 외의 일반 요청은 요청 경계 및 오류 이후 네이티브 KV 상태를 지웁니다. 스냅샷은 네이티브 호출에서 유지되지 않습니다. 스냅샷 제한이나 작업자 예약은 전체 프로세스 메모리 제한이 아닙니다.
 
 `--parallel-context-dynamic`는 해당 웨이브의 실제 입력 토큰과 헤드룸 배치 1개를 더해 각 병렬 KV 컨텍스트의 크기를 판단합니다. `--context`는 질문당 입력 제한으로 유지됩니다. 이후의 웨이브가 클수록 컨텍스트가 커지고 동일한 유효 질문 수에서 가장 큰 할당을 유지합니다. 응답 보고서 `backend.parallel_context_tokens`; 컨텍스트 크기를 변경하면 점수가 변경될 수 있으므로 대상 모델에서 판단 동등성을 확인하세요.
 
@@ -399,7 +403,7 @@ VRAM보다 큰 모델의 경우 CUDA 로딩은 `--gpu-layers N` 또는 `--cpu-mo
 
 낮은 모델 로딩 피크 프로세스 RSS의 경우 `--model-load-mode read`를 사용합니다. [로드 동작 및 측정 제한](MODEL_INTERCHANGEABILITY.md#model-loading-and-peak-host-rss)를 참조하세요.
 
-레거시 프롬프트, 새로운 실행, 전체 증거 전송 및 비활성화된 준비 캐싱이 기본값으로 유지됩니다. 기존 반복 요청 및 수정된 판단 스키마는 계속 작동합니다. 이러한 옵션 중 어느 것도 고정된 스키마가 필요하지 않습니다.
+레거시 프롬프트, full evidence 및 비활성화된 준비 캐시는 기본값을 유지하며, 상주 실행은 위의 자동 선택을 따릅니다. 기존 반복 요청 및 수정된 판단 스키마는 계속 작동합니다. 이러한 옵션 중 어느 것도 고정된 스키마가 필요하지 않습니다.
 
 ```sh
 ./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \

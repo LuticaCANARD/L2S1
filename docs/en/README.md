@@ -77,3 +77,7 @@ Start with the [English README](../../README.md) to build L2S1 and run a first d
 Source and dependency notices: [LICENSE](../../LICENSE), [THIRD_PARTY_LICENSES.txt](../../THIRD_PARTY_LICENSES.txt). Model weights are supplied separately and keep their own terms. These reports describe recorded experiments within their stated scope; report accuracy, accepted accuracy, and coverage separately.
 
 - [Fast decision serving](FAST_DECISIONS.md): fixed prefix / ONNX / cascade.
+
+Compatible resident text servers (`--listen` / `--stdio`, including SDK `load`) automatically use bounded fixed-schema prefix KV reuse when no execution mode is specified. One-shot CLI calls and the low-level Rust backend retain `fresh`. Explicit execution modes, vision/projector settings, calibration/output heads and compact evidence preserve their existing paths; recurrent/hybrid models fall back to fresh with a startup message. Use `--execution-mode fresh` to opt out, or `--fixed-schema` to require support. Native parallel batching still requires `--execution-mode parallel`. This changes the split plan and can change scores; check capabilities and `usage.reused_prefix_tokens`.
+
+This default is a source change after v0.1.3. Published v0.1.3 requires explicit `fixedSchema: true` / `fixed_schema=True`; use a newly built binary until the next release.

@@ -173,3 +173,11 @@ GGUF, CUDA or Metal quality/performance evidence. The CI matrix targets Python
 actual host. The release pipeline publishes validated wheel/sdist artifacts to PyPI.
 
 The [release pipeline](../../docs/RELEASE_PIPELINE.md) publishes validated GitHub Release, npm, PyPI and native Cargo packages using configured trusted publishers. [v0.1.3](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.3) is available.
+
+## Resident prefix reuse
+
+Compatible resident text servers (`--listen` / `--stdio`, including SDK `load`) automatically use bounded fixed-schema prefix KV reuse when no execution mode is specified. One-shot CLI calls and the low-level Rust backend retain `fresh`. Explicit execution modes, vision/projector settings, calibration/output heads and compact evidence preserve their existing paths; recurrent/hybrid models fall back to fresh with a startup message. Use `--execution-mode fresh` to opt out, or `--fixed-schema` to require support. Native parallel batching still requires `--execution-mode parallel`. This changes the split plan and can change scores; check capabilities and `usage.reused_prefix_tokens`.
+
+Omit `fixed_schema` to inherit the runtime default. Set it to true to require support, or false to select fresh when no execution mode is specified. An explicit execution mode takes precedence over false.
+
+This default is a source change after v0.1.3. Published v0.1.3 requires explicit `fixedSchema: true` / `fixed_schema=True`; use a newly built binary until the next release.

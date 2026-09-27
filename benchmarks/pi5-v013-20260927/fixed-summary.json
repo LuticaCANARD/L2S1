@@ -1,0 +1,20 @@
+{
+  "mode": "fixed",
+  "load_ms": 761.8639590000384,
+  "measured_requests": 6,
+  "decisions": 18,
+  "p50_ms": 4090.89437450001,
+  "p95_ms": 7469.94894799991,
+  "raw_top1": 0.5555555555555556,
+  "coverage": 0.8888888888888888,
+  "accepted_accuracy": 0.625,
+  "reused_prefix_tokens": 1829,
+  "input_tokens": 2394,
+  "repeat_evidence_changes": 0,
+  "peak_native_rss_gib": 1.133026123046875,
+  "max_temperature_c": 67.2,
+  "max_swap_mib": 0.0,
+  "active_undervoltage_samples": 32,
+  "active_throttle_samples": 32,
+  "telemetry_samples": 45
+}

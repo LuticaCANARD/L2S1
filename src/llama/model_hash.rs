@@ -129,18 +129,15 @@ fn digest_with_cache(path: &Path, directory: Option<&Path>) -> Result<String> {
         .as_ref()
         .zip(directory)
         .map(|(file, directory)| cache_path(directory, file));
-    if let (Some(file), Some(cache_path)) = (&before, &cache_path) {
-        if let Ok(bytes) = fs::read(cache_path) {
-            if let Ok(entry) = serde_json::from_slice::<CacheEntry>(&bytes) {
-                if entry.version == 1
-                    && entry.file == *file
-                    && valid_digest(&entry.sha256)
-                    && FileIdentity::read(path).as_ref() == Some(file)
-                {
-                    return Ok(entry.sha256);
-                }
-            }
-        }
+    if let (Some(file), Some(cache_path)) = (&before, &cache_path)
+        && let Ok(bytes) = fs::read(cache_path)
+        && let Ok(entry) = serde_json::from_slice::<CacheEntry>(&bytes)
+        && entry.version == 1
+        && entry.file == *file
+        && valid_digest(&entry.sha256)
+        && FileIdentity::read(path).as_ref() == Some(file)
+    {
+        return Ok(entry.sha256);
     }
 
     let sha256 = crate::interoperability::file_digest(path)?;

@@ -378,9 +378,13 @@ A compatible GGUF LoRA can be loaded with `--lora`. A learned task-specific scor
 <a id="execution-and-memory"></a>
 ## Execution and memory
 
+Compatible resident text servers (`--listen` / `--stdio`, including SDK `load`) automatically use bounded fixed-schema prefix KV reuse when no execution mode is specified. One-shot CLI calls and the low-level Rust backend retain `fresh`. Explicit execution modes, vision/projector settings, calibration/output heads and compact evidence preserve their existing paths; recurrent/hybrid models fall back to fresh with a startup message. Use `--execution-mode fresh` to opt out, or `--fixed-schema` to require support. Native parallel batching still requires `--execution-mode parallel`. This changes the split plan and can change scores; check capabilities and `usage.reused_prefix_tokens`.
+
+This default is a source change after v0.1.3. Published v0.1.3 requires explicit `fixedSchema: true` / `fixed_schema=True`; use a newly built binary until the next release.
+
 | `--execution-mode` | Behavior | Status |
 | --- | --- | --- |
-| `fresh` | Evaluate every decision from an empty sequence state | Default |
+| `fresh` | Evaluate every decision from an empty sequence state | One-shot CLI / Rust default |
 | `prefix-reuse` | Reuse complete prefill batches from an exact common token prefix within one request | Opt-in; recurrent/hybrid memory falls back to fresh |
 | `state-restore` | Save a common prefix's whole sequence state and restore it for later independent suffixes | Supported, opt-in; works with tested hybrid Bonsai GGUF |
 | `parallel` | Batch independent questions into isolated sequences with shared-prefix prefill | Supported; rejects recurrent/hybrid models and can change scores |
@@ -394,7 +398,7 @@ The default prompt layout is `legacy`. `--prompt-layout state-first` places shar
   --snapshot-limit-bytes 268435456 --diagnostics
 ```
 
-State restoration limits its snapshot buffer to 256 MiB by default and reports fresh fallback when a snapshot cannot be used. It requires full evidence transfer; use `state-restore` explicitly for recurrent/hybrid models because `prefix-reuse` still falls back to fresh on those models. `--parallel-width` bounds questions per parallel wave and increases context memory. Ordinary requests clear native KV state at request boundaries and after errors; snapshots never survive their native call. Neither snapshot limits nor worker reservations are whole-process memory limits.
+State restoration limits its snapshot buffer to 256 MiB by default and reports fresh fallback when a snapshot cannot be used. It requires full evidence transfer; use `state-restore` explicitly for recurrent/hybrid models because `prefix-reuse` still falls back to fresh on those models. `--parallel-width` bounds questions per parallel wave and increases context memory. Outside fixed-schema resident sessions, ordinary requests clear native KV state at request boundaries and after errors; snapshots never survive their native call. Neither snapshot limits nor worker reservations are whole-process memory limits.
 
 `--parallel-context-dynamic` opts into sizing each parallel KV context from that wave's actual input tokens plus one batch of headroom. `--context` remains the per-question input limit. The context grows for larger later waves and retains its largest allocation at the same effective question count. Responses report `backend.parallel_context_tokens`; check decision equivalence on the target model because changing context size can change scores.
 
@@ -410,7 +414,7 @@ in compute identity and can change numerical scores. See
 
 For lower model-loading peak process RSS, use `--model-load-mode read`; see [loading behavior and measurement limits](MODEL_INTERCHANGEABILITY.md#model-loading-and-peak-host-rss).
 
-Legacy prompts, fresh execution, full evidence transfer and disabled preparation caching remain the defaults. Existing repeated requests and fixed decision schemas continue to work; none of these options requires a fixed schema.
+Legacy prompts, full evidence transfer and disabled preparation caching remain the defaults; resident execution follows the automatic selection above. Existing repeated requests and fixed decision schemas continue to work; none of these options requires a fixed schema.
 
 ```sh
 ./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \

@@ -2,21 +2,25 @@
 
 [English](../en/FAST_DECISIONS.md) · [한국어](../ko/FAST_DECISIONS.md) · [日本語](FAST_DECISIONS.md)
 
-三つとも明示的に有効化する機能です。既存 GGUF の既定値は維持し、MLX は実装しません。
+対応する常駐テキストサーバー（`--listen` / `--stdio`、SDK の `load` を含む）は、実行モードを省略すると容量制限付きの固定スキーマ prefix KV 再利用を既定で使用します。単発 CLI と低水準 Rust バックエンドは `fresh` を維持します。明示した実行モード、vision/projector、calibration/output head、compact evidence は従来の経路を維持し、recurrent/hybrid モデルは起動メッセージとともに fresh に切り替わります。無効化は `--execution-mode fresh`、対応を必須にする場合は `--fixed-schema` を使います。ネイティブ並列バッチには引き続き `--execution-mode parallel` が必要です。分割計画によってスコアが変わるため、capabilities と `usage.reused_prefix_tokens` を確認してください。
+
+この既定値は v0.1.3 後のソース変更です。公開済み v0.1.3 では `fixedSchema: true` / `fixed_schema=True` の明示が必要です。次のリリースまでは新しくビルドしたバイナリを使ってください。
 
 ## 固定スキーマ
 
 環境に応じて `llama`、`llama-cuda`、`llama-metal` でビルドします。
 
 ```sh
-l2s1 --model model.gguf --execution-mode prefix-reuse --fixed-schema --listen 127.0.0.1:8080
+l2s1 --model model.gguf --listen 127.0.0.1:8080
 ```
 
 `FixedSchemaBackend` は cold/warm の両方を同じ prefix/suffix 境界で評価し、大きな prefill batch を維持します。完全なプロンプトをトークン化して実際の token prefix を比較するため、BPE 境界を保ちます。アクティブな KV context は一つ、prefix snapshot は最大 8 個・256MiB、スキーマ準備キャッシュは別途 64 個・4MiB です。追い出された prefix は再計算し、答えは保存しません。`clear()` で KV と snapshot を消去します。信頼領域ごとに専用サーバーを使ってください。
 
-分割自体が既存 fresh の点数を変える可能性があります。**既存 fresh と split cold**、**split cold と split warm**を別々に比較します。後者がキャッシュの同等性検査です。recurrent/hybrid、既存 calibration、output head は拒否し、full evidence を要求します。26 個を超える候補と画像は KV を消去した既存経路で処理します。`shared_decision()` の batch 境界に合わせる従来動作は維持します。
+分割自体が既存 fresh の点数を変える可能性があります。**既存 fresh と split cold**、**split cold と split warm**を別々に比較します。後者がキャッシュの同等性検査です。明示的な固定スキーマ指定は recurrent/hybrid、既存 calibration、output head を拒否し、full evidence を要求します。26 個を超える候補と画像は KV を消去した既存経路で処理します。`shared_decision()` の batch 境界に合わせる従来動作は維持します。
 
 TypeScript は `L2S1.load({ model, fixedSchema: true, binaryPath: "./target/release/l2s1" })`、Python は `LoadOptions(model=..., fixed_schema=True, binary_path="./target/release/l2s1")` を使います。実行モード省略時は prefix-reuse を選び、stdio/HTTP に対応します。`prepare()` だけでは KV は作りません。capabilities の `prefix_reuse` と結果の `usage.reused_prefix_tokens` を確認してください。
+
+`fixedSchema: true` / `fixed_schema=True` はこの計画を必須にし、非対応ならエラーになります。省略は自動選択、`false` / `False` は明示した実行モードがなければ fresh を選びます。既存の cascade ポリシーは実行計画も一致する必要があるため、以前の明示設定を維持するか再適合・検証してください。
 
 ## Laya ONNX
 

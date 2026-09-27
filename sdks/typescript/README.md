@@ -245,3 +245,11 @@ npm run test:package -- l2s1-node-0.1.3.tgz l2s1-runtime-linux-x64-0.1.3.tgz
 Use a fresh output directory when rebuilding a runtime. `L2S1_PORTABLE_BUILD=1` disables build-host CPU instructions and OpenMP dependencies; its general CPU kernels may be slower than a host-optimized custom build. Each artifact includes license notices and a SHA-256 manifest. The verifier checks that Linux llama.cpp/GGML dependencies resolve from the bundle directory.
 
 The [release pipeline](../../docs/RELEASE_PIPELINE.md) publishes verified GitHub Release, npm, PyPI and native Cargo artifacts. Configure registry publishers before pushing a stable version tag.
+
+## Resident prefix reuse
+
+Compatible resident text servers (`--listen` / `--stdio`, including SDK `load`) automatically use bounded fixed-schema prefix KV reuse when no execution mode is specified. One-shot CLI calls and the low-level Rust backend retain `fresh`. Explicit execution modes, vision/projector settings, calibration/output heads and compact evidence preserve their existing paths; recurrent/hybrid models fall back to fresh with a startup message. Use `--execution-mode fresh` to opt out, or `--fixed-schema` to require support. Native parallel batching still requires `--execution-mode parallel`. This changes the split plan and can change scores; check capabilities and `usage.reused_prefix_tokens`.
+
+Omit `fixedSchema` to inherit the runtime default. Set it to true to require support, or false to select fresh when no execution mode is specified. An explicit execution mode takes precedence over false.
+
+This default is a source change after v0.1.3. Published v0.1.3 requires explicit `fixedSchema: true` / `fixed_schema=True`; use a newly built binary until the next release.

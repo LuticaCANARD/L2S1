@@ -19,7 +19,7 @@ export interface LoadOptions {
   ubatch?: number;
   threads?: number;
   gpuLayers?: number;
-  /** Explicit fixed-schema split plan with bounded prefix snapshots. */
+  /** Omit for the runtime default; true requires fixed-schema reuse, false opts out. */
   fixedSchema?: boolean;
   executionMode?: 'fresh' | 'prefix-reuse' | 'state-restore' | 'parallel';
   parallelWidth?: number;
@@ -49,6 +49,7 @@ function argumentsFor(options: LoadOptions): string[] {
     args.push('--fixed-schema');
     if (!options.executionMode) args.push('--execution-mode', 'prefix-reuse');
   }
+  if (options.fixedSchema === false && !options.executionMode) args.push('--execution-mode', 'fresh');
   const flags: [string, string | number | undefined][] = [
     ['device', options.device], ['mmproj', options.mmproj], ['lora', options.lora],
     ['context', options.context], ['batch', options.batch], ['ubatch', options.ubatch],

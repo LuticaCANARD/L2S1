@@ -1,0 +1,211 @@
+[
+  {
+    "pass_id": -1,
+    "case_id": "warehouse-01",
+    "elapsed_ms": 17038.30671000003,
+    "response": {
+      "api_version": 1,
+      "request_id": "local-2",
+      "scheduling": null,
+      "backend": {
+        "runtime": "local-libllama",
+        "model": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+        "details": {
+          "compute": {
+            "batch": 256,
+            "context": 2048,
+            "flash_attention": "off",
+            "threads": 4,
+            "ubatch": 256
+          },
+          "execution_mode": "fresh",
+          "model_architecture": "gemma3",
+          "model_description": "gemma3 1B Q8_0",
+          "model_path": "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+          "offload_device": null,
+          "offload_requested": false,
+          "parallel_width": 1,
+          "prompt_layout": "legacy",
+          "prompt_profile": "model",
+          "prompt_version": "gguf-jinja-decision-v1",
+          "runtime": "local-libllama"
+        }
+      },
+      "policy": {
+        "min_top_probability": 0.8,
+        "min_candidate_mass": 0.05
+      },
+      "results": [
+        {
+          "id": "storage_zone",
+          "value": {
+            "type": "choice",
+            "selected": "ambient"
+          },
+          "status": "selected",
+          "abstention_reasons": [],
+          "reason_messages": null,
+          "evidence": {
+            "type": "model_scored",
+            "scores": [
+              {
+                "id": "ambient",
+                "code": "A",
+                "token_id": 236776,
+                "token_ids": null,
+                "raw_logit": 38.22929763793945,
+                "option_probability": 0.9999629149570208
+              },
+              {
+                "id": "chilled",
+                "code": "B",
+                "token_id": 236799,
+                "token_ids": null,
+                "raw_logit": 27.71985626220703,
+                "option_probability": 2.7276679231121212e-05
+              },
+              {
+                "id": "frozen",
+                "code": "C",
+                "token_id": 236780,
+                "token_ids": null,
+                "raw_logit": 26.697059631347656,
+                "option_probability": 9.80836375062681e-06
+              }
+            ],
+            "candidate_mass": 0.9999998091970608,
+            "top_option_probability": 0.9999629149570208,
+            "entropy_confidence": 0.9996023521840379,
+            "scoring_method": "single_token_conditional_softmax_v1",
+            "calibration_id": null,
+            "truncated": false,
+            "code_prefix_evaluations": 0,
+            "code_evaluated_tokens": 0,
+            "estimate": {
+              "p_true": null,
+              "expected_value": null
+            }
+          },
+          "routing": null,
+          "usage": {
+            "input_tokens": 123,
+            "reused_prefix_tokens": 0,
+            "output_tokens": null,
+            "reasoning": null
+          }
+        },
+        {
+          "id": "cold_chain_required",
+          "value": {
+            "type": "binary",
+            "value": true
+          },
+          "status": "selected",
+          "abstention_reasons": [],
+          "reason_messages": null,
+          "evidence": {
+            "type": "model_scored",
+            "scores": [
+              {
+                "id": "false",
+                "code": "A",
+                "token_id": 236776,
+                "token_ids": null,
+                "raw_logit": 27.7169132232666,
+                "option_probability": 0.030330995945511065
+              },
+              {
+                "id": "true",
+                "code": "B",
+                "token_id": 236799,
+                "token_ids": null,
+                "raw_logit": 31.181697845458984,
+                "option_probability": 0.9696690040544887
+              }
+            ],
+            "candidate_mass": 0.9995653803782352,
+            "top_option_probability": 0.9696690040544887,
+            "entropy_confidence": 0.8039509201069822,
+            "scoring_method": "single_token_conditional_softmax_v1",
+            "calibration_id": null,
+            "truncated": false,
+            "code_prefix_evaluations": 0,
+            "code_evaluated_tokens": 0,
+            "estimate": {
+              "p_true": 0.9696690040544887,
+              "expected_value": null
+            }
+          },
+          "routing": null,
+          "usage": {
+            "input_tokens": 116,
+            "reused_prefix_tokens": 0,
+            "output_tokens": null,
+            "reasoning": null
+          }
+        },
+        {
+          "id": "dispatch_priority",
+          "value": {
+            "type": "ordinal",
+            "selected": "low",
+            "level_value": null
+          },
+          "status": "selected",
+          "abstention_reasons": [],
+          "reason_messages": null,
+          "evidence": {
+            "type": "model_scored",
+            "scores": [
+              {
+                "id": "low",
+                "code": "A",
+                "token_id": 236776,
+                "token_ids": null,
+                "raw_logit": 32.992759704589844,
+                "option_probability": 0.9865567230735401
+              },
+              {
+                "id": "medium",
+                "code": "B",
+                "token_id": 236799,
+                "token_ids": null,
+                "raw_logit": 28.022621154785156,
+                "option_probability": 0.006848860398964443
+              },
+              {
+                "id": "high",
+                "code": "C",
+                "token_id": 236780,
+                "token_ids": null,
+                "raw_logit": 27.98476219177246,
+                "option_probability": 0.006594416527497294
+              }
+            ],
+            "candidate_mass": 0.9999796922208892,
+            "top_option_probability": 0.9865567230735401,
+            "entropy_confidence": 0.9266355716672059,
+            "scoring_method": "single_token_conditional_softmax_v1",
+            "calibration_id": null,
+            "truncated": false,
+            "code_prefix_evaluations": 0,
+            "code_evaluated_tokens": 0,
+            "estimate": {
+              "p_true": null,
+              "expected_value": 0.020037693453959032
+            }
+          },
+          "routing": null,
+          "usage": {
+            "input_tokens": 143,
+            "reused_prefix_tokens": 0,
+            "output_tokens": null,
+            "reasoning": null
+          }
+        }
+      ],
+      "reasoning": null,
+      "error_budget": null
+    }
+  }
+]
