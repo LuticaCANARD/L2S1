@@ -1,0 +1,72 @@
+{
+  "matching_cases": [
+    "warehouse-01",
+    "warehouse-02",
+    "warehouse-03"
+  ],
+  "historical_passes": [
+    0,
+    1
+  ],
+  "historical_matched": {
+    "requests": 6,
+    "decisions": 18,
+    "p50_ms": 4743.1865655,
+    "raw_top1": 0.5555555555555556,
+    "coverage": 1.0,
+    "accepted_accuracy": 0.5555555555555556
+  },
+  "current": [
+    {
+      "mode": "fresh",
+      "measured_requests": 6,
+      "unique_cases": 3,
+      "decisions": 18,
+      "p50_ms": 16873.931125499952,
+      "p95_ms": 19193.508942999983,
+      "raw_top1": 0.5555555555555556,
+      "coverage": 0.8888888888888888,
+      "accepted_accuracy": 0.625,
+      "accepted_decisions": 16,
+      "accepted_correct": 10,
+      "correct_accepted_fraction": 0.5555555555555556,
+      "reused_prefix_tokens": 0,
+      "input_tokens": 2394,
+      "repeat_evidence_changes": 0,
+      "repeat_evidence_comparisons": 9,
+      "peak_native_rss_gib": 1.1239471435546875,
+      "max_temperature_c": 67.75,
+      "max_swap_mib": 0.0,
+      "active_undervoltage_samples": 59,
+      "active_throttle_samples": 59,
+      "telemetry_samples": 122
+    },
+    {
+      "mode": "fixed",
+      "measured_requests": 6,
+      "unique_cases": 3,
+      "decisions": 18,
+      "p50_ms": 4090.89437450001,
+      "p95_ms": 7469.94894799991,
+      "raw_top1": 0.5555555555555556,
+      "coverage": 0.8888888888888888,
+      "accepted_accuracy": 0.625,
+      "accepted_decisions": 16,
+      "accepted_correct": 10,
+      "correct_accepted_fraction": 0.5555555555555556,
+      "reused_prefix_tokens": 1829,
+      "input_tokens": 2394,
+      "repeat_evidence_changes": 0,
+      "repeat_evidence_comparisons": 9,
+      "peak_native_rss_gib": 1.133026123046875,
+      "max_temperature_c": 67.2,
+      "max_swap_mib": 0.0,
+      "active_undervoltage_samples": 31,
+      "active_throttle_samples": 31,
+      "telemetry_samples": 44
+    }
+  ],
+  "current_fresh_over_historical_p50": 3.557509470159582,
+  "current_reuse_latency_reduction_vs_historical": 0.1375219342508045,
+  "scope": "Retrospective subset comparison only. Same model SHA, suite SHA, host, 3 cases and 2 passes. Different source, native build, warmup, transport and uncontrolled power conditions. Historical whole-run RSS is not a matched-subset measurement."
+}

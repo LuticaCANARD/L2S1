@@ -416,7 +416,9 @@ impl ComputeOptions {
     }
 }
 
-/// Optimized modes are opt-in because batch shapes can affect model scores.
+/// Low-level execution plan. Rust backends and one-shot CLI calls default to Fresh.
+/// Compatible resident CLI/SDK servers select fixed-schema prefix reuse automatically.
+/// Explicit plans and their calibration identities are preserved; batch shapes can affect scores.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutionMode {

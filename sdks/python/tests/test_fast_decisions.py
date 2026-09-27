@@ -17,3 +17,12 @@ class FastDecisionTests(unittest.TestCase):
         self.assertEqual(args[args.index("--execution-mode")+1],"prefix-reuse")
         with self.assertRaises(ValueError):
             _arguments(LoadOptions(model="model.gguf",fixed_schema=True,execution_mode="fresh"))
+
+    def test_runtime_default_and_explicit_opt_out(self):
+        self.assertNotIn("--execution-mode", _arguments(LoadOptions(model="model.gguf")))
+        self.assertNotIn("--fixed-schema", _arguments(LoadOptions(model="model.gguf")))
+        args = _arguments(LoadOptions(model="model.gguf", fixed_schema=False))
+        self.assertEqual(args[args.index("--execution-mode") + 1], "fresh")
+        args = _arguments(LoadOptions(model="model.gguf", fixed_schema=False, execution_mode="parallel"))
+        self.assertEqual(args.count("--execution-mode"), 1)
+        self.assertEqual(args[args.index("--execution-mode") + 1], "parallel")

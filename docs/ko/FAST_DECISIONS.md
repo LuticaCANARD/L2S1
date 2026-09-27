@@ -2,21 +2,25 @@
 
 [English](../en/FAST_DECISIONS.md) · [한국어](FAST_DECISIONS.md) · [日本語](../ja/FAST_DECISIONS.md)
 
-세 경로는 모두 선택 기능입니다. 기존 GGUF 기본값은 유지하며 MLX는 구현하지 않습니다.
+호환되는 텍스트 상주 서버(`--listen` / `--stdio`, SDK `load` 포함)는 실행 모드를 생략하면 크기가 제한된 고정 스키마 prefix KV 재사용을 기본으로 사용합니다. 단발 CLI와 저수준 Rust 백엔드는 `fresh`를 유지합니다. 명시한 실행 모드, 비전/projector, calibration/output head, compact evidence는 기존 경로를 유지하며 recurrent/hybrid 모델은 시작 메시지와 함께 fresh로 전환합니다. `--execution-mode fresh`로 끄거나 `--fixed-schema`로 지원을 필수 조건으로 지정할 수 있습니다. 네이티브 병렬 배치는 여전히 `--execution-mode parallel`이 필요합니다. 분할 계획에 따라 점수가 달라질 수 있으므로 capabilities와 `usage.reused_prefix_tokens`를 확인하세요.
+
+이 기본값은 v0.1.3 이후 소스 변경입니다. 배포된 v0.1.3에서는 `fixedSchema: true` / `fixed_schema=True`를 명시해야 하며, 다음 릴리스 전에는 새로 빌드한 바이너리를 사용하세요.
 
 ## 고정 스키마 세션
 
 `llama`, `llama-cuda`, `llama-metal` 중 환경에 맞는 기능으로 빌드합니다.
 
 ```sh
-l2s1 --model model.gguf --execution-mode prefix-reuse --fixed-schema --listen 127.0.0.1:8080
+l2s1 --model model.gguf --listen 127.0.0.1:8080
 ```
 
 `FixedSchemaBackend`는 cold와 warm 호출을 같은 prefix/suffix 경계로 나눕니다. prefill batch 크기를 줄일 필요가 없습니다. 전체 프롬프트를 토큰화한 후 실제 토큰을 대조하므로 BPE 경계를 보존합니다. 활성 KV context는 하나이며, prefix snapshot은 최대 8개·256MiB입니다. 스키마 토큰 준비 캐시는 별도로 64개·4MiB로 제한합니다. 캐시가 차면 제거한 prefix를 다시 계산하며 답 자체는 저장하지 않습니다. `clear()`로 KV와 snapshot을 비웁니다. 신뢰 영역마다 전용 서버/백엔드를 사용하세요.
 
-분할 방식 자체가 기존 fresh 점수를 바꿀 수 있습니다. **기존 fresh 대 split cold**, **split cold 대 split warm**을 각각 비교해야 합니다. 후자가 캐시 동등성 검증입니다. recurrent/hybrid 모델, 기존 calibration, output head는 거부하며 full evidence가 필요합니다. 26개 초과 후보와 이미지는 KV를 비운 기존 경로를 사용합니다. `shared_decision()`의 기존 batch 정렬 방식은 유지됩니다.
+분할 방식 자체가 기존 fresh 점수를 바꿀 수 있습니다. **기존 fresh 대 split cold**, **split cold 대 split warm**을 각각 비교해야 합니다. 후자가 캐시 동등성 검증입니다. 명시적 고정 스키마 요청은 recurrent/hybrid 모델, 기존 calibration, output head를 거부하며 full evidence가 필요합니다. 26개 초과 후보와 이미지는 KV를 비운 기존 경로를 사용합니다. `shared_decision()`의 기존 batch 정렬 방식은 유지됩니다.
 
 TypeScript는 `L2S1.load({ model, fixedSchema: true, binaryPath: "./target/release/l2s1" })`, Python은 `LoadOptions(model=..., fixed_schema=True, binary_path="./target/release/l2s1")`를 사용합니다. 실행 모드를 생략하면 prefix-reuse를 선택하며 stdio와 HTTP를 지원합니다. `prepare()`만으로 KV가 생기지는 않습니다. capabilities의 `prefix_reuse`, 결과의 `usage.reused_prefix_tokens`를 확인하세요.
+
+`fixedSchema: true` / `fixed_schema=True`는 이 계획을 필수로 요구하며 호환되지 않으면 오류를 냅니다. 옵션 생략은 자동 선택이고, `false` / `False`는 실행 모드가 따로 없을 때 fresh를 선택합니다. 기존 cascade 정책은 실행 계획까지 일치해야 하므로 이전 명시 설정을 유지하거나 정책을 다시 적합·검증하세요.
 
 ## Laya ONNX
 

@@ -77,3 +77,7 @@
 소스·의존성 고지: [LICENSE](../../LICENSE), [THIRD_PARTY_LICENSES.txt](../../THIRD_PARTY_LICENSES.txt). 모델 가중치는 별도로 준비하며 각각의 약관을 따릅니다. 보고서는 명시된 범위의 실험 기록입니다. 정답률, 수락된 판단의 정답률, 수락률을 구분하세요.
 
 - [빠른 판정 서버](FAST_DECISIONS.md): fixed prefix / ONNX / cascade.
+
+호환되는 텍스트 상주 서버(`--listen` / `--stdio`, SDK `load` 포함)는 실행 모드를 생략하면 크기가 제한된 고정 스키마 prefix KV 재사용을 기본으로 사용합니다. 단발 CLI와 저수준 Rust 백엔드는 `fresh`를 유지합니다. 명시한 실행 모드, 비전/projector, calibration/output head, compact evidence는 기존 경로를 유지하며 recurrent/hybrid 모델은 시작 메시지와 함께 fresh로 전환합니다. `--execution-mode fresh`로 끄거나 `--fixed-schema`로 지원을 필수 조건으로 지정할 수 있습니다. 네이티브 병렬 배치는 여전히 `--execution-mode parallel`이 필요합니다. 분할 계획에 따라 점수가 달라질 수 있으므로 capabilities와 `usage.reused_prefix_tokens`를 확인하세요.
+
+이 기본값은 v0.1.3 이후 소스 변경입니다. 배포된 v0.1.3에서는 `fixedSchema: true` / `fixed_schema=True`를 명시해야 하며, 다음 릴리스 전에는 새로 빌드한 바이너리를 사용하세요.

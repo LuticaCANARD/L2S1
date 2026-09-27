@@ -5,6 +5,7 @@ import json
 import os
 import unittest
 from pathlib import Path
+from typing import Literal
 from unittest.mock import patch
 
 from l2s1 import DecisionRequest, L2S1, LoadOptions, ModelScoredEvidence
@@ -40,3 +41,27 @@ class RealModel(unittest.IsolatedAsyncioTestCase):
             print(json.dumps({"sdk": "python", "transport": "stdio", "execution": "native_parallel",
                               "requests": len(responses), "reused_prefix_tokens": reused}))
             await engine.decide(request)
+
+    async def test_default_resident_reuse_and_explicit_fresh(self) -> None:
+        root = Path(__file__).resolve().parents[3]
+        request = DecisionRequest.model_validate(json.loads((root / "examples/warehouse.json").read_text()))
+        transports: tuple[Literal["stdio", "http"], ...] = ("stdio", "http")
+        for transport in transports:
+            for fixed_schema in (None, False):
+                with self.subTest(transport=transport, fixed_schema=fixed_schema):
+                    engine = await L2S1.load(LoadOptions(
+                        model=os.environ["L2S1_MODEL"], binary_path=os.environ.get("L2S1_BINARY", "l2s1"),
+                        transport=transport, fixed_schema=fixed_schema, context=2048, batch=256, threads=2,
+                    ))
+                    async with engine:
+                        cold = await engine.decide(request)
+                        warm = await engine.decide(request)
+                        self.assertEqual([r.evidence for r in cold.results], [r.evidence for r in warm.results])
+                        reused = sum(r.usage.reused_prefix_tokens or 0 for r in warm.results)
+                        assert isinstance(warm.backend.details, dict)
+                        if fixed_schema is None:
+                            self.assertGreater(reused, 0)
+                            self.assertEqual(warm.backend.details["prefix_plan"], "fixed-schema-split-v1")
+                        else:
+                            self.assertEqual(reused, 0)
+                            self.assertNotIn("prefix_plan", warm.backend.details)

@@ -298,9 +298,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 llama.cpp バックエンドは、4 つの実行モードに対応しています。
 
+対応する常駐テキストサーバー（`--listen` / `--stdio`、SDK の `load` を含む）は、実行モードを省略すると容量制限付きの固定スキーマ prefix KV 再利用を既定で使用します。単発 CLI と低水準 Rust バックエンドは `fresh` を維持します。明示した実行モード、vision/projector、calibration/output head、compact evidence は従来の経路を維持し、recurrent/hybrid モデルは起動メッセージとともに fresh に切り替わります。無効化は `--execution-mode fresh`、対応を必須にする場合は `--fixed-schema` を使います。ネイティブ並列バッチには引き続き `--execution-mode parallel` が必要です。分割計画によってスコアが変わるため、capabilities と `usage.reused_prefix_tokens` を確認してください。
+
+この既定値は v0.1.3 後のソース変更です。公開済み v0.1.3 では `fixedSchema: true` / `fixed_schema=True` の明示が必要です。次のリリースまでは新しくビルドしたバイナリを使ってください。
+
 | モード | 用途 |
 | --- | --- |
-| `fresh` | 空のシーケンス状態から独立して評価する。デフォルト |
+| `fresh` | 空のシーケンス状態から独立して評価する。単発 CLI / Rust の既定値 |
 | `prefix-reuse` | 1 つのリクエスト内で、完全に一致する共通トークンプレフィックスを再利用する |
 | `state-restore` | 共通プレフィックスの状態を保存し、独立したサフィックスの評価前に復元する |
 | `parallel` | 独立した質問を、それぞれ分離されたシーケンスでまとめて処理する |

@@ -105,14 +105,14 @@ impl<F: HttpDecisionBackend, S: HttpDecisionBackend> HttpDecisionBackend for Cas
         let mut results: Vec<Option<Value>> = vec![None; request.decisions.len()];
         let mut eligible = Vec::new();
         let mut thresholds = Vec::new();
-        if images.is_empty() {
-            if let Some(policy) = &self.policy {
-                for (i, d) in request.decisions.iter().enumerate() {
-                    let id = schema_id(d)?;
-                    if let Some(r) = policy.rules.iter().find(|r| r.schema_sha256 == id) {
-                        eligible.push(i);
-                        thresholds.push(r.min_probability);
-                    }
+        if images.is_empty()
+            && let Some(policy) = &self.policy
+        {
+            for (i, d) in request.decisions.iter().enumerate() {
+                let id = schema_id(d)?;
+                if let Some(r) = policy.rules.iter().find(|r| r.schema_sha256 == id) {
+                    eligible.push(i);
+                    thresholds.push(r.min_probability);
                 }
             }
         }

@@ -11,13 +11,19 @@ pub struct FixedSchemaBackend {
     retained_bytes: usize,
 }
 impl FixedSchemaBackend {
+    /// Whether this configured backend can preserve the fixed prefix/suffix plan.
+    /// The execution mode must already be PrefixReuse. Automatic resident serving
+    /// checks this before transferring ownership; explicit construction stays strict.
+    pub fn is_compatible(backend: &LlamaBackend) -> bool {
+        !unsafe { sd_recurrent_or_hybrid(backend.engine.as_ptr()) }
+            && backend.output_head.is_none()
+            && backend.calibrations.is_empty()
+            && backend.execution_mode == ExecutionMode::PrefixReuse
+            && backend.evidence_transfer == EvidenceTransfer::Full
+    }
+
     pub fn new(backend: LlamaBackend) -> Result<Self> {
-        if unsafe { sd_recurrent_or_hybrid(backend.engine.as_ptr()) }
-            || backend.output_head.is_some()
-            || !backend.calibrations.is_empty()
-            || backend.execution_mode != ExecutionMode::PrefixReuse
-            || backend.evidence_transfer != EvidenceTransfer::Full
-        {
+        if !Self::is_compatible(&backend) {
             return Err(Error::Invalid("fixed-schema requires PrefixReuse, full evidence, a non-recurrent model, and no preexisting calibration/output head; its split plan changes numerics".into()));
         }
         unsafe { sd_clear(backend.engine.as_ptr()) };

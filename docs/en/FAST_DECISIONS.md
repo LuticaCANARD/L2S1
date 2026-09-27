@@ -2,21 +2,25 @@
 
 [English](../en/FAST_DECISIONS.md) · [한국어](../ko/FAST_DECISIONS.md) · [日本語](../ja/FAST_DECISIONS.md)
 
-Three opt-in paths are available. Existing GGUF defaults remain unchanged. There is no MLX implementation.
+Compatible resident text servers (`--listen` / `--stdio`, including SDK `load`) automatically use bounded fixed-schema prefix KV reuse when no execution mode is specified. One-shot CLI calls and the low-level Rust backend retain `fresh`. Explicit execution modes, vision/projector settings, calibration/output heads and compact evidence preserve their existing paths; recurrent/hybrid models fall back to fresh with a startup message. Use `--execution-mode fresh` to opt out, or `--fixed-schema` to require support. Native parallel batching still requires `--execution-mode parallel`. This changes the split plan and can change scores; check capabilities and `usage.reused_prefix_tokens`.
+
+This default is a source change after v0.1.3. Published v0.1.3 requires explicit `fixedSchema: true` / `fixed_schema=True`; use a newly built binary until the next release.
 
 ## Fixed-schema GGUF sessions
 
 Build with `llama` (CPU), `llama-cuda` or `llama-metal`. Start a resident server:
 
 ```sh
-l2s1 --model model.gguf --execution-mode prefix-reuse --fixed-schema --listen 127.0.0.1:8080
+l2s1 --model model.gguf --listen 127.0.0.1:8080
 ```
 
 `FixedSchemaBackend` uses the same explicit prefix/suffix split on cold and warm calls, independently of the prefill batch size. It preserves complete prompt tokenization and matches actual token prefixes, including BPE boundaries. One native KV context is active. Up to eight prefix snapshots occupy at most 256 MiB; schema preparation has a separate 64-entry/4 MiB limit. Eviction recomputes the prefix. Answers are never cached. `clear()` clears retained KV/snapshots; use a dedicated backend/server per trust domain.
 
-This execution plan can change scores compared with unsplit fresh execution. Validate both **flat fresh versus split cold** and **split cold versus split warm**. The latter is the cache equivalence check. Recurrent/hybrid models, existing calibration artifacts and output heads are rejected; calibrations fitted to the old plan must not silently transfer. Full evidence is required. More than 26 options and images use the existing path with KV cleared. `shared_decision()` retains its original batch-aligned behavior.
+This execution plan can change scores compared with unsplit fresh execution. Validate both **flat fresh versus split cold** and **split cold versus split warm**. The latter is the cache equivalence check. Explicit fixed-schema requests reject recurrent/hybrid models, existing calibration artifacts and output heads; calibrations fitted to the old plan must not silently transfer. Full evidence is required. More than 26 options and images use the existing path with KV cleared. `shared_decision()` retains its original batch-aligned behavior.
 
 TypeScript: `L2S1.load({ model, fixedSchema: true, binaryPath: "./target/release/l2s1" })`. Python: `LoadOptions(model=..., fixed_schema=True, binary_path="./target/release/l2s1")`. Both select prefix-reuse automatically when execution mode is omitted, and support stdio or HTTP. `prepare()` alone still does not create KV state. Check `/v1/capabilities.prefix_reuse` and per-result `usage.reused_prefix_tokens`.
+
+Explicit `fixedSchema: true` / `fixed_schema=True` requires this plan and errors on incompatible configurations. Omit the option for automatic selection; `false` / `False` selects fresh when no explicit execution mode is given. Existing cascade policies must match the exact serving plan: preserve their previous explicit settings or refit and validate the policy.
 
 ## Laya ONNX backend
 

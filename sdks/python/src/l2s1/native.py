@@ -38,7 +38,8 @@ class LoadOptions:
     ubatch: int | None = None
     threads: int | None = None
     gpu_layers: int | None = None
-    fixed_schema: bool = False
+    # None inherits the runtime default; False explicitly disables automatic reuse.
+    fixed_schema: bool | None = None
     execution_mode: ExecutionMode | None = None
     parallel_width: int | None = None
     prompt_layout: Literal["legacy", "state-first"] | None = None
@@ -68,6 +69,8 @@ def _arguments(options: LoadOptions) -> list[str]:
         args.append("--fixed-schema")
         if options.execution_mode is None:
             args.extend(["--execution-mode", "prefix-reuse"])
+    if options.fixed_schema is False and options.execution_mode is None:
+        args.extend(["--execution-mode", "fresh"])
     if options.device != "cpu":
         args.extend(["--device", options.device])
     for name in ("mmproj", "lora", "context", "batch", "ubatch", "threads", "gpu_layers", "execution_mode",

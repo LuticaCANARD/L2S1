@@ -155,3 +155,11 @@ Python 3.11/3.14 を対象として wheel/sdist を保存します。ローカ�
 プラットフォームの成功を意味しません。リリースパイプラインが検証済み wheel/sdist を PyPI に公開します。
 
 [配布パイプライン](../RELEASE_PIPELINE.md)は設定済み trusted publisher で GitHub Release・npm・PyPI・Cargo に検証済み配布物を公開します。[v0.1.3](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.3) をインストールできます。
+
+## 常駐 prefix 再利用
+
+対応する常駐テキストサーバー（`--listen` / `--stdio`、SDK の `load` を含む）は、実行モードを省略すると容量制限付きの固定スキーマ prefix KV 再利用を既定で使用します。単発 CLI と低水準 Rust バックエンドは `fresh` を維持します。明示した実行モード、vision/projector、calibration/output head、compact evidence は従来の経路を維持し、recurrent/hybrid モデルは起動メッセージとともに fresh に切り替わります。無効化は `--execution-mode fresh`、対応を必須にする場合は `--fixed-schema` を使います。ネイティブ並列バッチには引き続き `--execution-mode parallel` が必要です。分割計画によってスコアが変わるため、capabilities と `usage.reused_prefix_tokens` を確認してください。
+
+`fixed_schema` を省略するとランタイムの既定値に従います。true は対応を必須にし、false は実行モード省略時に fresh を選びます。明示した実行モードは false より優先されます。
+
+この既定値は v0.1.3 後のソース変更です。公開済み v0.1.3 では `fixedSchema: true` / `fixed_schema=True` の明示が必要です。次のリリースまでは新しくビルドしたバイナリを使ってください。

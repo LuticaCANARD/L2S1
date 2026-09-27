@@ -1,0 +1,40 @@
+{"mode": "fresh", "completed_pass": -1, "requests": 0}
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/lutica/l2s1-v013-validation-20260927/benchmark.py", line 62, in main
+    summaries=[await run(mode,cases) for mode in ('fresh','fixed')]
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lutica/l2s1-v013-validation-20260927/benchmark.py", line 34, in run
+    start=time.perf_counter();result=await engine.decide(DecisionRequest.model_validate(case['request']));elapsed=(time.perf_counter()-start)*1000
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lutica/l2s1-v013-validation-20260927/venv/lib/python3.13/site-packages/l2s1/engine.py", line 50, in decide
+    response = await self._backend.decide(snapshot, timeout_ms=timeout_ms)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lutica/l2s1-v013-validation-20260927/venv/lib/python3.13/site-packages/l2s1/native.py", line 198, in decide
+    return await self._open_client().decide(request, timeout_ms=timeout_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lutica/l2s1-v013-validation-20260927/venv/lib/python3.13/site-packages/l2s1/wire.py", line 34, in decide
+    value = await self._request("/v1/decisions", snapshot.model_dump_json(exclude_unset=True), timeout_ms)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lutica/l2s1-v013-validation-20260927/venv/lib/python3.13/site-packages/l2s1/stdio.py", line 75, in _request
+    return await future
+           ^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/lutica/l2s1-v013-validation-20260927/benchmark.py", line 64, in <module>
+    asyncio.run(main())
+    ~~~~~~~~~~~^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 123, in run
+    raise KeyboardInterrupt()
+KeyboardInterrupt

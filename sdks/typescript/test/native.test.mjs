@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { L2S1 } from '../dist/index.js';
@@ -32,5 +32,29 @@ test('startup failure, deadline and caller abort reap owned processes', { skip: 
     await assert.rejects(pending, /cancel startup/);
     const cancelledPid = Number(await readFile(pidPath, 'utf8'));
     assert.throws(() => process.kill(cancelledPid, 0), { code: 'ESRCH' });
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+// Probe the subprocess boundary: omission inherits the runtime's model-aware
+// choice, while an explicit false must survive serialization as a fresh override.
+test('resident reuse defaults and explicit overrides reach the native process', { skip: process.platform === 'win32' }, async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'l2s1 default reuse '));
+  const binary = join(dir, 'probe');
+  const record = join(dir, 'args.json');
+  try {
+    await writeFile(binary, `#!/usr/bin/env node\nimport { writeFileSync } from 'node:fs';\nwriteFileSync(${JSON.stringify(record)}, JSON.stringify(process.argv.slice(2)));\nprocess.exit(1);\n`, { mode: 0o755 });
+    for (const [options, expected, required] of [
+      [{}, undefined, false],
+      [{ fixedSchema: false }, 'fresh', false],
+      [{ fixedSchema: true }, 'prefix-reuse', true],
+      [{ fixedSchema: false, executionMode: 'parallel' }, 'parallel', false],
+    ]) {
+      await assert.rejects(L2S1.load({ model: 'fixture', binaryPath: binary, ...options }));
+      const args = JSON.parse(await readFile(record, 'utf8'));
+      const index = args.indexOf('--execution-mode');
+      assert.equal(index < 0 ? undefined : args[index + 1], expected);
+      assert.equal(args.includes('--fixed-schema'), required);
+      assert.equal(args.filter(arg => arg === '--execution-mode').length, expected ? 1 : 0);
+    }
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
