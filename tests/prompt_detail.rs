@@ -1,4 +1,4 @@
-use l2s1::{Decision, DecisionKind, Level, OptionSpec};
+use l2s1::{Decision, DecisionKind, DecisionRequest, Level, OptionSpec};
 // Exercise prompt compilation without requiring the native runtime. The same
 // module is used by the backend; public exports are checked by integration builds.
 #[path = "../src/prompt.rs"]
@@ -270,3 +270,96 @@ fn model_templates_keep_detail_and_examples_in_the_safe_data_segment() {
     assert_eq!(data(&typed)["options"][0]["id"], "option_2");
 }
 pub use l2s1::{option_code, option_code_width};
+
+fn map_in_reverse_key_order(entries: &[(&str, Value)]) -> Value {
+    let mut map = serde_json::Map::new();
+    for (key, value) in entries.iter().rev() {
+        map.insert((*key).into(), value.clone());
+    }
+    Value::Object(map)
+}
+
+#[test]
+fn prompt_bytes_do_not_depend_on_json_map_insertion_order() {
+    // With serde_json's preserve_order feature (enabled anywhere in a
+    // dependency graph), maps keep insertion order. Prompts must not.
+    let nested = map_in_reverse_key_order(&[("a", json!(1)), ("b", json!([{"y": 1, "x": 2}]))]);
+    let state = map_in_reverse_key_order(&[("alpha", nested), ("zeta", json!("z"))]);
+    let shared = map_in_reverse_key_order(&[("docs", json!("k")), ("examples", json!([]))]);
+    let decision = ordinal();
+    for detail in [PromptDetail::Minimal, PromptDetail::TypedExamples] {
+        let legacy = compile_prompt_with_detail(&state, &decision, PromptLayout::Legacy, detail, 0);
+        let text = &legacy[1].text;
+        let data = text
+            .rsplit_once('\n')
+            .map_or(text.as_str(), |(_, data)| data);
+        let expected_kind = if detail.is_minimal() {
+            ""
+        } else {
+            r#""decision_kind":"ordinal","#
+        };
+        assert!(
+            data.starts_with(&format!(r#"{{{expected_kind}"instruction":"#)),
+            "{data}"
+        );
+        assert!(
+            data.ends_with(r#""state":{"alpha":{"a":1,"b":[{"x":2,"y":1}]},"zeta":"z"}}"#),
+            "{data}"
+        );
+        let input = prompt::PromptInput {
+            shared: Some(&shared),
+            state: &state,
+        };
+        for layout in [PromptLayout::Legacy, PromptLayout::StateFirst] {
+            let parts = compile_prompt_with_detail(input, &decision, layout, detail, 0);
+            let text = &parts[1].text;
+            let data = text
+                .rsplit_once('\n')
+                .map_or(text.as_str(), |(_, data)| data);
+            assert!(
+                data.starts_with(r#"{"shared":{"docs":"k","examples":[]},"#),
+                "{data}"
+            );
+        }
+    }
+}
+
+#[test]
+fn shared_input_is_the_first_field_and_absent_shared_keeps_prompt_bytes() {
+    let decision = choice(3);
+    let shared = json!({"knowledge": "Doors close at 9."});
+    let mut request = DecisionRequest::new(json!({"task": 1}), vec![decision.clone()]);
+    for layout in [PromptLayout::Legacy, PromptLayout::StateFirst] {
+        let without = compile_prompt_with_layout(&request.state, &decision, layout);
+        assert_eq!(
+            compile_prompt_with_layout(&request, &decision, layout)[1].text,
+            without[1].text
+        );
+    }
+    request.shared = Some(shared.clone());
+    let mut other = decision.clone();
+    other.instruction = "Another question.".into();
+    for layout in [PromptLayout::Legacy, PromptLayout::StateFirst] {
+        let first = compile_prompt_with_layout(&request, &decision, layout);
+        let parsed = data(&first);
+        assert_eq!(parsed["shared"], shared);
+        assert_eq!(parsed["state"], request.state);
+        let prefix = format!("{{\"shared\":{shared},");
+        assert!(first[1].text.starts_with(&prefix));
+        // A different state or question keeps the shared field as a prefix.
+        let mut changed = request.clone();
+        changed.state = json!({"task": 2});
+        let second = compile_prompt_with_layout(&changed, &other, layout);
+        assert!(second[1].text.starts_with(&prefix));
+        assert!(!first[1].parse_special);
+    }
+    let wire: DecisionRequest = serde_json::from_value(json!({
+        "shared": shared, "state": {}, "decisions": [decision]
+    }))
+    .unwrap();
+    assert!(wire.shared.is_some());
+    let absent: DecisionRequest =
+        serde_json::from_value(json!({"state": {}, "decisions": [choice(2)]})).unwrap();
+    assert!(absent.shared.is_none());
+    assert!(!serde_json::to_string(&absent).unwrap().contains("shared"));
+}

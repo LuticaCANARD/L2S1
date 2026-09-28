@@ -1,8 +1,8 @@
 use clap::Parser;
 use l2s1::{
     ComputeOptions, DecisionBackend, DecisionPolicy, DecisionRequest, EvidenceTransfer,
-    ExecutionMode, FlashAttention, PreparationCacheConfig, PromptDetail, PromptLayout,
-    PromptProfile, llama::LlamaBackend,
+    ExecutionMode, FlashAttention, ParallelPrefixAlignment, ParallelWaveOrder,
+    PreparationCacheConfig, PromptDetail, PromptLayout, PromptProfile, llama::LlamaBackend,
 };
 use std::{
     io::{self, Read},
@@ -92,8 +92,17 @@ struct Args {
     #[arg(long)]
     parallel_context_dynamic: bool,
     /// State-first improves shared-prefix reuse but can change model predictions.
-    #[arg(long, value_enum, default_value_t = PromptLayout::Legacy)]
-    prompt_layout: PromptLayout,
+    /// Defaults to state-first for text parallel execution and legacy otherwise.
+    #[arg(long, value_enum)]
+    prompt_layout: Option<PromptLayout>,
+    /// Parallel shared-prefix rounding: batch keeps serial decode boundaries;
+    /// token shares every common token and can change scores slightly.
+    #[arg(long, value_enum, default_value_t = ParallelPrefixAlignment::Batch)]
+    parallel_prefix_alignment: ParallelPrefixAlignment,
+    /// Parallel wave membership: prefix groups questions with common token
+    /// prefixes; request keeps consecutive request-order waves.
+    #[arg(long, value_enum, default_value_t = ParallelWaveOrder::Prefix)]
+    parallel_wave_order: ParallelWaveOrder,
     /// Opt-in typed metadata and generic numeric comparison examples.
     #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
     prompt_detail: PromptDetail,
@@ -230,7 +239,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     backend.set_execution_mode(args.selected_execution_mode());
     backend.set_parallel_width(args.parallel_width as usize)?;
     backend.set_parallel_context_dynamic(args.parallel_context_dynamic);
-    backend.set_prompt_layout(args.prompt_layout);
+    if let Some(layout) = args.prompt_layout {
+        backend.set_prompt_layout(layout);
+    }
+    backend.set_parallel_prefix_alignment(args.parallel_prefix_alignment);
+    backend.set_parallel_wave_order(args.parallel_wave_order);
     backend.set_prompt_detail(args.prompt_detail);
     backend.set_code_rotation(args.code_rotation as usize)?;
     backend.set_evidence_transfer(args.evidence_transfer)?;

@@ -24,6 +24,7 @@ pub struct OutputHead {
 impl OutputHead {
     pub fn validate(&self, hidden_size: usize) -> Result<()> {
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![Decision {
                 id: self.decision_id.clone(),

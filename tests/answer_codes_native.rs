@@ -44,6 +44,7 @@ fn three_letter_codes_score_real_multitoken_paths_against_fresh_reference() {
     )
     .unwrap();
     let req = DecisionRequest {
+        shared: None,
         state: serde_json::json!({"wanted":"intent_39"}),
         decisions: vec![Decision {
             id: "wide".into(),

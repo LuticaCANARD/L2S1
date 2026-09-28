@@ -381,7 +381,7 @@ cargo run --release --locked --example fit_calibration -- \
 | `state-restore` | 共通プレフィックスのシーケンス全体の状態を保存し、後の独立したサフィックスのためにそれを復元します。 | サポートされており、オプトイン。テスト済みのハイブリッド盆栽 GGUF で動作します |
 | `parallel` | 共有プレフィックスプレフィルを使用して、独立した質問を分離されたシーケンスにバッチ処理します。 | サポートされています。リカレント/ハイブリッド モデルを拒否し、スコアを変更する可能性があります |
 
-デフォルトのプロンプト レイアウトは `legacy` です。 `--prompt-layout state-first` は共有状態をより早く配置し、より長い再利用可能なプレフィックスを公開できますが、プロンプトも変更され、予測も変更される可能性があります。
+デフォルトのプロンプト レイアウトは `legacy` です。ただし、テキストの `--execution-mode parallel` は 0.2.0 以降 `state-first` がデフォルトです（[並列プレフィックス共有](PARALLEL_EXECUTION.md#prefix-sharing-controls-020)を参照）。 `--prompt-layout state-first` は共有状態をより早く配置し、より長い再利用可能なプレフィックスを公開できますが、プロンプトも変更され、予測も変更される可能性があります。
 
 ```sh
 ./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \

@@ -64,6 +64,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             } else {
                 for (_, state, _) in &group.cases {
                     out.push(backend.decide(&DecisionRequest {
+                        shared: None,
                         state: state.clone(),
                         decisions: vec![group.decision.clone()],
                     })?);

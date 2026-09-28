@@ -107,43 +107,162 @@ pub struct PromptPart {
     pub parse_special: bool,
 }
 
-pub(crate) fn decision_data(
-    state: &serde_json::Value,
+/// Evidence rendered before each question: optional request-wide `shared`
+/// input followed by the request `state`. `&serde_json::Value` converts into an
+/// input without shared evidence, preserving the original prompt bytes.
+#[derive(Debug, Clone, Copy, serde::Serialize)]
+pub struct PromptInput<'a> {
+    pub shared: Option<&'a serde_json::Value>,
+    pub state: &'a serde_json::Value,
+}
+
+impl<'a> From<&'a serde_json::Value> for PromptInput<'a> {
+    fn from(state: &'a serde_json::Value) -> Self {
+        Self {
+            shared: None,
+            state,
+        }
+    }
+}
+
+impl<'a> From<&'a crate::DecisionRequest> for PromptInput<'a> {
+    fn from(request: &'a crate::DecisionRequest) -> Self {
+        Self {
+            shared: request.shared.as_ref(),
+            state: &request.state,
+        }
+    }
+}
+
+/// Serializes JSON with object keys sorted at every depth. Prompt bytes must
+/// not depend on serde_json's `preserve_order` feature, which any crate in the
+/// dependency graph can enable through Cargo feature unification. The output
+/// equals serde_json's default (sorted `BTreeMap`) serialization.
+struct Canonical<'a>(&'a serde_json::Value);
+
+impl serde::Serialize for Canonical<'_> {
+    fn serialize<S: serde::Serializer>(
+        &self,
+        serializer: S,
+    ) -> std::result::Result<S::Ok, S::Error> {
+        use serde::ser::{SerializeMap, SerializeSeq};
+        match self.0 {
+            serde_json::Value::Object(map) => {
+                let mut entries: Vec<_> = map.iter().collect();
+                entries.sort_unstable_by(|a, b| a.0.cmp(b.0));
+                let mut out = serializer.serialize_map(Some(entries.len()))?;
+                for (key, value) in entries {
+                    out.serialize_entry(key, &Canonical(value))?;
+                }
+                out.end()
+            }
+            serde_json::Value::Array(items) => {
+                let mut out = serializer.serialize_seq(Some(items.len()))?;
+                for item in items {
+                    out.serialize_element(&Canonical(item))?;
+                }
+                out.end()
+            }
+            other => other.serialize(serializer),
+        }
+    }
+}
+
+#[derive(serde::Serialize)]
+struct OptionData<'a> {
+    code: String,
+    criterion: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    id: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    value: Option<f64>,
+}
+
+/// Legacy fields are declared in the alphabetical order historically produced
+/// by sorted JSON maps, so the bytes are fixed regardless of serde_json features.
+/// Explicit shared evidence is always the first field.
+#[derive(serde::Serialize)]
+struct LegacyPayload<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    shared: Option<Canonical<'a>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    decision_kind: Option<&'a str>,
+    instruction: &'a str,
+    options: Vec<OptionData<'a>>,
+    state: Canonical<'a>,
+}
+
+/// Shared evidence and state precede the criterion so exact token prefixes can
+/// be reused across questions.
+#[derive(serde::Serialize)]
+struct StateFirstPayload<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    shared: Option<Canonical<'a>>,
+    state: Canonical<'a>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    decision_kind: Option<&'a str>,
+    instruction: &'a str,
+    options: Vec<OptionData<'a>>,
+}
+
+fn payload(
+    input: PromptInput<'_>,
     decision: &Decision,
     layout: PromptLayout,
+    decision_kind: Option<&str>,
+    options: Vec<OptionData<'_>>,
 ) -> String {
-    let count = decision.options().len();
-    let options: Vec<_> = decision.options().iter().enumerate().map(|(i, o)| {
-        serde_json::json!({"code": crate::option_code(i, count).expect("validated options"), "criterion": o.criterion})
-    }).collect();
-    if layout == PromptLayout::Legacy {
-        return serde_json::json!({"state": state, "instruction": decision.instruction, "options": options}).to_string();
+    let shared = input.shared.map(Canonical);
+    let state = Canonical(input.state);
+    let instruction = decision.instruction.as_str();
+    match layout {
+        PromptLayout::Legacy => serde_json::to_string(&LegacyPayload {
+            shared,
+            decision_kind,
+            instruction,
+            options,
+            state,
+        }),
+        PromptLayout::StateFirst => serde_json::to_string(&StateFirstPayload {
+            shared,
+            state,
+            decision_kind,
+            instruction,
+            options,
+        }),
     }
-    // A struct preserves field order regardless of serde_json's map feature flags.
-    // Put shared evidence before the criterion so exact token prefixes can be reused.
-    #[derive(serde::Serialize)]
-    struct Payload<'a> {
-        state: &'a serde_json::Value,
-        instruction: &'a str,
-        options: Vec<serde_json::Value>,
-    }
-    serde_json::to_string(&Payload {
-        state,
-        instruction: &decision.instruction,
-        options,
-    })
     .expect("JSON values and strings are serializable")
 }
 
+pub(crate) fn decision_data<'a>(
+    input: impl Into<PromptInput<'a>>,
+    decision: &Decision,
+    layout: PromptLayout,
+) -> String {
+    let canonical = decision.options();
+    let count = canonical.len();
+    let options = canonical
+        .iter()
+        .enumerate()
+        .map(|(i, o)| OptionData {
+            code: crate::option_code(i, count).expect("validated options"),
+            criterion: &o.criterion,
+            id: None,
+            value: None,
+        })
+        .collect();
+    payload(input.into(), decision, layout, None, options)
+}
+
 fn detailed_decision_data(
-    state: &serde_json::Value,
+    input: PromptInput<'_>,
     decision: &Decision,
     layout: PromptLayout,
     detail: PromptDetail,
     rotation: usize,
 ) -> String {
     if detail.is_minimal() && rotation == 0 {
-        return decision_data(state, decision, layout);
+        return decision_data(input, decision, layout);
     }
     let canonical = decision.options();
     let rotation = rotation % canonical.len().max(1);
@@ -156,45 +275,20 @@ fn detailed_decision_data(
         .map(|position| {
             let index = (position + rotation) % canonical.len();
             let option = &canonical[index];
-            let mut value = serde_json::json!({
-                "code": crate::option_code(position, canonical.len()).expect("validated options"),
-                "criterion": option.criterion,
-            });
-            if !detail.is_minimal() {
-                value["id"] = serde_json::json!(option.id);
-                if let DecisionKind::Ordinal { levels } = &decision.kind {
-                    value["value"] = serde_json::json!(levels[index].value);
-                }
+            let typed = !detail.is_minimal();
+            OptionData {
+                code: crate::option_code(position, canonical.len()).expect("validated options"),
+                criterion: &option.criterion,
+                id: typed.then_some(option.id.as_str()),
+                value: match &decision.kind {
+                    DecisionKind::Ordinal { levels } if typed => Some(levels[index].value),
+                    _ => None,
+                },
             }
-            value
         })
         .collect::<Vec<_>>();
     let decision_kind = (!detail.is_minimal()).then_some(kind);
-    let payload = if layout == PromptLayout::Legacy {
-        let mut value = serde_json::json!({
-            "state": state, "instruction": decision.instruction, "options": options,
-        });
-        if let Some(kind) = decision_kind {
-            value["decision_kind"] = kind.into();
-        }
-        value.to_string()
-    } else {
-        #[derive(serde::Serialize)]
-        struct Payload<'a> {
-            state: &'a serde_json::Value,
-            #[serde(skip_serializing_if = "Option::is_none")]
-            decision_kind: Option<&'a str>,
-            instruction: &'a str,
-            options: Vec<serde_json::Value>,
-        }
-        serde_json::to_string(&Payload {
-            state,
-            decision_kind,
-            instruction: &decision.instruction,
-            options,
-        })
-        .expect("JSON values and strings are serializable")
-    };
+    let payload = payload(input, decision, layout, decision_kind, options);
     if detail.is_minimal() {
         payload
     } else {
@@ -208,12 +302,15 @@ fn detailed_decision_data(
 }
 
 /// Original Qwen3 non-thinking prompt, retained for existing library callers.
-pub fn compile_prompt(state: &serde_json::Value, decision: &Decision) -> Vec<PromptPart> {
-    compile_prompt_with_layout(state, decision, PromptLayout::Legacy)
+pub fn compile_prompt<'a>(
+    input: impl Into<PromptInput<'a>>,
+    decision: &Decision,
+) -> Vec<PromptPart> {
+    compile_prompt_with_layout(input, decision, PromptLayout::Legacy)
 }
 
-pub fn compile_prompt_with_layout(
-    state: &serde_json::Value,
+pub fn compile_prompt_with_layout<'a>(
+    input: impl Into<PromptInput<'a>>,
     decision: &Decision,
     layout: PromptLayout,
 ) -> Vec<PromptPart> {
@@ -225,7 +322,7 @@ pub fn compile_prompt_with_layout(
         },
         PromptPart {
             parse_special: false,
-            text: decision_data(state, decision, layout),
+            text: decision_data(input, decision, layout),
         },
         PromptPart {
             parse_special: true,
@@ -238,24 +335,25 @@ pub fn compile_prompt_with_layout(
 /// `i` refers to canonical option `(i + rotation) % option_count`; callers must
 /// map scored code positions back to canonical options before producing results.
 /// The original decision, including ordinal level ordering, is never mutated.
-pub fn compile_prompt_with_detail(
-    state: &serde_json::Value,
+pub fn compile_prompt_with_detail<'a>(
+    input: impl Into<PromptInput<'a>>,
     decision: &Decision,
     layout: PromptLayout,
     detail: PromptDetail,
     rotation: usize,
 ) -> Vec<PromptPart> {
-    let mut parts = compile_prompt_with_layout(state, decision, layout);
+    let input = input.into();
+    let mut parts = compile_prompt_with_layout(input, decision, layout);
     if !detail.is_minimal() || rotation != 0 {
-        parts[1].text = detailed_decision_data(state, decision, layout, detail, rotation);
+        parts[1].text = detailed_decision_data(input, decision, layout, detail, rotation);
     }
     parts
 }
 
 #[cfg(feature = "llama")]
-pub(crate) fn compile_model_prompt(
+pub(crate) fn compile_model_prompt<'a>(
     skeleton: &str,
-    state: &serde_json::Value,
+    input: impl Into<PromptInput<'a>>,
     decision: &Decision,
     layout: PromptLayout,
 ) -> Result<Vec<PromptPart>> {
@@ -276,7 +374,7 @@ pub(crate) fn compile_model_prompt(
             parse_special: true,
         },
         PromptPart {
-            text: decision_data(state, decision, layout),
+            text: decision_data(input, decision, layout),
             parse_special: false,
         },
         PromptPart {
@@ -289,17 +387,18 @@ pub(crate) fn compile_model_prompt(
 /// Compile detailed data into a validated model template. Guidance, examples and
 /// user-controlled data remain in a segment with special-token parsing disabled.
 #[cfg(feature = "llama")]
-pub fn compile_model_prompt_with_detail(
+pub fn compile_model_prompt_with_detail<'a>(
     skeleton: &str,
-    state: &serde_json::Value,
+    input: impl Into<PromptInput<'a>>,
     decision: &Decision,
     layout: PromptLayout,
     detail: PromptDetail,
     rotation: usize,
 ) -> Result<Vec<PromptPart>> {
-    let mut parts = compile_model_prompt(skeleton, state, decision, layout)?;
+    let input = input.into();
+    let mut parts = compile_model_prompt(skeleton, input, decision, layout)?;
     if !detail.is_minimal() || rotation != 0 {
-        parts[1].text = detailed_decision_data(state, decision, layout, detail, rotation);
+        parts[1].text = detailed_decision_data(input, decision, layout, detail, rotation);
     }
     Ok(parts)
 }

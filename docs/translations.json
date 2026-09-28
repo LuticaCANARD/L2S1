@@ -38,7 +38,7 @@
     {
       "source": "docs/GUIDE.md",
       "path": "GUIDE.md",
-      "source_sha256": "409d5b4a87067778c05ced15414c8bf3f981c5350ba02479c84793baf33eb9cf",
+      "source_sha256": "725b5b211529708bf5b39460dd71108fce59289bbb6380b86f28c8c9a15e4e3e",
       "languages": [
         "en",
         "ko",
@@ -158,7 +158,7 @@
     {
       "source": "docs/PARALLEL_EXECUTION.md",
       "path": "PARALLEL_EXECUTION.md",
-      "source_sha256": "5e58666e48c6090bd6119fed88d2e2c86126ee80af7492140b590bc937fd0115",
+      "source_sha256": "c1421a2ab67dd32b63880350a40060d15cf5f133f742b392d8ba3b9b9cf3e138",
       "languages": [
         "en",
         "ko",

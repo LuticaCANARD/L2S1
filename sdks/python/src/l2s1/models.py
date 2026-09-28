@@ -118,6 +118,8 @@ def _unique(ids: list[str], label: str) -> None:
 
 
 class DecisionRequest(RequestModel):
+    # Evidence common to many requests or questions; rendered first. Runtime 0.2.0+.
+    shared: JsonValue | None = None
     state: JsonValue
     decisions: list[Decision] = Field(min_length=1, max_length=128)
     media: list[ImageMedia] = Field(default_factory=list, max_length=4)

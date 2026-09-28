@@ -381,7 +381,7 @@ cargo run --release --locked --example fit_calibration -- \
 | `state-restore` | 공통 접두사의 전체 시퀀스 상태를 저장하고 나중에 독립된 접미사를 위해 복원합니다. | 지원됨, 선택 가능; 테스트된 하이브리드 Bonsai GGUF와 함께 작동 |
 | `parallel` | 공유 접두사 미리 채우기를 사용하여 독립적인 질문을 격리된 시퀀스로 일괄 처리 | 지원됨; 반복/하이브리드 모델을 거부하고 점수를 변경할 수 있습니다. |
 
-기본 프롬프트 레이아웃은 `legacy`입니다. `--prompt-layout state-first`는 공유 상태를 더 일찍 배치하고 재사용 가능한 더 긴 접두사를 노출할 수 있지만 프롬프트도 변경하고 예측을 변경할 수도 있습니다.
+기본 프롬프트 레이아웃은 `legacy`입니다. 단, 텍스트 `--execution-mode parallel`은 0.2.0부터 `state-first`가 기본값입니다([병렬 접두사 공유](PARALLEL_EXECUTION.md#prefix-sharing-controls-020) 참조). `--prompt-layout state-first`는 공유 상태를 더 일찍 배치하고 재사용 가능한 더 긴 접두사를 노출할 수 있지만 프롬프트도 변경하고 예측을 변경할 수도 있습니다.
 
 ```sh
 ./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \

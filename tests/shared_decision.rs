@@ -36,6 +36,7 @@ fn fixed_schema_reuses_prefix_without_retaining_previous_state() {
         .map(|state| {
             backend
                 .decide(&DecisionRequest {
+                    shared: None,
                     state: state.clone(),
                     decisions: vec![decision.clone()],
                 })
@@ -76,6 +77,7 @@ fn fixed_schema_reuses_prefix_without_retaining_previous_state() {
     }
     let ordinary = backend
         .decide(&DecisionRequest {
+            shared: None,
             state: states[1].clone(),
             decisions: vec![decision.clone()],
         })

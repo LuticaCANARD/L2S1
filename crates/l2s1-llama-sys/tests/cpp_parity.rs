@@ -177,6 +177,7 @@ fn rust_matches_previous_cpp_bridge() {
                     2,
                     2,
                     dynamic,
+                    0,
                     ar.as_mut_ptr(),
                     a.as_mut_ptr(),
                     a.len(),

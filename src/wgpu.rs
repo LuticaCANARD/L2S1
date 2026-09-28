@@ -113,6 +113,9 @@ impl WgpuBackend {
             parallel_width: 1,
             parallel_context_dynamic: false,
             parallel_context_tokens: None,
+            parallel_prefix_alignment: Default::default(),
+            parallel_wave_order: Default::default(),
+            parallel_prefix_retained: false,
             compute: None,
             offload_requested: !software_adapter,
             offload_device: Some(adapter.name),
@@ -172,7 +175,12 @@ impl WgpuBackend {
         result
     }
 
-    fn prompt(&self, state: &serde_json::Value, decision: &crate::Decision, image: bool) -> String {
+    fn prompt(
+        &self,
+        state: crate::PromptInput<'_>,
+        decision: &crate::Decision,
+        image: bool,
+    ) -> String {
         let data =
             crate::prompt::compile_prompt_with_detail(state, decision, self.layout, self.detail, 0)
                 [1]
@@ -253,7 +261,7 @@ impl WgpuBackend {
         let mut input_counts = Vec::with_capacity(request.decisions.len());
         let mut single_token_codes = true;
         for decision in &request.decisions {
-            let prompt = self.prompt(&request.state, decision, soft.is_some());
+            let prompt = self.prompt(request.input(), decision, soft.is_some());
             let input = self.model.encode_tokens(&prompt);
             let image_begin = self.model.image_sentinel_ids_native().map(|pair| pair.0);
             if input

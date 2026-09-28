@@ -17,6 +17,8 @@ export interface DecisionPolicy { min_top_probability: number; min_candidate_mas
 export interface ReasoningOptions { mode?: 'direct' | 'thinking'; max_tokens?: number }
 export type FailureReasonCode = 'low_candidate_mass' | 'low_top_probability' | 'tied_candidates' | 'reasoning_limit' | 'native_failure';
 export interface DecisionRequest {
+  /** Evidence common to many requests or questions; always rendered first. Requires runtime 0.2.0+. */
+  shared?: JsonValue;
   state: JsonValue;
   decisions: Decision[];
   media?: { type: 'image'; id: string; data_base64: string }[];

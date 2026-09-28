@@ -10,8 +10,8 @@ mod reasoning;
 pub use decision::*;
 pub use output_head::*;
 pub use prompt::{
-    GPT_OSS_FINAL_PROMPT_VERSION, MODEL_PROMPT_VERSION, PROMPT_VERSION, PromptDetail, PromptLayout,
-    PromptPart, PromptProfile, STATE_FIRST_GPT_OSS_PROMPT_VERSION,
+    GPT_OSS_FINAL_PROMPT_VERSION, MODEL_PROMPT_VERSION, PROMPT_VERSION, PromptDetail, PromptInput,
+    PromptLayout, PromptPart, PromptProfile, STATE_FIRST_GPT_OSS_PROMPT_VERSION,
     STATE_FIRST_MODEL_PROMPT_VERSION, STATE_FIRST_PROMPT_VERSION, compile_prompt,
     compile_prompt_with_detail, compile_prompt_with_layout,
 };

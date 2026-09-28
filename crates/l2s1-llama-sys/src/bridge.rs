@@ -39,6 +39,8 @@ pub(crate) struct Engine {
     pub cached_tokens: Vec<i32>,
     pub cached_boundary: Option<usize>,
     pub split_cache: std::collections::VecDeque<(Vec<i32>, Vec<u8>)>,
+    /// Tokens whose KV sequence 0 holds between retaining parallel calls.
+    pub parallel_retained: Vec<i32>,
     pub vision_metrics: NativeVisionBatchMetrics,
     pub memory_dirty: bool,
     pub(crate) force_kv_clear: bool,
@@ -242,7 +244,7 @@ pub unsafe extern "C" fn sd_open_loading(
             features_enabled: false, last_feature_row: -1, batch_size: batch, context_size: context,
             sequence_capacity: 1, allocated_context_size: context, parallel_context_dynamic: false, parallel_shared_kv: true,
             context_params: llama_context_default_params(), description: CString::default(), architecture: CString::default(), runtime_libraries: CString::default(),
-            cached_tokens: Vec::new(), cached_boundary: None, split_cache: Default::default(), vision_metrics: NativeVisionBatchMetrics::default(), memory_dirty: false,
+            cached_tokens: Vec::new(), cached_boundary: None, split_cache: Default::default(), parallel_retained: Vec::new(), vision_metrics: NativeVisionBatchMetrics::default(), memory_dirty: false,
             force_kv_clear: std::env::var("L2S1_FORCE_KV_CLEAR").as_deref() == Ok("1"), vision_projector_reuse: false,
             cpu_moe_patterns: Vec::new(), placement_overrides: Vec::new(),
         });
@@ -371,6 +373,7 @@ impl Engine {
         self.cached_tokens.clear();
         self.cached_boundary = None;
         self.split_cache.clear();
+        self.parallel_retained.clear();
         self.last_feature_row = -1;
         if !self.memory_dirty && !self.force_kv_clear {
             self.vision_metrics.kv_clear_skipped += 1;

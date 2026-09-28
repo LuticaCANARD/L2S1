@@ -4,7 +4,9 @@
     clippy::missing_safety_doc,
     clippy::too_many_arguments
 )]
-use crate::{NativeRestoreMetrics, bridge::*, raw::*};
+use crate::{
+    NativeRestoreMetrics, SD_PARALLEL_RETAIN_PREFIX, SD_PARALLEL_TOKEN_PREFIX, bridge::*, raw::*,
+};
 use std::{ffi::c_char, ptr, slice, time::Instant};
 
 unsafe fn forward_logits(
@@ -378,6 +380,156 @@ fn common_prefix(inputs: &[&[i32]], batch: u32) -> usize {
     }
     common - common % batch as usize
 }
+/// Token-granular sharing skips segments too short to repay an extra decode.
+const MIN_TOKEN_SEGMENT: usize = 16;
+
+#[derive(Debug, PartialEq, Eq)]
+enum PrefixOp {
+    /// Evaluate `tokens[start..end]` of `seq` in its own sequence.
+    Decode {
+        seq: usize,
+        start: usize,
+        end: usize,
+    },
+    /// Share `src` KV for positions `[start, end)` with `dst`.
+    Copy {
+        src: usize,
+        dst: usize,
+        start: usize,
+        end: usize,
+    },
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct PrefixPlan {
+    ops: Vec<PrefixOp>,
+    /// First position each sequence evaluates in the suffix phase.
+    suffix_start: Vec<usize>,
+    /// Tokens each sequence did not evaluate itself in this call.
+    reused: Vec<usize>,
+    /// Sequence 0's shared extent, retained when requested.
+    root: usize,
+}
+
+/// Plan shared prefills as a prefix tree. Sequences that agree on a longer
+/// exact prefix keep sharing it after another sequence in the wave diverges.
+/// Every sequence keeps at least its final token for the suffix phase. With
+/// `aligned`, shared segments end on complete prefill batches, so each KV row
+/// is computed with the same decode boundaries as a serial prefill. `kept`
+/// tokens of sequence 0 are already resident from a retained prefix.
+fn plan_prefixes(inputs: &[&[i32]], batch: usize, aligned: bool, kept: usize) -> PrefixPlan {
+    let n = inputs.len();
+    let mut plan = PrefixPlan {
+        ops: Vec::new(),
+        suffix_start: vec![0; n],
+        reused: vec![0; n],
+        root: kept,
+    };
+    let mut resident = vec![0; n];
+    resident[0] = kept;
+    plan.reused[0] = kept;
+    let align = |end: usize| {
+        if aligned {
+            end - end % batch.max(1)
+        } else {
+            end
+        }
+    };
+    // (members, position from which members may still differ)
+    let mut stack = vec![((0..n).collect::<Vec<_>>(), 0)];
+    let mut first = true;
+    while let Some((members, scan)) = stack.pop() {
+        if members.len() < 2 {
+            continue;
+        }
+        let lead = inputs[members[0]];
+        let limit = members.iter().map(|&m| inputs[m].len() - 1).min().unwrap();
+        let mut common = limit;
+        for &m in &members[1..] {
+            common = scan
+                + lead[scan..common]
+                    .iter()
+                    .zip(&inputs[m][scan..common])
+                    .take_while(|(a, b)| a == b)
+                    .count();
+        }
+        let end = align(common);
+        // The member with the most resident KV evaluates the shared segment;
+        // ties keep request order.
+        let owner = *members
+            .iter()
+            .max_by_key(|&&m| (resident[m], usize::MAX - m))
+            .unwrap();
+        let start = resident[owner];
+        let gain: usize = members
+            .iter()
+            .filter(|&&m| m != owner)
+            .map(|&m| end.saturating_sub(resident[m]))
+            .sum();
+        if gain > 0 && (aligned || first || end <= start || gain >= MIN_TOKEN_SEGMENT) {
+            if end > start {
+                plan.ops.push(PrefixOp::Decode {
+                    seq: owner,
+                    start,
+                    end,
+                });
+                resident[owner] = end;
+            }
+            for &m in &members {
+                if m != owner && resident[m] < end {
+                    plan.ops.push(PrefixOp::Copy {
+                        src: owner,
+                        dst: m,
+                        start: resident[m],
+                        end,
+                    });
+                    plan.reused[m] += end - resident[m];
+                    resident[m] = end;
+                }
+            }
+        }
+        if first {
+            plan.root = resident[0];
+            first = false;
+        }
+        // Split at the first differing position; exhausted members are leaves.
+        let mut groups: Vec<Vec<usize>> = Vec::new();
+        for &m in &members {
+            if inputs[m].len() - 1 <= common {
+                continue;
+            }
+            match groups
+                .iter_mut()
+                .find(|g| inputs[g[0]][common] == inputs[m][common])
+            {
+                Some(group) => group.push(m),
+                None => groups.push(vec![m]),
+            }
+        }
+        // Depth-first in request order keeps the plan deterministic.
+        for group in groups.into_iter().rev() {
+            stack.push((group, common + 1));
+        }
+    }
+    plan.suffix_start = resident;
+    plan
+}
+
+/// Longest exact prefix of the retained tokens that sequence 0 can keep.
+fn retained_prefix(retained: &[i32], first: &[i32], batch: usize, aligned: bool) -> usize {
+    let common = retained
+        .iter()
+        .zip(first)
+        .take(first.len() - 1)
+        .take_while(|(a, b)| a == b)
+        .count();
+    if aligned {
+        common - common % batch.max(1)
+    } else {
+        common
+    }
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn sd_forward_parallel(
     e: *mut Engine,
@@ -386,15 +538,21 @@ pub unsafe extern "C" fn sd_forward_parallel(
     sequences: i32,
     capacity: u32,
     dynamic: bool,
+    flags: u32,
     reused: *mut i32,
     logits: *mut f32,
     logits_count: usize,
     error: *mut c_char,
     cap: usize,
 ) -> bool {
+    let aligned = flags & SD_PARALLEL_TOKEN_PREFIX == 0;
+    let retain = flags & SD_PARALLEL_RETAIN_PREFIX != 0;
     let ok = run(e, error, cap, |e| {
         if sequences < 1 || sequences as u32 > capacity || capacity > 32 {
             return Err("invalid parallel sequence count".into());
+        }
+        if flags & !(SD_PARALLEL_TOKEN_PREFIX | SD_PARALLEL_RETAIN_PREFIX) != 0 {
+            return Err("unknown parallel flags".into());
         }
         if e.recurrent() {
             return Err(
@@ -418,35 +576,69 @@ pub unsafe extern "C" fn sd_forward_parallel(
         } else {
             maximum
         };
+        // A context rebuild clears the engine, including any retained prefix.
         e.ensure_sequences(capacity, requested as u32, dynamic, true)?;
-        e.clear();
-        let common = common_prefix(&inputs, e.batch_size);
-        let mut b = Batch::new(e.batch_size)?;
-        let mut start = 0;
-        while start < common {
-            b.0.n_tokens = 0;
-            while start < common && b.0.n_tokens < e.batch_size as i32 {
-                b.add(inputs[0][start], start as i32, 0, false);
-                start += 1;
-            }
-            e.memory_dirty = true;
-            let rc = llama_decode(e.ctx, b.0);
-            if rc != 0 {
-                return Err(format!(
-                    "parallel shared prefill failed (llama_decode={rc}, batch_tokens={}, context={}; code 1 means no KV slot for this batch; see llama.cpp stderr for other codes)",
-                    b.0.n_tokens,
-                    llama_n_ctx(e.ctx)
-                ));
-            }
-        }
-        if common > 0 {
+        let batch = e.batch_size as usize;
+        let kept = if retain && !e.parallel_retained.is_empty() {
+            retained_prefix(&e.parallel_retained, inputs[0], batch, aligned)
+        } else {
+            0
+        };
+        if kept == 0 {
+            e.clear();
+        } else {
+            // Only sequence 0's matching prefix survives from the previous call.
             let memory = llama_get_memory(e.ctx);
-            for (s, reuse) in reused.iter_mut().enumerate().skip(1) {
-                llama_memory_seq_cp(memory, 0, s as i32, 0, common as i32);
-                *reuse = common as i32;
+            for s in 1..capacity as i32 {
+                llama_memory_seq_rm(memory, s, -1, -1);
+            }
+            llama_memory_seq_rm(memory, 0, kept as i32, -1);
+            e.parallel_retained.truncate(kept);
+        }
+        let plan = plan_prefixes(&inputs, batch, aligned, kept);
+        let mut b = Batch::new(e.batch_size)?;
+        let memory = llama_get_memory(e.ctx);
+        for op in &plan.ops {
+            match *op {
+                PrefixOp::Decode {
+                    seq,
+                    mut start,
+                    end,
+                } => {
+                    while start < end {
+                        b.0.n_tokens = 0;
+                        let stop = end.min(start + batch);
+                        for (position, &token) in
+                            inputs[seq].iter().enumerate().take(stop).skip(start)
+                        {
+                            b.add(token, position as i32, seq as i32, false);
+                        }
+                        e.memory_dirty = true;
+                        let rc = llama_decode(e.ctx, b.0);
+                        if rc != 0 {
+                            return Err(format!(
+                                "parallel shared prefill failed (llama_decode={rc}, batch_tokens={}, context={}; code 1 means no KV slot for this batch; see llama.cpp stderr for other codes)",
+                                b.0.n_tokens,
+                                llama_n_ctx(e.ctx)
+                            ));
+                        }
+                        start = stop;
+                    }
+                }
+                PrefixOp::Copy {
+                    src,
+                    dst,
+                    start,
+                    end,
+                } => {
+                    llama_memory_seq_cp(memory, src as i32, dst as i32, start as i32, end as i32);
+                }
             }
         }
-        let mut positions = vec![common; inputs.len()];
+        for (reuse, &count) in reused.iter_mut().zip(&plan.reused) {
+            *reuse = count as i32;
+        }
+        let mut positions = plan.suffix_start.clone();
         let mut completed = 0;
         while completed < inputs.len() {
             b.0.n_tokens = 0;
@@ -491,9 +683,20 @@ pub unsafe extern "C" fn sd_forward_parallel(
                 completed += 1;
             }
         }
+        if retain && plan.root > 0 {
+            for s in 1..capacity as i32 {
+                llama_memory_seq_rm(memory, s, -1, -1);
+            }
+            llama_memory_seq_rm(memory, 0, plan.root as i32, -1);
+            e.parallel_retained = inputs[0][..plan.root].to_vec();
+        } else {
+            e.clear();
+        }
         Ok(())
     });
-    sd_clear(e);
+    if !retain {
+        sd_clear(e);
+    }
     ok
 }
 #[unsafe(no_mangle)]
@@ -672,5 +875,109 @@ mod tests {
         assert_eq!(common_prefix(&[&a, &a], 2), 4);
         assert_eq!(common_prefix(&[&a], 2), 0);
         assert_eq!(common_prefix(&[&a, &[1]], 2), 0);
+    }
+    fn decode(seq: usize, start: usize, end: usize) -> PrefixOp {
+        PrefixOp::Decode { seq, start, end }
+    }
+    fn copy(src: usize, dst: usize, start: usize, end: usize) -> PrefixOp {
+        PrefixOp::Copy {
+            src,
+            dst,
+            start,
+            end,
+        }
+    }
+    #[test]
+    fn prefix_plan_matches_whole_wave_sharing() {
+        let a = [1, 2, 3, 4, 5, 6];
+        let b = [1, 2, 3, 4, 8];
+        let plan = plan_prefixes(&[&a, &b], 2, true, 0);
+        assert_eq!(plan.ops, [decode(0, 0, 4), copy(0, 1, 0, 4)]);
+        assert_eq!(plan.suffix_start, [4, 4]);
+        assert_eq!(plan.reused, [0, 4]);
+        assert_eq!(plan.root, 4);
+        // Batch alignment keeps the old rounding; one input shares nothing.
+        let plan = plan_prefixes(&[&a, &[1, 2, 3, 9]], 2, true, 0);
+        assert_eq!(plan.ops, [decode(0, 0, 2), copy(0, 1, 0, 2)]);
+        let plan = plan_prefixes(&[&a], 2, true, 0);
+        assert!(plan.ops.is_empty());
+        assert_eq!(plan.suffix_start, [0]);
+        // Identical prompts keep their final token for the suffix phase.
+        let plan = plan_prefixes(&[&a, &a, &a], 1, true, 0);
+        assert_eq!(plan.suffix_start, [5, 5, 5]);
+        assert_eq!(plan.reused, [0, 5, 5]);
+    }
+    #[test]
+    fn prefix_plan_keeps_sharing_after_an_early_divergence() {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let b = [1, 2, 7, 7, 7, 7, 7, 7, 7];
+        let c = [1, 2, 3, 4, 5, 6, 7, 8, 10];
+        let plan = plan_prefixes(&[&a, &b, &c], 2, true, 0);
+        assert_eq!(
+            plan.ops,
+            [
+                decode(0, 0, 2),
+                copy(0, 1, 0, 2),
+                copy(0, 2, 0, 2),
+                decode(0, 2, 8),
+                copy(0, 2, 2, 8),
+            ]
+        );
+        assert_eq!(plan.suffix_start, [8, 2, 8]);
+        assert_eq!(plan.reused, [0, 2, 8]);
+        assert_eq!(plan.root, 2);
+        // Batch alignment rounds each nested segment down.
+        let plan = plan_prefixes(&[&a, &b, &c], 4, true, 0);
+        assert_eq!(
+            plan.ops,
+            [decode(0, 0, 8), copy(0, 2, 0, 8)],
+            "the root rounds to zero, the nested group still shares"
+        );
+        assert_eq!(plan.suffix_start, [8, 0, 8]);
+        assert_eq!(plan.root, 0);
+    }
+    #[test]
+    fn token_prefix_plan_skips_only_short_nested_segments() {
+        let long: Vec<i32> = (0..40).collect();
+        let mut a = long.clone();
+        a.extend([100, 1]);
+        let mut b = long.clone();
+        b.extend([100, 2]);
+        let mut c = long.clone();
+        c.extend([200, 3]);
+        let plan = plan_prefixes(&[&a, &b, &c], 16, false, 0);
+        // The root shares all 40 tokens; one more common token is not worth
+        // a separate decode.
+        assert_eq!(
+            plan.ops,
+            [decode(0, 0, 40), copy(0, 1, 0, 40), copy(0, 2, 0, 40)]
+        );
+        assert_eq!(plan.suffix_start, [40, 40, 40]);
+        let plan = plan_prefixes(&[&a, &b, &c], 16, true, 0);
+        assert_eq!(
+            plan.ops,
+            [decode(0, 0, 32), copy(0, 1, 0, 32), copy(0, 2, 0, 32)]
+        );
+    }
+    #[test]
+    fn retained_prefix_is_not_evaluated_again() {
+        let a = [1, 2, 3, 4, 5, 6, 7];
+        let b = [1, 2, 3, 4, 5, 6, 8];
+        assert_eq!(retained_prefix(&[1, 2, 3, 4, 9], &a, 2, true), 4);
+        assert_eq!(retained_prefix(&[1, 2, 3, 9], &a, 2, true), 2);
+        assert_eq!(retained_prefix(&[1, 2, 3, 9], &a, 2, false), 3);
+        assert_eq!(retained_prefix(&a, &a, 1, true), 6);
+        let plan = plan_prefixes(&[&a, &b], 2, true, 4);
+        assert_eq!(plan.ops, [decode(0, 4, 6), copy(0, 1, 0, 6)]);
+        assert_eq!(plan.reused, [4, 6]);
+        assert_eq!(plan.root, 6);
+        // A single question reuses the retained prefix and keeps it.
+        let plan = plan_prefixes(&[&a], 2, true, 4);
+        assert!(plan.ops.is_empty());
+        assert_eq!((plan.suffix_start[0], plan.reused[0], plan.root), (4, 4, 4));
+        // A retained prefix longer than this wave's common prefix stays whole.
+        let plan = plan_prefixes(&[&a, &[1, 9]], 2, true, 4);
+        assert_eq!(plan.ops, []);
+        assert_eq!(plan.root, 4);
     }
 }

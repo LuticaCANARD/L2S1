@@ -119,6 +119,7 @@ impl<F: HttpDecisionBackend, S: HttpDecisionBackend> HttpDecisionBackend for Cas
         let mut fast_failed = false;
         if !eligible.is_empty() {
             let fast_request = DecisionRequest {
+                shared: request.shared.clone(),
                 state: request.state.clone(),
                 decisions: eligible
                     .iter()
@@ -165,6 +166,7 @@ impl<F: HttpDecisionBackend, S: HttpDecisionBackend> HttpDecisionBackend for Cas
             .collect();
         if !remaining.is_empty() {
             let slow_request = DecisionRequest {
+                shared: request.shared.clone(),
                 state: request.state.clone(),
                 decisions: remaining
                     .iter()

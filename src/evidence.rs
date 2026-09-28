@@ -31,6 +31,7 @@ impl ExactEvidence {
         normalizer: f64,
     ) -> Result<Self> {
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![decision.clone()],
         }
@@ -80,6 +81,7 @@ impl ExactEvidence {
     }
     pub fn from_logits(decision: &Decision, logits: &[f32], tokens: &[i32]) -> Result<Self> {
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![decision.clone()],
         }
@@ -144,6 +146,7 @@ impl ExactEvidence {
             ));
         }
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![decision.clone()],
         }
