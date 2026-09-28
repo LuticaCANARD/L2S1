@@ -6,7 +6,7 @@ impl LlamaBackend {
         digest(
             &serde_json::to_vec(&(
                 self.identity(),
-                self.prompt_layout,
+                self.prompt_layout(),
                 self.prompt_detail,
                 self.code_rotation,
                 &self.policy,
@@ -159,7 +159,7 @@ impl LlamaBackend {
         for d in &request.decisions {
             let (input, candidates, paths) = if d.options().len() > 26 {
                 let (input, paths) =
-                    self.encode_decision_sequences(&request.state, d)
+                    self.encode_decision_sequences(request.input(), d)
                         .map_err(|e| {
                             DecisionFailure::new(
                                 FailureKind::UnsupportedCapability,
@@ -170,7 +170,7 @@ impl LlamaBackend {
                         })?;
                 (input, Vec::new(), paths)
             } else {
-                let (input, candidates) = self.prepare_checked(&request.state, d)?;
+                let (input, candidates) = self.prepare_checked(request.input(), d)?;
                 (input, candidates, Vec::new())
             };
             decisions.push(PreparedDecisionReport {
@@ -269,7 +269,7 @@ impl LlamaBackend {
         let prepared = request
             .decisions
             .iter()
-            .map(|d| self.prepare(&request.state, d))
+            .map(|d| self.prepare(request.input(), d))
             .collect::<Result<Vec<_>>>()?;
         self.timings.prepare_ms += started.elapsed().as_secs_f64() * 1000.0;
         let pointers: Vec<_> = prepared.iter().map(|p| p.0.as_ptr()).collect();

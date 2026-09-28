@@ -18,12 +18,14 @@ impl LlamaBackend {
 
     /// Exact assistant-continuation token paths in canonical semantic order.
     /// Unlike encode_decision, supports codes that span multiple tokens.
-    pub fn encode_decision_sequences(
+    pub fn encode_decision_sequences<'a>(
         &self,
-        state: &serde_json::Value,
+        state: impl Into<crate::PromptInput<'a>>,
         decision: &Decision,
     ) -> Result<(Vec<i32>, Vec<Vec<i32>>)> {
+        let state = state.into();
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![decision.clone()],
         }
@@ -62,7 +64,7 @@ impl LlamaBackend {
 
     fn prepare_code_sequences_uncached(
         &self,
-        state: &serde_json::Value,
+        state: crate::PromptInput<'_>,
         decision: &Decision,
     ) -> Result<(Vec<i32>, Vec<Vec<i32>>)> {
         let parts = match &self.chat_skeleton {
@@ -70,14 +72,14 @@ impl LlamaBackend {
                 skeleton,
                 state,
                 decision,
-                self.prompt_layout,
+                self.prompt_layout(),
                 self.prompt_detail,
                 self.code_rotation,
             )?,
             None => compile_prompt_with_detail(
                 state,
                 decision,
-                self.prompt_layout,
+                self.prompt_layout(),
                 self.prompt_detail,
                 self.code_rotation,
             ),
@@ -148,7 +150,7 @@ impl LlamaBackend {
 
     pub(super) fn evaluate_code_sequences(
         &mut self,
-        state: &serde_json::Value,
+        state: crate::PromptInput<'_>,
         decision: &Decision,
     ) -> Result<DecisionResult> {
         self.check_sequence_config()?;
@@ -250,6 +252,7 @@ mod tests {
 
     fn request(count: usize) -> DecisionRequest {
         DecisionRequest {
+            shared: None,
             state: serde_json::json!({"wanted": "intent_39"}),
             decisions: vec![Decision {
                 id: "wide".into(),
@@ -285,7 +288,7 @@ mod tests {
         for count in [27, 77] {
             let req = request(count);
             let (input, paths) = backend
-                .encode_decision_sequences(&req.state, &req.decisions[0])
+                .encode_decision_sequences(req.input(), &req.decisions[0])
                 .unwrap();
             let preflight = backend.preflight(&req).unwrap();
             assert_eq!(preflight.decisions[0].candidate_token_sequences, paths);
@@ -368,7 +371,7 @@ mod tests {
         // AAA expansion is checked against actual tokenizer paths, not just strings.
         let three = request(677);
         let (_, paths) = backend
-            .encode_decision_sequences(&three.state, &three.decisions[0])
+            .encode_decision_sequences(three.input(), &three.decisions[0])
             .unwrap();
         assert_eq!(paths.len(), 677);
         assert_eq!(option_code(676, 677).unwrap(), "BAA");

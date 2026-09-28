@@ -415,3 +415,135 @@ fn real_model_parallel_labeled() {
         std::fs::write(path,serde_json::to_vec_pretty(&serde_json::json!({"runs":runs,"scope":"36 synthetic labeled decisions, state-first v2; not held-out production accuracy"})).unwrap()).unwrap();
     }
 }
+
+fn max_probability_delta(a: &[DecisionResponse], b: &[DecisionResponse]) -> f64 {
+    let mut delta = 0.0_f64;
+    for (a, b) in a.iter().zip(b) {
+        for (a, b) in a.results.iter().zip(&b.results) {
+            assert_eq!((&a.id, a.input_tokens), (&b.id, b.input_tokens));
+            for (x, y) in a.scores.iter().zip(&b.scores) {
+                delta = delta.max((x.option_probability - y.option_probability).abs());
+            }
+        }
+    }
+    delta
+}
+
+fn reused(responses: &[DecisionResponse]) -> Vec<usize> {
+    responses
+        .iter()
+        .flat_map(|r| r.results.iter().map(|r| r.reused_prefix_tokens))
+        .collect()
+}
+
+#[test]
+#[ignore = "requires SKID_MODEL; checks shared input, nested prefix groups, alignment and retention"]
+fn real_model_prefix_sharing() {
+    let model = env::var("SKID_MODEL").expect("set SKID_MODEL");
+    let mut backend = LlamaBackend::load(
+        model.as_ref(),
+        2048,
+        256,
+        4,
+        env::var("SKID_CUDA").as_deref() == Ok("1"),
+        DecisionPolicy::default(),
+    )
+    .unwrap();
+    // Without an explicit layout, only parallel execution selects state-first.
+    assert_eq!(backend.prompt_layout(), PromptLayout::Legacy);
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    assert_eq!(backend.prompt_layout(), PromptLayout::StateFirst);
+    assert_eq!(
+        backend.info().prompt_layout,
+        PromptLayout::StateFirst,
+        "reported identity follows the resolved layout"
+    );
+    // Legacy places the question before the state; only `shared` precedes it.
+    backend.set_prompt_layout(PromptLayout::Legacy);
+    backend.set_parallel_width(4).unwrap();
+    let knowledge = "Dispatch policy: frozen goods need a frozen truck; chilled goods \
+                     leave within 24 hours; ambient goods may wait for the next route. "
+        .repeat(12);
+    let requests: Vec<_> = (0..3)
+        .map(|i| {
+            let mut request = request(3, false);
+            request.shared = Some(serde_json::json!({"knowledge": knowledge}));
+            request.state["case"] = serde_json::json!(i);
+            request
+        })
+        .collect();
+    backend.set_execution_mode(ExecutionMode::Fresh);
+    let fresh = backend.decide_batch(&requests).unwrap();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_prompt_layout(PromptLayout::Legacy);
+    let batch = backend.decide_batch(&requests).unwrap();
+    let batch_reused = reused(&batch);
+    eprintln!("batch-aligned reuse: {batch_reused:?}");
+    // Only the question that evaluated the first shared prefix pays for it;
+    // later waves reuse the retained prefix inside the call.
+    assert_eq!(batch_reused.iter().filter(|&&r| r == 0).count(), 1);
+    assert!(batch_reused.iter().all(|&r| r % 256 == 0));
+    let delta = max_probability_delta(&fresh, &batch);
+    eprintln!("batch-aligned max probability delta vs fresh: {delta}");
+    assert!(delta < 0.05);
+    assert_eq!(
+        batch[0].backend.parallel_wave_order,
+        ParallelWaveOrder::Prefix
+    );
+    assert!(!batch[0].backend.parallel_prefix_retained);
+
+    // Request-order waves still produce request-ordered results.
+    backend.set_parallel_wave_order(ParallelWaveOrder::Request);
+    let ordered = backend.decide_batch(&requests).unwrap();
+    assert!(max_probability_delta(&fresh, &ordered) < 0.05);
+    backend.set_parallel_wave_order(ParallelWaveOrder::Prefix);
+
+    backend.set_parallel_prefix_alignment(ParallelPrefixAlignment::Token);
+    let token = backend.decide_batch(&requests).unwrap();
+    let token_reused = reused(&token);
+    eprintln!("token-aligned reuse: {token_reused:?}");
+    assert!(token_reused.iter().zip(&batch_reused).all(|(t, b)| t >= b));
+    assert!(token_reused.iter().sum::<usize>() > batch_reused.iter().sum::<usize>());
+    let delta = max_probability_delta(&fresh, &token);
+    eprintln!("token-aligned max probability delta vs fresh: {delta}");
+    assert!(delta < 0.05);
+    assert_eq!(
+        token[0].backend.parallel_prefix_alignment,
+        ParallelPrefixAlignment::Token
+    );
+    backend.set_parallel_prefix_alignment(ParallelPrefixAlignment::Batch);
+
+    {
+        let mut session = backend.parallel_prefix_session().unwrap();
+        let first = session.decide_batch(&requests).unwrap();
+        assert!(first[0].backend.parallel_prefix_retained);
+        for (a, b) in first.iter().zip(&batch) {
+            assert_same(a, b);
+        }
+        // The next call starts from the retained shared prefix.
+        let second = session.decide_batch(&requests).unwrap();
+        let second_reused = reused(&second);
+        eprintln!("session second-call reuse: {second_reused:?}");
+        assert!(second_reused.iter().all(|&r| r > 0));
+        for (a, b) in second.iter().zip(&first) {
+            assert_same(a, b);
+        }
+        // A failure clears the retained prefix and the session stays usable.
+        let mut invalid = requests.clone();
+        invalid[0].decisions[0].instruction = "overlong ".repeat(4000);
+        assert!(session.decide_batch(&invalid).is_err());
+        let recovered = session.decide_batch(&requests).unwrap();
+        assert_eq!(reused(&recovered), batch_reused);
+        for (a, b) in recovered.iter().zip(&first) {
+            assert_same(a, b);
+        }
+        assert_eq!(session.decide(&requests[0]).unwrap().results.len(), 3);
+    }
+    let after = backend.decide_batch(&requests).unwrap();
+    assert!(!after[0].backend.parallel_prefix_retained);
+    for (a, b) in after.iter().zip(&batch) {
+        assert_same(a, b);
+    }
+    backend.set_execution_mode(ExecutionMode::Fresh);
+    assert!(backend.parallel_prefix_session().is_err());
+}

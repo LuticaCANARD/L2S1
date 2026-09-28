@@ -44,6 +44,7 @@ impl ScalarCalibration {
         records: &[CalibrationRecord],
     ) -> Result<Self> {
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![task.clone()],
         }

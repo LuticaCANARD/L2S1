@@ -53,8 +53,12 @@ impl FixedSchemaBackend {
         // tokens of two distinct state encodings can be static schema tokens.
         // Each actual request is intersected with these tokens too: never assume
         // concatenating separately tokenized strings preserves the prompt.
-        let (a, _) = self.backend.prepare(&serde_json::Value::Null, decision)?;
-        let (b, _) = self.backend.prepare(&serde_json::json!({}), decision)?;
+        let (a, _) = self
+            .backend
+            .prepare((&serde_json::Value::Null).into(), decision)?;
+        let (b, _) = self
+            .backend
+            .prepare((&serde_json::json!({})).into(), decision)?;
         let n = a.iter().zip(&b).take_while(|(a, b)| a == b).count();
         let prefix = a[..n].to_vec();
         let bytes = key.len() + prefix.len() * std::mem::size_of::<i32>();
@@ -85,12 +89,12 @@ impl FixedSchemaBackend {
             for decision in &request.decisions {
                 if decision.options().len() > 26 {
                     unsafe { sd_clear(self.backend.engine.as_ptr()) };
-                    results.push(self.backend.evaluate(&request.state, decision)?);
+                    results.push(self.backend.evaluate(request.input(), decision)?);
                     unsafe { sd_clear(self.backend.engine.as_ptr()) };
                     continue;
                 }
                 let prefix = self.prefix(decision)?;
-                let (tokens, _) = self.backend.prepare(&request.state, decision)?;
+                let (tokens, _) = self.backend.prepare(request.input(), decision)?;
                 let p = prefix
                     .iter()
                     .zip(&tokens)
@@ -101,7 +105,7 @@ impl FixedSchemaBackend {
                     unsafe { sd_clear(self.backend.engine.as_ptr()) };
                 }
                 results.push(self.backend.evaluate_planned(
-                    &request.state,
+                    request.input(),
                     decision,
                     (p > 0).then_some(p),
                     reuse,

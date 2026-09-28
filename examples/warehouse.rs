@@ -4,6 +4,7 @@ use serde_json::{Map, Value};
 
 fn main() -> l2s1::Result<()> {
     let request = DecisionRequest {
+        shared: None,
         state: Value::Object(Map::from_iter([
             ("shipment_id".into(), Value::from("BOX-103")),
             ("storage_requirement".into(), Value::from("chilled")),

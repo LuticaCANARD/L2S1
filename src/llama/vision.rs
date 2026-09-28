@@ -149,7 +149,7 @@ impl LlamaBackend {
                     request
                         .decisions
                         .iter()
-                        .map(move |decision| (&request.state, decision, *image))
+                        .map(move |decision| (request.input(), decision, *image))
                 })
                 .collect::<Vec<_>>();
             if questions
@@ -170,7 +170,7 @@ impl LlamaBackend {
                 let started = Instant::now();
                 let prepared = wave
                     .iter()
-                    .map(|(state, decision, _)| self.prepare_vision(state, decision))
+                    .map(|(state, decision, _)| self.prepare_vision(*state, decision))
                     .collect::<Result<Vec<_>>>()?;
                 self.timings.prepare_ms += started.elapsed().as_secs_f64() * 1000.0;
                 let before = "Image:\n";
@@ -366,7 +366,7 @@ impl LlamaBackend {
 
     fn prepare_vision(
         &self,
-        state: &serde_json::Value,
+        state: crate::PromptInput<'_>,
         decision: &Decision,
     ) -> Result<PreparedVision> {
         let key = self
@@ -387,14 +387,14 @@ impl LlamaBackend {
                 skeleton,
                 state,
                 decision,
-                self.prompt_layout,
+                self.prompt_layout(),
                 self.prompt_detail,
                 self.code_rotation,
             )?,
             None => compile_prompt_with_detail(
                 state,
                 decision,
-                self.prompt_layout,
+                self.prompt_layout(),
                 self.prompt_detail,
                 self.code_rotation,
             ),
@@ -468,7 +468,7 @@ impl LlamaBackend {
         let mut results = Vec::with_capacity(request.decisions.len());
         for decision in &request.decisions {
             let started = Instant::now();
-            let prepared = self.prepare_vision(&request.state, decision)?;
+            let prepared = self.prepare_vision(request.input(), decision)?;
             self.timings.prepare_ms += started.elapsed().as_secs_f64() * 1000.0;
             let parts = &prepared.parts;
             // Media stays in the user-data segment; control tokens remain in

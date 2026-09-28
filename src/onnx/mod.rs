@@ -340,6 +340,7 @@ impl OnnxBackend {
     }
     pub fn inspect_input(&self, request: &DecisionRequest) -> Result<Value> {
         request.validate()?;
+        reject_shared(request)?;
         let text = match &request.state {
             Value::String(s) => s.clone(),
             v => pyjson::dumps(v, false),
@@ -365,6 +366,7 @@ impl OnnxBackend {
         let mut rows = Vec::new();
         for request in requests {
             request.validate()?;
+            reject_shared(request)?;
             let text = match &request.state {
                 Value::String(s) => s.clone(),
                 v => pyjson::dumps(v, false),
@@ -443,4 +445,15 @@ impl HttpDecisionBackend for OnnxBackend {
         }
         self.decide_many(requests)
     }
+}
+
+/// The encoder classifies the state text alone and has no field for shared
+/// evidence; refuse rather than silently ignoring it.
+fn reject_shared(request: &DecisionRequest) -> Result<()> {
+    if request.shared.is_some() {
+        return Err(Error::Invalid(
+            "the ONNX backend does not support the shared request field".into(),
+        ));
+    }
+    Ok(())
 }

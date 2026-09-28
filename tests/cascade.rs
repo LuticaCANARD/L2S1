@@ -84,6 +84,7 @@ fn routes_only_validated_confident_answers_preserving_order() {
     )
     .unwrap();
     let r = DecisionRequest {
+        shared: None,
         state: json!("test"),
         decisions: ds,
     };
@@ -117,6 +118,7 @@ fn unconfigured_route_never_calls_fast_and_rejects_bad_artifacts() {
     .unwrap();
     c.decide_json(
         &DecisionRequest {
+            shared: None,
             state: json!(null),
             decisions: vec![decision("yes")],
         },

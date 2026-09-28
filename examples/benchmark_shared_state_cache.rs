@@ -53,6 +53,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .map(|question| {
                     Ok(backend
                         .decide(&DecisionRequest {
+                            shared: None,
                             state: state.clone(),
                             decisions: vec![question.clone()],
                         })?

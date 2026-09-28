@@ -311,6 +311,8 @@ impl HttpDecisionBackend for crate::openrouter::OpenRouterBackend {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct WireRequest {
+    #[serde(default)]
+    shared: Option<Value>,
     state: Value,
     #[serde(default)]
     media: Vec<WireMedia>,
@@ -563,6 +565,7 @@ fn prepare_request<B: HttpDecisionBackend>(
         ));
     }
     let request = DecisionRequest {
+        shared: wire.shared.clone(),
         state: wire.state.clone(),
         decisions: wire
             .decisions
@@ -614,6 +617,7 @@ fn prepare_request<B: HttpDecisionBackend>(
         }
         group_images.push(selected_ids.clone());
         groups.push(DecisionRequest {
+            shared: wire.shared.clone(),
             state: wire.state.clone(),
             decisions: request.decisions[index..end].to_vec(),
         });
@@ -948,6 +952,28 @@ mod tests {
             2
         );
         assert_eq!(output["results"][0]["usage"]["input_tokens"], 12);
+    }
+
+    #[test]
+    fn shared_input_reaches_every_request_group() {
+        let body = serde_json::to_vec(&json!({
+            "shared": {"knowledge": "k"},
+            "state": {"x": 1},
+            "media": [{"type": "image", "id": "a", "data_base64": "AAAA"}],
+            "decisions": [
+                {"id": "text", "instruction": "Choose", "media_ids": [],
+                 "kind": {"type": "binary", "false_label": "no", "true_label": "yes"}},
+                {"id": "image", "instruction": "Choose", "media_ids": ["a"],
+                 "kind": {"type": "binary", "false_label": "no", "true_label": "yes"}}
+            ]
+        }))
+        .unwrap();
+        let prepared = prepare_request(&BatchProbe::default(), &body).unwrap();
+        assert_eq!(prepared.request.shared, Some(json!({"knowledge": "k"})));
+        assert_eq!(prepared.groups.len(), 2);
+        for group in &prepared.groups {
+            assert_eq!(group.shared, prepared.request.shared);
+        }
     }
 
     #[derive(Default)]

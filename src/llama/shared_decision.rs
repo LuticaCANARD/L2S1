@@ -6,9 +6,9 @@ use crate::{Decision, DecisionRequest, DecisionResponse, Error, ExecutionMode, R
 /// Exclusively borrows the backend: model, schema, policy, layout and artifacts
 /// cannot change during the session. Only exact, complete native token batches
 /// are reused. Each new state replaces the previous suffix; no answers are cached.
-/// With the default sorted JSON maps, Legacy places instruction/options before
-/// state and usually exposes more reusable tokens than StateFirst. Always check
-/// reused_prefix_tokens; downstream serde_json features can affect Legacy order.
+/// Legacy places instruction/options before state and usually exposes more
+/// reusable tokens than StateFirst here. Prompt field order is fixed regardless
+/// of serde_json features; check reused_prefix_tokens for the actual reuse.
 ///
 /// KV is cleared at creation, on failure and on drop. Ordinary requests remain
 /// isolated. This session retains one sequence, not a multi-schema cache.
@@ -39,6 +39,7 @@ impl LlamaBackend {
             ));
         }
         let request = DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![decision],
         };
@@ -67,7 +68,7 @@ impl SharedDecisionSession<'_> {
         self.backend.restore_metrics = Default::default();
         let result = self
             .backend
-            .evaluate(&self.request.state, &self.request.decisions[0]);
+            .evaluate(self.request.input(), &self.request.decisions[0]);
         let backend = self.backend.info_for_request(&self.request);
         self.request.state = serde_json::Value::Null;
         if result.is_err() {

@@ -17,6 +17,13 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct DecisionRequest {
+    /// Optional evidence common to many requests or questions (for example a
+    /// knowledge base or examples). It is always rendered first in the data
+    /// segment, before `state` and the question, in every prompt layout, so
+    /// callers do not need key-name ordering tricks to obtain a reusable exact
+    /// token prefix. Absent or `null` leaves the prompt unchanged.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shared: Option<serde_json::Value>,
     pub state: serde_json::Value,
     pub decisions: Vec<Decision>,
 }
@@ -104,6 +111,20 @@ impl Decision {
 }
 
 impl DecisionRequest {
+    /// A request without shared evidence.
+    pub fn new(state: serde_json::Value, decisions: Vec<Decision>) -> Self {
+        Self {
+            shared: None,
+            state,
+            decisions,
+        }
+    }
+
+    /// Prompt evidence for this request: `shared` (if any) followed by `state`.
+    pub fn input(&self) -> crate::PromptInput<'_> {
+        self.into()
+    }
+
     pub fn validate(&self) -> Result<()> {
         if self.decisions.is_empty() {
             return Err(Error::Invalid("decisions must not be empty".into()));
@@ -279,6 +300,18 @@ pub struct BackendInfo {
     /// Currently allocated padded KV context capacity in dynamic parallel mode.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parallel_context_tokens: Option<u32>,
+    /// Shared-prefix rounding in parallel mode; absent means `batch`.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::ParallelPrefixAlignment::is_batch"
+    )]
+    pub parallel_prefix_alignment: crate::ParallelPrefixAlignment,
+    /// Parallel wave membership; absent means request order.
+    #[serde(default, skip_serializing_if = "crate::ParallelWaveOrder::is_request")]
+    pub parallel_wave_order: crate::ParallelWaveOrder,
+    /// A parallel prefix session kept shared-prefix KV across calls.
+    #[serde(default, skip_serializing_if = "bool_is_false")]
+    pub parallel_prefix_retained: bool,
     /// Requested compute settings; absent in historical responses.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub compute: Option<ComputeOptions>,

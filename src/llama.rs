@@ -21,8 +21,10 @@ mod model_hash;
 mod prepared_cache;
 mod shared_decision;
 pub use fixed_schema::FixedSchemaBackend;
+mod parallel_session;
 mod shared_state;
 mod vision;
+pub use parallel_session::ParallelPrefixSession;
 pub use prepared_cache::CacheMetrics;
 use prepared_cache::{BoundedTokenCache, CandidateTokens};
 pub use shared_decision::SharedDecisionSession;
@@ -74,7 +76,13 @@ pub struct LlamaBackend {
     execution_mode: ExecutionMode,
     parallel_width: usize,
     parallel_context_dynamic: bool,
-    prompt_layout: PromptLayout,
+    parallel_prefix_alignment: ParallelPrefixAlignment,
+    parallel_wave_order: ParallelWaveOrder,
+    /// Set while a `ParallelPrefixSession` borrows this backend.
+    parallel_retain_calls: bool,
+    warned_legacy_parallel: std::cell::Cell<bool>,
+    /// `None` selects state-first in parallel mode and legacy otherwise.
+    prompt_layout: Option<PromptLayout>,
     _not_send_sync: PhantomData<Rc<()>>,
 }
 
@@ -330,7 +338,11 @@ impl LlamaBackend {
             execution_mode: ExecutionMode::Fresh,
             parallel_width: 4,
             parallel_context_dynamic: false,
-            prompt_layout: PromptLayout::Legacy,
+            parallel_prefix_alignment: ParallelPrefixAlignment::Batch,
+            parallel_wave_order: ParallelWaveOrder::Prefix,
+            parallel_retain_calls: false,
+            warned_legacy_parallel: std::cell::Cell::new(false),
+            prompt_layout: None,
             _not_send_sync: PhantomData,
         };
         // The owning backend drops the handle even if profile setup fails.
@@ -541,7 +553,7 @@ impl LlamaBackend {
                 ));
             }
             self.collect_features = true;
-            let result = self.evaluate(&request.state, &request.decisions[0])?;
+            let result = self.evaluate(request.input(), &request.decisions[0])?;
             Ok((
                 self.copy_features()?,
                 DecisionResponse {
@@ -562,18 +574,20 @@ impl LlamaBackend {
     /// Export exactly the input and candidate token IDs used by inference.
     /// Useful for supervised decision training without reimplementing templates.
     /// Performs no forward pass and does not alter the KV cache.
-    pub fn encode_decision(
+    pub fn encode_decision<'a>(
         &self,
-        state: &serde_json::Value,
+        state: impl Into<crate::PromptInput<'a>>,
         decision: &Decision,
     ) -> Result<(Vec<i32>, Vec<i32>)> {
+        let state = state.into();
         if decision.options().len() > 26 {
             return Err(Error::Invalid(
                 "wide answer codes require encode_decision_sequences".into(),
             ));
         }
         DecisionRequest {
-            state: state.clone(),
+            shared: state.shared.cloned(),
+            state: state.state.clone(),
             decisions: vec![decision.clone()],
         }
         .validate()?;
@@ -643,11 +657,52 @@ impl LlamaBackend {
         self.clear_preparation_cache();
     }
 
-    /// Opt in to evidence-first prompts after validating their workload accuracy.
+    /// Select the prompt layout explicitly. Without a call, text `parallel`
+    /// execution uses `StateFirst` (so questions about one state share its
+    /// exact token prefix) and every other configuration, including a backend
+    /// with a vision projector (whose waves share no prefix KV), uses
+    /// `Legacy`. Layout changes the prompt; validate workload accuracy and
+    /// bind calibration to it.
     pub fn set_prompt_layout(&mut self, layout: PromptLayout) {
         unsafe { sd_clear(self.engine.as_ptr()) };
-        self.prompt_layout = layout;
+        self.prompt_layout = Some(layout);
         self.clear_preparation_cache();
+    }
+
+    /// Return to the execution-mode-dependent default layout.
+    pub fn reset_prompt_layout(&mut self) {
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        self.prompt_layout = None;
+        self.clear_preparation_cache();
+    }
+
+    /// The prompt layout used for the current configuration.
+    pub fn prompt_layout(&self) -> PromptLayout {
+        self.prompt_layout.unwrap_or(
+            if self.execution_mode == ExecutionMode::Parallel
+                && self.vision_projector_path.is_none()
+            {
+                PromptLayout::StateFirst
+            } else {
+                PromptLayout::Legacy
+            },
+        )
+    }
+
+    /// Choose how parallel waves round shared prefixes. `Batch` (default)
+    /// keeps shared KV on serial decode boundaries; `Token` shares every
+    /// common token and can change scores slightly.
+    pub fn set_parallel_prefix_alignment(&mut self, alignment: ParallelPrefixAlignment) {
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        self.parallel_prefix_alignment = alignment;
+    }
+
+    /// Choose how questions are assigned to parallel waves. `Prefix`
+    /// (default) groups questions with common token prefixes; `Request`
+    /// restores consecutive request-order waves. Results keep request order.
+    pub fn set_parallel_wave_order(&mut self, order: ParallelWaveOrder) {
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        self.parallel_wave_order = order;
     }
 
     /// Opt-in prompt information. Changing it invalidates prepared tokens and
@@ -716,7 +771,7 @@ impl LlamaBackend {
 
     fn prepare(
         &self,
-        state: &serde_json::Value,
+        state: crate::PromptInput<'_>,
         decision: &Decision,
     ) -> Result<(Vec<i32>, Vec<i32>)> {
         self.prepare_checked(state, decision)
@@ -730,7 +785,7 @@ impl LlamaBackend {
 
     fn prepare_checked(
         &self,
-        state: &serde_json::Value,
+        state: crate::PromptInput<'_>,
         decision: &Decision,
     ) -> std::result::Result<(Vec<i32>, Vec<i32>), DecisionFailure> {
         // Exact serialized key; no semantic normalization or hash-only lookup.
@@ -770,7 +825,7 @@ impl LlamaBackend {
 
     fn prepare_uncached(
         &self,
-        state: &serde_json::Value,
+        state: crate::PromptInput<'_>,
         decision: &Decision,
     ) -> std::result::Result<(Vec<i32>, Vec<i32>), DecisionFailure> {
         let parts = match &self.chat_skeleton {
@@ -778,14 +833,14 @@ impl LlamaBackend {
                 skeleton,
                 state,
                 decision,
-                self.prompt_layout,
+                self.prompt_layout(),
                 self.prompt_detail,
                 self.code_rotation,
             )?,
             None => compile_prompt_with_detail(
                 state,
                 decision,
-                self.prompt_layout,
+                self.prompt_layout(),
                 self.prompt_detail,
                 self.code_rotation,
             ),
@@ -873,7 +928,7 @@ impl LlamaBackend {
 
     fn evaluate(
         &mut self,
-        state: &serde_json::Value,
+        state: crate::PromptInput<'_>,
         decision: &Decision,
     ) -> Result<DecisionResult> {
         self.evaluate_planned(state, decision, None, false)
@@ -881,7 +936,7 @@ impl LlamaBackend {
 
     fn evaluate_planned(
         &mut self,
-        state: &serde_json::Value,
+        state: crate::PromptInput<'_>,
         decision: &Decision,
         boundary: Option<usize>,
         reuse: bool,
@@ -1023,28 +1078,42 @@ impl LlamaBackend {
 
     fn evaluate_parallel(
         &mut self,
-        questions: &[(&serde_json::Value, &Decision)],
+        questions: &[(crate::PromptInput<'_>, &Decision)],
     ) -> Result<Vec<DecisionResult>> {
-        let width = self.parallel_width.min(questions.len());
+        // A session keeps one sequence capacity so retained KV survives calls.
+        let width = if self.parallel_retain_calls {
+            self.parallel_width
+        } else {
+            self.parallel_width.min(questions.len())
+        };
         let vocab = unsafe { sd_vocab_size(self.engine.as_ptr()) };
         if vocab <= 0 {
             return Err(Error::Backend("invalid vocabulary size".into()));
         }
-        let mut results = Vec::with_capacity(questions.len());
-        for decisions in questions.chunks(width) {
-            let started = Instant::now();
-            let prepared = decisions
-                .iter()
-                .map(|(state, decision)| self.prepare(state, decision))
-                .collect::<Result<Vec<_>>>()?;
-            self.timings.prepare_ms += started.elapsed().as_secs_f64() * 1000.0;
-            let pointers: Vec<_> = prepared.iter().map(|(input, _)| input.as_ptr()).collect();
-            let counts: Vec<_> = prepared
-                .iter()
-                .map(|(input, _)| input.len() as i32)
-                .collect();
-            let mut logits = vec![0.0; decisions.len() * vocab as usize];
-            let mut reused = vec![0; decisions.len()];
+        let started = Instant::now();
+        let prepared = questions
+            .iter()
+            .map(|(input, decision)| self.prepare(*input, decision))
+            .collect::<Result<Vec<_>>>()?;
+        self.timings.prepare_ms += started.elapsed().as_secs_f64() * 1000.0;
+        let mut order: Vec<usize> = (0..questions.len()).collect();
+        if self.parallel_wave_order == ParallelWaveOrder::Prefix {
+            // Stable, so identical prompts keep request order.
+            order.sort_by(|&a, &b| prepared[a].0.cmp(&prepared[b].0));
+        }
+        // Later waves reuse the previous wave's root prefix when it matches;
+        // the caller clears native state at the end of the request or session.
+        let mut flags = SD_PARALLEL_RETAIN_PREFIX;
+        if self.parallel_prefix_alignment == ParallelPrefixAlignment::Token {
+            flags |= SD_PARALLEL_TOKEN_PREFIX;
+        }
+        let mut results: Vec<Option<DecisionResult>> = questions.iter().map(|_| None).collect();
+        let mut reused_total = 0;
+        for wave in order.chunks(width) {
+            let pointers: Vec<_> = wave.iter().map(|&i| prepared[i].0.as_ptr()).collect();
+            let counts: Vec<_> = wave.iter().map(|&i| prepared[i].0.len() as i32).collect();
+            let mut logits = vec![0.0; wave.len() * vocab as usize];
+            let mut reused = vec![0; wave.len()];
             let mut error = [0 as c_char; 1024];
             // Each vector stays live throughout the call. The bridge copies each
             // sequence's full-vocabulary final logits before the next decode.
@@ -1055,9 +1124,10 @@ impl LlamaBackend {
                     self.engine.as_ptr(),
                     pointers.as_ptr(),
                     counts.as_ptr(),
-                    decisions.len() as i32,
+                    wave.len() as i32,
                     width as u32,
                     self.parallel_context_dynamic,
+                    flags,
                     reused.as_mut_ptr(),
                     logits.as_mut_ptr(),
                     logits.len(),
@@ -1070,15 +1140,15 @@ impl LlamaBackend {
                 return Err(native_error(&error));
             }
             let started = Instant::now();
-            for (index, ((_, decision), (input, candidates))) in
-                decisions.iter().zip(&prepared).enumerate()
-            {
+            for (slot, &index) in wave.iter().enumerate() {
+                let decision = questions[index].1;
+                let (input, candidates) = &prepared[index];
                 self.failure_stage = (
                     "score",
                     FailureKind::InvalidEvidence,
                     Some(decision.id.clone()),
                 );
-                let start = index * vocab as usize;
+                let start = slot * vocab as usize;
                 let mut result = score_logits(
                     decision,
                     &logits[start..start + vocab as usize],
@@ -1086,55 +1156,77 @@ impl LlamaBackend {
                     input.len(),
                     &self.policy,
                 )?;
-                result.reused_prefix_tokens = reused[index] as usize;
+                result.reused_prefix_tokens = reused[slot] as usize;
+                reused_total += reused[slot] as usize;
                 let mut result = self.apply_calibration(decision, result)?;
                 self.restore_code_metadata(&mut result);
-                results.push(result);
+                results[index] = Some(result);
             }
             self.timings.score_ms += started.elapsed().as_secs_f64() * 1000.0;
-            self.timings.decisions += decisions.len();
+            self.timings.decisions += wave.len();
         }
-        Ok(results)
+        if reused_total == 0
+            && questions.len() > 1
+            && self.prompt_layout() == PromptLayout::Legacy
+            && !self.warned_legacy_parallel.replace(true)
+        {
+            eprintln!(
+                "l2s1: warning: parallel execution with the legacy prompt layout reused no prefix tokens; \
+                 legacy prompts put the question before the state, so questions rarely share a prefix. \
+                 Use the state-first layout (the parallel default) or a request `shared` field."
+            );
+        }
+        Ok(results
+            .into_iter()
+            .map(|result| result.expect("every question belongs to one wave"))
+            .collect())
     }
 
     /// Explicitly batch independent requests without merging their state or prompts.
     /// Results preserve both request and decision order. Errors fail the whole
     /// batch; no KV state survives the call, including validation failures.
+    /// In parallel mode, questions from all requests share bounded waves and
+    /// exact token prefixes (for example a common `shared` field) within the call.
     pub fn decide_batch(&mut self, requests: &[DecisionRequest]) -> Result<Vec<DecisionResponse>> {
         unsafe { sd_clear(self.engine.as_ptr()) };
-        let responses = (|| {
-            if let Some(head) = &self.output_head {
-                self.check_head_config(head)?;
-            }
-            for request in requests {
-                request.validate()?;
-                self.check_artifacts(request)?;
-            }
-            if requests.is_empty() {
-                return Ok(Vec::new());
-            }
-            if self.execution_mode != ExecutionMode::Parallel {
-                return requests
-                    .iter()
-                    .map(|request| self.decide(request))
-                    .collect();
-            }
-            let questions: Vec<_> = requests
-                .iter()
-                .flat_map(|request| request.decisions.iter().map(|d| (&request.state, d)))
-                .collect();
-            let mut results = self.evaluate_parallel(&questions)?.into_iter();
-            Ok(requests
-                .iter()
-                .map(|request| DecisionResponse {
-                    backend: self.info_for_request(request),
-                    policy: self.policy.clone(),
-                    results: results.by_ref().take(request.decisions.len()).collect(),
-                })
-                .collect())
-        })();
+        let responses = self.decide_batch_inner(requests);
         unsafe { sd_clear(self.engine.as_ptr()) };
         responses
+    }
+
+    fn decide_batch_inner(
+        &mut self,
+        requests: &[DecisionRequest],
+    ) -> Result<Vec<DecisionResponse>> {
+        if let Some(head) = &self.output_head {
+            self.check_head_config(head)?;
+        }
+        for request in requests {
+            request.validate()?;
+            self.check_artifacts(request)?;
+        }
+        if requests.is_empty() {
+            return Ok(Vec::new());
+        }
+        if self.execution_mode != ExecutionMode::Parallel {
+            return requests
+                .iter()
+                .map(|request| self.decide(request))
+                .collect();
+        }
+        let questions: Vec<_> = requests
+            .iter()
+            .flat_map(|request| request.decisions.iter().map(|d| (request.input(), d)))
+            .collect();
+        let mut results = self.evaluate_parallel(&questions)?.into_iter();
+        Ok(requests
+            .iter()
+            .map(|request| DecisionResponse {
+                backend: self.info_for_request(request),
+                policy: self.policy.clone(),
+                results: results.by_ref().take(request.decisions.len()).collect(),
+            })
+            .collect())
     }
 
     fn info_for_request(&self, request: &DecisionRequest) -> BackendInfo {
@@ -1172,9 +1264,9 @@ impl LlamaBackend {
                 _ => "model",
             }
             .into(),
-            prompt_layout: self.prompt_layout,
+            prompt_layout: self.prompt_layout(),
             prompt_version: {
-                let base = match (self.prompt_layout, self.profile) {
+                let base = match (self.prompt_layout(), self.profile) {
                     (PromptLayout::Legacy, PromptProfile::Qwen3) => PROMPT_VERSION,
                     (PromptLayout::Legacy, PromptProfile::GptOssFinal) => {
                         GPT_OSS_FINAL_PROMPT_VERSION
@@ -1208,6 +1300,17 @@ impl LlamaBackend {
             parallel_context_tokens: (self.execution_mode == ExecutionMode::Parallel
                 && self.parallel_context_dynamic)
                 .then(|| unsafe { sd_context_tokens(self.engine.as_ptr()) }),
+            parallel_prefix_alignment: if self.execution_mode == ExecutionMode::Parallel {
+                self.parallel_prefix_alignment
+            } else {
+                ParallelPrefixAlignment::Batch
+            },
+            parallel_wave_order: if self.execution_mode == ExecutionMode::Parallel {
+                self.parallel_wave_order
+            } else {
+                ParallelWaveOrder::Request
+            },
+            parallel_prefix_retained: self.parallel_retain_calls,
             offload_requested: self.gpu,
             offload_device: self.gpu.then_some(device),
         }
@@ -1232,14 +1335,14 @@ impl DecisionBackend for LlamaBackend {
                 let questions: Vec<_> = request
                     .decisions
                     .iter()
-                    .map(|d| (&request.state, d))
+                    .map(|d| (request.input(), d))
                     .collect();
                 return self.evaluate_parallel(&questions);
             }
             request
                 .decisions
                 .iter()
-                .map(|decision| self.evaluate(&request.state, decision))
+                .map(|decision| self.evaluate(request.input(), decision))
                 .collect::<Result<Vec<_>>>()
         })();
         unsafe { sd_clear(self.engine.as_ptr()) };

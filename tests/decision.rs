@@ -27,6 +27,7 @@ fn typed_ordinal_constructor_preserves_levels_and_validation() {
     ];
     let decision = Decision::ordinal("priority", "Rate priority", levels);
     let request = DecisionRequest {
+        shared: None,
         state: serde_json::json!({}),
         decisions: vec![decision],
     };
@@ -162,6 +163,7 @@ fn invalid_logits_and_candidate_ids_fail() {
 #[test]
 fn request_rejects_duplicate_questions_and_bad_policy() {
     let request = DecisionRequest {
+        shared: None,
         state: serde_json::Value::Null,
         decisions: vec![binary(), binary()],
     };

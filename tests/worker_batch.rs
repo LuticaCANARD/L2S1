@@ -3,6 +3,7 @@ use std::{rc::Rc, sync::mpsc, thread, time::Duration};
 
 fn request(id: &str, tokens: usize) -> DecisionRequest {
     DecisionRequest {
+        shared: None,
         state: serde_json::json!({"id": id, "tokens": tokens}),
         decisions: vec![Decision {
             id: "decision".into(),

@@ -43,6 +43,7 @@ impl LlamaBackend {
         Ok(SharedStateSession {
             backend: self,
             request: DecisionRequest {
+                shared: None,
                 state,
                 decisions: Vec::new(),
             },
@@ -74,7 +75,7 @@ impl SharedStateSession<'_> {
             self.request
                 .decisions
                 .iter()
-                .map(|decision| self.backend.evaluate(&self.request.state, decision))
+                .map(|decision| self.backend.evaluate(self.request.input(), decision))
                 .collect::<Result<Vec<_>>>()
         })();
         let backend_info = self.backend.info_for_request(&self.request);

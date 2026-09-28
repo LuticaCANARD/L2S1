@@ -259,6 +259,7 @@ unsafe extern "C" {
         sequences: i32,
         capacity: u32,
         dynamic_context: bool,
+        flags: u32,
         reused: *mut i32,
         logits: *mut f32,
         logits_count: usize,
@@ -279,6 +280,15 @@ unsafe extern "C" {
 mod raw {
     include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 }
+/// `sd_forward_parallel` flag: share exact prefixes at token granularity
+/// instead of rounding each shared segment down to a complete prefill batch.
+/// Shared KV is then not computed with serial execution's batch boundaries.
+pub const SD_PARALLEL_TOKEN_PREFIX: u32 = 1;
+/// `sd_forward_parallel` flag: after success, keep the wave's root shared prefix
+/// in sequence 0 and reuse it when the next call starts with the same tokens.
+/// Any other native call that clears the engine discards it.
+pub const SD_PARALLEL_RETAIN_PREFIX: u32 = 2;
+
 mod bridge;
 mod text;
 mod vision;

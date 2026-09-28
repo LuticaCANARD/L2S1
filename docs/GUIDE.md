@@ -374,7 +374,7 @@ This default is a source change after v0.1.3. Published v0.1.3 requires explicit
 | `state-restore` | Save a common prefix's whole sequence state and restore it for later independent suffixes | Supported, opt-in; works with tested hybrid Bonsai GGUF |
 | `parallel` | Batch independent questions into isolated sequences with shared-prefix prefill | Supported; rejects recurrent/hybrid models and can change scores |
 
-The default prompt layout is `legacy`. `--prompt-layout state-first` places shared state earlier and can expose longer reusable prefixes, but it also changes the prompt and can change predictions.
+The default prompt layout is `legacy`, except text `--execution-mode parallel`, which defaults to `state-first` since 0.2.0 (see [parallel prefix sharing](PARALLEL_EXECUTION.md#prefix-sharing-controls-020)). `--prompt-layout state-first` places shared state earlier and can expose longer reusable prefixes, but it also changes the prompt and can change predictions.
 
 ```sh
 ./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \

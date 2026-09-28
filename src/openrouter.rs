@@ -143,7 +143,7 @@ impl OpenRouterBackend {
                 let jobs = chunk
                     .iter()
                     .map(|decision| {
-                        scope.spawn(|| self.decide_one(&request.state, decision, &image_urls))
+                        scope.spawn(|| self.decide_one(request.input(), decision, &image_urls))
                     })
                     .collect::<Vec<_>>();
                 for job in jobs {
@@ -167,7 +167,7 @@ impl OpenRouterBackend {
 
     fn decide_one(
         &self,
-        state: &Value,
+        state: crate::PromptInput<'_>,
         decision: &crate::Decision,
         image_urls: &[String],
     ) -> Result<RemoteDecisionResult> {
