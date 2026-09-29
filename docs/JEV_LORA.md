@@ -104,11 +104,14 @@ with `--features llama-metal`, check with `l2s1-train doctor --mlx`, and add
 export, writes a PEFT-format adapter (`alpha = scale * rank`) that the same
 `convert_lora_to_gguf.py` stage converts, and evaluates with `--metal`, so the
 adapter loads through `--lora` without fusing a full model copy. The exporter
-loads only the GGUF vocabulary, so a large model is not loaded twice. Gemma 4
-checkpoints need mlx-lm from main (ml-explore/mlx-lm#1349), which requires
-Transformers 5.7+; run llama.cpp's converter from an environment whose
-Transformers can read that tokenizer. Verified end to end on Gemma 3 1B IT
-(pipeline and GGUF LoRA effect only, not accuracy).
+loads only the GGUF vocabulary, so a large model is not loaded twice. Weights
+load lazily and are quantized to 4 bits as they stream in, so Gemma 4 12B trains
+in about 13 GiB. Gemma 4 checkpoints (`gemma4_unified`) need mlx-lm from main
+(ml-explore/mlx-lm#1349), which requires Transformers 5.7+; the pinned llama.cpp
+converters ran in that same environment (Transformers 5.17). A pinned-data run on
+Gemma 4 12B IT is recorded in
+[jev-lora-mlx-gemma4-12b-20260930](../benchmarks/jev-lora-mlx-gemma4-12b-20260930/README.md).
+Use a custom `--profiles` registry for checkpoints outside the bundled profiles.
 
 Download the pinned dataset's `all/train-00000-of-00001.parquet` and
 `all/test-00000-of-00001.parquet` to a source directory as `train.parquet` and
