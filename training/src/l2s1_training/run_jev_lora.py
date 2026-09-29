@@ -45,6 +45,8 @@ def main(command=None):
     p.add_argument('--converter', type=Path, help='Matching llama.cpp convert_lora_to_gguf.py')
     p.add_argument('--library-path', type=Path, help='Matching llama.cpp shared libraries')
     p.add_argument('--stage-timeout', type=float, default=7200, help='Maximum seconds per stage (default: 7200)')
+    p.add_argument('--backend', choices=['cuda', 'mlx'], default='cuda',
+                   help='Training/evaluation device: CUDA (NF4 + PEFT) or Apple Silicon (MLX + Metal)')
     p.add_argument('--rules-fixture', type=Path, help='Optional existing decision-rules regression fixture')
     a = p.parse_args()
     if not math.isfinite(a.stage_timeout) or a.stage_timeout <= 0:
@@ -107,8 +109,9 @@ def main(command=None):
                 seal_tokens(a.data, tokens, model, a.exporter)
                 shared = ['--model', profile['name'], '--profiles', a.profiles, '--data', a.data,
                           '--tokens', tokens, '--checkpoint', checkpoint]
-                stage('smoke', [sys.executable, '-m', 'l2s1_training.train_jev_lora', 'smoke', *shared, '--output', out/'smoke'])
-                stage('train', [sys.executable, '-m', 'l2s1_training.train_jev_lora', 'train', *shared, '--output', out/'train',
+                trainer = 'l2s1_training.train_jev_mlx' if a.backend == 'mlx' else 'l2s1_training.train_jev_lora'
+                stage('smoke', [sys.executable, '-m', trainer, 'smoke', *shared, '--output', out/'smoke'])
+                stage('train', [sys.executable, '-m', trainer, 'train', *shared, '--output', out/'train',
                                '--smoke-report', out/'smoke/complete.json'])
                 stage('convert', [sys.executable, a.converter.resolve(), out/'train/adapter', '--base', checkpoint,
                                   '--outfile', out/'adapter.gguf', '--outtype', 'f16'])
@@ -119,7 +122,7 @@ def main(command=None):
                 for variant in ('base', 'adapter'):
                     pred = out/f'{variant}-predictions.jsonl'
                     cmd = [a.evaluator.resolve(), '--model', model, '--input', a.data/'test-requests.jsonl', '--output', pred,
-                           '--cuda', '--context', '8192', '--batch', '256', '--threads', '4', '--execution-mode', 'fresh',
+                           '--'+('metal' if a.backend == 'mlx' else 'cuda'), '--context', '8192', '--batch', '256', '--threads', '4', '--execution-mode', 'fresh',
                            '--prompt-layout', 'legacy', '--prompt-detail', 'minimal', '--request-batch-size', '1',
                            '--model-load-mode', 'read', '--warmup']
                     if variant == 'adapter':

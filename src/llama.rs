@@ -232,6 +232,20 @@ impl LlamaBackend {
         Self::load_with_device_options(path, compute, if cuda { 1 } else { 0 }, policy, profile)
     }
 
+    /// Load only the tokenizer, chat template and metadata (no weights, no
+    /// context) for `encode_decision`, `encode_decision_sequences`, `preflight`
+    /// and prompt setters. Preparation matches a default-compute CPU backend
+    /// (2048-token limit, same identity); anything needing logits errors.
+    pub fn load_vocab_only(path: &Path, profile: PromptProfile) -> Result<Self> {
+        Self::load_with_device_options(
+            path,
+            ComputeOptions::default(),
+            -1,
+            DecisionPolicy::default(),
+            profile,
+        )
+    }
+
     /// Load a GGUF through the pinned llama.cpp Metal backend on macOS.
     pub fn load_with_metal_options(
         path: &Path,
@@ -255,6 +269,9 @@ impl LlamaBackend {
         profile: PromptProfile,
     ) -> Result<Self> {
         policy.validate()?;
+        // -1 selects CPU with a vocab-only native load.
+        let vocab_only = device_kind == -1;
+        let device_kind = device_kind.max(0);
         let gpu = device_kind != 0;
         compute.validate_device(gpu)?;
         let path = path
@@ -286,6 +303,7 @@ impl LlamaBackend {
                     .map_or(if gpu { -1 } else { 0 }, |n| n as i32),
                 compute.cpu_moe_layers as i32,
                 match compute.model_load_mode {
+                    _ if vocab_only => 1,
                     crate::ModelLoadMode::Auto => -1,
                     crate::ModelLoadMode::Read => 0,
                 },

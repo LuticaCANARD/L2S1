@@ -7,10 +7,7 @@ fn main() {
 #[cfg(feature = "llama")]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     use clap::Parser;
-    use l2s1::{
-        DecisionPolicy, DecisionRequest, PromptDetail, PromptLayout, PromptProfile,
-        llama::LlamaBackend,
-    };
+    use l2s1::{DecisionRequest, PromptDetail, PromptLayout, PromptProfile, llama::LlamaBackend};
     use serde::Deserialize;
     use std::{
         fs::{File, OpenOptions},
@@ -39,15 +36,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         request: DecisionRequest,
     }
     let args = Args::parse();
-    let mut backend = LlamaBackend::load_with_profile(
-        &args.model,
-        2048,
-        256,
-        4,
-        false,
-        DecisionPolicy::default(),
-        PromptProfile::Auto,
-    )?;
+    // Tokenizer only: exporting never loads the weights.
+    let mut backend = LlamaBackend::load_vocab_only(&args.model, PromptProfile::Auto)?;
     backend.set_prompt_layout(args.prompt_layout);
     backend.set_prompt_detail(args.prompt_detail);
     let mut output = BufWriter::new(

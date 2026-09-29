@@ -352,3 +352,30 @@ fn real_output_head_is_scoped_and_rejects_config_drift() {
     b.set_prompt_layout(PromptLayout::Legacy);
     assert!(b.decide(&request).is_ok());
 }
+
+#[test]
+#[ignore = "requires SKID_MODEL"]
+fn vocab_only_encodes_like_full_load_and_rejects_inference() {
+    let model = std::env::var("SKID_MODEL").expect("set SKID_MODEL");
+    let request: DecisionRequest =
+        serde_json::from_str(include_str!("../examples/warehouse.json")).unwrap();
+    let mut vocab = LlamaBackend::load_vocab_only(model.as_ref(), PromptProfile::Auto).unwrap();
+    let full = LlamaBackend::load(
+        model.as_ref(),
+        2048,
+        256,
+        4,
+        false,
+        DecisionPolicy::default(),
+    )
+    .unwrap();
+    for decision in &request.decisions {
+        assert_eq!(
+            vocab.encode_decision(&request.state, decision).unwrap(),
+            full.encode_decision(&request.state, decision).unwrap()
+        );
+    }
+    assert_eq!(vocab.identity(), full.identity());
+    assert!(vocab.decide(&request).is_err());
+    assert!(vocab.preflight(&request).is_ok());
+}
