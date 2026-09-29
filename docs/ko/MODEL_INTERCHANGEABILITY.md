@@ -106,6 +106,18 @@ l2s1 --model models/SmolLM2-135M-Instruct-Q8_0.gguf \
 
 `register_calibration()`/`load_calibration()`에 아티팩트를 등록합니다. CLI는 반복되는 `--calibration`를 허용합니다. 작업/ID당 최대 하나의 아티팩트가 허용됩니다. 다른 작업 ID는 네이티브 점수를 유지합니다. 작업 의미가 변경된 일치 ID가 실패합니다. 원시 logits 및 기본 질량은 유지됩니다. 보정된 채점 및 아티팩트 ID는 명시적입니다. 스칼라 보정은 출력 헤드와 누적될 수 없습니다. `clear_calibrations()`는 명시적 제거 작업입니다.
 
+<a id="family-calibration-for-unseen-tasks"></a>
+### 새 작업을 위한 작업군 보정
+
+`FamilyCalibration::fit()`은 결정 종류와 선택지 수(`binary`/2, `choice`/K, `ordinal`/K)가 같은 서로 다른 작업 두 개 이상의 라벨 기록을 모아, 같은 방식으로 온도 하나를 맞춥니다. 추론 시에는 작업별 `ScalarCalibration`이 처리하지 않은 같은 종류·너비의 모든 결정에 적용되므로, 새 작업도 자체 라벨 없이 보정된 후보 분포를 받습니다. 결과는 `scoring_method: "family_temperature_softmax_with_base_mass_v1"`과 작업군 ID를 보고합니다. 결과물은 같은 모델/설정 지문(병렬 점수를 바꾸는 병렬 접두사 정렬과 웨이브 순서를 이제 포함)에 묶이고, 작업과 소스 그룹 해시를 기록합니다.
+
+```sh
+cargo run --release --offline --example fit_family_calibration -- family-input.json binary-family.json
+l2s1 --model MODEL.gguf --input examples/warehouse.json --family-calibration binary-family.json
+```
+
+`family-input.json`에는 `id`, `model`, `tasks`(각각 `decision`과 `records`), 그리고 다른 작업·소스의 선택적 `held_out` 기록이 들어갑니다. 이제 모든 지표에 10개 신뢰도 구간의 top-label 기대 보정 오차 `ece`가 포함되며, 이전에 작성된 결과물에는 없습니다. 결과물의 `leave_one_task_out` 목록은 각 작업과 그 작업의 소스 그룹 기록을 제외하고 온도를 다시 맞춘 뒤, 그 작업의 보정 전후 NLL, Brier, ECE를 보고합니다. 이것이 새 작업에 작업군을 적용하는 근거입니다. 온도 하나가 어떤 작업은 개선하고 다른 작업은 악화시킬 수 있으므로 작업별로 확인하세요. `register_family_calibration()`/`load_family_calibration()`으로 등록하며, 종류·너비마다 작업군은 하나만 허용되고 `clear_calibrations()`는 두 종류를 모두 제거합니다. 작업군 보정은 스칼라 보정과 같은 제한(output head, LoRA, 넓은 코드, 이미지 요청 불가)을 따릅니다.
+
 <a id="request-local-state-restoration"></a>
 ## 요청-로컬 상태 복원
 

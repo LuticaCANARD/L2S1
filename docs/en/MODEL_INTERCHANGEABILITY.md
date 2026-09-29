@@ -107,6 +107,18 @@ l2s1 --model models/SmolLM2-135M-Instruct-Q8_0.gguf \
 
 Register artifacts with `register_calibration()`/`load_calibration()`; the CLI accepts repeated `--calibration`. At most one artifact per task/ID is accepted. Other task IDs keep native scoring. A matching ID with changed task meaning fails. Raw logits and base mass are retained; calibrated scoring and artifact ID are explicit. A scalar calibration cannot be stacked with an output head. `clear_calibrations()` is an explicit removal operation.
 
+<a id="family-calibration-for-unseen-tasks"></a>
+### Family calibration for unseen tasks
+
+`FamilyCalibration::fit()` pools labeled records from at least two distinct tasks that share one decision kind and option count (`binary`/2, `choice`/K, `ordinal`/K) and fits one temperature the same way. At inference it applies to any decision of that kind and width that no task-specific `ScalarCalibration` handled, so new tasks get a calibrated candidate distribution without their own labels. The result reports `scoring_method: "family_temperature_softmax_with_base_mass_v1"` and the family ID. The artifact binds the same model/configuration fingerprint (now including parallel prefix alignment and wave order, which change parallel scores) and records task and source-group hashes.
+
+```sh
+cargo run --release --offline --example fit_family_calibration -- family-input.json binary-family.json
+l2s1 --model MODEL.gguf --input examples/warehouse.json --family-calibration binary-family.json
+```
+
+`family-input.json` contains `id`, `model`, `tasks` (each with `decision` and `records`), and optional `held_out` records from other tasks and sources. Every metric now includes `ece`, the top-label expected calibration error over 10 confidence bins; artifacts written earlier omit it. The artifact's `leave_one_task_out` list refits the temperature without each task, also excluding records from that task's source groups, and reports that task's NLL, Brier and ECE before and after. This is the evidence for applying a family to unseen tasks: check it per task, because one temperature can help some tasks and hurt others. Register with `register_family_calibration()`/`load_family_calibration()`; at most one family per kind and width is accepted, and `clear_calibrations()` removes both kinds. Families share the scalar calibration restrictions (no output head, LoRA, wide codes or image requests).
+
 <a id="request-local-state-restoration"></a>
 ## Request-local state restoration
 

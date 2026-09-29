@@ -106,6 +106,18 @@ l2s1 --model models/SmolLM2-135M-Instruct-Q8_0.gguf \
 
 `register_calibration()`/`load_calibration()` でアーティファクトを登録します。 CLI は、繰り返される `--calibration` を受け入れます。タスク/ID ごとに最大 1 つのアーティファクトが受け入れられます。他のタスク ID では、ネイティブ スコアが維持されます。タスクの意味が変更された ID の照合は失敗します。生の logits と基本質量は保持されます。調整されたスコアとアーティファクト ID は明示的です。スカラー 校正 は、出力 ヘッド とスタックできません。 `clear_calibrations()` は明示的な削除操作です。
 
+<a id="family-calibration-for-unseen-tasks"></a>
+### 未知のタスク向けファミリー校正
+
+`FamilyCalibration::fit()` は、判断の種類と選択肢数（`binary`/2、`choice`/K、`ordinal`/K）が同じ 2 つ以上の異なるタスクのラベル付き記録をまとめ、同じ方法で温度を 1 つ当てはめます。推論時には、タスク固有の `ScalarCalibration` が処理しなかった同じ種類・幅のすべての判断に適用されるため、新しいタスクも独自のラベルなしで校正された候補分布を得られます。結果は `scoring_method: "family_temperature_softmax_with_base_mass_v1"` とファミリー ID を報告します。成果物は同じモデル／設定フィンガープリント（並列スコアを変える並列プレフィックスのアライメントとウェーブ順序を新たに含む）に結び付けられ、タスクとソースグループのハッシュを記録します。
+
+```sh
+cargo run --release --offline --example fit_family_calibration -- family-input.json binary-family.json
+l2s1 --model MODEL.gguf --input examples/warehouse.json --family-calibration binary-family.json
+```
+
+`family-input.json` には `id`、`model`、`tasks`（それぞれ `decision` と `records`）、および他のタスク・ソースからの任意の `held_out` 記録が入ります。すべての指標に、10 個の信頼度ビンによる top-label 期待校正誤差 `ece` が含まれるようになりました。以前に作成された成果物にはありません。成果物の `leave_one_task_out` は、各タスクとそのタスクのソースグループの記録を除いて温度を当てはめ直し、そのタスクの校正前後の NLL、Brier、ECE を報告します。これが未知のタスクにファミリーを適用する根拠です。1 つの温度があるタスクを改善し別のタスクを悪化させることがあるため、タスクごとに確認してください。`register_family_calibration()`／`load_family_calibration()` で登録し、種類・幅ごとにファミリーは 1 つだけ受け付け、`clear_calibrations()` は両方を削除します。ファミリー校正はスカラー校正と同じ制限（output head、LoRA、幅の広いコード、画像リクエストは不可）に従います。
+
 <a id="request-local-state-restoration"></a>
 ## ローカル状態の復元を要求する
 

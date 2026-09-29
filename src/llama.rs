@@ -62,6 +62,7 @@ pub struct LlamaBackend {
     adapter_sha256: Option<String>,
     head_sha256: Option<String>,
     calibrations: Vec<ScalarCalibration>,
+    family_calibrations: Vec<FamilyCalibration>,
     snapshot_limit_bytes: usize,
     restore_metrics: StateRestoreMetrics,
     failure_stage: (&'static str, FailureKind, Option<String>),
@@ -332,6 +333,7 @@ impl LlamaBackend {
             adapter_sha256: None,
             head_sha256: None,
             calibrations: Vec::new(),
+            family_calibrations: Vec::new(),
             snapshot_limit_bytes: 256 * 1024 * 1024,
             restore_metrics: StateRestoreMetrics::default(),
             failure_stage: ("inference", FailureKind::BackendFailure, None),
@@ -407,11 +409,7 @@ impl LlamaBackend {
             self.evidence_transfer = previous;
             return Err(error);
         }
-        if let Some(error) = self
-            .calibrations
-            .iter()
-            .find_map(|a| a.validate(&self.identity()).err())
-        {
+        if let Err(error) = self.validate_calibrations() {
             self.evidence_transfer = previous;
             return Err(error);
         }
@@ -443,7 +441,7 @@ impl LlamaBackend {
     /// Opt in to one compatible GGUF LoRA at scale 1. Clears cached base logits.
     /// A second adapter requires a new backend; defaults remain unchanged.
     pub fn load_lora(&mut self, path: &Path) -> Result<()> {
-        if self.output_head.is_some() || !self.calibrations.is_empty() {
+        if self.output_head.is_some() || self.has_calibrations() {
             return Err(Error::Invalid(
                 "LoRA and output heads cannot be combined".into(),
             ));
@@ -479,7 +477,7 @@ impl LlamaBackend {
                 "output heads require full evidence transfer".into(),
             ));
         }
-        if self.output_head.is_some() || self.lora_path.is_some() || !self.calibrations.is_empty() {
+        if self.output_head.is_some() || self.lora_path.is_some() || self.has_calibrations() {
             return Err(Error::Invalid(
                 "only one output head, without LoRA, is supported".into(),
             ));
@@ -546,7 +544,7 @@ impl LlamaBackend {
                 || self.execution_mode != ExecutionMode::Fresh
                 || self.lora_path.is_some()
                 || self.output_head.is_some()
-                || !self.calibrations.is_empty()
+                || self.has_calibrations()
             {
                 return Err(Error::Invalid(
                     "feature export requires one fresh base decision".into(),

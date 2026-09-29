@@ -49,9 +49,22 @@ workload accuracy and recalibrate before upgrading a deployment. See
 - `BackendInfo.parallel_prefix_alignment`, `parallel_wave_order` and
   `parallel_prefix_retained` report these settings.
 - `LlamaBackend::prompt_layout()` and `reset_prompt_layout()`.
+- `FamilyCalibration`: one temperature per decision kind and option count,
+  fitted on labeled records from at least two tasks, applied to tasks without
+  a task-specific `ScalarCalibration` (which still takes precedence). The
+  artifact reports leave-one-task-out NLL, Brier and ECE for every fitting
+  task. CLI `--family-calibration`, `register_family_calibration()`,
+  `load_family_calibration()` and the `fit_family_calibration` example.
+- `CalibrationMetrics.ece`: top-label expected calibration error over 10
+  confidence bins, reported by every calibration fit and held-out evaluation.
 
 ### Fixed
 
+- `ModelIdentity` now includes `parallel_prefix_alignment` and
+  `parallel_wave_order`. Both change parallel scores, so a calibration fitted
+  under one setting is rejected under another instead of being misapplied.
+  Default (`batch`, request order) values are omitted, so fingerprints of
+  non-parallel configurations are unchanged.
 - Prompt JSON (payload fields and every nested object in `state` and
   `shared`) is serialized with sorted keys regardless of serde_json's
   `preserve_order` feature. Cargo unifies features across the dependency
@@ -67,3 +80,5 @@ workload accuracy and recalibrate before upgrading a deployment. See
   (`SD_PARALLEL_TOKEN_PREFIX`, `SD_PARALLEL_RETAIN_PREFIX`).
 - `LlamaBackend::encode_decision` and `encode_decision_sequences` accept
   `impl Into<PromptInput>`; `&serde_json::Value` still works.
+- `ModelIdentity` and `CalibrationMetrics` have new public fields; struct
+  literals need `parallel_prefix_alignment`, `parallel_wave_order` and `ece`.

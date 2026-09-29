@@ -3,17 +3,21 @@ use crate::interoperability::digest;
 
 impl LlamaBackend {
     pub fn serving_artifact_id(&self) -> String {
-        digest(
-            &serde_json::to_vec(&(
-                self.identity(),
-                self.prompt_layout(),
-                self.prompt_detail,
-                self.code_rotation,
-                &self.policy,
-                &self.calibrations,
-            ))
-            .expect("serializable backend settings"),
-        )
+        let settings = (
+            self.identity(),
+            self.prompt_layout(),
+            self.prompt_detail,
+            self.code_rotation,
+            &self.policy,
+            &self.calibrations,
+        );
+        // Without family calibrations the ID keeps its earlier serialization.
+        let bytes = if self.family_calibrations.is_empty() {
+            serde_json::to_vec(&settings)
+        } else {
+            serde_json::to_vec(&(settings, &self.family_calibrations))
+        };
+        digest(&bytes.expect("serializable backend settings"))
     }
 
     pub fn identity(&self) -> ModelIdentity {
@@ -36,6 +40,8 @@ impl LlamaBackend {
             execution_mode: self.execution_mode,
             parallel_width: info.parallel_width,
             parallel_context_dynamic: info.parallel_context_dynamic,
+            parallel_prefix_alignment: info.parallel_prefix_alignment,
+            parallel_wave_order: info.parallel_wave_order,
         }
     }
     pub fn inspect(&self) -> ModelInspection {
@@ -89,14 +95,62 @@ impl LlamaBackend {
             .calibrations
             .iter()
             .any(|a| a.decision_id == artifact.decision_id || a.id == artifact.id)
+            || self.family_calibrations.iter().any(|a| a.id == artifact.id)
         {
             return Err(Error::Invalid("duplicate calibration task or ID".into()));
         }
         self.calibrations.push(artifact);
         Ok(())
     }
+    /// Load a family calibration; see [`FamilyCalibration`].
+    pub fn load_family_calibration(&mut self, path: &Path) -> Result<()> {
+        let bytes = std::fs::read(path).map_err(|e| Error::Backend(e.to_string()))?;
+        let artifact: FamilyCalibration =
+            serde_json::from_slice(&bytes).map_err(|e| Error::Invalid(e.to_string()))?;
+        self.register_family_calibration(artifact)
+    }
+    /// Register a fallback calibration for tasks without a task-specific one.
+    /// At most one family per decision kind and option count is allowed.
+    pub fn register_family_calibration(&mut self, artifact: FamilyCalibration) -> Result<()> {
+        if self.output_head.is_some() {
+            return Err(Error::Invalid(
+                "family calibration and output head cannot be combined".into(),
+            ));
+        }
+        artifact.validate(&self.identity())?;
+        if self.family_calibrations.iter().any(|a| {
+            a.id == artifact.id
+                || (a.decision_kind == artifact.decision_kind
+                    && a.option_count == artifact.option_count)
+        }) || self.calibrations.iter().any(|a| a.id == artifact.id)
+        {
+            return Err(Error::Invalid(
+                "duplicate family calibration scope or ID".into(),
+            ));
+        }
+        self.family_calibrations.push(artifact);
+        Ok(())
+    }
+    pub(super) fn has_calibrations(&self) -> bool {
+        !self.calibrations.is_empty() || !self.family_calibrations.is_empty()
+    }
+    pub(super) fn validate_calibrations(&self) -> Result<()> {
+        if !self.has_calibrations() {
+            return Ok(());
+        }
+        let identity = self.identity();
+        for artifact in &self.calibrations {
+            artifact.validate(&identity)?;
+        }
+        for artifact in &self.family_calibrations {
+            artifact.validate(&identity)?;
+        }
+        Ok(())
+    }
+    /// Remove task-specific and family calibrations.
     pub fn clear_calibrations(&mut self) {
         self.calibrations.clear();
+        self.family_calibrations.clear();
         unsafe { sd_clear(self.engine.as_ptr()) };
     }
     pub(super) fn check_artifacts(&self, request: &DecisionRequest) -> Result<()> {
@@ -110,13 +164,10 @@ impl LlamaBackend {
                 head.applies_to(d)?;
             }
         }
-        if !self.calibrations.is_empty() {
-            let identity = self.identity();
-            for artifact in &self.calibrations {
-                artifact.validate(&identity)?;
-                for d in &request.decisions {
-                    artifact.applies_to(d)?;
-                }
+        self.validate_calibrations()?;
+        for artifact in &self.calibrations {
+            for d in &request.decisions {
+                artifact.applies_to(d)?;
             }
         }
         Ok(())
@@ -127,6 +178,11 @@ impl LlamaBackend {
         mut result: DecisionResult,
     ) -> Result<DecisionResult> {
         for artifact in &self.calibrations {
+            result = artifact.apply(decision, result, &self.policy)?;
+        }
+        // Task-specific calibration takes precedence; a calibrated result is
+        // returned unchanged by the family.
+        for artifact in &self.family_calibrations {
             result = artifact.apply(decision, result, &self.policy)?;
         }
         Ok(result)

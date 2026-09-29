@@ -26,7 +26,7 @@ struct Args {
     vision_projector_reuse: bool,
     /// Vision throughput profile: parallel4, dynamic KV, batch1024,
     /// FlashAttention, compact evidence, bounded preparation and image reuse.
-    #[arg(long, requires = "mmproj", conflicts_with_all = ["execution_mode", "parallel_width", "parallel_context_dynamic", "batch", "ubatch", "flash_attention", "evidence_transfer", "preparation_cache_bytes", "preparation_cache_entries", "output_head", "calibration"])]
+    #[arg(long, requires = "mmproj", conflicts_with_all = ["execution_mode", "parallel_width", "parallel_context_dynamic", "batch", "ubatch", "flash_attention", "evidence_transfer", "preparation_cache_bytes", "preparation_cache_entries", "output_head", "calibration", "family_calibration"])]
     vision_optimized: bool,
     /// Start a JSON HTTP API at this address, for example 127.0.0.1:8080.
     #[arg(long, conflicts_with_all = ["input", "image", "inspect", "preflight", "diagnostics"])]
@@ -70,6 +70,10 @@ struct Args {
     /// Task-scoped scalar calibration; repeat for multiple decision IDs.
     #[arg(long, conflicts_with = "output_head")]
     calibration: Vec<PathBuf>,
+    /// Fallback calibration per decision kind and option count for tasks
+    /// without a task-scoped calibration; repeat for multiple scopes.
+    #[arg(long, conflicts_with = "output_head")]
+    family_calibration: Vec<PathBuf>,
     /// Maximum bytes allocated for a request-local sequence snapshot.
     #[arg(long, default_value_t = 268435456)]
     snapshot_limit_bytes: usize,
@@ -156,6 +160,7 @@ impl Args {
             && self.mmproj.is_none()
             && self.output_head.is_none()
             && self.calibration.is_empty()
+            && self.family_calibration.is_empty()
             && self.evidence_transfer == EvidenceTransfer::Full
     }
 
@@ -257,6 +262,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     backend.set_snapshot_limit_bytes(args.snapshot_limit_bytes);
     for path in &args.calibration {
         backend.load_calibration(path)?;
+    }
+    for path in &args.family_calibration {
+        backend.load_family_calibration(path)?;
     }
     if args.vision_projector_reuse {
         backend.set_vision_projector_reuse(true);
@@ -377,6 +385,7 @@ mod tests {
         for flags in [
             vec!["--stdio", "--mmproj", "projector.gguf"],
             vec!["--stdio", "--calibration", "calibration.json"],
+            vec!["--stdio", "--family-calibration", "family.json"],
             vec!["--stdio", "--output-head", "head.json"],
             vec!["--stdio", "--evidence-transfer", "compact"],
         ] {

@@ -334,7 +334,7 @@ impl LlamaBackend {
     pub fn enable_vision_optimizations(&mut self) -> Result<()> {
         if self.vision_projector_path.is_none()
             || self.output_head.is_some()
-            || !self.calibrations.is_empty()
+            || self.has_calibrations()
             || self.collect_features
         {
             return Err(Error::Invalid("vision optimizations require a loaded projector without output heads, calibration or feature export".into()));
@@ -438,7 +438,7 @@ impl LlamaBackend {
             self.execution_mode,
             ExecutionMode::Fresh | ExecutionMode::Parallel
         ) || self.output_head.is_some()
-            || !self.calibrations.is_empty()
+            || self.has_calibrations()
             || self.collect_features
         {
             return Err(Error::Invalid(
