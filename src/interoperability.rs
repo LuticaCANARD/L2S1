@@ -43,6 +43,15 @@ pub struct ModelIdentity {
     pub parallel_width: usize,
     #[serde(default, skip_serializing_if = "crate::decision::bool_is_false")]
     pub parallel_context_dynamic: bool,
+    /// Shared-prefix rounding changes parallel scores; absent means `batch`.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::ParallelPrefixAlignment::is_batch"
+    )]
+    pub parallel_prefix_alignment: crate::ParallelPrefixAlignment,
+    /// Wave membership changes parallel decode batches; absent means request order.
+    #[serde(default, skip_serializing_if = "crate::ParallelWaveOrder::is_request")]
+    pub parallel_wave_order: crate::ParallelWaveOrder,
 }
 impl ModelIdentity {
     pub fn fingerprint(&self) -> String {

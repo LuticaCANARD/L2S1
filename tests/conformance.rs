@@ -173,7 +173,7 @@ fn model_replacement_contract() {
             "fixture-calibration".into(),
             &backend.identity(),
             task,
-            &[record],
+            std::slice::from_ref(&record),
         )
         .unwrap();
         backend.register_calibration(artifact).unwrap();
@@ -196,6 +196,46 @@ fn model_replacement_contract() {
         assert!(backend.decide(&request).is_err());
         backend.clear_calibrations();
         backend.preflight(&request).unwrap();
+        // A family calibration covers unseen tasks of its kind and width;
+        // a task-specific calibration still takes precedence.
+        let calibrated_layout = backend.info().prompt_layout;
+        let width = task.options().len();
+        let kind = decision_kind_name(task);
+        let family_tasks: Vec<_> = (0..2)
+            .map(|t| {
+                let mut decision = task.clone();
+                decision.id = format!("family-task-{t}");
+                decision.instruction = format!("{} ({t})", decision.instruction);
+                FamilyCalibrationTask {
+                    decision,
+                    records: vec![CalibrationRecord {
+                        group: format!("family-source-{t}"),
+                        raw_logits: record.raw_logits.clone(),
+                        correct_option: t % width,
+                    }],
+                }
+            })
+            .collect();
+        let family =
+            FamilyCalibration::fit("fixture-family".into(), &backend.identity(), &family_tasks)
+                .unwrap();
+        backend.register_family_calibration(family).unwrap();
+        backend.preflight(&request).unwrap();
+        let with_family = backend.decide(&request).unwrap();
+        for (result, decision) in with_family.results.iter().zip(&request.decisions) {
+            let expected = (decision_kind_name(decision) == kind
+                && decision.options().len() == width)
+                .then_some("fixture-family");
+            assert_eq!(result.calibration_id.as_deref(), expected);
+        }
+        backend.set_prompt_layout(if calibrated_layout == PromptLayout::Legacy {
+            PromptLayout::StateFirst
+        } else {
+            PromptLayout::Legacy
+        });
+        assert!(backend.decide(&request).is_err());
+        backend.clear_calibrations();
+        backend.set_prompt_layout(calibrated_layout);
         reports.push(serde_json::json!({"model":inspection,"modes":modes,"snapshot_budget_fallback":limited.state_restore,"scope":"synthetic real-model contract; not labeled workload quality or production evidence"}));
     }
     if let Ok(path) = std::env::var("L2S1_CONFORMANCE_REPORT") {

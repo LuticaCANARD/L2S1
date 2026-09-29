@@ -8,7 +8,7 @@ impl LlamaBackend {
             ExecutionMode::Fresh | ExecutionMode::PrefixReuse
         ) || self.evidence_transfer != EvidenceTransfer::Full
             || self.output_head.is_some()
-            || !self.calibrations.is_empty()
+            || self.has_calibrations()
             || self.collect_features
         {
             return Err(Error::Invalid("multi-letter codes currently require fresh or prefix-reuse execution and full evidence without output heads, scalar calibration or feature export".into()));

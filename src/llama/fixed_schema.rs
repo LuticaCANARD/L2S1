@@ -17,7 +17,7 @@ impl FixedSchemaBackend {
     pub fn is_compatible(backend: &LlamaBackend) -> bool {
         !unsafe { sd_recurrent_or_hybrid(backend.engine.as_ptr()) }
             && backend.output_head.is_none()
-            && backend.calibrations.is_empty()
+            && !backend.has_calibrations()
             && backend.execution_mode == ExecutionMode::PrefixReuse
             && backend.evidence_transfer == EvidenceTransfer::Full
     }
