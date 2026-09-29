@@ -45,6 +45,8 @@ pub(crate) struct Engine {
     pub memory_dirty: bool,
     pub(crate) force_kv_clear: bool,
     pub vision_projector_reuse: bool,
+    /// Tokenizer, template and metadata only; no weights or context.
+    vocab_only: bool,
     cpu_moe_patterns: Vec<CString>,
     placement_overrides: Vec<llama_model_tensor_buft_override>,
 }
@@ -226,7 +228,9 @@ pub unsafe extern "C" fn sd_open_loading(
         if !(0..=2).contains(&device_kind) || gpu_layers < -1 || cpu_moe_layers < 0 || cpu_moe_layers as usize >= llama_max_tensor_buft_overrides() || (device_kind == 0 && (gpu_layers != 0 || cpu_moe_layers != 0)) {
             return Err("invalid CPU/GPU placement options".into());
         }
-        if model_load_mode != -1 && model_load_mode != 0 { return Err("invalid model loading mode".into()); }
+        // 1 loads only vocabulary and metadata: tokenization without weights.
+        let vocab_only = model_load_mode == 1;
+        if !(-1..=1).contains(&model_load_mode) || (vocab_only && device_kind != 0) { return Err("invalid model loading mode".into()); }
         static INIT: OnceLock<Result<()>> = OnceLock::new();
         if let Err(cause) = INIT.get_or_init(|| {
             LOG.lock().unwrap_or_else(|p| p.into_inner()).threshold = match std::env::var("L2S1_LOG").as_deref() {
@@ -245,7 +249,7 @@ pub unsafe extern "C" fn sd_open_loading(
             sequence_capacity: 1, allocated_context_size: context, parallel_context_dynamic: false, parallel_shared_kv: true,
             context_params: llama_context_default_params(), description: CString::default(), architecture: CString::default(), runtime_libraries: CString::default(),
             cached_tokens: Vec::new(), cached_boundary: None, split_cache: Default::default(), parallel_retained: Vec::new(), vision_metrics: NativeVisionBatchMetrics::default(), memory_dirty: false,
-            force_kv_clear: std::env::var("L2S1_FORCE_KV_CLEAR").as_deref() == Ok("1"), vision_projector_reuse: false,
+            force_kv_clear: std::env::var("L2S1_FORCE_KV_CLEAR").as_deref() == Ok("1"), vision_projector_reuse: false, vocab_only,
             cpu_moe_patterns: Vec::new(), placement_overrides: Vec::new(),
         });
         let mut mp = llama_model_default_params();
@@ -259,7 +263,8 @@ pub unsafe extern "C" fn sd_open_loading(
         }
         mp.devices = e.devices.as_mut_ptr(); mp.n_gpu_layers = gpu_layers;
         if model_load_mode == 0 { mp.load_mode = llama_load_mode_LLAMA_LOAD_MODE_NONE; }
-        if log_info_enabled() { eprintln!("l2s1 model loading: {}", if model_load_mode == 0 { "read" } else { "auto" }); }
+        mp.vocab_only = vocab_only;
+        if log_info_enabled() { eprintln!("l2s1 model loading: {}", ["auto", "read", "vocab-only"][(model_load_mode + 1) as usize]); }
         if cpu_moe_layers > 0 {
             let cpu = ggml_backend_dev_by_type(ggml_backend_dev_type_GGML_BACKEND_DEVICE_TYPE_CPU);
             if cpu.is_null() { return Err("CPU backend unavailable for MoE split".into()); }
@@ -288,6 +293,11 @@ pub unsafe extern "C" fn sd_open_loading(
             if count <= 0 || cpu_moe_layers > llama_model_n_layer(e.model) { return Err("CPU MoE split requires an MoE model and a layer count within the model".into()); }
         }
         if !llama_model_has_decoder(e.model) || llama_model_has_encoder(e.model) { return Err("decision scoring requires a decoder-only language model".into()); }
+        if vocab_only {
+            let mut desc = [0; 512]; llama_model_desc(e.model, desc.as_mut_ptr(), desc.len());
+            e.description = CStr::from_ptr(desc.as_ptr()).to_owned(); e.runtime_libraries = runtime_libraries();
+            return Ok(Box::into_raw(e));
+        }
         let cp = &mut e.context_params;
         cp.n_ctx = context; cp.n_batch = batch; cp.n_ubatch = ubatch; cp.n_seq_max = 1; cp.n_threads = threads; cp.n_threads_batch = threads;
         cp.embeddings = false; cp.offload_kqv = device_kind != 0; cp.op_offload = device_kind != 0; cp.flash_attn_type = flash_attention as _;
@@ -401,6 +411,11 @@ impl Engine {
         dynamic: bool,
         shared: bool,
     ) -> Result<()> {
+        if self.vocab_only {
+            return Err(
+                "vocab-only backend has no weights; load the full model to compute logits".into(),
+            );
+        }
         if !(1..=32).contains(&capacity) || self.context_size > i32::MAX as u32 / capacity {
             return Err("parallel width requires 1..32 and context * width <= INT_MAX".into());
         }
@@ -632,6 +647,9 @@ pub unsafe extern "C" fn sd_load_vision_projector(
         let e = e.as_mut().ok_or("invalid vision projector path")?;
         if e.model.is_null() || path.is_null() || *path == 0 {
             return Err("invalid vision projector path".into());
+        }
+        if e.vocab_only {
+            return Err("vocab-only backend cannot load a vision projector".into());
         }
         if !e.vision.is_null() {
             return Err("vision projector already loaded".into());

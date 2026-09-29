@@ -16,7 +16,7 @@ COMMANDS = {
     'regression': ('report_jev_rule_regression', 'Prepare or score the decision-rules regression'),
     'verify-ollaya': ('verify_jev_ollaya', 'Check answer parity against pinned Ollaya source'),
     'profiles': (None, 'List the bundled or custom pinned model profiles'),
-    'doctor': (None, 'Check optional dependencies, CUDA and native tool capabilities'),
+    'doctor': (None, 'Check optional dependencies, CUDA/MLX and native tool capabilities'),
 }
 
 
@@ -24,18 +24,28 @@ def doctor(argv):
     import subprocess
     p = argparse.ArgumentParser(prog='l2s1-train doctor')
     p.add_argument('--cuda', action='store_true', help='Require the complete CUDA training stack')
+    p.add_argument('--mlx', action='store_true', help='Require the Apple Silicon MLX training stack')
     p.add_argument('--exporter', type=Path)
     p.add_argument('--evaluator', type=Path)
     p.add_argument('--converter', type=Path)
     a = p.parse_args(argv)
     checks = []
-    for package in ('torch', 'transformers', 'peft', 'bitsandbytes', 'accelerate', 'huggingface-hub', 'pyarrow'):
+    cuda_stack = ('torch', 'transformers', 'peft', 'bitsandbytes', 'accelerate')
+    for package in cuda_stack + ('mlx', 'mlx-lm', 'huggingface-hub', 'pyarrow'):
         try:
             version = importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError:
             version = None
         checks.append(dict(name=package, ok=version is not None, version=version,
-                           required=a.cuda and package != 'pyarrow'))
+                           required=(a.cuda and package in cuda_stack + ('huggingface-hub',))
+                                    or (a.mlx and package in ('mlx', 'mlx-lm'))))
+    if a.mlx:
+        try:
+            import mlx.core as mx
+            from mlx_lm.tuner.utils import linear_to_lora_layers
+            checks.append(dict(name='metal', ok=mx.metal.is_available(), required=True))
+        except Exception as error:
+            checks.append(dict(name='training-imports', ok=False, required=True, error=str(error)))
     if a.cuda:
         try:
             import torch

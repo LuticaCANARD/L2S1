@@ -32,6 +32,14 @@ workload accuracy and recalibrate before upgrading a deployment. See
 
 ### Added
 
+- `LlamaBackend::load_vocab_only` loads only the GGUF tokenizer, chat template
+  and metadata (llama.cpp `vocab_only`) for `encode_decision`,
+  `encode_decision_sequences` and `preflight`; inference returns an error.
+  `export_decision_tokens` uses it, so exporting no longer loads the weights.
+  Tokens and `model_identity` match a default CPU load.
+- `l2s1-train run --backend mlx` trains decision adapters on Apple Silicon
+  with MLX, writes PEFT-format adapters for the existing GGUF LoRA conversion,
+  and evaluates on Metal (`training[mlx]`, `l2s1-train doctor --mlx`).
 - `DecisionRequest.shared` (JSON `"shared"`): evidence common to many requests
   or questions, always rendered first in the data segment in both layouts.
   Callers no longer need to name `state` keys so that they sort first. Absent

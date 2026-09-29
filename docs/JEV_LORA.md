@@ -66,7 +66,9 @@ This training package adds no HTTP endpoint or shared multiquestion forward pass
   microbatch 1, accumulation 12; AdamW learning rate 1e-4 decays to zero;
   soft-target candidate cross entropy plus 0.1 negative log candidate mass.
 - NF4 frozen base, bf16 compute where supported (fp16 otherwise), fp32 adapters
-  and normalization parameters. CUDA is required for this training path.
+  and normalization parameters. CUDA is required for this training path; the
+  Apple Silicon path below keeps the data, loss and schedule but uses an MLX
+  4-bit affine base and fp32 adapters.
 - A 12-example smoke adapter is discarded. Final training restarts from the base.
   Fixed final checkpoint; no test/development selection, threshold fitting or
   temperature fitting. These probabilities are not claimed calibrated.
@@ -95,6 +97,18 @@ Native exporter/evaluator and matching llama.cpp converter/libraries remain
 separate prerequisites. Existing local checkpoints can be reused offline.
 This does not establish Windows GPU training validation; installed CLI contracts
 are checked separately from real CUDA execution.
+
+On Apple Silicon, install `'./training[mlx]'` instead, build the native tools
+with `--features llama-metal`, check with `l2s1-train doctor --mlx`, and add
+`--backend mlx` to `l2s1-train run`. The trainer consumes the same sealed token
+export, writes a PEFT-format adapter (`alpha = scale * rank`) that the same
+`convert_lora_to_gguf.py` stage converts, and evaluates with `--metal`, so the
+adapter loads through `--lora` without fusing a full model copy. The exporter
+loads only the GGUF vocabulary, so a large model is not loaded twice. Gemma 4
+checkpoints need mlx-lm from main (ml-explore/mlx-lm#1349), which requires
+Transformers 5.7+; run llama.cpp's converter from an environment whose
+Transformers can read that tokenizer. Verified end to end on Gemma 3 1B IT
+(pipeline and GGUF LoRA effect only, not accuracy).
 
 Download the pinned dataset's `all/train-00000-of-00001.parquet` and
 `all/test-00000-of-00001.parquet` to a source directory as `train.parquet` and

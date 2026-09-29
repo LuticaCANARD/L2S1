@@ -18,6 +18,8 @@ l2s1-train = "l2s1_training.cli:main"
 [project.optional-dependencies]
 # Tested training stack; install the CUDA-specific torch wheel for your host first.
 cuda = ["torch==2.14.0", "transformers==5.17.0", "peft==0.21.0", "bitsandbytes==0.50.2", "accelerate==1.15.0", "huggingface-hub==1.32.0"]
+# Apple Silicon; Gemma 4 needs mlx-lm main (ml-explore/mlx-lm#1349) until the next release.
+mlx = ["mlx-lm==0.31.3", "huggingface-hub==1.32.0"]
 fetch = ["huggingface-hub==1.32.0"]
 parquet = ["pyarrow==21.0.0"]
 

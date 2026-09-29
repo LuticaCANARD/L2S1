@@ -1,4 +1,5 @@
 """Tests also run against the installed wheel outside the source tree."""
+import importlib.util
 import json
 import os
 import signal
@@ -212,6 +213,21 @@ class PackageTests(unittest.TestCase):
             self.assertTrue(all(r['status']=='failed' for r in result['runs']))
             for r in result['runs']:
                 self.assertEqual(json.loads((root/'run'/r['model']/'run.json').read_text(encoding='utf-8')), r)
+
+
+    @unittest.skipUnless(importlib.util.find_spec('mlx_lm'), 'requires mlx-lm')
+    def test_mlx_adapter_uses_peft_layout(self):
+        import mlx.nn as nn
+        from mlx_lm.tuner.lora import LoRALinear
+        from l2s1_training.train_jev_mlx import peft_adapter
+        base = nn.Linear(64, 32)
+        base.freeze()
+        model = nn.Module()
+        model.q_proj = LoRALinear.from_base(base, r=4, scale=2.)
+        tensors, config = peft_adapter(model, dict(rank=4, alpha=8, dropout=0), {'q_proj'})
+        self.assertEqual({k: tuple(v.shape) for k, v in tensors.items()},
+                         {'base_model.model.q_proj.lora_A.weight': (4, 64), 'base_model.model.q_proj.lora_B.weight': (32, 4)})
+        self.assertEqual((config['r'], config['lora_alpha'], config['target_modules']), (4, 8, ['q_proj']))
 
 
 if __name__ == '__main__':
