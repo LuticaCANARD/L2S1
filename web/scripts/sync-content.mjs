@@ -6,6 +6,7 @@ const root = new URL('../../', import.meta.url);
 const target = new URL('../static/docs/', import.meta.url);
 const publicStudy = 'typed-decisions-20260926';
 const reviewEvidence = {
+  'decision-performance-20260930': ['summary.json', 'provenance.json', 'records.jsonl', 'JEVBENCH-LICENSE'],
   'evidence-simd-20260927': ['summary.json', 'native-parity.json'],
   'fast-decisions-20260927': ['summary.json', 'provenance.json'],
   'decision-review-20260927': ['summary.json'],
@@ -17,7 +18,7 @@ const reviewEvidence = {
 await rm(target, { recursive: true, force: true });
 await mkdir(target, { recursive: true });
 for (const name of [
-  'README.md', 'README.ko.md', 'README.ja.md', 'LICENSE', 'THIRD_PARTY_LICENSES.txt',
+  'README.md', 'README.ko.md', 'README.ja.md', 'CHANGELOG.md', 'LICENSE', 'THIRD_PARTY_LICENSES.txt',
 ]) {
   if (name.endsWith('.md')) {
     await writeFile(new URL(name, target), publicEvidenceLinks(await readFile(new URL(name, root), 'utf8')));
@@ -67,7 +68,7 @@ for (const language of ['en', 'ko', 'ja']) {
 
 // The language indexes also link to public package and website documentation.
 for (const path of [
-  'sdks/README.md', 'sdks/typescript/README.md', 'sdks/python/README.md', 'crates/l2s1-llama-sys/README.md',
+  'sdks/README.md', 'sdks/typescript/README.md', 'sdks/python/README.md', 'sdks/cpp/README.md', 'crates/l2s1-llama-sys/README.md',
   'crates/l2s1-tools/README.md', 'crates/l2s1-tools/NOTICE.md',
   'sdks/typescript/PUBLISHING.md', 'web/README.md',
   'skills/l2s1/SKILL.md', 'skills/l2s1/references/decisions.md',
@@ -90,7 +91,7 @@ for (const entry of await readdir(benchmarks, { withFileTypes: true })) {
     if (entry.name === rulesStudy) {
       await writeFile(new URL(report.name, destination), rulesReportLinks(await readFile(new URL(report.name, source), 'utf8')));
     } else {
-      await copyFile(new URL(report.name, source), new URL(report.name, destination));
+      await writeFile(new URL(report.name, destination), publicEvidenceLinks(await readFile(new URL(report.name, source), 'utf8')));
     }
   }
 }

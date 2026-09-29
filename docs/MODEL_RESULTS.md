@@ -1,5 +1,7 @@
 # Recorded model results
 
+[Performance review](PERFORMANCE_REVIEW.md): current measurements, failure analysis and prioritized experiments.
+
 [English](en/MODEL_RESULTS.md) · [한국어](ko/MODEL_RESULTS.md) · [日本語](ja/MODEL_RESULTS.md)
 
 [English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)

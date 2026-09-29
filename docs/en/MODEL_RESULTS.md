@@ -1,4 +1,6 @@
 <a id="recorded-model-results"></a>
+
+[Performance review](PERFORMANCE_REVIEW.md): current measurements, failure analysis and prioritized experiments.
 # Recorded model results
 
 [English](MODEL_RESULTS.md) · [한국어](../ko/MODEL_RESULTS.md) · [日本語](../ja/MODEL_RESULTS.md)

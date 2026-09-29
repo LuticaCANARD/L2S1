@@ -1,0 +1,113 @@
+{
+  "l2s1_revision": "74334ece4e0464b7b6c9c55038f6f2d8af4d0d7b",
+  "review_revision": "6b2fcfada72b63db4fadb78c7e4c60f2b6d42282",
+  "jevbench_revision": "f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84",
+  "hardware": "RTX 3080 10 GiB; WSL2; i9-9900K, 4 logical CPUs",
+  "n_unique_items": 231,
+  "runs_per_model": 1,
+  "gemma": {
+    "context": 4096,
+    "batch": 256,
+    "ubatch": 256,
+    "threads": 4,
+    "flash_attention": "off",
+    "execution": "fresh/legacy",
+    "transport": "Rust in-process",
+    "warmup": 1,
+    "load_and_warmup_excluded": true,
+    "truncated": 0,
+    "identities": {
+      "gemma4-e2b": {
+        "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+        "dataset_hash": "dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51",
+        "evaluator_sha256": "6929c6033c83f6a8d00b03bc233c0e221cc066fd4867c87938af363fd351c496",
+        "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "jevbench_revision": "f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84"
+      },
+      "gemma4-12b": {
+        "model_sha256": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b",
+        "dataset_hash": "dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51",
+        "evaluator_sha256": "6929c6033c83f6a8d00b03bc233c0e221cc066fd4867c87938af363fd351c496",
+        "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "jevbench_revision": "f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84"
+      }
+    }
+  },
+  "laya": {
+    "model": "convaiinnovations/laya",
+    "revision": "55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851",
+    "upstream_commit": "f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84",
+    "dataset_hash": "dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51",
+    "n": 231,
+    "device": "NVIDIA GeForce RTX 3080",
+    "torch": "2.8.0+cu128",
+    "transformers": "4.57.6",
+    "laya": "0.3.21",
+    "python": "3.12.13",
+    "threads": 4,
+    "transport": "in-process official Python SDK",
+    "max_len": 512,
+    "head_max_len": 192,
+    "warmup": 1,
+    "fast": false,
+    "compile": false,
+    "amp_dtype": "torch.bfloat16",
+    "model_load_s": 3.9236995070004923,
+    "model_weight_dtypes": [
+      "torch.float32"
+    ],
+    "config": {
+      "encoder": "answerdotai/ModernBERT-large",
+      "head_layers": 2,
+      "max_len": 512,
+      "head_max_len": 192,
+      "max_prefixes": 6,
+      "act_costs": {
+        "escalate": 0.5
+      },
+      "cost_wrong_act": 3.0,
+      "amp_dtype": "bf16",
+      "model_name": "rl-agent",
+      "temperature": [
+        1.6369030475616455,
+        1.2514300346374512,
+        1.983399510383606
+      ],
+      "temperature_by_options": {
+        "choice:3-5": 1.7601518630981445,
+        "choice:6-10": 1.0000158548355103,
+        "score:3-5": 1.2514300346374512,
+        "noul:2": 1.983399510383606,
+        "choice:11+": 0.10058280825614929,
+        "choice:2": 1.9063563346862793
+      },
+      "training": {
+        "updates": 7313,
+        "epochs_completed": 1,
+        "hours": 1.96,
+        "world_size": 1,
+        "fine_tuned_from_checkpoint": true
+      }
+    },
+    "started_utc": "2026-09-29T15:25:13Z"
+  },
+  "source_sha256": {
+    "gemma4-e2b/jevbench-records.jsonl": "2ea6edc2b2c61e861acdc014abe84bdbb9b757545d76cfd2dfd3c435e9e9fb7a",
+    "gemma4-e2b/selective-policy.jsonl": "599433edc50265920a1ca21bd11678c56d76daf1a8d32f58742155805c37f353",
+    "gemma4-e2b/manifest.json": "ff31772f855ae693fdaefb7805622aa98d26fe10a8259e031f425380acc5d897",
+    "gemma4-12b/jevbench-records.jsonl": "77f76947c03767d01a38ef8256fc7d7936082293c0ae05bbf95f3eda8c90d3e1",
+    "gemma4-12b/selective-policy.jsonl": "7cafca56d7619672998fdeb80ff769d751c33047698e6d3a919c3bf2664c26b4",
+    "gemma4-12b/manifest.json": "86a95681fa39dc425d06a1aebccc870c3bffd2832fd3e73b129a03115b147721",
+    "laya/results.jsonl": "5b5d1db76e6685bc3349db9e167d46bcac64d08d3419e0c69e8e26bd303b6ce6",
+    "laya/plan.json": "3472ff09d66d68537a3ee9efa6403d2a59e9f7b9fda921ea5b3235f0ceea867a",
+    "laya/audit.json": "56a594e5fa52f3c92944b695020aa83504d770aa307f064a1db6a3c3ce0d70cf",
+    "laya/model-provenance.json": "fe7d1e0cd9476215e10d7b72b8de01800ae0a90a86e18a88d6057a19c4cb40fb"
+  },
+  "records_sha256": "f1fbb99887e5df4dc5b88cbb19a43ff0df94fb17d96cbff64eb25adfa181d58b",
+  "limitations": [
+    "Public subset, not official 534-item leaderboard",
+    "Laya default 512-token input budget truncates 57 items; Gemma does not",
+    "Different runtimes, context and quantization; separate runs; no fixed clocks",
+    "Cascade replay is arithmetic on stored outcomes, not deployed measurement"
+  ]
+}

@@ -12,17 +12,21 @@ Use it to classify messages, route requests, check conditions, or assign ordered
 
 [Python SDK](sdks/python/README.md), [native batching](docs/en/BATCHING_API_REVIEW.md), and the [GitHub Release/npm/PyPI/Cargo pipeline](docs/en/RELEASE_PIPELINE.md).
 
+Latest measured public JevBench subset (231 items): Gemma 4 12B QAT Q4_0 **194/231 correct (83.98%), p50 93.48 ms**; E2B Q8_0 **159/231 (68.83%), p50 40.41 ms** on RTX 3080. Model loading and warmup excluded; these `74334ec` results do not establish production accuracy. [Comparison, Laya limits and improvement review](docs/en/PERFORMANCE_REVIEW.md).
+
 **Recorded on RTX 5090 / Windows:** Gemma 4 E2B Q8_0 reached **94.3% accepted accuracy**, **97.2% coverage**, and **67.6 ms p50 per three-decision request** on `decision-rules-v1`. Correct accepted answers were 91.7% of all decisions (33 correct, 2 wrong, 1 abstention per pass). This is 36 synthetic rule decisions repeated 3 times; loading and warmups are excluded. [Results and conditions](docs/en/BENCHMARK.md#recorded-windows-rtx-5090-results) · [Summary JSON](benchmarks/decision-rules-windows-20260926/summary.json).
 
 ## Install
 
-[v0.1.1](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.1) is available on PyPI, npm and crates.io.
+[v0.2.0](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.0) is available on PyPI, npm and crates.io.
+
+v0.2.0 changes the default text-parallel prompt layout and wave ordering. Re-evaluate your workload and calibration when upgrading; [compatibility details](CHANGELOG.md#020-2026-09-30).
 
 | Package | Install command |
 | --- | --- |
-| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.1.1` |
-| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.1.1` |
-| Rust library | `cargo add l2s1@0.1.1 --features llama` |
+| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.0` |
+| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.0` |
+| Rust library | `cargo add l2s1@0.2.0 --features llama` |
 
 Python keeps `import l2s1` and needs a separate Rust runtime. Use a platform runtime from the release with `runtime_dir`, or a custom executable with `binary_path`. npm selects the matching prebuilt runtime automatically; keep optional dependencies enabled. Supply GGUF model weights separately. The Rust `llama` feature requires CMake and a C++17 compiler.
 
@@ -176,9 +180,9 @@ HTTP image requests use named `media` and per-decision `media_ids`. Local backen
 
 ## Use from TypeScript
 
-The [`@l2s1/node` package](docs/en/typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install it with `npm install @l2s1/node@0.1.1`. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
+The [`@l2s1/node` package](docs/en/typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install it with `npm install @l2s1/node@0.2.0`. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
 
-With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](sdks/typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `sdks/typescript/l2s1-node-0.1.1.tgz`.
+With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](sdks/typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `sdks/typescript/l2s1-node-0.2.0.tgz`.
 
 ```sh
 cargo build --release --locked --features llama --bin l2s1

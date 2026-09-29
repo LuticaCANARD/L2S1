@@ -6,7 +6,7 @@
 
 `@l2s1/node` uses the existing Rust inference engine from Node.js. One model process stays resident across calls. Binary, choice, ordinal, image, policy, reasoning and evidence fields use the Rust HTTP v1 schema. Validation, tokenization, scoring, abstention and GPU execution remain in Rust.
 
-Node.js 22+ is required. The wrapper selects an optional prebuilt runtime package for the current OS and CPU architecture. Each runtime package contains the Rust executable and matching llama.cpp/GGML shared libraries; installation runs no compilation or download scripts. Model weights are supplied separately. [Version 0.1.4](https://www.npmjs.com/package/@l2s1/node/v/0.1.4) is published on npm.
+Node.js 22+ is required. The wrapper selects an optional prebuilt runtime package for the current OS and CPU architecture. Each runtime package contains the Rust executable and matching llama.cpp/GGML shared libraries; installation runs no compilation or download scripts. Model weights are supplied separately. [Version 0.2.0](https://www.npmjs.com/package/@l2s1/node/v/0.2.0) is published on npm.
 
 See the [npm publishing review](PUBLISHING.md) for scope access, package ordering, authentication and platform release conditions.
 
@@ -15,17 +15,17 @@ See the [npm publishing review](PUBLISHING.md) for scope access, package orderin
 From npm:
 
 ```sh
-npm install @l2s1/node@0.1.4
+npm install @l2s1/node@0.2.0
 ```
 
 The wrapper selects the matching runtime through optional dependencies. Keep optional dependencies enabled. Runtime and wrapper versions must match.
 
 ### Install from this repository
 
-You can also install the wrapper and platform runtime tarballs from [v0.1.4](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.4). For example, on Linux x64:
+You can also install the wrapper and platform runtime tarballs from [v0.2.0](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.0). For example, on Linux x64:
 
 ```sh
-npm install ./l2s1-node-0.1.4.tgz ./l2s1-runtime-linux-x64-0.1.4.tgz
+npm install ./l2s1-node-0.2.0.tgz ./l2s1-runtime-linux-x64-0.2.0.tgz
 ```
 
 For a custom native build, build the Rust executable at the repository root:
@@ -44,7 +44,7 @@ node scripts/install-ci.mjs
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.4.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.2.0.tgz
 ```
 
 ## Load a local model
@@ -239,7 +239,7 @@ cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack
-npm run test:package -- l2s1-node-0.1.4.tgz l2s1-runtime-linux-x64-0.1.4.tgz
+npm run test:package -- l2s1-node-0.2.0.tgz l2s1-runtime-linux-x64-0.2.0.tgz
 ```
 
 Use a fresh output directory when rebuilding a runtime. `L2S1_PORTABLE_BUILD=1` disables build-host CPU instructions and OpenMP dependencies. Linux ARM64 packages use runtime-selected GGML CPU variants with an ARMv8 fallback; the package CI is configured for Ubuntu 24.04 / GCC 14. Keep every bundled CPU module when moving the runtime. See [native build options](../../crates/l2s1-llama-sys/README.md#portable-linux-arm64) for controlled comparisons and custom OpenMP dependencies. Each artifact includes license notices and a SHA-256 manifest. The verifier checks that Linux llama.cpp/GGML dependencies resolve from the bundle directory.

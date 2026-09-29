@@ -10,17 +10,21 @@ L2S1 は、ローカルのチャットモデルで二値・選択・順序付き
 
 [Python SDK](sdks/python/README.md)、[native batch](docs/ja/BATCHING_API_REVIEW.md)、[GitHub Release・npm・PyPI・Cargo 配布パイプライン](docs/ja/RELEASE_PIPELINE.md)を提供します。
 
+最近の公開JevBench 231問測定: RTX 3080でGemma 4 12B QAT Q4_0は **194/231正解（83.98%）、p50 93.48 ms**、E2B Q8_0は **159/231（68.83%）、p50 40.41 ms**。読み込みとウォームアップを除外した `74334ec` の結果で、本番精度を保証しません。[比較・Layaの制限・改善検討](docs/ja/PERFORMANCE_REVIEW.md)。
+
 **RTX 5090 / Windows の測定:** Gemma 4 E2B Q8_0 は `decision-rules-v1` で **採用正解率94.3%**、**採用率97.2%**、**3判断のリクエストあたりp50 67.6 ms**を記録しました。全判断に対する採用正解は91.7%（各反復で正解33件・誤答2件・保留1件）です。合成ルール判断36件を3回反復し、読み込みとウォームアップは除外しました。[結果と測定条件](docs/ja/BENCHMARK.md#recorded-windows-rtx-5090-results) · [集計JSON](benchmarks/decision-rules-windows-20260926/summary.json)。
 
 ## インストール
 
-[v0.1.1](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.1) を PyPI・npm・crates.io からインストールできます。
+[v0.2.0](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.0) を PyPI・npm・crates.io からインストールできます。
+
+v0.2.0ではtext-parallelの既定プロンプト配置とwave順序が変わります。更新時は業務データとcalibrationを再検証してください。[互換性変更](CHANGELOG.md#020-2026-09-30)。
 
 | パッケージ | インストールコマンド |
 | --- | --- |
-| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.1.1` |
-| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.1.1` |
-| Rust ライブラリ | `cargo add l2s1@0.1.1 --features llama` |
+| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.0` |
+| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.0` |
+| Rust ライブラリ | `cargo add l2s1@0.2.0 --features llama` |
 
 Python は `import l2s1` を維持し、別途 Rust ランタイムが必要です。リリースのプラットフォームランタイムを `runtime_dir` に指定するか、独自ビルドの実行ファイルを `binary_path` に指定してください。npm は対応するビルド済みランタイムを自動選択するため、optional dependencies を有効にしてください。GGUF モデルの重みは別途用意します。Rust の `llama` 機能には CMake と C++17 コンパイラが必要です。
 
@@ -174,9 +178,9 @@ HTTP の画像リクエストでは、名前付きの `media` と判断ごとの
 
 ## TypeScript から使う
 
-[`@l2s1/node` パッケージ](docs/ja/typescript/README.md)は、現在の OS とアーキテクチャに対応するビルド済みの Rust ランタイムを選択し、型付きの `load()`、`decide()`、`capabilities()`、`close()` を提供します。`npm install @l2s1/node@0.1.1` でインストールし、GGUF の重みは別途用意します。同じアプリケーション API で、`connect()` は HTTP サーバーを使い、`fromBackend()` はカスタムバックエンドを受け付けます。
+[`@l2s1/node` パッケージ](docs/ja/typescript/README.md)は、現在の OS とアーキテクチャに対応するビルド済みの Rust ランタイムを選択し、型付きの `load()`、`decide()`、`capabilities()`、`close()` を提供します。`npm install @l2s1/node@0.2.0` でインストールし、GGUF の重みは別途用意します。同じアプリケーション API で、`connect()` は HTTP サーバーを使い、`fromBackend()` はカスタムバックエンドを受け付けます。
 
-Node.js 24 以上と Bash または Zsh を使い、リポジトリのルートから次のコマンドを実行してください。ローカル CPU ランタイムと TypeScript パッケージをビルドし、例の型を検査してから[倉庫の分類例](sdks/typescript/examples/warehouse.ts)を実行します。モデルのパスは、用意した GGUF ファイルの絶対パスに置き換えてください。`npm pack` は `sdks/typescript/l2s1-node-0.1.1.tgz` を生成します。
+Node.js 24 以上と Bash または Zsh を使い、リポジトリのルートから次のコマンドを実行してください。ローカル CPU ランタイムと TypeScript パッケージをビルドし、例の型を検査してから[倉庫の分類例](sdks/typescript/examples/warehouse.ts)を実行します。モデルのパスは、用意した GGUF ファイルの絶対パスに置き換えてください。`npm pack` は `sdks/typescript/l2s1-node-0.2.0.tgz` を生成します。
 
 ```sh
 cargo build --release --locked --features llama --bin l2s1
