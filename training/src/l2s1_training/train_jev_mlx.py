@@ -19,7 +19,26 @@ def lora_keys(block, suffixes):
     return keys
 
 
-def peft_adapter(model, protocol, targets):
+def checkpoint_modules(checkpoint):
+    """Language-model module names from the HF safetensors headers (no weights read)."""
+    names = set()
+    for path in Path(checkpoint).glob('*.safetensors'):
+        with path.open('rb') as f:
+            header = json.loads(f.read(int.from_bytes(f.read(8), 'little')))
+        names |= {k.removesuffix('.weight') for k in header if k.endswith('.weight')}
+    return {n for n in names if not any(part in n.lower() for part in ('vision', 'audio', 'projector'))}
+
+
+def hf_module(module, hf_modules):
+    """mlx-lm renames prefixes (e.g. Gemma 4 language_model.model.layers vs HF
+    model.language_model.layers); match on the layers.N.<path> suffix instead."""
+    suffix = module[module.rindex('layers.'):]
+    matches = [n for n in hf_modules if n == suffix or n.endswith('.'+suffix)]
+    require(len(matches) == 1, f'No unique checkpoint tensor for {module}')
+    return matches[0]
+
+
+def peft_adapter(model, protocol, targets, hf_modules):
     """MLX lora_a (in, r) / lora_b (r, out) at scale alpha/r -> PEFT lora_A (r, in) / lora_B (out, r)."""
     import mlx.core as mx
     from mlx.utils import tree_flatten
@@ -27,6 +46,7 @@ def peft_adapter(model, protocol, targets):
     for name, value in tree_flatten(model.trainable_parameters()):
         module, kind = name.rsplit('.', 1)
         require(kind in ('lora_a', 'lora_b'), f'Unexpected trainable parameter: {name}')
+        module = hf_module(module, hf_modules)
         tensors[f'base_model.model.{module}.lora_{kind[-1].upper()}.weight'] = value.T.astype(mx.float32)
     config = dict(peft_type='LORA', task_type='CAUSAL_LM', r=protocol['rank'], lora_alpha=protocol['alpha'],
                   lora_dropout=protocol['dropout'], bias='none', target_modules=sorted(targets))
@@ -58,17 +78,21 @@ def main():
     import mlx.nn as nn
     import mlx.optimizers as optim
     import mlx_lm
+    from mlx_lm.tuner.trainer import grad_checkpoint
     from mlx_lm.tuner.utils import linear_to_lora_layers
     from mlx.utils import tree_flatten, tree_map
     protocol = binding['protocol']
-    model, tokenizer = mlx_lm.load(str(args.checkpoint))
+    # Lazy load: bf16 weights stream through quantization instead of all being resident.
+    model, tokenizer = mlx_lm.load(str(args.checkpoint), lazy=True)
     validate_tokenizer(getattr(tokenizer, '_tokenizer', tokenizer), rows)
     args.output.mkdir(parents=True, exist_ok=False)
     mx.random.seed(SEED)
     # 4-bit base like the CUDA NF4 path; only the float LoRA matrices train.
     nn.quantize(model, group_size=64, bits=4,
                 class_predicate=lambda _, m: isinstance(m, nn.Linear) and m.weight.shape[-1] % 64 == 0)
+    mx.eval(model.parameters())
     model.freeze()
+    grad_checkpoint(model.layers[0])
     keys = lora_keys(model.layers[0], profile['target_modules'])
     linear_to_lora_layers(model, len(model.layers), dict(rank=protocol['rank'], dropout=protocol['dropout'],
                           scale=protocol['alpha']/protocol['rank'], keys=keys))
@@ -120,7 +144,7 @@ def main():
                 log.flush()
                 print(json.dumps(info), flush=True)
                 sums = [0., 0.]
-    tensors, config = peft_adapter(model, protocol, targets)
+    tensors, config = peft_adapter(model, protocol, targets, checkpoint_modules(args.checkpoint))
     require(any(mx.any(v != 0).item() for k, v in tensors.items() if 'lora_B' in k), 'No LoRA update')
     if not smoke:
         (args.output/'adapter').mkdir()

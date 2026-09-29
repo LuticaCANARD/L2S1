@@ -223,10 +223,14 @@ class PackageTests(unittest.TestCase):
         base = nn.Linear(64, 32)
         base.freeze()
         model = nn.Module()
-        model.q_proj = LoRALinear.from_base(base, r=4, scale=2.)
-        tensors, config = peft_adapter(model, dict(rank=4, alpha=8, dropout=0), {'q_proj'})
+        model.language_model = nn.Module()
+        model.language_model.layers = [nn.Module()]
+        model.language_model.layers[0].q_proj = LoRALinear.from_base(base, r=4, scale=2.)
+        tensors, config = peft_adapter(model, dict(rank=4, alpha=8, dropout=0), {'q_proj'},
+                                       {'model.language_model.layers.0.q_proj', 'model.language_model.layers.1.q_proj'})
+        prefix = 'base_model.model.model.language_model.layers.0.q_proj'
         self.assertEqual({k: tuple(v.shape) for k, v in tensors.items()},
-                         {'base_model.model.q_proj.lora_A.weight': (4, 64), 'base_model.model.q_proj.lora_B.weight': (32, 4)})
+                         {prefix+'.lora_A.weight': (4, 64), prefix+'.lora_B.weight': (32, 4)})
         self.assertEqual((config['r'], config['lora_alpha'], config['target_modules']), (4, 8, ['q_proj']))
 
 

@@ -57,6 +57,8 @@ workload accuracy and recalibrate before upgrading a deployment. See
 - `l2s1-train run --backend mlx` trains decision adapters on Apple Silicon
   with MLX, writes PEFT-format adapters for the existing GGUF LoRA conversion,
   and evaluates on Metal (`training[mlx]`, `l2s1-train doctor --mlx`).
+  Verified on Gemma 4 12B IT with the pinned pilot data (raw accuracy
+  0.687 → 0.729, soft KL 2.61 → 0.21).
 - `DecisionRequest.shared` (JSON `"shared"`): evidence common to many requests
   or questions, always rendered first in the data segment in both layouts.
   Callers no longer need to name `state` keys so that they sort first. Absent
