@@ -6,7 +6,7 @@ import random
 import sys
 root = Path(__file__).resolve().parent
 sys.path.insert(0, str(root.parents[1]/'scripts'))
-from benchmark_decision_performance import digest, metrics, outcomes
+from benchmark_decision_performance import digest, metrics, outcomes, compare
 
 summary = json.loads((root/'summary.json').read_text())
 protocol = json.loads((root/'protocol.json').read_text())
@@ -19,6 +19,8 @@ for line in (root/'records.jsonl').read_text().splitlines():
     r = json.loads(line)
     records[(r['model'], r['phase'], r['arm'])].append(r['record'])
 assert set(records) == {(m,p,a) for m in ('e2b','12b') for p in ('development','test') for a in ('before','after')}
+assert len(summary['runs']) == len(records)
+assert {(r['model'], r['phase'], r['arm']) for r in summary['runs']} == set(records)
 for run in summary['runs']:
     key = (run['model'], run['phase'], run['arm'])
     gold = json.loads((root/f'{run["phase"]}-gold.json').read_text())
@@ -38,3 +40,19 @@ for model in ('e2b','12b'):
 assert sum(map(len, records.values())) == 320
 assert sum(len(r['response']['results']) for group in records.values() for r in group) == 960
 print('Verified 8 complete paired runs, 320 cases / 960 decision predictions.')
+
+parallel = json.loads((root/'parallel-validation.json').read_text())
+assert digest(root/'parallel-records.jsonl') == parallel['records_sha256']
+parallel_records = collections.defaultdict(list)
+for line in (root/'parallel-records.jsonl').read_text().splitlines():
+    r = json.loads(line)
+    parallel_records[r['model']].append(r['record'])
+assert set(parallel_records) == {'e2b', '12b'}
+assert len(parallel['runs']) == 2
+assert {r['model'] for r in parallel['runs']} == set(parallel_records)
+gold = json.loads((root/'test-gold.json').read_text())
+for run in parallel['runs']:
+    rows = parallel_records[run['model']]
+    assert metrics(rows, gold) == run['metrics']
+    assert compare(records[(run['model'], 'test', 'after')], rows, gold) == run['comparison']
+print('Verified parallel inference checks: 128 case predictions / 384 decision predictions.')

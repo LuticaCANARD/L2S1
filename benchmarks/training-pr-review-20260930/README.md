@@ -50,3 +50,16 @@ python3 benchmarks/training-pr-review-20260930/run.py \
 ```
 
 Set the matching shared-library search path for the evaluator. Full local predictions, stderr and the measured binary are retained under `results/training-pr-review-20260930/`; compact checked-in records support the reported metrics without model files.
+
+## Parallel inference review (PR #90)
+
+The integrated evaluator was also checked on the same 64 test cases / 192 decisions per model, with explicit parallel width 8, dynamic context and token prefix alignment. This is a follow-up regression check; no configuration was selected from these results, and the training runner keeps its fresh default. Both arms use state-first/typed with FA off and context 4096. The runner itself uses 8192; these checks do not claim full MLX training or all-context equivalence.
+
+| Model | Fresh → parallel raw correct | Changed top-1 | Changed selected/abstained | Max probability difference | Reused tokens |
+| --- | --- | --- | --- | --- | --- |
+| E2B | 177 → 179/192 | 2/192 | 1/192 | 0.583812 | 39,754 |
+| 12B | 192 → 192/192 | 0/192 | 0/192 | 0.004385 | 39,754 |
+
+E2B accepted-correct remains 177; one formerly accepted wrong answer becomes an abstention. The large E2B probability difference means a small Metal-only difference is not a universal bound. Parallel evaluation remains explicit and requires deployment-specific quality validation. No model/policy default was changed based on this fixture. Latency in the JSON is observational: native contract compilation overlapped this check, so it is not a controlled speed comparison.
+
+`parallel-validation.json` records executable/source/input/prediction hashes and complete commands. `parallel-records.jsonl` plus the fresh records let `verify.py` recompute both metrics and probability/selection drift. The integrated Python runner has 24 package tests (22 passed, two optional skipped), including command wiring for all 12 layout/detail/execution combinations; native unit/CLI tests pass (38 library tests plus two CLI tests, model-dependent cases skipped there).

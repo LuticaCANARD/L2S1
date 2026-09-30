@@ -1,13 +1,17 @@
 """Recompute every checked-in metric from compact records; no model required."""
 from collections import defaultdict
 import json
+import hashlib
 from pathlib import Path
 import sys
-sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts'))
-from benchmark_decision_performance import digest, metrics, read_rows
+sys.path.insert(0, str(Path(__file__).resolve().parent/'measured-source/scripts'))
 
 root=Path(__file__).resolve().parent
-repo=root.parents[1]
+# Authenticate the archived metric implementation before importing it.
+for file, sha in json.loads((root/'implementation-hashes.json').read_text()).items():
+    assert hashlib.sha256((root/'measured-source'/file).read_bytes()).hexdigest() == sha, file+' measured source snapshot changed'
+from benchmark_decision_performance import digest, metrics, read_rows
+
 summary=json.loads((root/'summary.json').read_text())
 assert set(summary)=={'e2b','12b'}
 for model in ('e2b','12b'):
@@ -15,8 +19,6 @@ for model in ('e2b','12b'):
     assert set(summary[model])==phases
 
 assert digest(root/'records.jsonl')==json.loads((root/'records-sha256.json').read_text())['records.jsonl']
-for file,sha in json.loads((root/'implementation-hashes.json').read_text()).items():
-    assert digest(repo/file)==sha, file+' changed after measured build'
 for model in ('e2b','12b'):
     freeze=json.loads((root/(model+'-accuracy-selection.json')).read_text())
     assert digest(root/'protocol.json')==freeze['protocol_sha256']

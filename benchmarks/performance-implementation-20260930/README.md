@@ -2,6 +2,8 @@
 
 Implements the first three items from the [performance review](../../docs/PERFORMANCE_REVIEW.md): a gated compute tuner, resident evaluator sessions, and opt-in structured arithmetic/time/graph facts. [Usage](../../docs/DECISION_PERFORMANCE.md).
 
+The verifier uses the immutable [measured source snapshot](measured-source/README.md). These results describe that build; later evaluator changes require separate measurements.
+
 Base: main `6b2fcfa`; exact measured source, binary, model, input and runtime hashes are retained in the artifacts below. No model weights, universal compute defaults, prompt defaults, or acceptance thresholds were changed.
 
 ## Conditions and reporting

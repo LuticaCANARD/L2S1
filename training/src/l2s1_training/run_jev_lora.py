@@ -52,6 +52,9 @@ def main(command=None):
     p.add_argument('--stage-timeout', type=float, default=7200, help='Maximum seconds per stage (default: 7200)')
     p.add_argument('--backend', choices=['cuda', 'mlx'], default='cuda',
                    help='Training/evaluation device: CUDA (NF4 + PEFT) or Apple Silicon (MLX + Metal)')
+    p.add_argument('--eval-execution', choices=['fresh', 'parallel'], default='fresh',
+                   help='fresh reproduces the pilot; parallel batches each case\'s decisions and shares '
+                        'their prompt prefix (validate numerical differences, decisions and abstentions for your model)')
     p.add_argument('--rules-fixture', type=Path, help='Optional existing decision-rules regression fixture')
     a = p.parse_args()
     if not math.isfinite(a.stage_timeout) or a.stage_timeout <= 0:
@@ -107,6 +110,10 @@ def main(command=None):
                         raise FileNotFoundError(f'Missing local prerequisite: {path}')
                 protocol = validate_dataset(a.data)['protocol']
                 prompt = ['--prompt-layout', protocol['prompt_layout'], '--prompt-detail', protocol['prompt_detail']]
+                if a.eval_execution == 'parallel':
+                    stage('evaluator-check', [a.evaluator.resolve(), '--help'])
+                    if '--parallel-prefix-alignment' not in (out/'evaluator-check.log').read_text(encoding='utf-8'):
+                        raise ValueError('Evaluator lacks --parallel-prefix-alignment; rebuild evaluate_jsonl before training')
                 status['artifacts'] = {k:digest(v) for k,v in dict(model=model, exporter=a.exporter,
                     evaluator=a.evaluator, converter=a.converter, manifest=a.data/'manifest.json').items()}
                 tokens = out/'train-tokens.jsonl'
@@ -125,10 +132,15 @@ def main(command=None):
                 if a.rules_fixture:
                     stage('prepare-regression', [sys.executable, '-m', 'l2s1_training.report_jev_rule_regression',
                         '--fixture', a.rules_fixture, '--requests-output', out/'rules-requests.jsonl'])
+                layout = protocol['prompt_layout']
+                execution = ['--execution-mode', 'fresh'] if a.eval_execution == 'fresh' else [
+                    '--execution-mode', 'parallel', '--parallel-width', '8', '--parallel-context-dynamic',
+                    # Token sharing pays off only when prompts share the state; legacy leads with the question.
+                    '--parallel-prefix-alignment', 'token' if layout == 'state-first' else 'batch']
                 for variant in ('base', 'adapter'):
                     pred = out/f'{variant}-predictions.jsonl'
                     cmd = [a.evaluator.resolve(), '--model', model, '--input', a.data/'test-requests.jsonl', '--output', pred,
-                           '--'+('metal' if a.backend == 'mlx' else 'cuda'), '--context', str(CONTEXT), '--batch', '256', '--threads', '4', '--execution-mode', 'fresh',
+                           '--'+('metal' if a.backend == 'mlx' else 'cuda'), '--context', str(CONTEXT), '--batch', '256', '--threads', '4', *execution,
                            *prompt, '--request-batch-size', '1',
                            '--model-load-mode', 'read', '--warmup']
                     if variant == 'adapter':

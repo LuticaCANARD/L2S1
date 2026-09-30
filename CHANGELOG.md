@@ -17,6 +17,13 @@
   prefixes), loads lazily and checkpoints gradients: Gemma 4 12B trains in
   12.8 GiB on a 36 GiB Mac.
 
+- `l2s1-train run --eval-execution parallel` and `evaluate_jsonl
+  --parallel-prefix-alignment` opt into parallel scoring. The training runner
+  checks evaluator compatibility before export. Validate decisions and abstentions
+  on the deployment model/device; `fresh` remains the default.
+- Jev preparation preserves shared evidence through token export and evaluation;
+  training rejects prompt identity/layout mismatches and invalid token contexts.
+
 ## 0.2.1 (2026-09-30)
 
 - Compatible resident servers clear retained KV snapshots and schema tokens when

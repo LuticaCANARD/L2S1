@@ -226,6 +226,27 @@ class PackageTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'filename'):
                 read_profile('gemma4', path)
 
+    def test_parallel_rejects_old_evaluator_before_export_or_training(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data = self.prepare(root)
+            profile = read_profile('gemma4')
+            checkpoint = root/profile['revision']
+            checkpoint.mkdir()
+            (checkpoint/'config.json').write_text('{}')
+            (root/profile['gguf']).write_bytes(b'fixture')
+            (root/'converter.py').write_text('')
+            out = root/'run'
+            result = subprocess.run([sys.executable, '-m', 'l2s1_training', 'run', '--models', 'gemma4',
+                '--eval-execution', 'parallel', '--checkpoint-root', str(root), '--data', str(data),
+                '--gguf-root', str(root), '--exporter', sys.executable, '--evaluator', sys.executable,
+                '--converter', str(root/'converter.py'), '--output', str(out)], capture_output=True)
+            self.assertEqual(result.returncode, 1)
+            run = json.loads((out/'gemma4/run.json').read_text(encoding='utf-8'))
+            self.assertIn('Evaluator lacks --parallel-prefix-alignment', run['error'])
+            self.assertEqual([s['name'] for s in run['stages']], ['evaluator-check'])
+            self.assertFalse((out/'gemma4/train').exists())
+
     def test_all_models_failure_summary_is_durable(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

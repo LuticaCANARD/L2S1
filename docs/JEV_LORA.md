@@ -113,6 +113,19 @@ Gemma 4 12B IT is recorded in
 [jev-lora-mlx-gemma4-12b-20260930](../benchmarks/jev-lora-mlx-gemma4-12b-20260930/README.md).
 Use a custom `--profiles` registry for checkpoints outside the bundled profiles.
 
+`--eval-execution parallel` scores each case's decisions together instead of
+one fresh call each. It can change probabilities, selected decisions and abstentions,
+so validate the deployment model/device and compare base and adapter under the same mode.
+The runner checks evaluator support before exporting or training. A [CUDA regression check](../benchmarks/training-pr-review-20260930/README.md#parallel-inference-review-pr-90)
+changed 2/192 E2B top-1 answers with a maximum probability difference of 0.584;
+12B retained 192/192 answers with a 0.0044 maximum difference. Treat numerical
+equivalence as model/device-specific. The speedup
+comes from sharing the state prefix and therefore needs `state-first` prompts;
+with the pilot's `legacy` layout it measured no faster than `fresh`. Batching
+several training examples per forward pass was also measured and rejected:
+on Gemma 4 12B it was 2.6× slower and, because MLX quantized matmuls round
+differently by batch shape, changed the loss.
+
 Download the pinned dataset's `all/train-00000-of-00001.parquet` and
 `all/test-00000-of-00001.parquet` to a source directory as `train.parquet` and
 `test.parquet`. Retain the dataset card there as `README.md`.
