@@ -1,7 +1,9 @@
 # Reproducible decision tuning and structured evidence
 
-These features are opt-in. Default model loading, prompt layout and acceptance
-policy remain unchanged. Start with the [measured study](../benchmarks/performance-implementation-20260930/README.md).
+Compute tuning and structured facts are opt-in. Compatible resident servers and
+SDKs use fixed-schema prefix reuse automatically; the independent JSONL evaluator
+keeps an explicit resident option. Default model loading, prompt layout and
+acceptance policy remain unchanged. Start with the [measured study](../benchmarks/performance-implementation-20260930/README.md).
 
 ## Tune compute on development requests
 
@@ -40,6 +42,31 @@ defaults based on this small study. An inference failure retains partial evidenc
 but makes the harness exit unsuccessfully.
 
 ## Keep native prefixes between calls
+
+For product use, omit the execution mode when starting `l2s1 --stdio` or
+`l2s1 --listen`, or when calling Python/TypeScript/C++ `load()`. Compatible text
+models automatically reuse the current ordered decision schema. Changing a
+decision ID, instruction, kind, candidate content/order, or the decision list
+clears all native prefix snapshots and cached schema tokens. Returning A→B→A
+starts A cold again. Changing only state keeps schema reuse and evaluates the new
+state each time. Errors inside the backend and explicit `clear()` also clear it.
+Schema identity is not a tenant identity: keep a separate server per trust domain.
+
+`capabilities().prefix_reuse.schema_change` reports `clear_all` on this runtime.
+This invalidation contract and the C++ default require the runtime/SDK built from
+this change; previously published packages do not gain them automatically.
+Python/TypeScript already inherit automatic reuse from compatible resident runtimes.
+Set `execution_mode="fresh"` (Python/C++), `executionMode: 'fresh'` (TypeScript),
+or `--execution-mode fresh` (CLI) to opt out. One-shot CLI and low-level
+`LlamaBackend` retain fresh execution. Vision, compact evidence, calibration/output
+heads, recurrent/hybrid models and explicit execution modes keep existing compatibility
+rules. Flash Attention and parallel execution are not enabled by this default.
+
+The [resident validation record](../benchmarks/performance-implementation-20260930/resident-defaults-validation.json)
+covers E2B and 12B on CUDA: six native checks and 20 SDK configurations across
+Python/TypeScript stdio and HTTP, and C++ stdio. It verifies actual reuse,
+schema A→B→A invalidation, error recovery and fresh opt-out; it is not a new
+accuracy or latency benchmark.
 
 The evaluator now exposes existing scoped Rust sessions:
 

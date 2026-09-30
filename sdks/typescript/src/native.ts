@@ -19,7 +19,8 @@ export interface LoadOptions {
   ubatch?: number;
   threads?: number;
   gpuLayers?: number;
-  /** Omit for the runtime default; true requires fixed-schema reuse, false opts out. */
+  /** Omit for automatic runtime reuse; true requires it, false opts out.
+   * The runtime detects schema changes and invalidates its prefixes; plans cache no answers. */
   fixedSchema?: boolean;
   executionMode?: 'fresh' | 'prefix-reuse' | 'state-restore' | 'parallel';
   parallelWidth?: number;

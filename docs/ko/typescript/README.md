@@ -248,3 +248,5 @@ npm run test:package -- l2s1-node-0.2.0.tgz l2s1-runtime-linux-x64-0.2.0.tgz
 `fixedSchema`를 생략하면 런타임 기본값을 따릅니다. true는 지원을 필수로 요구하며, false는 실행 모드를 생략했을 때 fresh를 선택합니다. 명시한 실행 모드는 false보다 우선합니다.
 
 이 기본값은 v0.1.4에 포함됩니다. 이전 v0.1.3에서는 `fixedSchema: true` / `fixed_schema=True`를 명시해야 합니다.
+
+이 변경을 포함한 런타임에서는 결정 스키마의 내용이나 순서가 바뀌면 보관한 접두사 캐시를 모두 비웁니다. 이전에 만든 plan으로 돌아와도 첫 요청은 다시 계산하며, state만 바뀌면 접두사를 재사용합니다. `capabilities().prefix_reuse.schema_change == "clear_all"`로 확인할 수 있습니다. 기존 배포 런타임에는 이 동작이 자동 적용되지 않습니다.

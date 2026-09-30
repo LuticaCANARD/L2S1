@@ -163,3 +163,5 @@ Python 3.11/3.14 を対象として wheel/sdist を保存します。ローカ�
 `fixed_schema` を省略するとランタイムの既定値に従います。true は対応を必須にし、false は実行モード省略時に fresh を選びます。明示した実行モードは false より優先されます。
 
 この既定値は v0.1.4 に含まれます。以前の v0.1.3 では `fixedSchema: true` / `fixed_schema=True` の明示が必要です。
+
+この変更を含むランタイムでは、決定スキーマの内容や順序が変わると保持したプレフィックスをすべて破棄します。以前の plan に戻った場合も最初のリクエストは再計算し、state だけの変更ではプレフィックスを再利用します。`capabilities().prefix_reuse.schema_change == "clear_all"` で確認できます。既存の公開ランタイムには自動適用されません。

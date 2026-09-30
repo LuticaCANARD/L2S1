@@ -36,6 +36,18 @@ See the [native build requirements](../../crates/l2s1-llama-sys/README.md).
 
 ## Reuse a decision
 
+Omit `execution_mode` to inherit automatic fixed-schema prefix reuse from a
+compatible resident runtime. Set `execution_mode = "fresh"` or
+`fixed_schema = false` to opt out; `fixed_schema = true` requires support.
+An explicit execution mode takes precedence over `fixed_schema = false`.
+The runtime clears retained snapshots whenever the ordered decision schema changes,
+including when an older prepared plan is used again. State changes reuse the
+prefix and compute new results. Check `capabilities()["prefix_reuse"]` and
+`Result::usage["reused_prefix_tokens"]`; `prepare()` itself performs no inference.
+These C++ defaults and schema invalidation require builds from this change.
+
+The example below explicitly selects parallel execution for `decide_batch`:
+
 ```cpp
 #include <l2s1/l2s1.hpp>
 

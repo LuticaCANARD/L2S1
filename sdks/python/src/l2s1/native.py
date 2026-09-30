@@ -39,6 +39,7 @@ class LoadOptions:
     threads: int | None = None
     gpu_layers: int | None = None
     # None inherits the runtime default; False explicitly disables automatic reuse.
+    # The runtime owns schema detection/invalidation; prepared plans cache no answers.
     fixed_schema: bool | None = None
     execution_mode: ExecutionMode | None = None
     parallel_width: int | None = None

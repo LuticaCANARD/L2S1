@@ -1,4 +1,5 @@
 #include <l2s1/l2s1.hpp>
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 using namespace l2s1;
@@ -8,6 +9,20 @@ int main(int argc,char** argv) {
     if(argc!=2) return 2;
     try {
         LoadOptions options; options.binary_path=argv[1]; options.model="model with spaces;$(not-a-shell)";
+        auto launch=[&]() { auto e=Engine::load(options); return e.capabilities()["launch_args"].get<std::vector<std::string>>(); };
+        auto mode=[&](const std::string& expected, bool fixed) {
+            auto args=launch(); auto it=std::find(args.begin(),args.end(),"--execution-mode");
+            check(std::count(args.begin(),args.end(),"--execution-mode")==1 && it+1!=args.end() && *(it+1)==expected);
+            check((std::find(args.begin(),args.end(),"--fixed-schema")!=args.end())==fixed);
+        };
+        auto defaults=launch(); check(std::find(defaults.begin(),defaults.end(),"--execution-mode")==defaults.end());
+        options.fixed_schema=false; mode("fresh",false);
+        options.execution_mode="parallel"; mode("parallel",false);
+        options.fixed_schema=true; fails("invalid_options",[&]{Engine::load(options);});
+        options.execution_mode.reset(); mode("prefix-reuse",true);
+        options.execution_mode="prefix-reuse"; mode("prefix-reuse",true);
+        options.execution_mode="fresh"; fails("invalid_options",[&]{Engine::load(options);});
+        options.fixed_schema.reset(); mode("fresh",false);
         options.execution_mode="parallel";
         options.policy=Policy{0.8123456789123456,0.05123456789123456};
         Request request{{{"temperature_c",6}},{{"cold","Temperature?",Binary{"warm","cold"},std::nullopt}}};

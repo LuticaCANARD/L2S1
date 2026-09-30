@@ -16,6 +16,7 @@ Json decide(const Json& request,const std::string& id) {
     return {{"api_version",1},{"request_id",id},{"backend",{{"runtime","fixture"},{"model","fixture"}}},{"policy",nullptr},{"results",results}};
 }
 int main(int argc,char** argv) {
+    Json launch_args=Json::array(); for(int i=1;i<argc;++i) launch_args.push_back(argv[i]);
     std::string mode; for(int i=1;i+1<argc;++i) if(std::string(argv[i])=="--model") mode=argv[i+1];
     std::string policy_text; for(int i=1;i+1<argc;++i) if(std::string(argv[i])=="--min-top-probability") policy_text=argv[i+1];
     if(mode=="exit") return 7;
@@ -24,7 +25,7 @@ int main(int argc,char** argv) {
     while(std::getline(std::cin,line)) {
         auto call=Json::parse(line); auto id=call.at("id").get<std::string>(); auto op=call.at("op").get<std::string>(); Json result;
         if(op=="health") result={{"status","ok"}};
-        else if(op=="capabilities") result={{"api_version",1},{"backend",{{"runtime","fixture"},{"model","fixture"}}},{"decision_types",{"binary","choice","ordinal"}},{"media",Json::object()},{"limits",Json::object()},{"launch_policy",policy_text}};
+        else if(op=="capabilities") result={{"api_version",1},{"backend",{{"runtime","fixture"},{"model","fixture"}}},{"decision_types",{"binary","choice","ordinal"}},{"media",Json::object()},{"limits",Json::object()},{"launch_policy",policy_text},{"launch_args",launch_args}};
         else {
             if(mode=="timeout") std::this_thread::sleep_for(std::chrono::seconds(5));
             if(mode=="malformed") {std::cout<<"not json\n"<<std::flush;continue;}

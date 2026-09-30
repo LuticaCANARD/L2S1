@@ -182,3 +182,5 @@ Compatible resident text servers (`--listen` / `--stdio`, including SDK `load`) 
 Omit `fixed_schema` to inherit the runtime default. Set it to true to require support, or false to select fresh when no execution mode is specified. An explicit execution mode takes precedence over false.
 
 This default is available in v0.1.4. Published v0.1.3 requires explicit `fixedSchema: true` / `fixed_schema=True`.
+
+With a runtime built from this change, changing the ordered decision schema clears all retained prefixes. Returning to an older prepared plan starts cold; changing only state keeps prefix reuse. Check `capabilities().prefix_reuse.schema_change == "clear_all"`. Existing published runtimes do not gain this behavior automatically.

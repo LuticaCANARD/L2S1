@@ -9,6 +9,10 @@
 For the Rust library, run `cargo add l2s1@0.2.0 --features llama` in your application.
 
 All SDKs use the same resident Rust engine and expose native batching. C++ uses stdio; Python and TypeScript also support HTTP.
+Python, TypeScript and C++ `load()` inherit automatic fixed-schema prefix reuse
+from a compatible runtime when the execution mode is omitted. Schema changes
+clear retained prefixes; state changes keep reuse. See the
+[runtime/version requirements and opt-out](../docs/DECISION_PERFORMANCE.md#keep-native-prefixes-between-calls).
 Rust library and Cargo package sources remain in the repository root and `crates/`.
 
 Run build, test and release commands from the repository root unless a guide specifies an SDK directory.
