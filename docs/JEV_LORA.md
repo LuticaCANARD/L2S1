@@ -177,6 +177,9 @@ probabilities. Reports retain failed cases and exit nonzero if any case fails.
 Probabilities must be finite, nonnegative,
 and sum to one within 1e-4. Criteria and instructions must be nonempty strings.
 Case/question IDs cannot contain `/`, which separates native training IDs.
+An optional `shared` JSON value supplies common evidence. Preparation preserves it
+in both inference requests and every single-question token export; labels stay
+separate. Exact-state overlap is still rejected even if shared evidence differs.
 
 ```json
 {"id":"train-1","workflow":"routing","state":{"items":2},"questions":{"multiple":{"type":"noul","instructions":"Are there multiple items?"}},"gold":{"multiple":{"type":"noul","label":"true","probabilities":{"false":0.1,"true":0.9}}}}

@@ -64,10 +64,10 @@ class PackageTests(unittest.TestCase):
         case = dict(id='mixed', workflow='custom', request=dict(state={}, decisions=[
             decision('c', dict(type='choice', instructions='Pick', criteria={'a':'A','b':'B'})),
             decision('n', dict(type='noul', instructions='True?')),
-            decision('s', dict(type='score', instructions='Level?', criteria=['Low','Mid','High'])),
+            decision('s', dict(type='score', instructions='Level?', criteria={'low':'Low','medium':'Mid','high':'High'})),
         ]), gold=dict(c=dict(type='choice', label='b', probabilities={'a':.2,'b':.8}),
                       n=dict(type='noul', label='true', probabilities={'false':.1,'true':.9}),
-                      s=dict(type='score', label='2', probabilities={'0':.1,'1':.2,'2':.7})))
+                      s=dict(type='score', label='high', probabilities={'low':.1,'medium':.2,'high':.7})))
         results = []
         for d in case['request']['decisions']:
             gold = case['gold'][d['id']]

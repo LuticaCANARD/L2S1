@@ -54,8 +54,8 @@ def decision(qid, q):
     elif kind == 'score':
         # An ordered array labels levels "0", "1", ...; an ordered object keeps the
         # application's own level IDs (visible to the model in typed prompts).
-        items = list(criteria.items()) if isinstance(criteria, dict) else list(enumerate(criteria or []))
-        require(isinstance(criteria, (list, dict)) and 2 <= len(items) <= 10, 'Invalid Score criteria')
+        require(isinstance(criteria, (list, dict)) and 2 <= len(criteria) <= 10, 'Invalid Score criteria')
+        items = list(criteria.items()) if isinstance(criteria, dict) else list(enumerate(criteria))
         native = dict(type='ordinal', levels=[dict(id=str(k), criterion=v, value=i)
                                              for i, (k, v) in enumerate(items)])
     else:
@@ -81,7 +81,16 @@ def convert(row, *, encoded=True):
         ids = [o['id'] for o in option_specs(d)]
         distribution(g['probabilities'], ids)
         require(g['label'] in ids and g['type'] == questions[d['id']]['type'], 'Invalid gold')
-    return dict(id=row['id'], workflow=row['workflow'], request=dict(state=state, decisions=decisions), gold=gold)
+    request = dict(state=state, decisions=decisions)
+    if row.get('shared') is not None:
+        request['shared'] = json.loads(row['shared']) if encoded else row['shared']
+    return dict(id=row['id'], workflow=row['workflow'], request=request, gold=gold)
+
+
+def token_requests(rows):
+    # Keep every inference input, especially shared evidence, when splitting questions.
+    return [dict(id=f'{r["id"]}/{d["id"]}', request=dict(r['request'], decisions=[d]))
+            for r in rows for d in r['request']['decisions']]
 
 
 def state_key(case):
@@ -154,8 +163,7 @@ def write_dataset(splits, output, dataset, revision, source_hashes, scope, proto
         jsonl(requests, [dict(id=r['id'], request=r['request']) for r in rows])
         files[name] = dict(cases=len(rows), decisions=sum(len(r['gold']) for r in rows),
                            ids=[r['id'] for r in rows], sha256=digest(labeled), requests_sha256=digest(requests))
-    flat = [dict(id=f'{r["id"]}/{d["id"]}', request=dict(state=r['request']['state'], decisions=[d]))
-            for r in splits['train'] for d in r['request']['decisions']]
+    flat = token_requests(splits['train'])
     jsonl(output/'train-token-requests.jsonl', flat)
     write_json(output/'manifest.json', dict(schema_version=1, seed=SEED, mode='specialist',
         dataset=dataset, revision=revision, source_sha256=source_hashes,
@@ -185,8 +193,7 @@ def validate_dataset(data):
         splits[name] = rows
     require(all(splits[k] for k in ('train', 'development', 'test')), 'Empty required split')
     check_disjoint(splits)
-    flat = [dict(id=f'{r["id"]}/{d["id"]}', request=dict(state=r['request']['state'], decisions=[d]))
-            for r in splits['train'] for d in r['request']['decisions']]
+    flat = token_requests(splits['train'])
     require(digest(data/'train-token-requests.jsonl') == manifest['token_requests_sha256'] and
             read_jsonl(data/'train-token-requests.jsonl') == flat, 'Training request binding mismatch')
     return manifest
