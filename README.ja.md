@@ -16,15 +16,15 @@ L2S1 は、ローカルのチャットモデルで二値・選択・順序付き
 
 ## インストール
 
-[v0.2.0](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.0) を PyPI・npm・crates.io からインストールできます。
+[v0.2.1](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.1) を PyPI・npm・crates.io からインストールできます。
 
 v0.2.0ではtext-parallelの既定プロンプト配置とwave順序が変わります。更新時は業務データとcalibrationを再検証してください。[互換性変更](CHANGELOG.md#020-2026-09-30)。
 
 | パッケージ | インストールコマンド |
 | --- | --- |
-| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.0` |
-| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.0` |
-| Rust ライブラリ | `cargo add l2s1@0.2.0 --features llama` |
+| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.1` |
+| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.1` |
+| Rust ライブラリ | `cargo add l2s1@0.2.1 --features llama` |
 
 Python は `import l2s1` を維持し、別途 Rust ランタイムが必要です。リリースのプラットフォームランタイムを `runtime_dir` に指定するか、独自ビルドの実行ファイルを `binary_path` に指定してください。npm は対応するビルド済みランタイムを自動選択するため、optional dependencies を有効にしてください。GGUF モデルの重みは別途用意します。Rust の `llama` 機能には CMake と C++17 コンパイラが必要です。
 
@@ -178,9 +178,9 @@ HTTP の画像リクエストでは、名前付きの `media` と判断ごとの
 
 ## TypeScript から使う
 
-[`@l2s1/node` パッケージ](docs/ja/typescript/README.md)は、現在の OS とアーキテクチャに対応するビルド済みの Rust ランタイムを選択し、型付きの `load()`、`decide()`、`capabilities()`、`close()` を提供します。`npm install @l2s1/node@0.2.0` でインストールし、GGUF の重みは別途用意します。同じアプリケーション API で、`connect()` は HTTP サーバーを使い、`fromBackend()` はカスタムバックエンドを受け付けます。
+[`@l2s1/node` パッケージ](docs/ja/typescript/README.md)は、現在の OS とアーキテクチャに対応するビルド済みの Rust ランタイムを選択し、型付きの `load()`、`decide()`、`capabilities()`、`close()` を提供します。`npm install @l2s1/node@0.2.1` でインストールし、GGUF の重みは別途用意します。同じアプリケーション API で、`connect()` は HTTP サーバーを使い、`fromBackend()` はカスタムバックエンドを受け付けます。
 
-Node.js 24 以上と Bash または Zsh を使い、リポジトリのルートから次のコマンドを実行してください。ローカル CPU ランタイムと TypeScript パッケージをビルドし、例の型を検査してから[倉庫の分類例](sdks/typescript/examples/warehouse.ts)を実行します。モデルのパスは、用意した GGUF ファイルの絶対パスに置き換えてください。`npm pack` は `sdks/typescript/l2s1-node-0.2.0.tgz` を生成します。
+Node.js 24 以上と Bash または Zsh を使い、リポジトリのルートから次のコマンドを実行してください。ローカル CPU ランタイムと TypeScript パッケージをビルドし、例の型を検査してから[倉庫の分類例](sdks/typescript/examples/warehouse.ts)を実行します。モデルのパスは、用意した GGUF ファイルの絶対パスに置き換えてください。`npm pack` は `sdks/typescript/l2s1-node-0.2.1.tgz` を生成します。
 
 ```sh
 cargo build --release --locked --features llama --bin l2s1

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.1 (2026-09-30)
+
+- Compatible resident servers clear retained KV snapshots and schema tokens when
+  the ordered decision schema changes. State-only changes keep prefix reuse;
+  returning to an older schema starts cold. Capabilities expose
+  `prefix_reuse.schema_change: "clear_all"`.
+- C++ `Engine::load()` now inherits automatic resident reuse like Python and
+  TypeScript. `LoadOptions::execution_mode` is optional; `fixed_schema` can
+  require reuse or opt out. Explicit fresh/parallel modes remain available.
+  This changes C++'s previous fresh default and can change scores through the
+  resident split plan; revalidate application decisions when upgrading.
+- Add checked structured integer/time/graph facts, explicit resident JSONL
+  evaluation, and repeated compute tuning with correctness and latency gates.
+  Facts, Flash Attention and parallel execution remain opt-in.
+- Include reproducible performance/JevBench evidence and real CUDA schema/SDK
+  validation across E2B and 12B. See [usage and validation](docs/DECISION_PERFORMANCE.md).
+
 ## 0.2.0 (2026-09-30)
 
 Parallel prefix sharing. Several defaults change prompts or wave schedules, so
