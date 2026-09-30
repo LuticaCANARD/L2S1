@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- MLX training on Gemma 4: LoRA tensors are named after the checkpoint's own
+  safetensors names (mlx-lm renames Gemma 4 prefixes, so the 0.2.x adapters
+  could not be converted), and weights load lazily and are quantized while
+  streaming, so Gemma 4 12B trains in about 13 GiB instead of swapping at
+  57 GiB. Verified on Gemma 4 12B IT with the pinned pilot data (raw accuracy
+  0.687 → 0.729, soft KL 2.61 → 0.21).
+
+### Added
+
+- `l2s1-train run --eval-execution parallel` evaluates each case's decisions
+  in one parallel call. The default `fresh` reproduces the pilot. With the
+  pilot's `legacy` prompts it is about as fast as `fresh` (questions lead, so
+  little prefix is shared); with `state-first` prompts and token-level sharing
+  it measured 1.9× (base) and 1.3× (LoRA) faster on Gemma 4 12B with
+  identical top-1 answers and at most 0.014 probability difference.
+- `evaluate_jsonl --parallel-prefix-alignment`.
+
 ## 0.2.1 (2026-09-30)
 
 - Compatible resident servers clear retained KV snapshots and schema tokens when
@@ -57,8 +78,6 @@ workload accuracy and recalibrate before upgrading a deployment. See
 - `l2s1-train run --backend mlx` trains decision adapters on Apple Silicon
   with MLX, writes PEFT-format adapters for the existing GGUF LoRA conversion,
   and evaluates on Metal (`training[mlx]`, `l2s1-train doctor --mlx`).
-  Verified on Gemma 4 12B IT with the pinned pilot data (raw accuracy
-  0.687 → 0.729, soft KL 2.61 → 0.21).
 - `DecisionRequest.shared` (JSON `"shared"`): evidence common to many requests
   or questions, always rendered first in the data segment in both layouts.
   Callers no longer need to name `state` keys so that they sort first. Absent

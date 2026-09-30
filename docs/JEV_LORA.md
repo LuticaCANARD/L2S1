@@ -113,6 +113,15 @@ Gemma 4 12B IT is recorded in
 [jev-lora-mlx-gemma4-12b-20260930](../benchmarks/jev-lora-mlx-gemma4-12b-20260930/README.md).
 Use a custom `--profiles` registry for checkpoints outside the bundled profiles.
 
+`--eval-execution parallel` scores each case's decisions together instead of
+one fresh call each. It changes probabilities slightly (at most 0.05 measured,
+top-1 unchanged), so compare base and adapter under the same mode. The speedup
+comes from sharing the state prefix and therefore needs `state-first` prompts;
+with the pilot's `legacy` layout it measured no faster than `fresh`. Batching
+several training examples per forward pass was also measured and rejected:
+on Gemma 4 12B it was 2.6× slower and, because MLX quantized matmuls round
+differently by batch shape, changed the loss.
+
 Download the pinned dataset's `all/train-00000-of-00001.parquet` and
 `all/test-00000-of-00001.parquet` to a source directory as `train.parquet` and
 `test.parquet`. Retain the dataset card there as `README.md`.

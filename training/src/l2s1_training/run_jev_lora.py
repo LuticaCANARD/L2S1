@@ -47,6 +47,9 @@ def main(command=None):
     p.add_argument('--stage-timeout', type=float, default=7200, help='Maximum seconds per stage (default: 7200)')
     p.add_argument('--backend', choices=['cuda', 'mlx'], default='cuda',
                    help='Training/evaluation device: CUDA (NF4 + PEFT) or Apple Silicon (MLX + Metal)')
+    p.add_argument('--eval-execution', choices=['fresh', 'parallel'], default='fresh',
+                   help='fresh reproduces the pilot; parallel batches each case\'s decisions and shares '
+                        'their prompt prefix (faster with state-first prompts; probabilities can differ slightly)')
     p.add_argument('--rules-fixture', type=Path, help='Optional existing decision-rules regression fixture')
     a = p.parse_args()
     if not math.isfinite(a.stage_timeout) or a.stage_timeout <= 0:
@@ -119,11 +122,16 @@ def main(command=None):
                 if a.rules_fixture:
                     stage('prepare-regression', [sys.executable, '-m', 'l2s1_training.report_jev_rule_regression',
                         '--fixture', a.rules_fixture, '--requests-output', out/'rules-requests.jsonl'])
+                layout = 'legacy'
+                execution = ['--execution-mode', 'fresh'] if a.eval_execution == 'fresh' else [
+                    '--execution-mode', 'parallel', '--parallel-width', '8', '--parallel-context-dynamic',
+                    # Token sharing pays off only when prompts share the state; legacy leads with the question.
+                    '--parallel-prefix-alignment', 'token' if layout == 'state-first' else 'batch']
                 for variant in ('base', 'adapter'):
                     pred = out/f'{variant}-predictions.jsonl'
                     cmd = [a.evaluator.resolve(), '--model', model, '--input', a.data/'test-requests.jsonl', '--output', pred,
-                           '--'+('metal' if a.backend == 'mlx' else 'cuda'), '--context', '8192', '--batch', '256', '--threads', '4', '--execution-mode', 'fresh',
-                           '--prompt-layout', 'legacy', '--prompt-detail', 'minimal', '--request-batch-size', '1',
+                           '--'+('metal' if a.backend == 'mlx' else 'cuda'), '--context', '8192', '--batch', '256', '--threads', '4', *execution,
+                           '--prompt-layout', layout, '--prompt-detail', 'minimal', '--request-batch-size', '1',
                            '--model-load-mode', 'read', '--warmup']
                     if variant == 'adapter':
                         cmd += ['--lora', out/'adapter.gguf']
