@@ -24,7 +24,7 @@ expects the consumer to provide `nlohmann_json` through its CMake package config
 In a consuming CMake project:
 
 ```cmake
-find_package(l2s1_cpp 0.1 CONFIG REQUIRED)
+find_package(l2s1_cpp 0.2 CONFIG REQUIRED)
 target_link_libraries(your_app PRIVATE l2s1::cpp)
 ```
 
@@ -44,7 +44,8 @@ The runtime clears retained snapshots whenever the ordered decision schema chang
 including when an older prepared plan is used again. State changes reuse the
 prefix and compute new results. Check `capabilities()["prefix_reuse"]` and
 `Result::usage["reused_prefix_tokens"]`; `prepare()` itself performs no inference.
-These C++ defaults and schema invalidation require builds from this change.
+These C++ defaults and schema invalidation require runtime/SDK 0.2.1 or later.
+`execution_mode` is now `std::optional<std::string>`; `std::nullopt` inherits the runtime default.
 
 The example below explicitly selects parallel execution for `decide_batch`:
 

@@ -53,8 +53,8 @@ state each time. Errors inside the backend and explicit `clear()` also clear it.
 Schema identity is not a tenant identity: keep a separate server per trust domain.
 
 `capabilities().prefix_reuse.schema_change` reports `clear_all` on this runtime.
-This invalidation contract and the C++ default require the runtime/SDK built from
-this change; previously published packages do not gain them automatically.
+This invalidation contract and the C++ default require runtime/SDK 0.2.1 or later;
+older installed packages do not gain them automatically.
 Python/TypeScript already inherit automatic reuse from compatible resident runtimes.
 Set `execution_mode="fresh"` (Python/C++), `executionMode: 'fresh'` (TypeScript),
 or `--execution-mode fresh` (CLI) to opt out. One-shot CLI and low-level
