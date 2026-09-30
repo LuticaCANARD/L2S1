@@ -104,11 +104,14 @@ with `--features llama-metal`, check with `l2s1-train doctor --mlx`, and add
 export, writes a PEFT-format adapter (`alpha = scale * rank`) that the same
 `convert_lora_to_gguf.py` stage converts, and evaluates with `--metal`, so the
 adapter loads through `--lora` without fusing a full model copy. The exporter
-loads only the GGUF vocabulary, so a large model is not loaded twice. Gemma 4
-checkpoints need mlx-lm from main (ml-explore/mlx-lm#1349), which requires
-Transformers 5.7+; run llama.cpp's converter from an environment whose
-Transformers can read that tokenizer. Verified end to end on Gemma 3 1B IT
-(pipeline and GGUF LoRA effect only, not accuracy).
+loads only the GGUF vocabulary, so a large model is not loaded twice. Weights
+load lazily and are quantized to 4 bits as they stream in, so Gemma 4 12B trains
+in about 13 GiB. Gemma 4 checkpoints (`gemma4_unified`) need mlx-lm from main
+(ml-explore/mlx-lm#1349), which requires Transformers 5.7+; the pinned llama.cpp
+converters ran in that same environment (Transformers 5.17). A pinned-data run on
+Gemma 4 12B IT is recorded in
+[jev-lora-mlx-gemma4-12b-20260930](../benchmarks/jev-lora-mlx-gemma4-12b-20260930/README.md).
+Use a custom `--profiles` registry for checkpoints outside the bundled profiles.
 
 Download the pinned dataset's `all/train-00000-of-00001.parquet` and
 `all/test-00000-of-00001.parquet` to a source directory as `train.parquet` and
@@ -174,13 +177,17 @@ probabilities. Reports retain failed cases and exit nonzero if any case fails.
 Probabilities must be finite, nonnegative,
 and sum to one within 1e-4. Criteria and instructions must be nonempty strings.
 Case/question IDs cannot contain `/`, which separates native training IDs.
+An optional `shared` JSON value supplies common evidence. Preparation preserves it
+in both inference requests and every single-question token export; labels stay
+separate. Exact-state overlap is still rejected even if shared evidence differs.
 
 ```json
 {"id":"train-1","workflow":"routing","state":{"items":2},"questions":{"multiple":{"type":"noul","instructions":"Are there multiple items?"}},"gold":{"multiple":{"type":"noul","label":"true","probabilities":{"false":0.1,"true":0.9}}}}
 ```
 
 Choice uses a criteria object keyed by label; Noul uses `false`/`true`; Score uses
-an ordered criteria array and zero-based string labels (`"0"`, `"1"`, ...).
+an ordered criteria array and zero-based string labels (`"0"`, `"1"`, ...), or an
+ordered criteria object whose keys become the level labels (`{"low": ..., "high": ...}`).
 See [`training/examples`](../training/examples) for all three types. The example
 splits only demonstrate the file format, not a useful training dataset.
 
@@ -189,6 +196,13 @@ l2s1-train prepare --train my-data/train.jsonl \
   --development my-data/development.jsonl --test my-data/test.jsonl \
   --output results/my-jev-data
 ```
+
+An adapter only helps prompts rendered the way it was trained. If the application
+runs another layout or detail, prepare with the same settings, for example
+`--prompt-layout state-first --prompt-detail typed`. They are recorded in the
+protocol and token seal, and `run` exports, trains and evaluates with them; the
+default stays `legacy` / `minimal` (the pilot protocol). Export enforces the
+evaluator's 8192-token context.
 
 Use that directory as `run --data`. Preparation rejects duplicate IDs and exact
 canonical states both within and across splits. Native inference files contain

@@ -23,14 +23,39 @@ def row(name):
 
 
 class PackageTests(unittest.TestCase):
-    def prepare(self, root):
+    def prepare(self, root, **prompt):
         paths = []
         for split in ('train', 'development', 'test'):
             path = root/(split+'.jsonl')
             path.write_text(json.dumps(row(split), ensure_ascii=False)+'\n', encoding='utf-8')
             paths.append(path)
-        prepare_custom(*paths, root/'data')
+        prepare_custom(*paths, root/'data', **prompt)
         return root/'data'
+
+    def test_deployment_prompt_settings_are_recorded_and_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data = self.prepare(Path(tmp), layout='state-first', detail='typed')
+            protocol = validate_dataset(data)['protocol']
+            self.assertEqual((protocol['prompt_layout'], protocol['prompt_detail']), ('state-first', 'typed'))
+            manifest = json.loads((data/'manifest.json').read_text(encoding='utf-8'))
+            manifest['protocol']['prompt_layout'] = 'sideways'
+            save_status(data/'manifest.json', manifest)
+            with self.assertRaisesRegex(ValueError, 'layout'):
+                validate_dataset(data)
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaisesRegex(ValueError, 'layout'):
+            self.prepare(Path(tmp), layout='sideways')
+
+    def test_score_object_criteria_keep_application_level_ids(self):
+        from l2s1_training.prepare_jev_data import decision
+        from l2s1_training.report_jev import answer
+        d = decision('priority', dict(type='score', instructions='How urgent?',
+                                      criteria={'low': 'Later', 'medium': 'This week', 'high': 'Now'}))
+        self.assertEqual([(o['id'], o['value']) for o in d['kind']['levels']],
+                         [('low', 0), ('medium', 1), ('high', 2)])
+        scores = [dict(id=i, option_probability=p) for i, p in (('low', .1), ('medium', .2), ('high', .7))]
+        a = answer(d, dict(id='priority', scores=scores))
+        self.assertAlmostEqual(a['score'], 1.6)
+        self.assertEqual(list(a['legend']), ['low', 'medium', 'high'])
 
     def test_custom_score_without_explicit_expectation_renders_all_types(self):
         from l2s1_training.common import option_specs
@@ -39,10 +64,10 @@ class PackageTests(unittest.TestCase):
         case = dict(id='mixed', workflow='custom', request=dict(state={}, decisions=[
             decision('c', dict(type='choice', instructions='Pick', criteria={'a':'A','b':'B'})),
             decision('n', dict(type='noul', instructions='True?')),
-            decision('s', dict(type='score', instructions='Level?', criteria=['Low','Mid','High'])),
+            decision('s', dict(type='score', instructions='Level?', criteria={'low':'Low','medium':'Mid','high':'High'})),
         ]), gold=dict(c=dict(type='choice', label='b', probabilities={'a':.2,'b':.8}),
                       n=dict(type='noul', label='true', probabilities={'false':.1,'true':.9}),
-                      s=dict(type='score', label='2', probabilities={'0':.1,'1':.2,'2':.7})))
+                      s=dict(type='score', label='high', probabilities={'low':.1,'medium':.2,'high':.7})))
         results = []
         for d in case['request']['decisions']:
             gold = case['gold'][d['id']]
@@ -223,10 +248,14 @@ class PackageTests(unittest.TestCase):
         base = nn.Linear(64, 32)
         base.freeze()
         model = nn.Module()
-        model.q_proj = LoRALinear.from_base(base, r=4, scale=2.)
-        tensors, config = peft_adapter(model, dict(rank=4, alpha=8, dropout=0), {'q_proj'})
+        model.language_model = nn.Module()
+        model.language_model.layers = [nn.Module()]
+        model.language_model.layers[0].q_proj = LoRALinear.from_base(base, r=4, scale=2.)
+        tensors, config = peft_adapter(model, dict(rank=4, alpha=8, dropout=0), {'q_proj'},
+                                       {'model.language_model.layers.0.q_proj', 'model.language_model.layers.1.q_proj'})
+        prefix = 'base_model.model.model.language_model.layers.0.q_proj'
         self.assertEqual({k: tuple(v.shape) for k, v in tensors.items()},
-                         {'base_model.model.q_proj.lora_A.weight': (4, 64), 'base_model.model.q_proj.lora_B.weight': (32, 4)})
+                         {prefix+'.lora_A.weight': (4, 64), prefix+'.lora_B.weight': (32, 4)})
         self.assertEqual((config['r'], config['lora_alpha'], config['target_modules']), (4, 8, ['q_proj']))
 
 

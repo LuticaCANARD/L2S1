@@ -31,7 +31,7 @@ def option_specs(decision):
     require(kind['type'] in ('choice', 'ordinal'), 'Unsupported decision kind')
     return kind['options'] if kind['type'] == 'choice' else kind['levels']
 
-def normalized_token_identity(identity, rotation, detail):
+def normalized_token_identity(identity, rotation, detail, layout=None):
     """Remove only an authenticated rotation suffix, preserving prompt detail."""
     variants = {'minimal': 'Minimal', 'typed': 'Typed', 'typed_examples': 'TypedExamples'}
     require(detail in variants, 'Unknown prompt detail')
@@ -47,6 +47,10 @@ def normalized_token_identity(identity, rotation, detail):
                 'Only minimal rotation zero may omit prompt suffix')
         base = version
     require('/detail-' not in base and '/rotation-' not in base, 'Malformed prompt identity suffix')
+    if layout is not None:
+        require(layout in ('legacy', 'state-first'), 'Unknown prompt layout')
+        require(('-state-first-' in base) == (layout == 'state-first'),
+                'Prompt layout identity mismatch')
     return dict(identity, prompt_version=f'{base}/detail-{variants[detail]}-v1')
 
 def validate_tokenizer(tokenizer, rows):

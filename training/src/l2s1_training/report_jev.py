@@ -31,7 +31,8 @@ def answer(decision, result):
         return dict(type='choice', choice=max(p, key=p.get), probabilities=wire_p, confidence=confidence)
     levels = decision['kind']['levels']
     require([o['value'] for o in levels] == list(range(len(levels))), 'Jev Score requires zero-based levels')
-    return dict(type='score', score=round(sum(int(k)*v for k, v in p.items()), 4),
+    value = {o['id']: o['value'] for o in levels}
+    return dict(type='score', score=round(sum(value[k]*v for k, v in p.items()), 4),
                 probabilities=wire_p, confidence=confidence, legend={o['id']: o['criterion'] for o in levels})
 
 
@@ -73,9 +74,10 @@ def score_case(case, prediction):
             soft_kl=sum(v*math.log(v/max(pv[k], 1e-12)) for k, v in gv.items() if v > 0),
             soft_brier=sum((pv[k]-gv[k])**2 for k in ids))
         if a['type'] == 'score':
-            target_score = float(g['score']) if 'score' in g else sum(int(k)*v for k,v in gv.items())
+            value = {o['id']: o['value'] for o in d['kind']['levels']}
+            target_score = float(g['score']) if 'score' in g else sum(value[k]*v for k,v in gv.items())
             require(math.isfinite(target_score) and 0 <= target_score <= len(ids)-1, 'Invalid gold Score expectation')
-            row['score_mae'] = abs(sum(int(k)*v for k,v in pv.items())-target_score)
+            row['score_mae'] = abs(sum(value[k]*v for k,v in pv.items())-target_score)
         metrics.append(row)
     return dict(id=case['id'], model=response['backend']['model_description'], answers=answers,
                 l2s1_policy=dict(thresholds=response['policy'], decisions=policies),
