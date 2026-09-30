@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(l2s1_cpp VERSION 0.2.1 LANGUAGES CXX)
+project(l2s1_cpp VERSION 0.2.2 LANGUAGES CXX)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 find_package(Threads REQUIRED)

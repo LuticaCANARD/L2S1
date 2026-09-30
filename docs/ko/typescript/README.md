@@ -7,7 +7,7 @@
 
 `@l2s1/node`는 Node.js의 기존 Rust 추론 엔진을 사용합니다. 하나의 모델 프로세스가 호출 전반에 걸쳐 상주합니다. 바이너리, 선택, 서열, 이미지, 정책, 추론 및 증거 필드는 Rust HTTP v1 스키마를 사용합니다. 검증, 토큰화, 채점, 판단 보류 및 GPU 실행은 Rust에 유지됩니다.
 
-Node.js 22+가 필요합니다. 래퍼는 현재 OS 및 CPU 아키텍처에 대해 사전 구축된 선택적 런타임 패키지를 선택합니다. 각 런타임 패키지에는 Rust 실행 파일과 일치하는 llama.cpp/GGML 공유 라이브러리가 포함되어 있습니다. 설치 시 컴파일이나 다운로드 스크립트가 실행되지 않습니다. 모델 중량은 별도로 제공됩니다. [0.2.1 버전](https://www.npmjs.com/package/@l2s1/node/v/0.2.1)을 npm에 게시했습니다.
+Node.js 22+가 필요합니다. 래퍼는 현재 OS 및 CPU 아키텍처에 대해 사전 구축된 선택적 런타임 패키지를 선택합니다. 각 런타임 패키지에는 Rust 실행 파일과 일치하는 llama.cpp/GGML 공유 라이브러리가 포함되어 있습니다. 설치 시 컴파일이나 다운로드 스크립트가 실행되지 않습니다. 모델 중량은 별도로 제공됩니다. [0.2.2 버전](https://www.npmjs.com/package/@l2s1/node/v/0.2.2)을 npm에 게시했습니다.
 
 Scope 접근, 패키지 순서, 인증, 플랫폼 릴리스 조건은 [npm 공개 검토](PUBLISHING.md)를 참고하세요.
 
@@ -17,7 +17,7 @@ Scope 접근, 패키지 순서, 인증, 플랫폼 릴리스 조건은 [npm 공�
 npm에서 설치합니다:
 
 ```sh
-npm install @l2s1/node@0.2.1
+npm install @l2s1/node@0.2.2
 ```
 
 ### 이 저장소에서 설치
@@ -25,10 +25,10 @@ npm install @l2s1/node@0.2.1
 최종 사용자의 경우 빌드 워크플로에서 생성된 래퍼와 플랫폼 런타임 tarball을 설치합니다. 예를 들어 Linux x64에서는 다음과 같습니다.
 
 ```sh
-npm install ./l2s1-node-0.2.1.tgz ./l2s1-runtime-linux-x64-0.2.1.tgz
+npm install ./l2s1-node-0.2.2.tgz ./l2s1-runtime-linux-x64-0.2.2.tgz
 ```
 
-`npm install @l2s1/node@0.2.1`은 선택적 종속성을 통해 런타임을 선택합니다. 선택적 종속성을 활성화된 상태로 유지하세요. 런타임 및 래퍼 버전이 일치해야 합니다.
+`npm install @l2s1/node@0.2.2`은 선택적 종속성을 통해 런타임을 선택합니다. 선택적 종속성을 활성화된 상태로 유지하세요. 런타임 및 래퍼 버전이 일치해야 합니다.
 
 사용자 정의 네이티브 빌드의 경우 저장소 루트에서 Rust 실행 파일을 빌드합니다.
 
@@ -46,7 +46,7 @@ node scripts/install-ci.mjs
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.2.1.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.2.2.tgz
 ```
 
 <a id="load-a-local-model"></a>
@@ -234,7 +234,7 @@ cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack
-npm run test:package -- l2s1-node-0.2.1.tgz l2s1-runtime-linux-x64-0.2.1.tgz
+npm run test:package -- l2s1-node-0.2.2.tgz l2s1-runtime-linux-x64-0.2.2.tgz
 ```
 
 런타임을 다시 빌드할 때 새 출력 디렉터리를 사용하세요. `L2S1_PORTABLE_BUILD=1`은 빌드 호스트 전용 CPU 명령과 OpenMP 의존성을 끕니다. Linux ARM64 패키지는 런타임 CPU 기능에 맞는 GGML 커널을 선택하며 ARMv8 fallback을 포함합니다. 패키지 CI는 Ubuntu 24.04 / GCC 14를 사용하도록 설정했습니다. 런타임을 옮길 때 모든 CPU 모듈을 함께 옮기세요. 비교 빌드와 사용자 지정 OpenMP 의존성은 [네이티브 빌드 옵션](../crates/l2s1-llama-sys/README.md#portable-linux-arm64)을 참고하세요. 각 패키지에는 라이선스와 SHA-256 매니페스트가 포함되며 검증기는 llama.cpp/GGML 의존성이 패키지 안에서 해결되는지 확인합니다.

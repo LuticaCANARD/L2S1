@@ -18,15 +18,15 @@ L2S1은 로컬 채팅 모델로 이진·선택·서열 판단을 수행하는 Ru
 
 ## 설치
 
-[v0.2.1](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.1)을 PyPI·npm·crates.io에서 설치할 수 있습니다.
+[v0.2.2](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.2)을 PyPI·npm·crates.io에서 설치할 수 있습니다.
 
 v0.2.0은 text-parallel의 기본 프롬프트 배치와 wave 순서를 변경합니다. 업그레이드 시 업무 데이터와 calibration을 다시 검증하세요. [호환성 변경](CHANGELOG.md#020-2026-09-30).
 
 | 패키지 | 설치 명령 |
 | --- | --- |
-| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.1` |
-| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.1` |
-| Rust 라이브러리 | `cargo add l2s1@0.2.1 --features llama` |
+| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.2` |
+| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.2` |
+| Rust 라이브러리 | `cargo add l2s1@0.2.2 --features llama` |
 
 Python은 `import l2s1`을 유지하며 별도 Rust 런타임이 필요합니다. 릴리스의 플랫폼 런타임을 `runtime_dir`로 지정하거나 직접 빌드한 실행 파일을 `binary_path`로 지정하세요. npm은 현재 플랫폼에 맞는 사전 빌드 런타임을 자동 선택하므로 optional dependencies를 활성화해 두세요. GGUF 모델 가중치는 별도로 준비합니다. Rust의 `llama` 기능은 CMake와 C++17 컴파일러가 필요합니다.
 
@@ -180,9 +180,9 @@ HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 �
 
 ## TypeScript에서 사용하기
 
-[`@l2s1/node`](docs/ko/typescript/README.md)는 현재 OS·CPU에 맞는 사전 빌드 Rust 런타임을 선택하며, 타입이 있는 `load()`, `decide()`, `capabilities()`, `close()`를 제공합니다. `npm install @l2s1/node@0.2.1`로 설치하고 GGUF 가중치는 별도로 준비합니다. 같은 애플리케이션 API에서 `connect()`는 HTTP 서버를, `fromBackend()`는 사용자 정의 백엔드를 사용합니다.
+[`@l2s1/node`](docs/ko/typescript/README.md)는 현재 OS·CPU에 맞는 사전 빌드 Rust 런타임을 선택하며, 타입이 있는 `load()`, `decide()`, `capabilities()`, `close()`를 제공합니다. `npm install @l2s1/node@0.2.2`로 설치하고 GGUF 가중치는 별도로 준비합니다. 같은 애플리케이션 API에서 `connect()`는 HTTP 서버를, `fromBackend()`는 사용자 정의 백엔드를 사용합니다.
 
-Node.js 24 이상과 Bash 또는 Zsh에서 저장소 루트를 기준으로 실행합니다. 로컬 CPU 런타임과 TypeScript 패키지를 빌드하고, 예제의 타입을 검사한 뒤 [창고 분류 예제](sdks/typescript/examples/warehouse.ts)를 실행합니다. 모델 경로는 준비한 GGUF 파일의 절대 경로로 바꾸세요. `npm pack`은 `sdks/typescript/l2s1-node-0.2.1.tgz`를 생성합니다.
+Node.js 24 이상과 Bash 또는 Zsh에서 저장소 루트를 기준으로 실행합니다. 로컬 CPU 런타임과 TypeScript 패키지를 빌드하고, 예제의 타입을 검사한 뒤 [창고 분류 예제](sdks/typescript/examples/warehouse.ts)를 실행합니다. 모델 경로는 준비한 GGUF 파일의 절대 경로로 바꾸세요. `npm pack`은 `sdks/typescript/l2s1-node-0.2.2.tgz`를 생성합니다.
 
 ```sh
 cargo build --release --locked --features llama --bin l2s1

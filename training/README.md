@@ -5,7 +5,14 @@ The `l2s1-train` command prepares data, downloads pinned checkpoints on request,
 runs serial training/evaluation, and produces Choice/Noul/Score JSON answers.
 The package imports without PyTorch; CUDA training is an optional dependency.
 
-From the repository root:
+Install training tools 0.1.1 from the released SDK v0.2.2 source tag:
+
+```sh
+python -m pip install 'l2s1-training @ git+https://github.com/LuticaCANARD/L2S1.git@v0.2.2#subdirectory=training'
+l2s1-train --version
+```
+
+For a local checkout, run from the repository root:
 
 ```sh
 python -m pip install ./training
