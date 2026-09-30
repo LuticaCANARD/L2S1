@@ -1,0 +1,29 @@
+[
+  {
+    "name": "raw",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "256",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy"
+    ]
+  },
+  {
+    "name": "facts",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "256",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--derive-facts"
+    ]
+  }
+]

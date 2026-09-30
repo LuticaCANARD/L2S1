@@ -6,6 +6,7 @@ const root = new URL('../../', import.meta.url);
 const target = new URL('../static/docs/', import.meta.url);
 const publicStudy = 'typed-decisions-20260926';
 const reviewEvidence = {
+  'performance-implementation-20260930': ['summary.json', 'provenance.json', 'records.jsonl', 'records-sha256.json', 'protocol.json', 'jevbench-protocol.json', 'e2b-accuracy-selection.json', '12b-accuracy-selection.json', 'hardware.json', 'validation.json', 'jevbench-audit.json', 'implementation-hashes.json', 'JEVBENCH-LICENSE'],
   'decision-performance-20260930': ['summary.json', 'provenance.json', 'records.jsonl', 'JEVBENCH-LICENSE'],
   'evidence-simd-20260927': ['summary.json', 'native-parity.json'],
   'fast-decisions-20260927': ['summary.json', 'provenance.json'],
@@ -91,7 +92,11 @@ for (const entry of await readdir(benchmarks, { withFileTypes: true })) {
     if (entry.name === rulesStudy) {
       await writeFile(new URL(report.name, destination), rulesReportLinks(await readFile(new URL(report.name, source), 'utf8')));
     } else {
-      await writeFile(new URL(report.name, destination), publicEvidenceLinks(await readFile(new URL(report.name, source), 'utf8')));
+      let markdown = publicEvidenceLinks(await readFile(new URL(report.name, source), 'utf8'));
+      for (const file of reviewEvidence[entry.name] ?? []) {
+        markdown = markdown.replaceAll(`](${file})`, `](/benchmarks/${entry.name}/${file})`);
+      }
+      await writeFile(new URL(report.name, destination), markdown);
     }
   }
 }

@@ -2,7 +2,7 @@
 
 [English](../en/PERFORMANCE_REVIEW.md) · [한국어](../ko/PERFORMANCE_REVIEW.md) · [日本語](PERFORMANCE_REVIEW.md)
 
-main `6b2fcfa` / v0.2.0 のコードに基づく検討です。改善候補は未実装・未計測です。既存の測定リビジョンは別記します。[証拠と再集計](../../benchmarks/decision-performance-20260930/README.md)。
+main `6b2fcfa` / v0.2.0 のコードに基づく検討です。以下の表は当初の改善候補です。実装後の測定結果は末尾の続報を参照してください。既存の測定リビジョンは別記します。[証拠と再集計](../../benchmarks/decision-performance-20260930/README.md)。
 
 ## 基準値と失敗傾向
 
@@ -47,3 +47,7 @@ E2Bの既存ポリシー（top probability >=0.8、candidate mass >=0.05、同�
 最初は既存設定で実行できる1・2を試します。KV量子化は現在公開されたL2S1設定ではなく、bridge・設定識別・数値検証が必要です。speculative decodingは多トークン生成向けで、一段階の直接採点では低優先度です。閾値較正は採用を変えますが元の誤答を自動修正しません。
 
 Layaの追加比較では長文checkpointやwindowingを明示し、モデル・文脈・集計・遅延の変更を記録します。切り詰め解消が正解率を回復するとは仮定しません。[公式Laya](https://huggingface.co/convaiinnovations/laya)はcheckpoint別上限を説明しています。[llama.cppのガイド](https://github.com/ggml-org/llama.cpp/blob/master/docs/development/token_generation_performance_tips.md)はGPU配置とthread数の確認を推奨しますが、生成速度の値をL2S1遅延の予測に使いません。
+
+## 実装の続報
+
+優先度1〜3向けの[チューニング・常駐セッション・構造化データの前処理](../DECISION_PERFORMANCE.md)を追加しました。測定結果と適用範囲はリンク先の実験レポートを参照してください。

@@ -1,0 +1,695 @@
+{
+  "easy-intent-00": {
+    "decision": "track_order"
+  },
+  "easy-intent-01": {
+    "decision": "cancel_order"
+  },
+  "easy-intent-02": {
+    "decision": "change_address"
+  },
+  "easy-intent-03": {
+    "decision": "report_damage"
+  },
+  "easy-intent-04": {
+    "decision": "billing_question"
+  },
+  "easy-intent-05": {
+    "decision": "track_order"
+  },
+  "easy-intent-06": {
+    "decision": "set_alarm"
+  },
+  "easy-intent-07": {
+    "decision": "play_music"
+  },
+  "easy-intent-08": {
+    "decision": "weather"
+  },
+  "easy-intent-09": {
+    "decision": "send_message"
+  },
+  "easy-intent-10": {
+    "decision": "turn_off_lights"
+  },
+  "easy-intent-11": {
+    "decision": "set_alarm"
+  },
+  "easy-fact-00": {
+    "decision": "true"
+  },
+  "easy-fact-01": {
+    "decision": "false"
+  },
+  "easy-fact-02": {
+    "decision": "true"
+  },
+  "easy-fact-03": {
+    "decision": "false"
+  },
+  "easy-fact-04": {
+    "decision": "true"
+  },
+  "easy-fact-05": {
+    "decision": "false"
+  },
+  "easy-fact-06": {
+    "decision": "true"
+  },
+  "easy-fact-07": {
+    "decision": "false"
+  },
+  "easy-fact-08": {
+    "decision": "true"
+  },
+  "easy-fact-09": {
+    "decision": "false"
+  },
+  "easy-fact-10": {
+    "decision": "true"
+  },
+  "easy-fact-11": {
+    "decision": "false"
+  },
+  "easy-extraction-00": {
+    "decision": "paypal"
+  },
+  "easy-extraction-01": {
+    "decision": "cash"
+  },
+  "easy-extraction-02": {
+    "decision": "bank_transfer"
+  },
+  "easy-extraction-03": {
+    "decision": "high"
+  },
+  "easy-extraction-04": {
+    "decision": "low"
+  },
+  "easy-extraction-05": {
+    "decision": "urgent"
+  },
+  "easy-extraction-06": {
+    "decision": "M"
+  },
+  "easy-extraction-07": {
+    "decision": "XL"
+  },
+  "easy-extraction-08": {
+    "decision": "thursday"
+  },
+  "easy-extraction-09": {
+    "decision": "monday"
+  },
+  "easy-extraction-10": {
+    "decision": "friday"
+  },
+  "easy-extraction-11": {
+    "decision": "credit_card"
+  },
+  "easy-tool_selection-00": {
+    "decision": "get_weather"
+  },
+  "easy-tool_selection-01": {
+    "decision": "send_email"
+  },
+  "easy-tool_selection-02": {
+    "decision": "create_calendar_event"
+  },
+  "easy-tool_selection-03": {
+    "decision": "convert_currency"
+  },
+  "easy-tool_selection-04": {
+    "decision": "translate_text"
+  },
+  "easy-tool_selection-05": {
+    "decision": "create_calendar_event"
+  },
+  "easy-tool_selection-06": {
+    "decision": "search_flights"
+  },
+  "easy-tool_selection-07": {
+    "decision": "book_restaurant"
+  },
+  "easy-tool_selection-08": {
+    "decision": "set_reminder"
+  },
+  "easy-tool_selection-09": {
+    "decision": "get_stock_price"
+  },
+  "easy-tool_selection-10": {
+    "decision": "call_taxi"
+  },
+  "easy-tool_selection-11": {
+    "decision": "set_reminder"
+  },
+  "original-policy-01-0": {
+    "decision": "false"
+  },
+  "original-policy-01-1": {
+    "decision": "false"
+  },
+  "original-policy-02-0": {
+    "decision": "true"
+  },
+  "original-policy-02-1": {
+    "decision": "true"
+  },
+  "original-policy-03-0": {
+    "decision": "true"
+  },
+  "original-policy-03-1": {
+    "decision": "true"
+  },
+  "original-policy-04-0": {
+    "decision": "false"
+  },
+  "original-policy-04-1": {
+    "decision": "false"
+  },
+  "original-policy-05-0": {
+    "decision": "false"
+  },
+  "original-policy-05-1": {
+    "decision": "false"
+  },
+  "original-policy-06-0": {
+    "decision": "true"
+  },
+  "original-policy-06-1": {
+    "decision": "true"
+  },
+  "original-intent-01-0": {
+    "decision": "refund"
+  },
+  "original-intent-01-1": {
+    "decision": "refund"
+  },
+  "original-intent-02-0": {
+    "decision": "status"
+  },
+  "original-intent-02-1": {
+    "decision": "status"
+  },
+  "original-intent-03-0": {
+    "decision": "change_address"
+  },
+  "original-intent-03-1": {
+    "decision": "change_address"
+  },
+  "original-intent-04-0": {
+    "decision": "cancel"
+  },
+  "original-intent-04-1": {
+    "decision": "cancel"
+  },
+  "original-intent-05-0": {
+    "decision": "other"
+  },
+  "original-intent-05-1": {
+    "decision": "other"
+  },
+  "original-intent-06-0": {
+    "decision": "status"
+  },
+  "original-intent-06-1": {
+    "decision": "status"
+  },
+  "original-ordinal-01-0": {
+    "decision": "0"
+  },
+  "original-ordinal-01-1": {
+    "decision": "0"
+  },
+  "original-ordinal-02-0": {
+    "decision": "1"
+  },
+  "original-ordinal-02-1": {
+    "decision": "1"
+  },
+  "original-ordinal-03-0": {
+    "decision": "2"
+  },
+  "original-ordinal-03-1": {
+    "decision": "2"
+  },
+  "original-ordinal-04-0": {
+    "decision": "3"
+  },
+  "original-ordinal-04-1": {
+    "decision": "3"
+  },
+  "original-ordinal-05-0": {
+    "decision": "0"
+  },
+  "original-ordinal-05-1": {
+    "decision": "0"
+  },
+  "original-ordinal-06-0": {
+    "decision": "2"
+  },
+  "original-ordinal-06-1": {
+    "decision": "2"
+  },
+  "original-extraction-01-0": {
+    "decision": "pickup"
+  },
+  "original-extraction-01-1": {
+    "decision": "pickup"
+  },
+  "original-extraction-02-0": {
+    "decision": "unknown"
+  },
+  "original-extraction-02-1": {
+    "decision": "unknown"
+  },
+  "original-extraction-03-0": {
+    "decision": "courier"
+  },
+  "original-extraction-03-1": {
+    "decision": "courier"
+  },
+  "original-extraction-04-0": {
+    "decision": "post"
+  },
+  "original-extraction-04-1": {
+    "decision": "post"
+  },
+  "original-extraction-05-0": {
+    "decision": "unknown"
+  },
+  "original-extraction-05-1": {
+    "decision": "unknown"
+  },
+  "original-extraction-06-0": {
+    "decision": "courier"
+  },
+  "original-extraction-06-1": {
+    "decision": "courier"
+  },
+  "original-adequacy-01-0": {
+    "decision": "true"
+  },
+  "original-adequacy-01-1": {
+    "decision": "true"
+  },
+  "original-adequacy-02-0": {
+    "decision": "false"
+  },
+  "original-adequacy-02-1": {
+    "decision": "false"
+  },
+  "original-adequacy-03-0": {
+    "decision": "false"
+  },
+  "original-adequacy-03-1": {
+    "decision": "false"
+  },
+  "original-adequacy-04-0": {
+    "decision": "true"
+  },
+  "original-adequacy-04-1": {
+    "decision": "true"
+  },
+  "original-adequacy-05-0": {
+    "decision": "false"
+  },
+  "original-adequacy-05-1": {
+    "decision": "false"
+  },
+  "original-adequacy-06-0": {
+    "decision": "true"
+  },
+  "original-adequacy-06-1": {
+    "decision": "true"
+  },
+  "original-routing-01-0": {
+    "decision": "math"
+  },
+  "original-routing-01-1": {
+    "decision": "math"
+  },
+  "original-routing-02-0": {
+    "decision": "coding"
+  },
+  "original-routing-02-1": {
+    "decision": "coding"
+  },
+  "original-routing-03-0": {
+    "decision": "coding_agent"
+  },
+  "original-routing-03-1": {
+    "decision": "coding_agent"
+  },
+  "original-routing-04-0": {
+    "decision": "document"
+  },
+  "original-routing-04-1": {
+    "decision": "document"
+  },
+  "original-routing-05-0": {
+    "decision": "tools"
+  },
+  "original-routing-05-1": {
+    "decision": "tools"
+  },
+  "original-routing-06-0": {
+    "decision": "general"
+  },
+  "original-routing-06-1": {
+    "decision": "general"
+  },
+  "hard-opus-a-long_policy-01": {
+    "decision": "pay_subject_to_15000_sublimit"
+  },
+  "hard-opus-a-long_policy-04": {
+    "decision": "cfo"
+  },
+  "hard-opus-a-long_policy-08": {
+    "decision": "parts_covered_labour_charged"
+  },
+  "hard-opus-a-long_policy-09": {
+    "decision": "license_required"
+  },
+  "hard-opus-a-long_policy-11": {
+    "decision": "true"
+  },
+  "hard-opus-a-long_policy-13": {
+    "decision": "true"
+  },
+  "hard-opus-a-long_policy-17": {
+    "decision": "database_oncall"
+  },
+  "hard-opus-a-long_policy-19": {
+    "decision": "false"
+  },
+  "hard-opus-a-probability-03": {
+    "decision": "true"
+  },
+  "hard-opus-a-probability-04": {
+    "decision": "on_time"
+  },
+  "hard-opus-a-probability-07": {
+    "decision": "escalated"
+  },
+  "hard-opus-a-probability-08": {
+    "decision": "false"
+  },
+  "hard-opus-a-temporal_numeric-03": {
+    "decision": "true"
+  },
+  "hard-opus-a-temporal_numeric-06": {
+    "decision": "false"
+  },
+  "hard-opus-a-temporal_numeric-07": {
+    "decision": "sep_26"
+  },
+  "hard-opus-a-temporal_numeric-09": {
+    "decision": "false"
+  },
+  "hard-opus-a-temporal_numeric-12": {
+    "decision": "1"
+  },
+  "hard-opus-b-ambiguous-02": {
+    "decision": "real_incident"
+  },
+  "hard-opus-b-ambiguous-03": {
+    "decision": "time_barred"
+  },
+  "hard-opus-b-ambiguous-07": {
+    "decision": "within_policy"
+  },
+  "hard-opus-b-ambiguous-09": {
+    "decision": "legitimate"
+  },
+  "hard-opus-b-ambiguous-10": {
+    "decision": "ask_user_which_alex"
+  },
+  "hard-opus-b-ambiguous-11": {
+    "decision": "cannot_determine"
+  },
+  "hard-opus-b-ambiguous-13": {
+    "decision": "cannot_determine"
+  },
+  "hard-opus-b-multi_hop-03": {
+    "decision": "tier3_cfo"
+  },
+  "hard-opus-b-multi_hop-04": {
+    "decision": "bjorn"
+  },
+  "hard-opus-b-multi_hop-05": {
+    "decision": "2"
+  },
+  "hard-opus-b-multi_hop-07": {
+    "decision": "credit_20_percent"
+  },
+  "hard-opus-b-multi_hop-08": {
+    "decision": "false"
+  },
+  "hard-opus-b-probability-01": {
+    "decision": "merchant_wins"
+  },
+  "hard-opus-b-probability-02": {
+    "decision": "upstream_provider"
+  },
+  "hard-opus-b-probability-03": {
+    "decision": "true"
+  },
+  "hard-opus-b-probability-04": {
+    "decision": "attended"
+  },
+  "hard-opus-b-probability-06": {
+    "decision": "upheld"
+  },
+  "hard-opus-b-tradeoff-01": {
+    "decision": "escalate_to_engineering"
+  },
+  "hard-opus-b-tradeoff-03": {
+    "decision": "order_b"
+  },
+  "hard-opus-b-tradeoff-06": {
+    "decision": "true"
+  },
+  "hard-opus-b-tradeoff-07": {
+    "decision": "p0_fix_24h"
+  },
+  "hard-opus-b-tradeoff-08": {
+    "decision": "true"
+  },
+  "hard-opus-b-tradeoff-12": {
+    "decision": "refund_now"
+  },
+  "hard-opus-c-long_policy-02": {
+    "decision": "erase_but_retain_transaction_records"
+  },
+  "hard-opus-c-long_policy-03": {
+    "decision": "eur_400"
+  },
+  "hard-opus-c-long_policy-04": {
+    "decision": "true"
+  },
+  "hard-opus-c-long_policy-05": {
+    "decision": "1"
+  },
+  "hard-opus-c-long_policy-08": {
+    "decision": "1"
+  },
+  "hard-opus-c-long_policy-10": {
+    "decision": "credit_minus_restocking_fee"
+  },
+  "hard-opus-c-long_policy-11": {
+    "decision": "false"
+  },
+  "hard-opus-c-probability-03": {
+    "decision": "kuznets_technik"
+  },
+  "hard-opus-c-temporal_numeric-02": {
+    "decision": "true"
+  },
+  "hard-opus-c-temporal_numeric-03": {
+    "decision": "eur_692_00"
+  },
+  "hard-opus-c-temporal_numeric-04": {
+    "decision": "usd_2335_00"
+  },
+  "hard-opus-c-temporal_numeric-06": {
+    "decision": "sep_18_book_set"
+  },
+  "hard-opus-c-temporal_numeric-08": {
+    "decision": "eur_498_81"
+  },
+  "hard-opus-c-temporal_numeric-12": {
+    "decision": "expired_30_month_cap"
+  },
+  "hard-sol-a-adversarial-01": {
+    "decision": "deny_missing_approval"
+  },
+  "hard-sol-a-adversarial-06": {
+    "decision": "false"
+  },
+  "hard-sol-a-adversarial-07": {
+    "decision": "retain_until_2031"
+  },
+  "hard-sol-a-adversarial-08": {
+    "decision": "true"
+  },
+  "hard-sol-a-adversarial-09": {
+    "decision": "2"
+  },
+  "hard-sol-a-adversarial-11": {
+    "decision": "standard_research"
+  },
+  "hard-sol-a-multi_hop-01": {
+    "decision": "accept_s2_dusk"
+  },
+  "hard-sol-a-multi_hop-02": {
+    "decision": "security_primary"
+  },
+  "hard-sol-a-multi_hop-05": {
+    "decision": "require_director"
+  },
+  "hard-sol-a-multi_hop-07": {
+    "decision": "admit"
+  },
+  "hard-sol-a-multi_hop-08": {
+    "decision": "central_engineering"
+  },
+  "hard-sol-a-multi_hop-09": {
+    "decision": "require_steward"
+  },
+  "hard-sol-a-multi_hop-10": {
+    "decision": "approve_45_days"
+  },
+  "hard-sol-a-multi_hop-12": {
+    "decision": "needs_authentication"
+  },
+  "hard-sol-a-trap-02": {
+    "decision": "false"
+  },
+  "hard-sol-a-trap-04": {
+    "decision": "false"
+  },
+  "hard-sol-a-trap-05": {
+    "decision": "0"
+  },
+  "hard-sol-a-trap-06": {
+    "decision": "keep_open_unresolved"
+  },
+  "hard-sol-a-trap-08": {
+    "decision": "late"
+  },
+  "hard-sol-a-trap-10": {
+    "decision": "blocked_second_review"
+  },
+  "hard-sol-a-trap-13": {
+    "decision": "false"
+  },
+  "hard-sol-a-trap-15": {
+    "decision": "false"
+  },
+  "hard-sol-b-judge_hard-01": {
+    "decision": "true"
+  },
+  "hard-sol-b-judge_hard-02": {
+    "decision": "false"
+  },
+  "hard-sol-b-judge_hard-05": {
+    "decision": "true"
+  },
+  "hard-sol-b-judge_hard-08": {
+    "decision": "false"
+  },
+  "hard-sol-b-judge_hard-10": {
+    "decision": "false"
+  },
+  "hard-sol-b-judge_hard-14": {
+    "decision": "false"
+  },
+  "hard-sol-b-judge_hard-15": {
+    "decision": "true"
+  },
+  "hard-sol-b-judge_hard-18": {
+    "decision": "false"
+  },
+  "hard-sol-b-long_policy-01": {
+    "decision": "reject_entire_claim"
+  },
+  "hard-sol-b-long_policy-02": {
+    "decision": "deny_current_export"
+  },
+  "hard-sol-b-long_policy-05": {
+    "decision": "delete_profile_omar_april_and_table"
+  },
+  "hard-sol-b-long_policy-06": {
+    "decision": "east_ward"
+  },
+  "hard-sol-b-routing_hard-01": {
+    "decision": "office_file_repair"
+  },
+  "hard-sol-b-routing_hard-02": {
+    "decision": "ledger_reconciliation"
+  },
+  "hard-sol-b-routing_hard-03": {
+    "decision": "network_dns"
+  },
+  "hard-sol-b-routing_hard-07": {
+    "decision": "release_notarization"
+  },
+  "hard-sol-b-routing_hard-09": {
+    "decision": "source_access"
+  },
+  "hard-sol-b-temporal_numeric-01": {
+    "decision": "late_by_under_2h"
+  },
+  "hard-sol-b-temporal_numeric-02": {
+    "decision": "over_limit"
+  },
+  "hard-sol-b-temporal_numeric-03": {
+    "decision": "9_credits"
+  },
+  "hard-sol-b-temporal_numeric-04": {
+    "decision": "pass"
+  },
+  "hard-sol-c-judge_hard-03": {
+    "decision": "false"
+  },
+  "hard-sol-c-judge_hard-05": {
+    "decision": "true"
+  },
+  "hard-sol-c-judge_hard-07": {
+    "decision": "false"
+  },
+  "hard-sol-c-judge_hard-08": {
+    "decision": "false"
+  },
+  "hard-sol-c-judge_hard-09": {
+    "decision": "true"
+  },
+  "hard-sol-c-judge_hard-10": {
+    "decision": "true"
+  },
+  "hard-sol-c-judge_hard-11": {
+    "decision": "false"
+  },
+  "hard-sol-c-judge_hard-13": {
+    "decision": "false"
+  },
+  "hard-sol-c-judge_hard-15": {
+    "decision": "true"
+  },
+  "hard-sol-c-multi_hop-07": {
+    "decision": "programme_review"
+  },
+  "hard-sol-c-multi_hop-09": {
+    "decision": "bus_substitution"
+  },
+  "hard-sol-c-multi_hop-11": {
+    "decision": "coverage_excluded"
+  },
+  "hard-sol-c-multi_hop-12": {
+    "decision": "conservation_hold"
+  },
+  "hard-sol-c-multi_hop-13": {
+    "decision": "normal_release"
+  }
+}

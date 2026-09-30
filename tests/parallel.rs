@@ -547,3 +547,67 @@ fn real_model_prefix_sharing() {
     backend.set_execution_mode(ExecutionMode::Fresh);
     assert!(backend.parallel_prefix_session().is_err());
 }
+
+#[test]
+#[ignore = "requires SKID_MODEL; validates resident reuse within the measured FA-on compute profile"]
+fn real_model_resident_parallel_recovers_in_its_compute_profile() {
+    let model = env::var("SKID_MODEL").expect("set SKID_MODEL");
+    let mut backend = LlamaBackend::load_with_options(
+        model.as_ref(),
+        l2s1::ComputeOptions {
+            context: 2048,
+            batch: 128,
+            ubatch: 128,
+            threads: 4,
+            flash_attention: l2s1::FlashAttention::On,
+            gpu_layers: None,
+            cpu_moe_layers: 0,
+            model_load_mode: l2s1::ModelLoadMode::Auto,
+        },
+        env::var("SKID_CUDA").as_deref() == Ok("1"),
+        DecisionPolicy::default(),
+        l2s1::PromptProfile::Auto,
+    )
+    .unwrap();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_prompt_layout(PromptLayout::Legacy);
+    backend.set_parallel_width(2).unwrap();
+    backend.set_parallel_context_dynamic(true);
+    let requests: Vec<_> = (0..3).map(|i| {
+        let mut r = request(3, false);
+        r.shared = Some(serde_json::json!({"manual":"Frozen goods need a frozen truck; chilled goods leave within 24 hours. ".repeat(24)}));
+        r.state["case"] = serde_json::json!(i);
+        r
+    }).collect();
+    // Cold parallel is the reference: fresh vs parallel can itself change
+    // quantized kernels. This test isolates cross-call retention, not that drift.
+    // Grow the dynamic allocation first. A resize clears KV; comparing reuse
+    // counts with the very first allocation would confound resize and recovery.
+    backend.decide_batch(&requests).unwrap();
+    let cold = backend.decide_batch(&requests).unwrap();
+    {
+        let mut session = backend.parallel_prefix_session().unwrap();
+        for _ in 0..2 {
+            let actual = session.decide_batch(&requests).unwrap();
+            assert!(max_probability_delta(&cold, &actual) <= 0.02);
+            for (a, b) in actual.iter().zip(&cold) {
+                assert_same(a, b);
+            }
+            assert!(reused(&actual).iter().any(|&count| count > 0));
+        }
+        let mut bad = requests.clone();
+        bad[0].state = serde_json::json!({"overlong":"word ".repeat(10000)});
+        assert!(session.decide_batch(&bad).is_err());
+        let recovered = session.decide_batch(&requests).unwrap();
+        assert_eq!(reused(&recovered), reused(&cold));
+        for (a, b) in recovered.iter().zip(&cold) {
+            assert_same(a, b);
+        }
+    }
+    let after = backend.decide_batch(&requests).unwrap();
+    assert!(!after[0].backend.parallel_prefix_retained);
+    assert_eq!(reused(&after), reused(&cold));
+    for (a, b) in after.iter().zip(&cold) {
+        assert_same(a, b);
+    }
+}

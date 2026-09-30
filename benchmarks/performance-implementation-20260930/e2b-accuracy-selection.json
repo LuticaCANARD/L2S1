@@ -1,0 +1,462 @@
+{
+  "model": "e2b",
+  "selected_families": [
+    "numeric",
+    "temporal"
+  ],
+  "families": {
+    "numeric": {
+      "enabled": true,
+      "metrics": {
+        "raw": [
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 4,
+            "accepted": 5,
+            "accepted_correct": 2,
+            "wrong_accepted": 3,
+            "abstained": 7,
+            "coverage": 0.4166666666666667,
+            "accepted_accuracy": 0.4,
+            "correct_all": 0.16666666666666666,
+            "p50_ms": 32.0106,
+            "p95_ms": 108.1272,
+            "measured_ms": 470.806601,
+            "decisions_per_second": 25.488172796455757,
+            "input_tokens": 1568,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 10.997399999999999,
+              "native_ms": 438.534601,
+              "score_ms": 15.0522
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 4,
+            "accepted": 5,
+            "accepted_correct": 2,
+            "wrong_accepted": 3,
+            "abstained": 7,
+            "coverage": 0.4166666666666667,
+            "accepted_accuracy": 0.4,
+            "correct_all": 0.16666666666666666,
+            "p50_ms": 30.380699,
+            "p95_ms": 35.650399,
+            "measured_ms": 374.015786,
+            "decisions_per_second": 32.08420726926216,
+            "input_tokens": 1568,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 11.1782,
+              "native_ms": 342.823989,
+              "score_ms": 14.858798
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 4,
+            "accepted": 5,
+            "accepted_correct": 2,
+            "wrong_accepted": 3,
+            "abstained": 7,
+            "coverage": 0.4166666666666667,
+            "accepted_accuracy": 0.4,
+            "correct_all": 0.16666666666666666,
+            "p50_ms": 33.369099999999996,
+            "p95_ms": 42.526199,
+            "measured_ms": 391.856491,
+            "decisions_per_second": 30.62345597332468,
+            "input_tokens": 1568,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 12.1516,
+              "native_ms": 358.793393,
+              "score_ms": 15.761198
+            }
+          }
+        ],
+        "facts": [
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 11,
+            "accepted": 12,
+            "accepted_correct": 11,
+            "wrong_accepted": 1,
+            "abstained": 0,
+            "coverage": 1.0,
+            "accepted_accuracy": 0.9166666666666666,
+            "correct_all": 0.9166666666666666,
+            "p50_ms": 33.643,
+            "p95_ms": 49.122,
+            "measured_ms": 417.3968,
+            "decisions_per_second": 28.7496214633174,
+            "input_tokens": 1821,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 12.6618,
+              "native_ms": 383.3891,
+              "score_ms": 15.750699999999998
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 11,
+            "accepted": 12,
+            "accepted_correct": 11,
+            "wrong_accepted": 1,
+            "abstained": 0,
+            "coverage": 1.0,
+            "accepted_accuracy": 0.9166666666666666,
+            "correct_all": 0.9166666666666666,
+            "p50_ms": 29.272099,
+            "p95_ms": 34.828399000000005,
+            "measured_ms": 366.465887,
+            "decisions_per_second": 32.745203375505454,
+            "input_tokens": 1821,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 11.1601,
+              "native_ms": 335.157887,
+              "score_ms": 15.3827
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 11,
+            "accepted": 12,
+            "accepted_correct": 11,
+            "wrong_accepted": 1,
+            "abstained": 0,
+            "coverage": 1.0,
+            "accepted_accuracy": 0.9166666666666666,
+            "correct_all": 0.9166666666666666,
+            "p50_ms": 29.609799,
+            "p95_ms": 62.029798,
+            "measured_ms": 406.151486,
+            "decisions_per_second": 29.545626234640935,
+            "input_tokens": 1821,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 11.835499,
+              "native_ms": 374.643387,
+              "score_ms": 14.6685
+            }
+          }
+        ]
+      }
+    },
+    "temporal": {
+      "enabled": true,
+      "metrics": {
+        "raw": [
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 6,
+            "accepted": 3,
+            "accepted_correct": 2,
+            "wrong_accepted": 1,
+            "abstained": 9,
+            "coverage": 0.25,
+            "accepted_accuracy": 0.6666666666666666,
+            "correct_all": 0.16666666666666666,
+            "p50_ms": 30.185,
+            "p95_ms": 34.2088,
+            "measured_ms": 377.676801,
+            "decisions_per_second": 31.77319858732864,
+            "input_tokens": 1853,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 12.8934,
+              "native_ms": 344.711001,
+              "score_ms": 15.162799999999999
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 6,
+            "accepted": 3,
+            "accepted_correct": 2,
+            "wrong_accepted": 1,
+            "abstained": 9,
+            "coverage": 0.25,
+            "accepted_accuracy": 0.6666666666666666,
+            "correct_all": 0.16666666666666666,
+            "p50_ms": 29.1047,
+            "p95_ms": 35.518798999999994,
+            "measured_ms": 372.757692,
+            "decisions_per_second": 32.19249463536221,
+            "input_tokens": 1853,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 11.9469,
+              "native_ms": 340.990393,
+              "score_ms": 14.753899
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 6,
+            "accepted": 3,
+            "accepted_correct": 2,
+            "wrong_accepted": 1,
+            "abstained": 9,
+            "coverage": 0.25,
+            "accepted_accuracy": 0.6666666666666666,
+            "correct_all": 0.16666666666666666,
+            "p50_ms": 35.239899,
+            "p95_ms": 46.501399,
+            "measured_ms": 421.905991,
+            "decisions_per_second": 28.4423550648277,
+            "input_tokens": 1853,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 13.9616,
+              "native_ms": 386.43319199999996,
+              "score_ms": 16.700099
+            }
+          }
+        ],
+        "facts": [
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 10,
+            "accepted": 9,
+            "accepted_correct": 8,
+            "wrong_accepted": 1,
+            "abstained": 3,
+            "coverage": 0.75,
+            "accepted_accuracy": 0.8888888888888888,
+            "correct_all": 0.6666666666666666,
+            "p50_ms": 32.8848,
+            "p95_ms": 40.129301,
+            "measured_ms": 422.326598,
+            "decisions_per_second": 28.414028519226726,
+            "input_tokens": 2158,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 17.52,
+              "native_ms": 380.736798,
+              "score_ms": 17.608999999999998
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 10,
+            "accepted": 9,
+            "accepted_correct": 8,
+            "wrong_accepted": 1,
+            "abstained": 3,
+            "coverage": 0.75,
+            "accepted_accuracy": 0.8888888888888888,
+            "correct_all": 0.6666666666666666,
+            "p50_ms": 31.691599,
+            "p95_ms": 36.741899000000004,
+            "measured_ms": 397.510385,
+            "decisions_per_second": 30.187890562909445,
+            "input_tokens": 2158,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 13.154399999999999,
+              "native_ms": 363.958086,
+              "score_ms": 15.083499
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 10,
+            "accepted": 9,
+            "accepted_correct": 8,
+            "wrong_accepted": 1,
+            "abstained": 3,
+            "coverage": 0.75,
+            "accepted_accuracy": 0.8888888888888888,
+            "correct_all": 0.6666666666666666,
+            "p50_ms": 35.986399000000006,
+            "p95_ms": 37.639399,
+            "measured_ms": 425.072984,
+            "decisions_per_second": 28.230446186154232,
+            "input_tokens": 2158,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 14.282599,
+              "native_ms": 388.637885,
+              "score_ms": 16.8962
+            }
+          }
+        ]
+      }
+    },
+    "graph": {
+      "enabled": false,
+      "metrics": {
+        "raw": [
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 5,
+            "accepted": 4,
+            "accepted_correct": 3,
+            "wrong_accepted": 1,
+            "abstained": 8,
+            "coverage": 0.3333333333333333,
+            "accepted_accuracy": 0.75,
+            "correct_all": 0.25,
+            "p50_ms": 47.363101,
+            "p95_ms": 97.9923,
+            "measured_ms": 595.339701,
+            "decisions_per_second": 20.156559322086938,
+            "input_tokens": 3056,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 17.156100000000002,
+              "native_ms": 558.411601,
+              "score_ms": 14.8019
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 5,
+            "accepted": 4,
+            "accepted_correct": 3,
+            "wrong_accepted": 1,
+            "abstained": 8,
+            "coverage": 0.3333333333333333,
+            "accepted_accuracy": 0.75,
+            "correct_all": 0.25,
+            "p50_ms": 43.589899,
+            "p95_ms": 75.017098,
+            "measured_ms": 585.687688,
+            "decisions_per_second": 20.4887352865099,
+            "input_tokens": 3056,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 17.2034,
+              "native_ms": 548.264889,
+              "score_ms": 15.2278
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 5,
+            "accepted": 4,
+            "accepted_correct": 3,
+            "wrong_accepted": 1,
+            "abstained": 8,
+            "coverage": 0.3333333333333333,
+            "accepted_accuracy": 0.75,
+            "correct_all": 0.25,
+            "p50_ms": 49.690799,
+            "p95_ms": 69.552299,
+            "measured_ms": 611.739488,
+            "decisions_per_second": 19.61619322504811,
+            "input_tokens": 3056,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 17.498399,
+              "native_ms": 573.784989,
+              "score_ms": 15.612
+            }
+          }
+        ],
+        "facts": [
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 8,
+            "accepted": 10,
+            "accepted_correct": 6,
+            "wrong_accepted": 4,
+            "abstained": 2,
+            "coverage": 0.8333333333333334,
+            "accepted_accuracy": 0.6,
+            "correct_all": 0.5,
+            "p50_ms": 53.965398,
+            "p95_ms": 77.516897,
+            "measured_ms": 663.300475,
+            "decisions_per_second": 18.091348419432386,
+            "input_tokens": 3356,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 20.180299,
+              "native_ms": 620.193179,
+              "score_ms": 16.928
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 8,
+            "accepted": 10,
+            "accepted_correct": 6,
+            "wrong_accepted": 4,
+            "abstained": 2,
+            "coverage": 0.8333333333333334,
+            "accepted_accuracy": 0.6,
+            "correct_all": 0.5,
+            "p50_ms": 52.442199,
+            "p95_ms": 67.53179800000001,
+            "measured_ms": 607.741178,
+            "decisions_per_second": 19.745247540228384,
+            "input_tokens": 3356,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 17.089098,
+              "native_ms": 570.597481,
+              "score_ms": 14.851599
+            }
+          },
+          {
+            "decisions": 12,
+            "cases": 12,
+            "raw_correct": 8,
+            "accepted": 10,
+            "accepted_correct": 6,
+            "wrong_accepted": 4,
+            "abstained": 2,
+            "coverage": 0.8333333333333334,
+            "accepted_accuracy": 0.6,
+            "correct_all": 0.5,
+            "p50_ms": 52.746498,
+            "p95_ms": 79.93929800000001,
+            "measured_ms": 663.431677,
+            "decisions_per_second": 18.087770626605156,
+            "input_tokens": 3356,
+            "reused_prefix_tokens": 0,
+            "profile": {
+              "prepare_ms": 19.4267,
+              "native_ms": 623.684878,
+              "score_ms": 15.098299
+            }
+          }
+        ]
+      }
+    }
+  },
+  "protocol_sha256": "4b9bbe39cc577b85eeba5fde56fee619fcdbd4167d0daedade89b7efe0ad41fe",
+  "development_input_sha256": "afaeef4cf60e25eee1404d0aae2b09f878da838c7aa9290551b70e5fa535ffae",
+  "development_outputs": {
+    "facts-0.jsonl": "cbf33fc13a70f8ae3346be6aaf3b1568eb84282dc2e6bb1c9b1e401b70e3b73f",
+    "facts-1.jsonl": "e84d168edfa19a1f7de89f56e23bee9bae574aa23e03351384bcd61012ae7fca",
+    "facts-2.jsonl": "539c0d7cfd24eb697f9c0558de2324ff55e11743dbdb993ff93d1b58403e2421",
+    "raw-0.jsonl": "71b0b25719da7cd844f3cf341764b706e2e6c64d2227ea0c279979cabdd0c2f4",
+    "raw-1.jsonl": "a1b97a1ed68fe7c317d4d4dd2dbcadd25af335aedf3d1e65a2ff08843dac20cf",
+    "raw-2.jsonl": "88a52a5d60028fb730e22d2e4cd699c93941db9a7506f45e9fc3cc01b057fae4"
+  },
+  "holdout_input_sha256": "5f0668747665dce49a932255dfd3e2849d17c5f052dd73b267dafee51ecff8e0",
+  "holdout_outcomes_examined": false
+}

@@ -2,7 +2,7 @@
 
 [English](../en/PERFORMANCE_REVIEW.md) · [한국어](PERFORMANCE_REVIEW.md) · [日本語](../ja/PERFORMANCE_REVIEW.md)
 
-main `6b2fcfa` / v0.2.0 기준 코드 검토입니다. 아래 개선 후보는 아직 구현·실측한 개선이 아닙니다. 기존 측정의 리비전과 조건은 별도로 표시합니다. [측정 증거와 재집계](../../benchmarks/decision-performance-20260930/README.md).
+main `6b2fcfa` / v0.2.0 기준 코드 검토입니다. 아래 표는 최초 검토 당시의 개선 후보이며, 하단 구현 후속 작업에서 이후 측정 결과를 확인할 수 있습니다. 기존 측정의 리비전과 조건은 별도로 표시합니다. [측정 증거와 재집계](../../benchmarks/decision-performance-20260930/README.md).
 
 ## 기준 성능과 실패 유형
 
@@ -47,3 +47,7 @@ JevBench `f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84`의 공개 231문항(Easy 48,
 첫 실험은 기존 설정으로 가능한 1·2번입니다. KV 양자화는 현재 L2S1 노출 기능이 아니어서 bridge·설정 식별자·수치 검증 작업이 필요합니다. speculative decoding은 다중 토큰 생성용이므로 직접 한 단계 채점에서는 우선순위가 낮습니다. 임계값 보정은 채택 정책을 바꾸며 원시 오답을 자동으로 고치지 않습니다.
 
 Laya 후속 비교에서는 긴 문맥 체크포인트나 windowing을 명시적으로 선택하고 모델·문맥·집계·속도 변화를 기록해야 합니다. 잘린 토큰을 복원하면 정확도도 복원된다고 가정하지 않습니다. [Laya 공식 문서](https://huggingface.co/convaiinnovations/laya)는 체크포인트별 한도를 설명합니다. [llama.cpp 성능 가이드](https://github.com/ggml-org/llama.cpp/blob/master/docs/development/token_generation_performance_tips.md)는 실제 GPU 적재와 스레드 수 확인을 권하며, 그 생성 속도를 L2S1 지연 예측으로 사용하지 않습니다.
+
+## 구현 후속 작업
+
+1~3번을 실행할 수 있는 [튜닝 도구·상주 세션·구조화된 사실 전처리](../DECISION_PERFORMANCE.md)를 추가했습니다. 실제 측정 결과와 적용 범위는 연결된 실험 보고서를 참고하세요.

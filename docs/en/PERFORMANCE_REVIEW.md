@@ -2,8 +2,8 @@
 
 [English](PERFORMANCE_REVIEW.md) · [한국어](../ko/PERFORMANCE_REVIEW.md) · [日本語](../ja/PERFORMANCE_REVIEW.md)
 
-Review of main `6b2fcfa` / released v0.2.0. Recommendations below are experiments,
-not implemented optimizations or measured gains. Existing measurements use the
+Review of main `6b2fcfa` / released v0.2.0. The experiment table records the
+original review; the implementation follow-up below links subsequent measurements. Existing measurements use the
 revisions named below. [Evidence and replay](../../benchmarks/decision-performance-20260930/README.md).
 
 ## Baseline and failure modes
@@ -91,3 +91,7 @@ recovering truncated tokens will recover the missing accuracy. The upstream
 different checkpoint limits. Upstream [llama.cpp performance guidance](https://github.com/ggml-org/llama.cpp/blob/master/docs/development/token_generation_performance_tips.md)
 also recommends checking actual GPU offload and thread counts; its generation
 numbers are not L2S1 latency estimates.
+
+## Implementation follow-up
+
+The first three experiments now have [runnable tooling and explicit structured-fact preprocessing](../DECISION_PERFORMANCE.md). See the linked study for measured results and limits.

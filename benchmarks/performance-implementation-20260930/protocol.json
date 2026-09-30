@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "development": {"file": "dev.jsonl", "families": ["numeric", "temporal", "graph"], "items_per_family": 12},
+  "holdout": {"file": "holdout.jsonl", "items_per_family": 40, "purpose": "synthetic structured-input generalization; not JevBench or natural-language accuracy"},
+  "models": ["gemma-4-12b-it-qat-q4_0.gguf", "gemma-4-E2B-it-Q8_0.gguf"],
+  "accuracy_selection": {
+    "candidates": ["raw", "explicit_facts"],
+    "unit": "model_and_family",
+    "enable_facts_only_if": "development raw correct strictly increases, wrong accepted does not increase, and candidate p95 <= 2x raw p95",
+    "freeze_before_holdout": true,
+    "no_changes_after_holdout": true,
+    "repeats": 3,
+    "accuracy_denominator": "unique items; repeats measure stability and timing only"
+  },
+  "compute_selection": {
+    "file": "compute-dev.jsonl",
+    "matrix": "compute-matrix.json",
+    "repeats": 3,
+    "gate": "complete paired outcomes, zero raw/accepted choice or input-token changes, probability/mass drift <= 0.02, median run p50 <= 0.95x baseline, worst run p95 <= 1.05x baseline"
+  },
+  "prefix_reuse": {
+    "files": ["schema.jsonl", "shared.jsonl"],
+    "repeats": 3,
+    "conditions": ["fresh", "split-cold", "split-resident"],
+    "warmup": "one ordinary untimed batch; resident scope opens after warmup",
+    "required": "positive actual reused tokens, paired raw/accepted outcomes, score drift, first cold versus subsequent warm call timings, error recovery and drop isolation"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "rust_default": {
+    "passed": 94,
+    "failed": 0,
+    "command": "cargo test --locked --offline --lib --tests"
+  },
+  "native_unit": {
+    "passed": 38,
+    "ignored": 1
+  },
+  "evaluator_and_tuner_python_contracts": {
+    "passed": 4
+  },
+  "facts_preserve_order": {
+    "passed": 4
+  },
+  "native_cuda": {
+    "fixed_schema_e2b": {
+      "passed": true,
+      "log_sha256": "bd456cfcff0a4dab7177569b6534b522b6b5bdaea924b92da0b962195a2f9ffa"
+    },
+    "fixed_schema_12b": {
+      "passed": true,
+      "log_sha256": "e6f6ddd9de649a60bd809b53897330a09d528526a97fd0fdc3f747fa254baa72"
+    },
+    "resident_parallel_e2b": {
+      "passed": true,
+      "log_sha256": "84360a4c4cc16b960fc1b34a5bf2bfc8ec05edd8ce6fd4dd567adf0238fb91f0"
+    },
+    "resident_parallel_12b": {
+      "passed": true,
+      "log_sha256": "6f42793cf3ad1fa994f29b1be9c557abcfb7247421ee9288aef96517b3bc16fb"
+    },
+    "compute_context_12b": {
+      "passed": true,
+      "log_sha256": "9bf5b3901cffb43ccad32e533ecfe5e1c8e6012291ddeb26c5743080c92c432e"
+    }
+  },
+  "known_failed_existing_profile": {
+    "test": "real_model_prefix_sharing",
+    "file": "tests/parallel.rs",
+    "model": "gemma-4-E2B-it-Q8_0.gguf",
+    "flash_attention": "off",
+    "batch": 256,
+    "parallel_width": 4,
+    "context": 2048,
+    "prompt_layout": "legacy",
+    "observed_max_probability_delta": 0.11428076721626697,
+    "unchanged_limit": 0.05,
+    "status": "failed; no equivalence claim"
+  },
+  "independent_jevbench_scorer": "all four 231-item runs match pinned upstream",
+  "record_replay": {
+    "runs": 96,
+    "records": 5364,
+    "passed": true
+  }
+}

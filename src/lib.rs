@@ -3,7 +3,9 @@
 //! Typed decision contracts and scoring, independent of the inference backend.
 mod codes;
 mod decision;
+mod facts;
 pub use codes::{option_code, option_code_width};
+pub use facts::{FactOperation, FactSpec, derive_facts};
 mod output_head;
 mod prompt;
 mod reasoning;
