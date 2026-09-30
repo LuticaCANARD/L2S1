@@ -1,4 +1,6 @@
 <a id="jevbench-public-evaluation"></a>
+
+[性能改善の検討](PERFORMANCE_REVIEW.md): 最近の測定、失敗分析、実験の優先順位。
 # JevBench 公開評価
 
 [English](../en/JEVBENCH.md) · [한국어](../ko/JEVBENCH.md) · [日本語](JEVBENCH.md)

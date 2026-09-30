@@ -1,0 +1,32 @@
+name: Decision performance contracts
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'examples/evaluate_jsonl.rs'
+      - 'scripts/*decision_performance*'
+      - 'benchmarks/performance-implementation-20260930/**'
+      - '.github/workflows/decision-performance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DISABLE: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: cargo test --locked --lib --tests
+      - run: python scripts/test_benchmark_decision_performance.py
+      - run: python benchmarks/performance-implementation-20260930/verify.py
+      - run: python benchmarks/performance-implementation-20260930/prepare.py && git diff --exit-code -- benchmarks/performance-implementation-20260930
+      - run: sudo apt-get update && sudo apt-get install -y libclang-dev
+      - run: cargo build --locked --features llama --example evaluate_jsonl
+      - run: cargo test --locked --features llama --lib --bin l2s1 --test fixed_schema
+      - run: L2S1_EVALUATOR=target/debug/examples/evaluate_jsonl python scripts/test_benchmark_decision_performance.py

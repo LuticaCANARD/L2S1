@@ -1,0 +1,362 @@
+{
+  "holdout-numeric-000": {
+    "answer": "v1"
+  },
+  "holdout-numeric-001": {
+    "answer": "v0"
+  },
+  "holdout-numeric-002": {
+    "answer": "v3"
+  },
+  "holdout-numeric-003": {
+    "answer": "v0"
+  },
+  "holdout-numeric-004": {
+    "answer": "v0"
+  },
+  "holdout-numeric-005": {
+    "answer": "v1"
+  },
+  "holdout-numeric-006": {
+    "answer": "v0"
+  },
+  "holdout-numeric-007": {
+    "answer": "v3"
+  },
+  "holdout-numeric-008": {
+    "answer": "v1"
+  },
+  "holdout-numeric-009": {
+    "answer": "v0"
+  },
+  "holdout-numeric-010": {
+    "answer": "v2"
+  },
+  "holdout-numeric-011": {
+    "answer": "v1"
+  },
+  "holdout-numeric-012": {
+    "answer": "v0"
+  },
+  "holdout-numeric-013": {
+    "answer": "v3"
+  },
+  "holdout-numeric-014": {
+    "answer": "v3"
+  },
+  "holdout-numeric-015": {
+    "answer": "v1"
+  },
+  "holdout-numeric-016": {
+    "answer": "v3"
+  },
+  "holdout-numeric-017": {
+    "answer": "v0"
+  },
+  "holdout-numeric-018": {
+    "answer": "v0"
+  },
+  "holdout-numeric-019": {
+    "answer": "v0"
+  },
+  "holdout-numeric-020": {
+    "answer": "v1"
+  },
+  "holdout-numeric-021": {
+    "answer": "v3"
+  },
+  "holdout-numeric-022": {
+    "answer": "v2"
+  },
+  "holdout-numeric-023": {
+    "answer": "v2"
+  },
+  "holdout-numeric-024": {
+    "answer": "v3"
+  },
+  "holdout-numeric-025": {
+    "answer": "v3"
+  },
+  "holdout-numeric-026": {
+    "answer": "v1"
+  },
+  "holdout-numeric-027": {
+    "answer": "v0"
+  },
+  "holdout-numeric-028": {
+    "answer": "v3"
+  },
+  "holdout-numeric-029": {
+    "answer": "v1"
+  },
+  "holdout-numeric-030": {
+    "answer": "v3"
+  },
+  "holdout-numeric-031": {
+    "answer": "v3"
+  },
+  "holdout-numeric-032": {
+    "answer": "v2"
+  },
+  "holdout-numeric-033": {
+    "answer": "v2"
+  },
+  "holdout-numeric-034": {
+    "answer": "v1"
+  },
+  "holdout-numeric-035": {
+    "answer": "v2"
+  },
+  "holdout-numeric-036": {
+    "answer": "v1"
+  },
+  "holdout-numeric-037": {
+    "answer": "v1"
+  },
+  "holdout-numeric-038": {
+    "answer": "v2"
+  },
+  "holdout-numeric-039": {
+    "answer": "v0"
+  },
+  "holdout-temporal-000": {
+    "answer": "v3"
+  },
+  "holdout-temporal-001": {
+    "answer": "v2"
+  },
+  "holdout-temporal-002": {
+    "answer": "v0"
+  },
+  "holdout-temporal-003": {
+    "answer": "v3"
+  },
+  "holdout-temporal-004": {
+    "answer": "v3"
+  },
+  "holdout-temporal-005": {
+    "answer": "v2"
+  },
+  "holdout-temporal-006": {
+    "answer": "v1"
+  },
+  "holdout-temporal-007": {
+    "answer": "v1"
+  },
+  "holdout-temporal-008": {
+    "answer": "v2"
+  },
+  "holdout-temporal-009": {
+    "answer": "v2"
+  },
+  "holdout-temporal-010": {
+    "answer": "v1"
+  },
+  "holdout-temporal-011": {
+    "answer": "v2"
+  },
+  "holdout-temporal-012": {
+    "answer": "v3"
+  },
+  "holdout-temporal-013": {
+    "answer": "v1"
+  },
+  "holdout-temporal-014": {
+    "answer": "v1"
+  },
+  "holdout-temporal-015": {
+    "answer": "v3"
+  },
+  "holdout-temporal-016": {
+    "answer": "v2"
+  },
+  "holdout-temporal-017": {
+    "answer": "v3"
+  },
+  "holdout-temporal-018": {
+    "answer": "v3"
+  },
+  "holdout-temporal-019": {
+    "answer": "v1"
+  },
+  "holdout-temporal-020": {
+    "answer": "v2"
+  },
+  "holdout-temporal-021": {
+    "answer": "v3"
+  },
+  "holdout-temporal-022": {
+    "answer": "v0"
+  },
+  "holdout-temporal-023": {
+    "answer": "v0"
+  },
+  "holdout-temporal-024": {
+    "answer": "v3"
+  },
+  "holdout-temporal-025": {
+    "answer": "v1"
+  },
+  "holdout-temporal-026": {
+    "answer": "v2"
+  },
+  "holdout-temporal-027": {
+    "answer": "v1"
+  },
+  "holdout-temporal-028": {
+    "answer": "v0"
+  },
+  "holdout-temporal-029": {
+    "answer": "v3"
+  },
+  "holdout-temporal-030": {
+    "answer": "v3"
+  },
+  "holdout-temporal-031": {
+    "answer": "v2"
+  },
+  "holdout-temporal-032": {
+    "answer": "v2"
+  },
+  "holdout-temporal-033": {
+    "answer": "v3"
+  },
+  "holdout-temporal-034": {
+    "answer": "v0"
+  },
+  "holdout-temporal-035": {
+    "answer": "v2"
+  },
+  "holdout-temporal-036": {
+    "answer": "v0"
+  },
+  "holdout-temporal-037": {
+    "answer": "v1"
+  },
+  "holdout-temporal-038": {
+    "answer": "v2"
+  },
+  "holdout-temporal-039": {
+    "answer": "v2"
+  },
+  "holdout-graph-000": {
+    "answer": "v1"
+  },
+  "holdout-graph-001": {
+    "answer": "v4"
+  },
+  "holdout-graph-002": {
+    "answer": "v2"
+  },
+  "holdout-graph-003": {
+    "answer": "v4"
+  },
+  "holdout-graph-004": {
+    "answer": "v3"
+  },
+  "holdout-graph-005": {
+    "answer": "v2"
+  },
+  "holdout-graph-006": {
+    "answer": "v4"
+  },
+  "holdout-graph-007": {
+    "answer": "v3"
+  },
+  "holdout-graph-008": {
+    "answer": "v1"
+  },
+  "holdout-graph-009": {
+    "answer": "v3"
+  },
+  "holdout-graph-010": {
+    "answer": "v6"
+  },
+  "holdout-graph-011": {
+    "answer": "v0"
+  },
+  "holdout-graph-012": {
+    "answer": "v5"
+  },
+  "holdout-graph-013": {
+    "answer": "v6"
+  },
+  "holdout-graph-014": {
+    "answer": "v4"
+  },
+  "holdout-graph-015": {
+    "answer": "v0"
+  },
+  "holdout-graph-016": {
+    "answer": "v3"
+  },
+  "holdout-graph-017": {
+    "answer": "v0"
+  },
+  "holdout-graph-018": {
+    "answer": "v5"
+  },
+  "holdout-graph-019": {
+    "answer": "v0"
+  },
+  "holdout-graph-020": {
+    "answer": "v1"
+  },
+  "holdout-graph-021": {
+    "answer": "v0"
+  },
+  "holdout-graph-022": {
+    "answer": "v2"
+  },
+  "holdout-graph-023": {
+    "answer": "v2"
+  },
+  "holdout-graph-024": {
+    "answer": "v0"
+  },
+  "holdout-graph-025": {
+    "answer": "v5"
+  },
+  "holdout-graph-026": {
+    "answer": "v5"
+  },
+  "holdout-graph-027": {
+    "answer": "v0"
+  },
+  "holdout-graph-028": {
+    "answer": "v2"
+  },
+  "holdout-graph-029": {
+    "answer": "v0"
+  },
+  "holdout-graph-030": {
+    "answer": "v1"
+  },
+  "holdout-graph-031": {
+    "answer": "v3"
+  },
+  "holdout-graph-032": {
+    "answer": "v3"
+  },
+  "holdout-graph-033": {
+    "answer": "v6"
+  },
+  "holdout-graph-034": {
+    "answer": "v0"
+  },
+  "holdout-graph-035": {
+    "answer": "v1"
+  },
+  "holdout-graph-036": {
+    "answer": "v6"
+  },
+  "holdout-graph-037": {
+    "answer": "v3"
+  },
+  "holdout-graph-038": {
+    "answer": "v0"
+  },
+  "holdout-graph-039": {
+    "answer": "v1"
+  }
+}

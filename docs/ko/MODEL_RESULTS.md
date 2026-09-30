@@ -1,4 +1,6 @@
 <a id="recorded-model-results"></a>
+
+[성능 개선 검토](PERFORMANCE_REVIEW.md): 최근 측정, 실패 분석, 실험 우선순위.
 # 기록된 모델 결과
 
 [English](../en/MODEL_RESULTS.md) · [한국어](MODEL_RESULTS.md) · [日本語](../ja/MODEL_RESULTS.md)

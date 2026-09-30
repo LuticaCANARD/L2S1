@@ -3,6 +3,45 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { L2S1 } from '../dist/index.js';
 
+test('resident defaults invalidate changed schemas and recover, with explicit fresh opt-out', {
+  skip: !process.env.L2S1_MODEL,
+  timeout: 600_000,
+}, async () => {
+  const request = JSON.parse(await readFile(new URL('../../../examples/warehouse.json', import.meta.url), 'utf8'));
+  request.decisions = request.decisions.slice(0, 1);
+  for (const transport of ['stdio', 'http']) {
+    for (const executionMode of [undefined, 'fresh']) {
+      const engine = await L2S1.load({
+        binaryPath: process.env.L2S1_BINARY ?? 'l2s1', model: process.env.L2S1_MODEL,
+        device: process.env.L2S1_DEVICE === 'cuda' ? 'cuda' : 'cpu',
+        transport, executionMode, context: 2048, batch: 256, threads: 2,
+      });
+      try {
+        const plan = engine.prepare(request.decisions);
+        const cold = await plan.decide(request.state);
+        const warm = await plan.decide(request.state);
+        assert.deepEqual(warm.results[0].evidence, cold.results[0].evidence);
+        const reused = warm.results[0].usage.reused_prefix_tokens;
+        assert.equal(reused > 0, executionMode === undefined);
+        if (!executionMode) assert.equal((await engine.capabilities()).prefix_reuse.schema_change, 'clear_all');
+        const state = await plan.decide({ storage_requirement: 'frozen' });
+        assert.equal(state.results[0].usage.reused_prefix_tokens > 0, executionMode === undefined);
+        const other = structuredClone(request);
+        other.decisions[0].id = 'changed_schema';
+        assert.equal((await engine.decide(other)).results[0].usage.reused_prefix_tokens, 0);
+        const returned = await plan.decide(request.state);
+        assert.equal(returned.results[0].usage.reused_prefix_tokens, 0);
+        await assert.rejects(plan.decide({ oversized: 'word '.repeat(4096) }));
+        const recovered = await plan.decide(request.state);
+        assert.equal(recovered.results[0].usage.reused_prefix_tokens, 0);
+        console.log(JSON.stringify({ sdk: 'typescript', transport, executionMode: executionMode ?? 'auto',
+          reused_prefix_tokens: reused, schema_return_tokens: returned.results[0].usage.reused_prefix_tokens,
+          recovery_tokens: recovered.results[0].usage.reused_prefix_tokens }));
+      } finally { await engine.close(); }
+    }
+  }
+});
+
 test('real local GGUF model returns all warehouse decision kinds across repeated calls', {
   skip: !process.env.L2S1_MODEL,
   timeout: 180_000,

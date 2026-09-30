@@ -1,4 +1,6 @@
 <a id="jevbench-public-evaluation"></a>
+
+[성능 개선 검토](PERFORMANCE_REVIEW.md): 최근 측정, 실패 분석, 실험 우선순위.
 # JevBench 공개 평가
 
 [English](../en/JEVBENCH.md) · [한국어](JEVBENCH.md) · [日本語](../ja/JEVBENCH.md)

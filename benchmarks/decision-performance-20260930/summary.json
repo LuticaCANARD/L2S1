@@ -1,0 +1,536 @@
+{
+  "models": {
+    "gemma4-e2b": {
+      "n": 231,
+      "correct": 159,
+      "accepted": 213,
+      "accepted_correct": 153,
+      "accepted_wrong": 60,
+      "abstained": 18,
+      "high_confidence_wrong_099": 37,
+      "families": {
+        "adequacy": {
+          "n": 12,
+          "correct": 10,
+          "accepted": 11,
+          "accepted_correct": 9,
+          "accepted_wrong": 2,
+          "abstained": 1,
+          "high_confidence_wrong_099": 1
+        },
+        "adversarial": {
+          "n": 6,
+          "correct": 4,
+          "accepted": 6,
+          "accepted_correct": 4,
+          "accepted_wrong": 2,
+          "abstained": 0,
+          "high_confidence_wrong_099": 2
+        },
+        "ambiguous": {
+          "n": 7,
+          "correct": 2,
+          "accepted": 7,
+          "accepted_correct": 2,
+          "accepted_wrong": 5,
+          "abstained": 0,
+          "high_confidence_wrong_099": 4
+        },
+        "extraction": {
+          "n": 24,
+          "correct": 24,
+          "accepted": 24,
+          "accepted_correct": 24,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "fact": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 12,
+          "accepted_correct": 12,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "intent": {
+          "n": 24,
+          "correct": 24,
+          "accepted": 24,
+          "accepted_correct": 24,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "judge_hard": {
+          "n": 17,
+          "correct": 10,
+          "accepted": 17,
+          "accepted_correct": 10,
+          "accepted_wrong": 7,
+          "abstained": 0,
+          "high_confidence_wrong_099": 5
+        },
+        "long_policy": {
+          "n": 19,
+          "correct": 7,
+          "accepted": 15,
+          "accepted_correct": 7,
+          "accepted_wrong": 8,
+          "abstained": 4,
+          "high_confidence_wrong_099": 5
+        },
+        "multi_hop": {
+          "n": 18,
+          "correct": 6,
+          "accepted": 15,
+          "accepted_correct": 5,
+          "accepted_wrong": 10,
+          "abstained": 3,
+          "high_confidence_wrong_099": 6
+        },
+        "ordinal": {
+          "n": 12,
+          "correct": 11,
+          "accepted": 12,
+          "accepted_correct": 11,
+          "accepted_wrong": 1,
+          "abstained": 0,
+          "high_confidence_wrong_099": 1
+        },
+        "policy": {
+          "n": 12,
+          "correct": 9,
+          "accepted": 11,
+          "accepted_correct": 8,
+          "accepted_wrong": 3,
+          "abstained": 1,
+          "high_confidence_wrong_099": 3
+        },
+        "probability": {
+          "n": 10,
+          "correct": 2,
+          "accepted": 9,
+          "accepted_correct": 2,
+          "accepted_wrong": 7,
+          "abstained": 1,
+          "high_confidence_wrong_099": 4
+        },
+        "routing": {
+          "n": 12,
+          "correct": 9,
+          "accepted": 11,
+          "accepted_correct": 9,
+          "accepted_wrong": 2,
+          "abstained": 1,
+          "high_confidence_wrong_099": 0
+        },
+        "routing_hard": {
+          "n": 5,
+          "correct": 5,
+          "accepted": 5,
+          "accepted_correct": 5,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "temporal_numeric": {
+          "n": 15,
+          "correct": 4,
+          "accepted": 10,
+          "accepted_correct": 1,
+          "accepted_wrong": 9,
+          "abstained": 5,
+          "high_confidence_wrong_099": 3
+        },
+        "tool_selection": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 12,
+          "accepted_correct": 12,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "tradeoff": {
+          "n": 6,
+          "correct": 2,
+          "accepted": 5,
+          "accepted_correct": 2,
+          "accepted_wrong": 3,
+          "abstained": 1,
+          "high_confidence_wrong_099": 3
+        },
+        "trap": {
+          "n": 8,
+          "correct": 6,
+          "accepted": 7,
+          "accepted_correct": 6,
+          "accepted_wrong": 1,
+          "abstained": 1,
+          "high_confidence_wrong_099": 0
+        }
+      }
+    },
+    "gemma4-12b": {
+      "n": 231,
+      "correct": 194,
+      "accepted": 203,
+      "accepted_correct": 181,
+      "accepted_wrong": 22,
+      "abstained": 28,
+      "high_confidence_wrong_099": 10,
+      "families": {
+        "adequacy": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 10,
+          "accepted_correct": 10,
+          "accepted_wrong": 0,
+          "abstained": 2,
+          "high_confidence_wrong_099": 0
+        },
+        "adversarial": {
+          "n": 6,
+          "correct": 5,
+          "accepted": 5,
+          "accepted_correct": 5,
+          "accepted_wrong": 0,
+          "abstained": 1,
+          "high_confidence_wrong_099": 0
+        },
+        "ambiguous": {
+          "n": 7,
+          "correct": 6,
+          "accepted": 7,
+          "accepted_correct": 6,
+          "accepted_wrong": 1,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "extraction": {
+          "n": 24,
+          "correct": 24,
+          "accepted": 24,
+          "accepted_correct": 24,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "fact": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 12,
+          "accepted_correct": 12,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "intent": {
+          "n": 24,
+          "correct": 24,
+          "accepted": 24,
+          "accepted_correct": 24,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "judge_hard": {
+          "n": 17,
+          "correct": 12,
+          "accepted": 15,
+          "accepted_correct": 12,
+          "accepted_wrong": 3,
+          "abstained": 2,
+          "high_confidence_wrong_099": 3
+        },
+        "long_policy": {
+          "n": 19,
+          "correct": 13,
+          "accepted": 12,
+          "accepted_correct": 9,
+          "accepted_wrong": 3,
+          "abstained": 7,
+          "high_confidence_wrong_099": 1
+        },
+        "multi_hop": {
+          "n": 18,
+          "correct": 12,
+          "accepted": 13,
+          "accepted_correct": 11,
+          "accepted_wrong": 2,
+          "abstained": 5,
+          "high_confidence_wrong_099": 0
+        },
+        "ordinal": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 12,
+          "accepted_correct": 12,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "policy": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 10,
+          "accepted_correct": 10,
+          "accepted_wrong": 0,
+          "abstained": 2,
+          "high_confidence_wrong_099": 0
+        },
+        "probability": {
+          "n": 10,
+          "correct": 7,
+          "accepted": 9,
+          "accepted_correct": 6,
+          "accepted_wrong": 3,
+          "abstained": 1,
+          "high_confidence_wrong_099": 1
+        },
+        "routing": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 12,
+          "accepted_correct": 12,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "routing_hard": {
+          "n": 5,
+          "correct": 5,
+          "accepted": 5,
+          "accepted_correct": 5,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "temporal_numeric": {
+          "n": 15,
+          "correct": 4,
+          "accepted": 7,
+          "accepted_correct": 1,
+          "accepted_wrong": 6,
+          "abstained": 8,
+          "high_confidence_wrong_099": 2
+        },
+        "tool_selection": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 12,
+          "accepted_correct": 12,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "tradeoff": {
+          "n": 6,
+          "correct": 3,
+          "accepted": 6,
+          "accepted_correct": 3,
+          "accepted_wrong": 3,
+          "abstained": 0,
+          "high_confidence_wrong_099": 3
+        },
+        "trap": {
+          "n": 8,
+          "correct": 7,
+          "accepted": 8,
+          "accepted_correct": 7,
+          "accepted_wrong": 1,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        }
+      }
+    },
+    "laya": {
+      "n": 231,
+      "correct": 133,
+      "accepted": 231,
+      "accepted_correct": 133,
+      "accepted_wrong": 98,
+      "abstained": 0,
+      "high_confidence_wrong_099": 0,
+      "families": {
+        "adequacy": {
+          "n": 12,
+          "correct": 8,
+          "accepted": 12,
+          "accepted_correct": 8,
+          "accepted_wrong": 4,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "adversarial": {
+          "n": 6,
+          "correct": 3,
+          "accepted": 6,
+          "accepted_correct": 3,
+          "accepted_wrong": 3,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "ambiguous": {
+          "n": 7,
+          "correct": 1,
+          "accepted": 7,
+          "accepted_correct": 1,
+          "accepted_wrong": 6,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "extraction": {
+          "n": 24,
+          "correct": 20,
+          "accepted": 24,
+          "accepted_correct": 20,
+          "accepted_wrong": 4,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "fact": {
+          "n": 12,
+          "correct": 10,
+          "accepted": 12,
+          "accepted_correct": 10,
+          "accepted_wrong": 2,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "intent": {
+          "n": 24,
+          "correct": 20,
+          "accepted": 24,
+          "accepted_correct": 20,
+          "accepted_wrong": 4,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "judge_hard": {
+          "n": 17,
+          "correct": 6,
+          "accepted": 17,
+          "accepted_correct": 6,
+          "accepted_wrong": 11,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "long_policy": {
+          "n": 19,
+          "correct": 4,
+          "accepted": 19,
+          "accepted_correct": 4,
+          "accepted_wrong": 15,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "multi_hop": {
+          "n": 18,
+          "correct": 6,
+          "accepted": 18,
+          "accepted_correct": 6,
+          "accepted_wrong": 12,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "ordinal": {
+          "n": 12,
+          "correct": 11,
+          "accepted": 12,
+          "accepted_correct": 11,
+          "accepted_wrong": 1,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "policy": {
+          "n": 12,
+          "correct": 9,
+          "accepted": 12,
+          "accepted_correct": 9,
+          "accepted_wrong": 3,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "probability": {
+          "n": 10,
+          "correct": 5,
+          "accepted": 10,
+          "accepted_correct": 5,
+          "accepted_wrong": 5,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "routing": {
+          "n": 12,
+          "correct": 6,
+          "accepted": 12,
+          "accepted_correct": 6,
+          "accepted_wrong": 6,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "routing_hard": {
+          "n": 5,
+          "correct": 1,
+          "accepted": 5,
+          "accepted_correct": 1,
+          "accepted_wrong": 4,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "temporal_numeric": {
+          "n": 15,
+          "correct": 5,
+          "accepted": 15,
+          "accepted_correct": 5,
+          "accepted_wrong": 10,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "tool_selection": {
+          "n": 12,
+          "correct": 12,
+          "accepted": 12,
+          "accepted_correct": 12,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "tradeoff": {
+          "n": 6,
+          "correct": 6,
+          "accepted": 6,
+          "accepted_correct": 6,
+          "accepted_wrong": 0,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        },
+        "trap": {
+          "n": 8,
+          "correct": 0,
+          "accepted": 8,
+          "accepted_correct": 0,
+          "accepted_wrong": 8,
+          "abstained": 0,
+          "high_confidence_wrong_099": 0
+        }
+      }
+    }
+  },
+  "cascade_replay": {
+    "n": 231,
+    "correct": 166,
+    "accepted": 222,
+    "accepted_correct": 159,
+    "accepted_wrong": 63,
+    "abstained": 9,
+    "high_confidence_wrong_099": 37,
+    "routed_to_12b": 18,
+    "rule": "Keep E2B when its existing 0.8/0.05 policy accepts; otherwise use 12B with its own policy",
+    "latency": "Not measured: no model co-residency or routing overhead included",
+    "scope": "Exploratory replay on public evaluation items; not held-out validation"
+  }
+}

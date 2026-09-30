@@ -1,0 +1,110 @@
+{
+  "dev-numeric-000": {
+    "answer": "v1"
+  },
+  "dev-numeric-001": {
+    "answer": "v1"
+  },
+  "dev-numeric-002": {
+    "answer": "v3"
+  },
+  "dev-numeric-003": {
+    "answer": "v2"
+  },
+  "dev-numeric-004": {
+    "answer": "v2"
+  },
+  "dev-numeric-005": {
+    "answer": "v0"
+  },
+  "dev-numeric-006": {
+    "answer": "v3"
+  },
+  "dev-numeric-007": {
+    "answer": "v0"
+  },
+  "dev-numeric-008": {
+    "answer": "v3"
+  },
+  "dev-numeric-009": {
+    "answer": "v3"
+  },
+  "dev-numeric-010": {
+    "answer": "v0"
+  },
+  "dev-numeric-011": {
+    "answer": "v2"
+  },
+  "dev-temporal-000": {
+    "answer": "v3"
+  },
+  "dev-temporal-001": {
+    "answer": "v3"
+  },
+  "dev-temporal-002": {
+    "answer": "v1"
+  },
+  "dev-temporal-003": {
+    "answer": "v1"
+  },
+  "dev-temporal-004": {
+    "answer": "v3"
+  },
+  "dev-temporal-005": {
+    "answer": "v2"
+  },
+  "dev-temporal-006": {
+    "answer": "v0"
+  },
+  "dev-temporal-007": {
+    "answer": "v0"
+  },
+  "dev-temporal-008": {
+    "answer": "v0"
+  },
+  "dev-temporal-009": {
+    "answer": "v3"
+  },
+  "dev-temporal-010": {
+    "answer": "v3"
+  },
+  "dev-temporal-011": {
+    "answer": "v2"
+  },
+  "dev-graph-000": {
+    "answer": "v6"
+  },
+  "dev-graph-001": {
+    "answer": "v2"
+  },
+  "dev-graph-002": {
+    "answer": "v1"
+  },
+  "dev-graph-003": {
+    "answer": "v1"
+  },
+  "dev-graph-004": {
+    "answer": "v1"
+  },
+  "dev-graph-005": {
+    "answer": "v1"
+  },
+  "dev-graph-006": {
+    "answer": "v2"
+  },
+  "dev-graph-007": {
+    "answer": "v5"
+  },
+  "dev-graph-008": {
+    "answer": "v3"
+  },
+  "dev-graph-009": {
+    "answer": "v3"
+  },
+  "dev-graph-010": {
+    "answer": "v1"
+  },
+  "dev-graph-011": {
+    "answer": "v4"
+  }
+}

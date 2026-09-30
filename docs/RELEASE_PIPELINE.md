@@ -47,7 +47,7 @@ CPU·Metal, 나머지는 CPU를 번들에 포함합니다. CUDA는 Cargo feature
    등록 후 secret을 제거하면 `rust-lang/crates-io-auth-action`의 임시 token을 사용합니다.
 
 레지스트리의 외부 계정 설정은 이 저장소의 workflow 추가만으로 생성되지 않습니다.
-현재 작업은 파이프라인·설치 패키지 준비이며 실제 레지스트리 게시를 수행하지 않았습니다.
+v0.2.0은 2026-09-30 KST에 GitHub Release·npm·PyPI·crates.io에 게시되었습니다. [완료된 배포](https://github.com/LuticaCANARD/L2S1/actions/runs/36589017452).
 
 ## 버전과 실행
 
@@ -58,11 +58,12 @@ CPU·Metal, 나머지는 CPU를 번들에 포함합니다. CUDA는 Cargo feature
 - `sdks/typescript/package.json`, `sdks/typescript/package-lock.json` 및 runtime optional dependency 버전
 
 ```sh
-python scripts/prepare_release.py --tag v0.1.1
+RELEASE_TAG=vMAJOR.MINOR.PATCH # replace with a new, unused version after aligning package versions
+python scripts/prepare_release.py --tag "$RELEASE_TAG"
 python -m unittest discover -s scripts -p test_release_pipeline.py -v
 # 커밋한 새 release revision에서 실행:
-git tag v0.1.1
-git push origin v0.1.1
+git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
+git push origin "refs/tags/$RELEASE_TAG"
 # 또는 GitHub Actions 수동 실행에 이미 존재하는 버전 태그 입력
 ```
 
@@ -75,7 +76,7 @@ git push origin v0.1.1
 저장소의 optional WGPU 경로는 아직 crates.io에 없는 `rullama-engine` git 의존성을
 사용합니다. 따라서 `prepare_cargo_release.py`는 저장소를 변경하지 않는 별도 staging
 디렉토리에 native 배포를 준비합니다. 공개 feature는 `llama`, `llama-cuda`, `llama-metal`,
-`openrouter`이며 stdio·native batching API가 포함됩니다. WGPU는 저장소 빌드 전용입니다.
+`onnx`, `onnx-cuda`, `openrouter`이며 stdio·native batching API가 포함됩니다. WGPU는 저장소 빌드 전용입니다.
 내부 벤치마크용 `l2s1-tools`의 `publish = false`는 유지합니다.
 
 `.crate` 파일과 staging source는 같은 build job에서 만들어 검증합니다. 실제 게시 job은
@@ -115,3 +116,5 @@ If publication fails after `assemble` succeeds, dispatch `release.yml` from main
 `node sdks/typescript/scripts/install-ci.mjs` installs only the locked development tools. It temporarily excludes the native runtime optional dependencies from npm's input and restores both manifest files byte-for-byte, even on failure. CI builds those runtimes separately and verifies the packed SDK with its matching runtime in `test:package`. This keeps build-tool installation independent of whether the release's runtime packages have been published yet.
 
 After publication, refresh the checked-in developer lockfile with `npm install --package-lock-only --ignore-scripts` in `sdks/typescript`. Wait for PR checks before merging; Python and TypeScript checks also run on matching main changes, and reusable checks use the triggering commit SHA unless an explicit release commit is supplied.
+
+ONNX Runtime은 별도 설치가 필요하며 npm native 번들에 포함되지 않습니다.

@@ -1,5 +1,7 @@
 # SDK release pipeline
 
+v0.2.0 was published to GitHub Release, npm, PyPI and crates.io on 2026-09-30 KST. [Successful release workflow](https://github.com/LuticaCANARD/L2S1/actions/runs/36589017452).
+
 [English](RELEASE_PIPELINE.md) · [한국어](../ko/RELEASE_PIPELINE.md) · [日本語](../ja/RELEASE_PIPELINE.md)
 
 [release.yml](../../.github/workflows/release.yml) runs on a stable `vMAJOR.MINOR.PATCH`
@@ -38,7 +40,7 @@ is independent from GitHub. The workflow does not create these external accounts
 The checkout's WGPU backend uses the unpublished git crate `rullama-engine`.
 `prepare_cargo_release.py` creates a separate native-only staging tree without
 changing the checkout. Published features are `llama`, `llama-cuda`, `llama-metal`,
-`openrouter`, including stdio and native batching. WGPU remains checkout-only.
+`onnx`, `onnx-cuda`, `openrouter`, including stdio and native batching. WGPU remains checkout-only.
 Both `.crate` archives and the staged source come from one build. Publication
 repackages that source and compares SHA-256 to the verified archives first.
 Weights and build outputs are excluded.
@@ -49,10 +51,11 @@ Align versions in root/sys Cargo manifests, Python pyproject/exported/runtime
 versions, npm package/lock and all runtime optional dependencies.
 
 ```sh
-python scripts/prepare_release.py --tag v0.1.1
+RELEASE_TAG=vMAJOR.MINOR.PATCH # replace with a new, unused version after aligning package versions
+python scripts/prepare_release.py --tag "$RELEASE_TAG"
 python -m unittest discover -s scripts -p test_release_pipeline.py -v
-git tag v0.1.1
-git push origin v0.1.1
+git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
+git push origin "refs/tags/$RELEASE_TAG"
 ```
 
 Registries are not one transaction. If one publishes and another fails, rerun
@@ -73,3 +76,5 @@ startup, not downloaded model weights. Real local GGUF CPU smoke is separate.
 [Cargo dependency rules](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html).
 
 [English index](../en/README.md) · [한국어 색인](../ko/README.md) · [日本語索引](../ja/README.md)
+
+ONNX Runtime must be installed separately; npm native bundles do not include it.

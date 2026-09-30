@@ -1,0 +1,68 @@
+[
+  {
+    "name": "fresh",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--request-batch-size",
+      "2",
+      "--parallel-width",
+      "2",
+      "--parallel-context-dynamic"
+    ]
+  },
+  {
+    "name": "split-cold",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--request-batch-size",
+      "2",
+      "--parallel-width",
+      "2",
+      "--parallel-context-dynamic",
+      "--execution-mode",
+      "parallel"
+    ]
+  },
+  {
+    "name": "split-resident",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--request-batch-size",
+      "2",
+      "--parallel-width",
+      "2",
+      "--parallel-context-dynamic",
+      "--execution-mode",
+      "parallel",
+      "--resident",
+      "shared-prefix"
+    ]
+  }
+]

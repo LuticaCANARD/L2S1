@@ -1,5 +1,7 @@
 # SDK 配布パイプライン
 
+v0.2.0は2026-09-30 KSTにGitHub Release・npm・PyPI・crates.ioへ公開されました。[完了した配布](https://github.com/LuticaCANARD/L2S1/actions/runs/36589017452)。
+
 [English](../en/RELEASE_PIPELINE.md) · [한국어](../ko/RELEASE_PIPELINE.md) · [日本語](RELEASE_PIPELINE.md)
 
 [release.yml](../../.github/workflows/release.yml) は安定版 `vMAJOR.MINOR.PATCH` の tag
@@ -33,7 +35,7 @@ trusted publisher に登録します。registry アカウント・公開権限�
 
 checkout の WGPU は未公開の git crate `rullama-engine` を使っています。
 `prepare_cargo_release.py` は checkout を変更せず別 staging に native 配布を作ります。
-公開 feature は `llama`・`llama-cuda`・`llama-metal`・`openrouter` で stdio/native batch を
+公開 feature は `llama`・`llama-cuda`・`llama-metal`・`onnx`・`onnx-cuda`・`openrouter` で stdio/native batch を
 含みます。WGPU は checkout 専用です。同一 build の `.crate` と staging source を使い、
 公開前の再 package と検証済み archive の SHA-256 が一致する必要があります。
 モデルと build 出力は含みません。
@@ -44,10 +46,11 @@ Cargo root/sys manifests、Python pyproject/export/runtime version、npm package
 runtime optional dependencies を同一 version にします。
 
 ```sh
-python scripts/prepare_release.py --tag v0.1.1
+RELEASE_TAG=vMAJOR.MINOR.PATCH # replace with a new, unused version after aligning package versions
+python scripts/prepare_release.py --tag "$RELEASE_TAG"
 python -m unittest discover -s scripts -p test_release_pipeline.py -v
-git tag v0.1.1
-git push origin v0.1.1
+git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
+git push origin "refs/tags/$RELEASE_TAG"
 ```
 
 registry 間は単一 transaction ではありません。一部成功後に他が失敗したら同じ検証済み
@@ -66,3 +69,5 @@ integrity・PyPI SHA-256・crates.io archive SHA-256 の完全一致時のみ省
 [GitHub draft release](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases)
 
 [English index](../en/README.md) · [한국어 색인](../ko/README.md) · [日本語索引](../ja/README.md)
+
+ONNX Runtimeは別途インストールが必要で、npm native bundleには含まれません。

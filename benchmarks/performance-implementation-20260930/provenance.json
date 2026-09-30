@@ -1,0 +1,1115 @@
+{
+  "e2b": {
+    "accuracy-dev": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+        "input": "afaeef4cf60e25eee1404d0aae2b09f878da838c7aa9290551b70e5fa535ffae",
+        "gold": "b1617130bb7e5d481d31a9c71554b542b215044847f44705ec05b6a6918bb651",
+        "matrix": "f95c2c28d520cf02550476900f97a6c3967f0b07a8066704b9b4d00c0e6043a2"
+      },
+      "configs": [
+        {
+          "name": "raw",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy"
+          ]
+        },
+        {
+          "name": "facts",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--derive-facts"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "456d4d035f0890a6196fd3024998112b908dd5f8ba6a06173e2f47d8d36d5470"
+    },
+    "schema": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+        "input": "f1dfb5305d967f8623e72f21a248950a13a8034eb288d1d61ff5b1c9a115d094",
+        "gold": "83f7271c2583c348a8f20c22bca52641d2f5f14e1234d0108a5caf784c24a02b",
+        "matrix": "19f1b0b7cc1896a4f9953a538030284d6c8a0072fca80fe9702666373de629b0"
+      },
+      "configs": [
+        {
+          "name": "fresh",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on"
+          ]
+        },
+        {
+          "name": "split-cold",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--execution-mode",
+            "prefix-reuse"
+          ]
+        },
+        {
+          "name": "split-resident",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--execution-mode",
+            "prefix-reuse",
+            "--resident",
+            "fixed-schema"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "5e8427d0e344aeb0fa43faa1e7b2279e33caaa202930a41433f777f8c439df24"
+    },
+    "shared": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+        "input": "4078152efcf126a19ce4a71664e36982004165e9cbd9bbd9b2d0fd16ab8b3796",
+        "gold": "83f7271c2583c348a8f20c22bca52641d2f5f14e1234d0108a5caf784c24a02b",
+        "matrix": "ecd17adda3ac0648ae576419fdcdf1c2f55dd86a0c0c0d2aa089a88420058e16"
+      },
+      "configs": [
+        {
+          "name": "fresh",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--request-batch-size",
+            "2",
+            "--parallel-width",
+            "2",
+            "--parallel-context-dynamic"
+          ]
+        },
+        {
+          "name": "split-cold",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--request-batch-size",
+            "2",
+            "--parallel-width",
+            "2",
+            "--parallel-context-dynamic",
+            "--execution-mode",
+            "parallel"
+          ]
+        },
+        {
+          "name": "split-resident",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--request-batch-size",
+            "2",
+            "--parallel-width",
+            "2",
+            "--parallel-context-dynamic",
+            "--execution-mode",
+            "parallel",
+            "--resident",
+            "shared-prefix"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "4b7d9b6e1310c16c9bd69c29cb2b96c3c7977e1acc60b8adc9cc0acd2c47337e"
+    },
+    "holdout": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+        "input": "58d34ed92af193ac5eb1a553a5cc7fb435f8b87dffc64f4dcf0892d41232dba0",
+        "gold": "8e5261314fa8769a86fea46739ac14afb822c9ecc5b76f39117efd7093b1659c",
+        "matrix": "f95c2c28d520cf02550476900f97a6c3967f0b07a8066704b9b4d00c0e6043a2"
+      },
+      "configs": [
+        {
+          "name": "raw",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy"
+          ]
+        },
+        {
+          "name": "facts",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--derive-facts"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "fc6a6a86904bdaf3267239b71835d81ba26c3034600631481f1ccd06f8a955a3"
+    },
+    "jevbench": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+        "input": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "gold": "2b3f95ea3258c7ac51a0695d192a3a03dac4574ad6c62c884e17c14425a901e7",
+        "matrix": "ce5ccacba6b42cd42e5208eb6c775d0b8fb96963a920777fb15685347a6bd2af"
+      },
+      "configs": [
+        {
+          "name": "baseline",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy"
+          ]
+        },
+        {
+          "name": "flash",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "82a2946acaab5d9720278689afb9e0743608ca3dd9b1c1575b09e1cf978018aa"
+    }
+  },
+  "12b": {
+    "accuracy-dev": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b",
+        "input": "afaeef4cf60e25eee1404d0aae2b09f878da838c7aa9290551b70e5fa535ffae",
+        "gold": "b1617130bb7e5d481d31a9c71554b542b215044847f44705ec05b6a6918bb651",
+        "matrix": "f95c2c28d520cf02550476900f97a6c3967f0b07a8066704b9b4d00c0e6043a2"
+      },
+      "configs": [
+        {
+          "name": "raw",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy"
+          ]
+        },
+        {
+          "name": "facts",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--derive-facts"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "3b1f83d60193e1d03ccda23d636918e08bd12a34089372e848bb00390eadbd11"
+    },
+    "compute": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b",
+        "input": "64c9fda2b66d35529ded1ce3d7235a87be345c69caa46cfa9b8cc30844349d49",
+        "gold": "f3968968ba044f75b7b60e8a9e2631a640a5152e04f83f9c06b9755f43bf23d2",
+        "matrix": "529bd6b698688b820dbbccbc7951264e3df859116f1d26e63dc71730b3dd87bb"
+      },
+      "configs": [
+        {
+          "name": "baseline",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy"
+          ]
+        },
+        {
+          "name": "flash",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on"
+          ]
+        },
+        {
+          "name": "flash-ub128",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--ubatch",
+            "128"
+          ]
+        },
+        {
+          "name": "flash-b128",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on"
+          ]
+        },
+        {
+          "name": "parallel-dynamic-1",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--execution-mode",
+            "parallel",
+            "--parallel-width",
+            "1",
+            "--parallel-context-dynamic"
+          ]
+        },
+        {
+          "name": "parallel-dynamic-2",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--execution-mode",
+            "parallel",
+            "--parallel-width",
+            "2",
+            "--parallel-context-dynamic"
+          ]
+        },
+        {
+          "name": "parallel-dynamic-3",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--execution-mode",
+            "parallel",
+            "--parallel-width",
+            "3",
+            "--parallel-context-dynamic"
+          ]
+        },
+        {
+          "name": "parallel-static-3",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--execution-mode",
+            "parallel",
+            "--parallel-width",
+            "3"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": false,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "e723a905b3716ddbacf0dcbb9ae476404635b2983e4aa0ec21b45a94d00843b9"
+    },
+    "schema": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b",
+        "input": "f1dfb5305d967f8623e72f21a248950a13a8034eb288d1d61ff5b1c9a115d094",
+        "gold": "83f7271c2583c348a8f20c22bca52641d2f5f14e1234d0108a5caf784c24a02b",
+        "matrix": "19f1b0b7cc1896a4f9953a538030284d6c8a0072fca80fe9702666373de629b0"
+      },
+      "configs": [
+        {
+          "name": "fresh",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on"
+          ]
+        },
+        {
+          "name": "split-cold",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--execution-mode",
+            "prefix-reuse"
+          ]
+        },
+        {
+          "name": "split-resident",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--execution-mode",
+            "prefix-reuse",
+            "--resident",
+            "fixed-schema"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "fed2490190059c51640483f2e18704a11175cbe55741144ebfcd86e5bd2517bf"
+    },
+    "shared": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b",
+        "input": "4078152efcf126a19ce4a71664e36982004165e9cbd9bbd9b2d0fd16ab8b3796",
+        "gold": "83f7271c2583c348a8f20c22bca52641d2f5f14e1234d0108a5caf784c24a02b",
+        "matrix": "ecd17adda3ac0648ae576419fdcdf1c2f55dd86a0c0c0d2aa089a88420058e16"
+      },
+      "configs": [
+        {
+          "name": "fresh",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--request-batch-size",
+            "2",
+            "--parallel-width",
+            "2",
+            "--parallel-context-dynamic"
+          ]
+        },
+        {
+          "name": "split-cold",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--request-batch-size",
+            "2",
+            "--parallel-width",
+            "2",
+            "--parallel-context-dynamic",
+            "--execution-mode",
+            "parallel"
+          ]
+        },
+        {
+          "name": "split-resident",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "128",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on",
+            "--request-batch-size",
+            "2",
+            "--parallel-width",
+            "2",
+            "--parallel-context-dynamic",
+            "--execution-mode",
+            "parallel",
+            "--resident",
+            "shared-prefix"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "ce89c507d93083877693bcd4045bea54a54213bd9ac7e056e8b148897d3b0bcb"
+    },
+    "holdout": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b",
+        "input": "5f0668747665dce49a932255dfd3e2849d17c5f052dd73b267dafee51ecff8e0",
+        "gold": "8e5261314fa8769a86fea46739ac14afb822c9ecc5b76f39117efd7093b1659c",
+        "matrix": "f95c2c28d520cf02550476900f97a6c3967f0b07a8066704b9b4d00c0e6043a2"
+      },
+      "configs": [
+        {
+          "name": "raw",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy"
+          ]
+        },
+        {
+          "name": "facts",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--derive-facts"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "e0d622aa57b0e89e505481c93e66f51a115c1c19ee97aa73c53553120142d6b7"
+    },
+    "jevbench": {
+      "version": 1,
+      "hashes": {
+        "binary": "b40431ef79f1603e84d94e190eda38ce8c8be5064d07037dc1fd26d235359099",
+        "model": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b",
+        "input": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "gold": "2b3f95ea3258c7ac51a0695d192a3a03dac4574ad6c62c884e17c14425a901e7",
+        "matrix": "ce5ccacba6b42cd42e5208eb6c775d0b8fb96963a920777fb15685347a6bd2af"
+      },
+      "configs": [
+        {
+          "name": "baseline",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy"
+          ]
+        },
+        {
+          "name": "flash",
+          "args": [
+            "--context",
+            "4096",
+            "--batch",
+            "256",
+            "--threads",
+            "4",
+            "--prompt-layout",
+            "legacy",
+            "--flash-attention",
+            "on"
+          ]
+        }
+      ],
+      "repeats": 3,
+      "evaluation_only": true,
+      "platform": {
+        "system": "Linux",
+        "release": "6.18.33.2-microsoft-standard-WSL2",
+        "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "gate": {
+        "top1_changes": 0,
+        "selection_changes": 0,
+        "input_token_changes": 0,
+        "max_probability_delta": 0.02,
+        "max_mass_delta": 0.02,
+        "p50_ratio": 0.95,
+        "p95_ratio": 1.05
+      },
+      "environment": {},
+      "runtime": {
+        "libllama.so.0.4.1": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so.0.4.1": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so.0.24.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so.0.24.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so.0.24.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libllama.so": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libllama.so.0": "1c33ccdfcc543e31ae895758bc0f04a9f6a7b293dfdadcb45d1ec8da43a39868",
+        "libmtmd.so": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libmtmd.so.0": "3147d9e5e02e8ded825b4a166bf0e06efc7f8910bca8e54b9adc166fd448089f",
+        "libggml-base.so": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+        "libggml.so": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml.so.0": "f40da96136eae52b32dcaba4e888de64fb7005c4f1727da4049dc72fe4768833",
+        "libggml-cuda.so": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cuda.so.0": "b3dcd0277ce74b2bfae87a05c04803dc30ed85973daf218b228d11e4a9f22f45",
+        "libggml-cpu.so": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0",
+        "libggml-cpu.so.0": "cf491c190b9ccee58ac67bf5033591efa0ea4aead60831bfb3ada833d39bd8d0"
+      },
+      "raw_plan_sha256": "10f6810d71782656e741a7299ddee2320c8aa21191f1fb6745b8b993320c6c13"
+    }
+  }
+}

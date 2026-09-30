@@ -1,0 +1,30 @@
+[
+  {
+    "name": "baseline",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "256",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy"
+    ]
+  },
+  {
+    "name": "flash",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "256",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on"
+    ]
+  }
+]

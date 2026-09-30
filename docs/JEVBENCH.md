@@ -1,5 +1,7 @@
 # JevBench public evaluation
 
+[Performance review](PERFORMANCE_REVIEW.md): current measurements, failure analysis and prioritized experiments.
+
 [English](en/JEVBENCH.md) · [한국어](ko/JEVBENCH.md) · [日本語](ja/JEVBENCH.md)
 
 [English index](en/README.md) · [한국어 색인](ko/README.md) · [日本語索引](ja/README.md)

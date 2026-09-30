@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.2.0 (2026-09-30)
 
 Parallel prefix sharing. Several defaults change prompts or wave schedules, so
 decisions, scores and calibration identities can differ from 0.1.4. Re-evaluate

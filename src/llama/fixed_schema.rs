@@ -1,14 +1,18 @@
 //! Owned, bounded fixed-schema session for resident applications and HTTP.
 use super::*;
+use sha2::{Digest, Sha256};
 use std::collections::VecDeque;
 
 /// Keeps one native KV context plus up to eight prefix snapshots (256 MiB total).
 /// Snapshot eviction recomputes the prefix; schema tokens have a separate 4 MiB limit.
 /// Cold and warm evaluations use the same explicit prefix/suffix split.
+/// Only the current ordered decision schema is retained. Changing any decision
+/// clears all native snapshots and schema tokens, even when returning to an old schema.
 pub struct FixedSchemaBackend {
     backend: LlamaBackend,
     prefixes: VecDeque<(String, Vec<i32>)>,
     retained_bytes: usize,
+    active_schema: Option<[u8; 32]>,
 }
 impl FixedSchemaBackend {
     /// Whether this configured backend can preserve the fixed prefix/suffix plan.
@@ -31,6 +35,7 @@ impl FixedSchemaBackend {
             backend,
             prefixes: VecDeque::new(),
             retained_bytes: 0,
+            active_schema: None,
         })
     }
 
@@ -39,6 +44,7 @@ impl FixedSchemaBackend {
         unsafe { sd_clear(self.backend.engine.as_ptr()) };
         self.prefixes.clear();
         self.retained_bytes = 0;
+        self.active_schema = None;
     }
 
     fn prefix(&mut self, decision: &Decision) -> Result<Vec<i32>> {
@@ -85,6 +91,18 @@ impl FixedSchemaBackend {
         let result = (|| {
             request.validate()?;
             self.backend.check_artifacts(request)?;
+            // Include IDs, instructions, kinds, option values and their order.
+            // State is deliberately excluded: each call evaluates its new suffix.
+            // Keep only a bounded digest, not a second copy of caller data.
+            let schema: [u8; 32] = Sha256::digest(
+                serde_json::to_vec(&request.decisions)
+                    .map_err(|e| Error::Invalid(e.to_string()))?,
+            )
+            .into();
+            if self.active_schema != Some(schema) {
+                self.clear();
+                self.active_schema = Some(schema);
+            }
             let mut results = Vec::with_capacity(request.decisions.len());
             for decision in &request.decisions {
                 if decision.options().len() > 26 {
@@ -143,7 +161,7 @@ impl crate::http::HttpDecisionBackend for FixedSchemaBackend {
         caps["batch"]["enabled"] = false.into();
         caps["prefix_reuse"] = serde_json::json!({"supported":true,"enabled":true,
             "plan":"fixed-schema-split-v1","kv_slots":1,"snapshot_entries":8,"snapshot_bytes":268435456,"schema_entries":64,"schema_bytes":4194304,
-            "isolation":"dedicated server instance per trust domain","answers_cached":false});
+            "isolation":"dedicated server instance per trust domain","schema_change":"clear_all","answers_cached":false});
         caps
     }
     fn decide_json(

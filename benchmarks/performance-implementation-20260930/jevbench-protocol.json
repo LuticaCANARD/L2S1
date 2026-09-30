@@ -1,0 +1,14 @@
+{
+  "upstream_revision": "f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84",
+  "public_items": 231,
+  "splits": {"easy": 48, "original": 72, "hard": 111},
+  "models": ["gemma-4-E2B-it-Q8_0.gguf", "gemma-4-12b-it-qat-q4_0.gguf"],
+  "configs": ["fresh legacy context=4096 batch=256 ubatch=256 threads=4 flash=off", "same with flash=on"],
+  "repeats": 3,
+  "warmup": "one excluded first request in each process",
+  "facts": "disabled; original benchmark requests remain unchanged",
+  "role": "public regression test; already examined and not an untouched holdout",
+  "selection": "fixed off/on comparison before reading new outcomes; independent of compute gate recommendation",
+  "scoring": "l2s1-tools jevbench-public score with pinned upstream comparison",
+  "denominator": "231 unique items per model/config; repeats are timing and stability measurements"
+}

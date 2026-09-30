@@ -7,7 +7,7 @@
 
 `@l2s1/node` は、Node.js の既存の Rust 推論エンジンを使用します。 1 つのモデル プロセスは呼び出しをまたいで常駐します。バイナリ、選択、順序付き、画像、ポリシー、推論、および証拠フィールドは、Rust HTTP v1 スキーマを使用します。検証、トークン化、スコアリング、判断保留 および GPU の実行は Rust に残ります。
 
-Node.js 22+ が必要です。ラッパーは、現在の OS および CPU アーキテクチャ用のオプションの事前構築済みランタイム パッケージを選択します。各ランタイム パッケージには、Rust 実行可能ファイルと、対応する llama.cpp/GGML 共有ライブラリが含まれています。インストールではコンパイル スクリプトやダウンロード スクリプトは実行されません。モデルウェイトは別途提供されます。[バージョン 0.1.4](https://www.npmjs.com/package/@l2s1/node/v/0.1.4) を npm に公開しました。
+Node.js 22+ が必要です。ラッパーは、現在の OS および CPU アーキテクチャ用のオプションの事前構築済みランタイム パッケージを選択します。各ランタイム パッケージには、Rust 実行可能ファイルと、対応する llama.cpp/GGML 共有ライブラリが含まれています。インストールではコンパイル スクリプトやダウンロード スクリプトは実行されません。モデルウェイトは別途提供されます。[バージョン 0.2.0](https://www.npmjs.com/package/@l2s1/node/v/0.2.0) を npm に公開しました。
 
 Scope 権限、パッケージ順序、認証、プラットフォームのリリース条件は [npm 公開の検討](PUBLISHING.md)を参照してください。
 
@@ -17,7 +17,7 @@ Scope 権限、パッケージ順序、認証、プラットフォームのリ�
 npm からインストール:
 
 ```sh
-npm install @l2s1/node@0.1.4
+npm install @l2s1/node@0.2.0
 ```
 
 ### このリポジトリからインストールする
@@ -25,10 +25,10 @@ npm install @l2s1/node@0.1.4
 エンド ユーザーの場合は、ビルド ワークフローによって生成されたラッパーとプラットフォーム ランタイム tarball をインストールします。たとえば、Linux x64 の場合は次のようになります。
 
 ```sh
-npm install ./l2s1-node-0.1.4.tgz ./l2s1-runtime-linux-x64-0.1.4.tgz
+npm install ./l2s1-node-0.2.0.tgz ./l2s1-runtime-linux-x64-0.2.0.tgz
 ```
 
-`npm install @l2s1/node@0.1.4` はオプションの依存関係からランタイムを選択します。オプションの依存関係を有効にしておきます。ランタイムとラッパーのバージョンは一致する必要があります。
+`npm install @l2s1/node@0.2.0` はオプションの依存関係からランタイムを選択します。オプションの依存関係を有効にしておきます。ランタイムとラッパーのバージョンは一致する必要があります。
 
 カスタム ネイティブ ビルドの場合は、リポジトリ ルートで Rust 実行可能ファイルをビルドします。
 
@@ -46,7 +46,7 @@ node scripts/install-ci.mjs
 npm run build
 npm pack
 # In your application:
-npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.1.4.tgz
+npm install /path/to/L2S1/sdks/typescript/l2s1-node-0.2.0.tgz
 ```
 
 <a id="load-a-local-model"></a>
@@ -234,7 +234,7 @@ cd sdks/typescript/runtime-packages/linux-x64
 npm pack --pack-destination ../../ --ignore-scripts
 cd ../..
 npm pack
-npm run test:package -- l2s1-node-0.1.4.tgz l2s1-runtime-linux-x64-0.1.4.tgz
+npm run test:package -- l2s1-node-0.2.0.tgz l2s1-runtime-linux-x64-0.2.0.tgz
 ```
 
 ランタイムの再ビルドには新しい出力ディレクトリを使ってください。`L2S1_PORTABLE_BUILD=1` はビルドホスト専用 CPU 命令と OpenMP 依存関係を無効にします。Linux ARM64 パッケージは実行時の CPU 機能に応じた GGML カーネルを選択し、ARMv8 fallback を含みます。パッケージ CI は Ubuntu 24.04 / GCC 14 を使う設定です。移動時はすべての CPU モジュールを同梱してください。比較ビルドと独自 OpenMP 依存関係は[ネイティブビルド設定](../crates/l2s1-llama-sys/README.md#portable-linux-arm64)を参照してください。各パッケージにはライセンスと SHA-256 マニフェストがあり、検証は llama.cpp/GGML の依存関係がパッケージ内で解決されることを確認します。
@@ -248,3 +248,5 @@ npm run test:package -- l2s1-node-0.1.4.tgz l2s1-runtime-linux-x64-0.1.4.tgz
 `fixedSchema` を省略するとランタイムの既定値に従います。true は対応を必須にし、false は実行モード省略時に fresh を選びます。明示した実行モードは false より優先されます。
 
 この既定値は v0.1.4 に含まれます。以前の v0.1.3 では `fixedSchema: true` / `fixed_schema=True` の明示が必要です。
+
+この変更を含むランタイムでは、決定スキーマの内容や順序が変わると保持したプレフィックスをすべて破棄します。以前の plan に戻った場合も最初のリクエストは再計算し、state だけの変更ではプレフィックスを再利用します。`capabilities().prefix_reuse.schema_change == "clear_all"` で確認できます。既存の公開ランタイムには自動適用されません。

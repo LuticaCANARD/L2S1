@@ -1,0 +1,141 @@
+[
+  {
+    "name": "baseline",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "256",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy"
+    ]
+  },
+  {
+    "name": "flash",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "256",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on"
+    ]
+  },
+  {
+    "name": "flash-ub128",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "256",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--ubatch",
+      "128"
+    ]
+  },
+  {
+    "name": "flash-b128",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on"
+    ]
+  },
+  {
+    "name": "parallel-dynamic-1",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--execution-mode",
+      "parallel",
+      "--parallel-width",
+      "1",
+      "--parallel-context-dynamic"
+    ]
+  },
+  {
+    "name": "parallel-dynamic-2",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--execution-mode",
+      "parallel",
+      "--parallel-width",
+      "2",
+      "--parallel-context-dynamic"
+    ]
+  },
+  {
+    "name": "parallel-dynamic-3",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--execution-mode",
+      "parallel",
+      "--parallel-width",
+      "3",
+      "--parallel-context-dynamic"
+    ]
+  },
+  {
+    "name": "parallel-static-3",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--execution-mode",
+      "parallel",
+      "--parallel-width",
+      "3"
+    ]
+  }
+]
