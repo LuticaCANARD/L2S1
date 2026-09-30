@@ -122,7 +122,7 @@ def main(command=None):
                 if a.rules_fixture:
                     stage('prepare-regression', [sys.executable, '-m', 'l2s1_training.report_jev_rule_regression',
                         '--fixture', a.rules_fixture, '--requests-output', out/'rules-requests.jsonl'])
-                layout = 'legacy'
+                layout = validate_dataset(a.data)['protocol']['prompt_layout']
                 execution = ['--execution-mode', 'fresh'] if a.eval_execution == 'fresh' else [
                     '--execution-mode', 'parallel', '--parallel-width', '8', '--parallel-context-dynamic',
                     # Token sharing pays off only when prompts share the state; legacy leads with the question.
