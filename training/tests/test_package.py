@@ -23,14 +23,39 @@ def row(name):
 
 
 class PackageTests(unittest.TestCase):
-    def prepare(self, root):
+    def prepare(self, root, **prompt):
         paths = []
         for split in ('train', 'development', 'test'):
             path = root/(split+'.jsonl')
             path.write_text(json.dumps(row(split), ensure_ascii=False)+'\n', encoding='utf-8')
             paths.append(path)
-        prepare_custom(*paths, root/'data')
+        prepare_custom(*paths, root/'data', **prompt)
         return root/'data'
+
+    def test_deployment_prompt_settings_are_recorded_and_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data = self.prepare(Path(tmp), layout='state-first', detail='typed')
+            protocol = validate_dataset(data)['protocol']
+            self.assertEqual((protocol['prompt_layout'], protocol['prompt_detail']), ('state-first', 'typed'))
+            manifest = json.loads((data/'manifest.json').read_text(encoding='utf-8'))
+            manifest['protocol']['prompt_layout'] = 'sideways'
+            save_status(data/'manifest.json', manifest)
+            with self.assertRaisesRegex(ValueError, 'layout'):
+                validate_dataset(data)
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaisesRegex(ValueError, 'layout'):
+            self.prepare(Path(tmp), layout='sideways')
+
+    def test_score_object_criteria_keep_application_level_ids(self):
+        from l2s1_training.prepare_jev_data import decision
+        from l2s1_training.report_jev import answer
+        d = decision('priority', dict(type='score', instructions='How urgent?',
+                                      criteria={'low': 'Later', 'medium': 'This week', 'high': 'Now'}))
+        self.assertEqual([(o['id'], o['value']) for o in d['kind']['levels']],
+                         [('low', 0), ('medium', 1), ('high', 2)])
+        scores = [dict(id=i, option_probability=p) for i, p in (('low', .1), ('medium', .2), ('high', .7))]
+        a = answer(d, dict(id='priority', scores=scores))
+        self.assertAlmostEqual(a['score'], 1.6)
+        self.assertEqual(list(a['legend']), ['low', 'medium', 'high'])
 
     def test_custom_score_without_explicit_expectation_renders_all_types(self):
         from l2s1_training.common import option_specs

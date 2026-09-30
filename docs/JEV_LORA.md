@@ -183,7 +183,8 @@ Case/question IDs cannot contain `/`, which separates native training IDs.
 ```
 
 Choice uses a criteria object keyed by label; Noul uses `false`/`true`; Score uses
-an ordered criteria array and zero-based string labels (`"0"`, `"1"`, ...).
+an ordered criteria array and zero-based string labels (`"0"`, `"1"`, ...), or an
+ordered criteria object whose keys become the level labels (`{"low": ..., "high": ...}`).
 See [`training/examples`](../training/examples) for all three types. The example
 splits only demonstrate the file format, not a useful training dataset.
 
@@ -192,6 +193,13 @@ l2s1-train prepare --train my-data/train.jsonl \
   --development my-data/development.jsonl --test my-data/test.jsonl \
   --output results/my-jev-data
 ```
+
+An adapter only helps prompts rendered the way it was trained. If the application
+runs another layout or detail, prepare with the same settings, for example
+`--prompt-layout state-first --prompt-detail typed`. They are recorded in the
+protocol and token seal, and `run` exports, trains and evaluates with them; the
+default stays `legacy` / `minimal` (the pilot protocol). Export enforces the
+evaluator's 8192-token context.
 
 Use that directory as `run --data`. Preparation rejects duplicate IDs and exact
 canonical states both within and across splits. Native inference files contain

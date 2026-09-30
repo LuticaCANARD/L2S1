@@ -23,6 +23,11 @@ def training_rows(data, tokens):
             'Token seal mismatch')
     require(seal['requests_sha256'] == digest(data/'train-token-requests.jsonl') == manifest['token_requests_sha256'],
             'Exported request binding mismatch')
+    protocol = manifest['protocol']
+    require(seal.get('prompt_layout') == protocol['prompt_layout'] and
+            seal.get('prompt_detail') == protocol['prompt_detail'], 'Token prompt settings differ from the protocol')
+    # Seals written before the exporter took --context used the default 2048.
+    context = seal.get('context', 2048)
     splits = {}
     for name, config in manifest['splits'].items():
         path = data/f'{name}.jsonl'
@@ -47,12 +52,12 @@ def training_rows(data, tokens):
         require((row['id'], rotation) not in seen, 'Duplicate rotation')
         seen.add((row['id'], rotation))
         require(row['candidate_codes'] == [chr(65+(i+width-rotation)%width) for i in range(width)], 'Code mapping mismatch')
-        require(len(set(row['candidate_ids'])) == width and len(row['input_ids']) <= 2048, 'Invalid token count')
+        require(len(set(row['candidate_ids'])) == width and len(row['input_ids']) <= context, 'Invalid token count')
         require(all(type(i) is int and i >= 0 for i in row['input_ids']+row['candidate_ids']), 'Invalid token ID')
         identity = row['model_identity']
         require(identity.get('adapter_sha256') is None and identity.get('head_sha256') is None, 'Export must use base')
         require(identity['weights_sha256'] == seal['model_sha256'], 'Token model hash mismatch')
-        identities.add(json.dumps(normalized_token_identity(identity, rotation, 'minimal'), sort_keys=True))
+        identities.add(json.dumps(normalized_token_identity(identity, rotation, protocol['prompt_detail'].replace('-', '_')), sort_keys=True))
         chosen = int(hashlib.sha256(f'{SEED}:{row["id"]}'.encode()).hexdigest(), 16) % width
         if rotation == chosen:
             selected.append(dict(row, target=distribution(gold['probabilities'], ids)))

@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+- `l2s1-train prepare --prompt-layout {legacy,state-first} --prompt-detail
+  {minimal,typed,typed-examples}` records the prompt the application deploys in
+  the protocol and token seal; `run` exports, trains and evaluates with it.
+  Defaults keep the frozen pilot protocol (`legacy` / `minimal`). (#89)
+- `LlamaBackend::load_vocab_only_with_options` and `export_decision_tokens
+  --context`: vocab-only preparation enforces the deployment context instead of
+  a fixed 2048 tokens; `run` exports with the evaluator's 8192. (#87)
+- `export_decision_tokens` renders a request's `shared` evidence (previously
+  dropped).
+- Jev Score criteria may be an ordered object, keeping application level IDs
+  (for example `low` / `medium` / `high`) instead of `"0"`, `"1"`, ...
+- MLX training maps LoRA modules to the checkpoint's own tensor names (Gemma 4
+  prefixes), loads lazily and checkpoints gradients: Gemma 4 12B trains in
+  12.8 GiB on a 36 GiB Mac.
+
 ## 0.2.1 (2026-09-30)
 
 - Compatible resident servers clear retained KV snapshots and schema tokens when

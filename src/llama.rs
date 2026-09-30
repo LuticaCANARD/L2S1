@@ -237,13 +237,18 @@ impl LlamaBackend {
     /// and prompt setters. Preparation matches a default-compute CPU backend
     /// (2048-token limit, same identity); anything needing logits errors.
     pub fn load_vocab_only(path: &Path, profile: PromptProfile) -> Result<Self> {
-        Self::load_with_device_options(
-            path,
-            ComputeOptions::default(),
-            -1,
-            DecisionPolicy::default(),
-            profile,
-        )
+        Self::load_vocab_only_with_options(path, ComputeOptions::default(), profile)
+    }
+
+    /// `load_vocab_only` with the deployment's compute options, so preparation
+    /// enforces the same `context` limit (and records the same identity) as the
+    /// backend that will run these prompts. No context is allocated either way.
+    pub fn load_vocab_only_with_options(
+        path: &Path,
+        compute: ComputeOptions,
+        profile: PromptProfile,
+    ) -> Result<Self> {
+        Self::load_with_device_options(path, compute, -1, DecisionPolicy::default(), profile)
     }
 
     /// Load a GGUF through the pinned llama.cpp Metal backend on macOS.

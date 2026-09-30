@@ -60,7 +60,7 @@ def doctor(argv):
         except Exception as error:
             checks.append(dict(name='training-imports', ok=False, required=True, error=str(error)))
     for name, path, flags in (
-        ('exporter', a.exporter, ['--all-rotations', '--prompt-detail']),
+        ('exporter', a.exporter, ['--all-rotations', '--prompt-detail', '--context']),
         ('evaluator', a.evaluator, ['--lora', '--request-batch-size', '--model-load-mode']),
     ):
         if path:
