@@ -61,7 +61,7 @@ def doctor(argv):
             checks.append(dict(name='training-imports', ok=False, required=True, error=str(error)))
     for name, path, flags in (
         ('exporter', a.exporter, ['--all-rotations', '--prompt-detail']),
-        ('evaluator', a.evaluator, ['--lora', '--request-batch-size', '--model-load-mode']),
+        ('evaluator', a.evaluator, ['--lora', '--request-batch-size', '--model-load-mode', '--parallel-prefix-alignment']),
     ):
         if path:
             try:

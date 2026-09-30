@@ -49,7 +49,7 @@ def main(command=None):
                    help='Training/evaluation device: CUDA (NF4 + PEFT) or Apple Silicon (MLX + Metal)')
     p.add_argument('--eval-execution', choices=['fresh', 'parallel'], default='fresh',
                    help='fresh reproduces the pilot; parallel batches each case\'s decisions and shares '
-                        'their prompt prefix (faster with state-first prompts; probabilities can differ slightly)')
+                        'their prompt prefix (validate numerical differences, decisions and abstentions for your model)')
     p.add_argument('--rules-fixture', type=Path, help='Optional existing decision-rules regression fixture')
     a = p.parse_args()
     if not math.isfinite(a.stage_timeout) or a.stage_timeout <= 0:
@@ -104,6 +104,10 @@ def main(command=None):
                     if not path.is_file():
                         raise FileNotFoundError(f'Missing local prerequisite: {path}')
                 validate_dataset(a.data)
+                if a.eval_execution == 'parallel':
+                    stage('evaluator-check', [a.evaluator.resolve(), '--help'])
+                    if '--parallel-prefix-alignment' not in (out/'evaluator-check.log').read_text(encoding='utf-8'):
+                        raise ValueError('Evaluator lacks --parallel-prefix-alignment; rebuild evaluate_jsonl before training')
                 status['artifacts'] = {k:digest(v) for k,v in dict(model=model, exporter=a.exporter,
                     evaluator=a.evaluator, converter=a.converter, manifest=a.data/'manifest.json').items()}
                 tokens = out/'train-tokens.jsonl'
