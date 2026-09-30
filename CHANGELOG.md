@@ -2,24 +2,27 @@
 
 ## Unreleased
 
-### Fixed
+- `l2s1-train prepare --prompt-layout {legacy,state-first} --prompt-detail
+  {minimal,typed,typed-examples}` records the prompt the application deploys in
+  the protocol and token seal; `run` exports, trains and evaluates with it.
+  Defaults keep the frozen pilot protocol (`legacy` / `minimal`). (#89)
+- `LlamaBackend::load_vocab_only_with_options` and `export_decision_tokens
+  --context`: vocab-only preparation enforces the deployment context instead of
+  a fixed 2048 tokens; `run` exports with the evaluator's 8192. (#87)
+- `export_decision_tokens` renders a request's `shared` evidence (previously
+  dropped).
+- Jev Score criteria may be an ordered object, keeping application level IDs
+  (for example `low` / `medium` / `high`) instead of `"0"`, `"1"`, ...
+- MLX training maps LoRA modules to the checkpoint's own tensor names (Gemma 4
+  prefixes), loads lazily and checkpoints gradients: Gemma 4 12B trains in
+  12.8 GiB on a 36 GiB Mac.
 
-- MLX training on Gemma 4: LoRA tensors are named after the checkpoint's own
-  safetensors names (mlx-lm renames Gemma 4 prefixes, so the 0.2.x adapters
-  could not be converted), and weights load lazily and are quantized while
-  streaming, so Gemma 4 12B trains in about 13 GiB instead of swapping at
-  57 GiB. Verified on Gemma 4 12B IT with the pinned pilot data (raw accuracy
-  0.687 → 0.729, soft KL 2.61 → 0.21).
-
-### Added
-
-- `l2s1-train run --eval-execution parallel` evaluates each case's decisions
-  in one parallel call. The default `fresh` reproduces the pilot. With the
-  pilot's `legacy` prompts it is about as fast as `fresh` (questions lead, so
-  little prefix is shared); with `state-first` prompts and token-level sharing
-  it measured 1.9× (base) and 1.3× (LoRA) faster on Gemma 4 12B with
-  identical top-1 answers and at most 0.014 probability difference.
-- `evaluate_jsonl --parallel-prefix-alignment`.
+- `l2s1-train run --eval-execution parallel` and `evaluate_jsonl
+  --parallel-prefix-alignment` opt into parallel scoring. The training runner
+  checks evaluator compatibility before export. Validate decisions and abstentions
+  on the deployment model/device; `fresh` remains the default.
+- Jev preparation preserves shared evidence through token export and evaluation;
+  training rejects prompt identity/layout mismatches and invalid token contexts.
 
 ## 0.2.1 (2026-09-30)
 
@@ -78,6 +81,8 @@ workload accuracy and recalibrate before upgrading a deployment. See
 - `l2s1-train run --backend mlx` trains decision adapters on Apple Silicon
   with MLX, writes PEFT-format adapters for the existing GGUF LoRA conversion,
   and evaluates on Metal (`training[mlx]`, `l2s1-train doctor --mlx`).
+  Verified on Gemma 4 12B IT with the pinned pilot data (raw accuracy
+  0.687 → 0.729, soft KL 2.61 → 0.21).
 - `DecisionRequest.shared` (JSON `"shared"`): evidence common to many requests
   or questions, always rendered first in the data segment in both layouts.
   Callers no longer need to name `state` keys so that they sort first. Absent

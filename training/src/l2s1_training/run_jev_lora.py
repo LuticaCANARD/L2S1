@@ -21,11 +21,16 @@ from .prepare_jev_data import validate_dataset
 from . import __version__
 
 
-def seal_tokens(data, tokens, model, exporter):
+# Export enforces the evaluator's context, so every exported prompt is one the evaluator accepts.
+CONTEXT = 8192
+
+
+def seal_tokens(data, tokens, model, exporter, protocol):
     write_json(tokens.with_suffix('.seal.json'), dict(schema_version=1, split='train',
         manifest_sha256=digest(data/'manifest.json'), tokens_sha256=digest(tokens),
         requests_sha256=digest(data/'train-token-requests.jsonl'), model_sha256=digest(model),
-        exporter_sha256=digest(exporter), prompt_layout='legacy', prompt_detail='minimal'))
+        exporter_sha256=digest(exporter), prompt_layout=protocol['prompt_layout'],
+        prompt_detail=protocol['prompt_detail'], context=CONTEXT))
 
 
 def main(command=None):
@@ -103,7 +108,8 @@ def main(command=None):
                 for path in (checkpoint/'config.json', model, a.exporter, a.evaluator, a.converter):
                     if not path.is_file():
                         raise FileNotFoundError(f'Missing local prerequisite: {path}')
-                validate_dataset(a.data)
+                protocol = validate_dataset(a.data)['protocol']
+                prompt = ['--prompt-layout', protocol['prompt_layout'], '--prompt-detail', protocol['prompt_detail']]
                 if a.eval_execution == 'parallel':
                     stage('evaluator-check', [a.evaluator.resolve(), '--help'])
                     if '--parallel-prefix-alignment' not in (out/'evaluator-check.log').read_text(encoding='utf-8'):
@@ -112,8 +118,8 @@ def main(command=None):
                     evaluator=a.evaluator, converter=a.converter, manifest=a.data/'manifest.json').items()}
                 tokens = out/'train-tokens.jsonl'
                 stage('export', [a.exporter.resolve(), '--model', model, '--input', a.data/'train-token-requests.jsonl',
-                      '--output', tokens, '--all-rotations', '--prompt-layout', 'legacy', '--prompt-detail', 'minimal'])
-                seal_tokens(a.data, tokens, model, a.exporter)
+                      '--output', tokens, '--all-rotations', *prompt, '--context', str(CONTEXT)])
+                seal_tokens(a.data, tokens, model, a.exporter, protocol)
                 shared = ['--model', profile['name'], '--profiles', a.profiles, '--data', a.data,
                           '--tokens', tokens, '--checkpoint', checkpoint]
                 trainer = 'l2s1_training.train_jev_mlx' if a.backend == 'mlx' else 'l2s1_training.train_jev_lora'
@@ -126,7 +132,7 @@ def main(command=None):
                 if a.rules_fixture:
                     stage('prepare-regression', [sys.executable, '-m', 'l2s1_training.report_jev_rule_regression',
                         '--fixture', a.rules_fixture, '--requests-output', out/'rules-requests.jsonl'])
-                layout = validate_dataset(a.data)['protocol']['prompt_layout']
+                layout = protocol['prompt_layout']
                 execution = ['--execution-mode', 'fresh'] if a.eval_execution == 'fresh' else [
                     '--execution-mode', 'parallel', '--parallel-width', '8', '--parallel-context-dynamic',
                     # Token sharing pays off only when prompts share the state; legacy leads with the question.
@@ -134,8 +140,8 @@ def main(command=None):
                 for variant in ('base', 'adapter'):
                     pred = out/f'{variant}-predictions.jsonl'
                     cmd = [a.evaluator.resolve(), '--model', model, '--input', a.data/'test-requests.jsonl', '--output', pred,
-                           '--'+('metal' if a.backend == 'mlx' else 'cuda'), '--context', '8192', '--batch', '256', '--threads', '4', *execution,
-                           '--prompt-layout', layout, '--prompt-detail', 'minimal', '--request-batch-size', '1',
+                           '--'+('metal' if a.backend == 'mlx' else 'cuda'), '--context', str(CONTEXT), '--batch', '256', '--threads', '4', *execution,
+                           *prompt, '--request-batch-size', '1',
                            '--model-load-mode', 'read', '--warmup']
                     if variant == 'adapter':
                         cmd += ['--lora', out/'adapter.gguf']

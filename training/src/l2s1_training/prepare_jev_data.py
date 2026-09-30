@@ -17,6 +17,15 @@ PROTOCOL = dict(epochs=1, rank=8, alpha=16, dropout=0, learning_rate=1e-4,
                       rotation='one SHA256-selected code rotation per decision, independent of labels',
                       selection='fixed final epoch; no development/test selection or calibration',
                       prompt_layout='legacy', prompt_detail='minimal')
+# Exporter/evaluator flag values. Train on the prompt the application deploys: an adapter
+# only helps prompts rendered the way it was trained.
+PROMPT_LAYOUTS = ('legacy', 'state-first')
+PROMPT_DETAILS = ('minimal', 'typed', 'typed-examples')
+
+
+def protocol(layout='legacy', detail='minimal'):
+    require(layout in PROMPT_LAYOUTS and detail in PROMPT_DETAILS, 'Unknown prompt layout/detail')
+    return dict(PROTOCOL, prompt_layout=layout, prompt_detail=detail)
 
 
 def canonical(value):
@@ -43,9 +52,12 @@ def decision(qid, q):
         require(isinstance(criteria, dict) and 2 <= len(criteria) <= 26, 'Invalid Choice criteria')
         native = dict(type='choice', options=[dict(id=k, criterion=v) for k, v in criteria.items()])
     elif kind == 'score':
-        require(isinstance(criteria, list) and 2 <= len(criteria) <= 10, 'Invalid Score criteria')
-        native = dict(type='ordinal', levels=[dict(id=str(i), criterion=v, value=i)
-                                             for i, v in enumerate(criteria)])
+        # An ordered array labels levels "0", "1", ...; an ordered object keeps the
+        # application's own level IDs (visible to the model in typed prompts).
+        require(isinstance(criteria, (list, dict)) and 2 <= len(criteria) <= 10, 'Invalid Score criteria')
+        items = list(criteria.items()) if isinstance(criteria, dict) else list(enumerate(criteria))
+        native = dict(type='ordinal', levels=[dict(id=str(k), criterion=v, value=i)
+                                             for i, (k, v) in enumerate(items)])
     else:
         raise ValueError('Unknown Jev type')
     require(all(isinstance(o['id'], str) and o['id'].strip() and
@@ -69,7 +81,16 @@ def convert(row, *, encoded=True):
         ids = [o['id'] for o in option_specs(d)]
         distribution(g['probabilities'], ids)
         require(g['label'] in ids and g['type'] == questions[d['id']]['type'], 'Invalid gold')
-    return dict(id=row['id'], workflow=row['workflow'], request=dict(state=state, decisions=decisions), gold=gold)
+    request = dict(state=state, decisions=decisions)
+    if row.get('shared') is not None:
+        request['shared'] = json.loads(row['shared']) if encoded else row['shared']
+    return dict(id=row['id'], workflow=row['workflow'], request=request, gold=gold)
+
+
+def token_requests(rows):
+    # Keep every inference input, especially shared evidence, when splitting questions.
+    return [dict(id=f'{r["id"]}/{d["id"]}', request=dict(r['request'], decisions=[d]))
+            for r in rows for d in r['request']['decisions']]
 
 
 def state_key(case):
@@ -93,7 +114,7 @@ def jsonl(path, rows):
             f.write(json.dumps(row, ensure_ascii=False)+'\n')
 
 
-def prepare(source, output):
+def prepare(source, output, layout='legacy', detail='minimal'):
     import pyarrow.parquet as pq
     train = [convert(r) for r in pq.read_table(source/'train.parquet').to_pylist()]
     test = [convert(r) for r in pq.read_table(source/'test.parquet').to_pylist()]
@@ -116,20 +137,22 @@ def prepare(source, output):
     check_disjoint(splits)
     write_dataset(splits, output, 'LocalLLaMA/typed-decisions', REVISION,
         {p.name: digest(p) for p in source.iterdir() if p.is_file()},
-        'Synthetic teacher agreement; four seen workflows. Exact canonical state/ID disjointness only; no near-duplicate or pretraining exclusion.')
+        'Synthetic teacher agreement; four seen workflows. Exact canonical state/ID disjointness only; no near-duplicate or pretraining exclusion.',
+        protocol(layout, detail))
 
 
-def prepare_custom(train, development, test, output):
+def prepare_custom(train, development, test, output, layout='legacy', detail='minimal'):
     paths = dict(train=train, development=development, test=test)
     splits = {name: [convert(r, encoded=False) for r in read_jsonl(path)] for name, path in paths.items()}
     require(all(splits.values()), 'Train, development and test splits must be nonempty')
     check_disjoint(splits)
     write_dataset(splits, output, 'custom-jev-jsonl', None,
         {name: digest(path) for name, path in paths.items()},
-        'Agreement with supplied labels. Exact state/ID separation only; label quality and near duplicates require dataset review.')
+        'Agreement with supplied labels. Exact state/ID separation only; label quality and near duplicates require dataset review.',
+        protocol(layout, detail))
 
 
-def write_dataset(splits, output, dataset, revision, source_hashes, scope):
+def write_dataset(splits, output, dataset, revision, source_hashes, scope, protocol):
     check_disjoint(splits)
     output.mkdir(parents=True, exist_ok=False)
     files = {}
@@ -140,13 +163,12 @@ def write_dataset(splits, output, dataset, revision, source_hashes, scope):
         jsonl(requests, [dict(id=r['id'], request=r['request']) for r in rows])
         files[name] = dict(cases=len(rows), decisions=sum(len(r['gold']) for r in rows),
                            ids=[r['id'] for r in rows], sha256=digest(labeled), requests_sha256=digest(requests))
-    flat = [dict(id=f'{r["id"]}/{d["id"]}', request=dict(state=r['request']['state'], decisions=[d]))
-            for r in splits['train'] for d in r['request']['decisions']]
+    flat = token_requests(splits['train'])
     jsonl(output/'train-token-requests.jsonl', flat)
     write_json(output/'manifest.json', dict(schema_version=1, seed=SEED, mode='specialist',
         dataset=dataset, revision=revision, source_sha256=source_hashes,
         splits=files, token_requests_sha256=digest(output/'train-token-requests.jsonl'),
-        protocol=PROTOCOL,
+        protocol=protocol,
         scope=scope))
 
 
@@ -154,7 +176,9 @@ def validate_dataset(data):
     """Verify both labels and inference payloads before exporting/training/evaluation."""
     manifest = json.loads((data/'manifest.json').read_text(encoding='utf-8'))
     require(manifest['schema_version'] == 1 and manifest['seed'] == SEED, 'Unsupported dataset schema/seed')
-    require(manifest['protocol'] == PROTOCOL, 'Unsupported training protocol; prepare data with this package')
+    stated = manifest['protocol']
+    require(isinstance(stated, dict) and stated == protocol(stated.get('prompt_layout'), stated.get('prompt_detail')),
+            'Unsupported training protocol; prepare data with this package')
     require({'train', 'development', 'test'} <= set(manifest['splits']) <= {'train', 'development', 'test', 'unused'},
             'Invalid split names')
     splits = {}
@@ -169,8 +193,7 @@ def validate_dataset(data):
         splits[name] = rows
     require(all(splits[k] for k in ('train', 'development', 'test')), 'Empty required split')
     check_disjoint(splits)
-    flat = [dict(id=f'{r["id"]}/{d["id"]}', request=dict(state=r['request']['state'], decisions=[d]))
-            for r in splits['train'] for d in r['request']['decisions']]
+    flat = token_requests(splits['train'])
     require(digest(data/'train-token-requests.jsonl') == manifest['token_requests_sha256'] and
             read_jsonl(data/'train-token-requests.jsonl') == flat, 'Training request binding mismatch')
     return manifest
@@ -183,15 +206,20 @@ def main():
     p.add_argument('--development', type=Path, help='Separate development JSONL split')
     p.add_argument('--test', type=Path, help='Separate final test JSONL split')
     p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--prompt-layout', choices=PROMPT_LAYOUTS, default='legacy',
+                   help='Prompt layout the application deploys (recorded in the protocol)')
+    p.add_argument('--prompt-detail', choices=PROMPT_DETAILS, default='minimal',
+                   help='Prompt detail the application deploys (recorded in the protocol)')
     a = p.parse_args()
+    prompt = dict(layout=a.prompt_layout, detail=a.prompt_detail)
     if a.source:
         if any((a.train, a.development, a.test)):
             p.error('--source cannot be combined with custom splits')
-        prepare(a.source, a.output)
+        prepare(a.source, a.output, **prompt)
     else:
         if not all((a.train, a.development, a.test)):
             p.error('Provide --source or all of --train, --development, --test')
-        prepare_custom(a.train, a.development, a.test, a.output)
+        prepare_custom(a.train, a.development, a.test, a.output, **prompt)
 
 
 if __name__ == '__main__':

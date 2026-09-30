@@ -5,8 +5,10 @@ on:
       - 'src/**'
       - 'tests/**'
       - 'examples/evaluate_jsonl.rs'
+      - 'examples/export_decision_tokens.rs'
       - 'scripts/*decision_performance*'
       - 'benchmarks/performance-implementation-20260930/**'
+      - 'benchmarks/training-pr-review-20260930/**'
       - '.github/workflows/decision-performance.yml'
   workflow_dispatch:
 permissions:
@@ -25,8 +27,9 @@ jobs:
       - run: cargo test --locked --lib --tests
       - run: python scripts/test_benchmark_decision_performance.py
       - run: python benchmarks/performance-implementation-20260930/verify.py
+      - run: python benchmarks/training-pr-review-20260930/verify.py
       - run: python benchmarks/performance-implementation-20260930/prepare.py && git diff --exit-code -- benchmarks/performance-implementation-20260930
       - run: sudo apt-get update && sudo apt-get install -y libclang-dev
-      - run: cargo build --locked --features llama --example evaluate_jsonl
-      - run: cargo test --locked --features llama --lib --bin l2s1 --test fixed_schema
+      - run: cargo build --locked --features llama --example evaluate_jsonl --example export_decision_tokens
+      - run: cargo test --locked --features llama --lib --bin l2s1 --test fixed_schema --test native
       - run: L2S1_EVALUATOR=target/debug/examples/evaluate_jsonl python scripts/test_benchmark_decision_performance.py

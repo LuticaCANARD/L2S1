@@ -379,3 +379,60 @@ fn vocab_only_encodes_like_full_load_and_rejects_inference() {
     assert!(vocab.decide(&request).is_err());
     assert!(vocab.preflight(&request).is_ok());
 }
+
+#[test]
+#[ignore = "requires SKID_MODEL"]
+fn vocab_only_deployment_context_preserves_shared_evidence_and_prompt_settings() {
+    let model = std::env::var("SKID_MODEL").expect("set SKID_MODEL");
+    let mut request: DecisionRequest =
+        serde_json::from_str(include_str!("../examples/warehouse.json")).unwrap();
+    request.decisions.truncate(1);
+    request.shared = Some(serde_json::json!({"manual": "verified account policy ".repeat(750)}));
+    let compute = ComputeOptions {
+        context: 4096,
+        ..ComputeOptions::default()
+    };
+    let mut vocab =
+        LlamaBackend::load_vocab_only_with_options(model.as_ref(), compute, PromptProfile::Auto)
+            .unwrap();
+    let mut full = LlamaBackend::load(
+        model.as_ref(),
+        4096,
+        256,
+        4,
+        false,
+        DecisionPolicy::default(),
+    )
+    .unwrap();
+    let default = LlamaBackend::load_vocab_only(model.as_ref(), PromptProfile::Auto).unwrap();
+    let decision = &request.decisions[0];
+    assert!(default.encode_decision(request.input(), decision).is_err());
+    for layout in [PromptLayout::Legacy, PromptLayout::StateFirst] {
+        for detail in [
+            PromptDetail::Minimal,
+            PromptDetail::Typed,
+            PromptDetail::TypedExamples,
+        ] {
+            vocab.set_prompt_layout(layout);
+            full.set_prompt_layout(layout);
+            vocab.set_prompt_detail(detail);
+            full.set_prompt_detail(detail);
+            for rotation in 0..decision.options().len() {
+                vocab.set_code_rotation(rotation).unwrap();
+                full.set_code_rotation(rotation).unwrap();
+                let encoded = vocab.encode_decision(request.input(), decision).unwrap();
+                assert!(encoded.0.len() > 2048 && encoded.0.len() <= 4096);
+                assert_eq!(
+                    encoded,
+                    full.encode_decision(request.input(), decision).unwrap()
+                );
+                assert_ne!(
+                    encoded.0,
+                    vocab.encode_decision(&request.state, decision).unwrap().0
+                );
+                assert_eq!(vocab.identity(), full.identity());
+            }
+        }
+    }
+    assert!(vocab.decide(&request).is_err());
+}

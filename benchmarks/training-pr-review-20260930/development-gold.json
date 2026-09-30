@@ -1,0 +1,82 @@
+{
+  "development-000": {
+    "team": "amber",
+    "approved": "true",
+    "priority": "high"
+  },
+  "development-001": {
+    "team": "violet",
+    "approved": "false",
+    "priority": "high"
+  },
+  "development-002": {
+    "team": "violet",
+    "approved": "false",
+    "priority": "high"
+  },
+  "development-003": {
+    "team": "amber",
+    "approved": "true",
+    "priority": "low"
+  },
+  "development-004": {
+    "team": "violet",
+    "approved": "false",
+    "priority": "low"
+  },
+  "development-005": {
+    "team": "amber",
+    "approved": "true",
+    "priority": "medium"
+  },
+  "development-006": {
+    "team": "jade",
+    "approved": "false",
+    "priority": "low"
+  },
+  "development-007": {
+    "team": "jade",
+    "approved": "true",
+    "priority": "high"
+  },
+  "development-008": {
+    "team": "jade",
+    "approved": "false",
+    "priority": "low"
+  },
+  "development-009": {
+    "team": "cobalt",
+    "approved": "false",
+    "priority": "high"
+  },
+  "development-010": {
+    "team": "violet",
+    "approved": "true",
+    "priority": "high"
+  },
+  "development-011": {
+    "team": "amber",
+    "approved": "true",
+    "priority": "medium"
+  },
+  "development-012": {
+    "team": "violet",
+    "approved": "false",
+    "priority": "low"
+  },
+  "development-013": {
+    "team": "amber",
+    "approved": "true",
+    "priority": "medium"
+  },
+  "development-014": {
+    "team": "violet",
+    "approved": "false",
+    "priority": "low"
+  },
+  "development-015": {
+    "team": "jade",
+    "approved": "false",
+    "priority": "low"
+  }
+}
