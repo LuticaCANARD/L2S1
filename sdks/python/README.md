@@ -3,14 +3,14 @@
 Python 3.11+ async SDK for the resident Rust engine. Requests and responses use the
 same HTTP v1 field names, decision kinds, policies and evidence as `@l2s1/node`.
 The package includes Pydantic runtime validation and PEP 561 type information.
-[l2s1-sdk 0.2.1](https://pypi.org/project/l2s1-sdk/0.2.1/) is published on PyPI; the import remains `import l2s1`.
+[l2s1-sdk 0.2.2](https://pypi.org/project/l2s1-sdk/0.2.2/) is published on PyPI; the import remains `import l2s1`.
 
 ## Install
 
 From PyPI:
 
 ```sh
-pip install l2s1-sdk==0.2.1
+pip install l2s1-sdk==0.2.2
 ```
 
 From a source checkout:
@@ -22,7 +22,7 @@ python -m pip install ./sdks/python
 From a built package:
 
 ```sh
-python -m pip install ./l2s1_sdk-0.2.1-py3-none-any.whl
+python -m pip install ./l2s1_sdk-0.2.2-py3-none-any.whl
 ```
 
 The wheel contains the Python SDK. Supply the Rust engine and GGUF weights
@@ -172,7 +172,7 @@ GGUF, CUDA or Metal quality/performance evidence. The CI matrix targets Python
 3.11 and 3.14 on Linux, macOS and Windows; local verification covers only the
 actual host. The release pipeline publishes validated wheel/sdist artifacts to PyPI.
 
-The [release pipeline](../../docs/RELEASE_PIPELINE.md) publishes validated GitHub Release, npm, PyPI and native Cargo packages using configured trusted publishers. [v0.2.1](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.1) is available.
+The [release pipeline](../../docs/RELEASE_PIPELINE.md) publishes validated GitHub Release, npm, PyPI and native Cargo packages using configured trusted publishers. [v0.2.2](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.2) is available.
 
 ## Resident prefix reuse
 

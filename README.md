@@ -18,15 +18,15 @@ Latest measured public JevBench subset (231 items): Gemma 4 12B QAT Q4_0 **194/2
 
 ## Install
 
-[v0.2.1](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.1) is available on PyPI, npm and crates.io.
+[v0.2.2](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.2) is available on PyPI, npm and crates.io.
 
 v0.2.0 changes the default text-parallel prompt layout and wave ordering. Re-evaluate your workload and calibration when upgrading; [compatibility details](CHANGELOG.md#020-2026-09-30).
 
 | Package | Install command |
 | --- | --- |
-| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.1` |
-| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.1` |
-| Rust library | `cargo add l2s1@0.2.1 --features llama` |
+| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.2` |
+| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.2` |
+| Rust library | `cargo add l2s1@0.2.2 --features llama` |
 
 Python keeps `import l2s1` and needs a separate Rust runtime. Use a platform runtime from the release with `runtime_dir`, or a custom executable with `binary_path`. npm selects the matching prebuilt runtime automatically; keep optional dependencies enabled. Supply GGUF model weights separately. The Rust `llama` feature requires CMake and a C++17 compiler.
 
@@ -180,9 +180,9 @@ HTTP image requests use named `media` and per-decision `media_ids`. Local backen
 
 ## Use from TypeScript
 
-The [`@l2s1/node` package](docs/en/typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install it with `npm install @l2s1/node@0.2.1`. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
+The [`@l2s1/node` package](docs/en/typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install it with `npm install @l2s1/node@0.2.2`. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
 
-With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](sdks/typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `sdks/typescript/l2s1-node-0.2.1.tgz`.
+With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](sdks/typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `sdks/typescript/l2s1-node-0.2.2.tgz`.
 
 ```sh
 cargo build --release --locked --features llama --bin l2s1

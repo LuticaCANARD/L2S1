@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.2 (2026-09-30)
+
+- Release the SDK/native runtimes at 0.2.2 and the source-installable training
+  tools at 0.1.1. Training remains available from this pinned source tag.
+
 - `l2s1-train prepare --prompt-layout {legacy,state-first} --prompt-detail
   {minimal,typed,typed-examples}` records the prompt the application deploys in
   the protocol and token seal; `run` exports, trains and evaluates with it.
