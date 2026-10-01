@@ -284,6 +284,20 @@ Gemma は可能性のあるビジョンです。 バックエンド: Gemma 3 4B/
 
 Gemma 4 と 2 つのラベル付き画像テストデータを使った CPU/CUDA のレイテンシ測定は、[画像の直接推論ベンチマーク](VISION_BENCHMARK.md)を参照してください。HTTP 画像 API による 30 クラス・150 画像の CUDA 実行は [Caltech-101 ベンチマーク](benchmarks/caltech101-vision-20260924/README.md)を参照してください。両方の回答順序による 70 画像の猫・犬の検証は、[猫と犬の画像レポート](benchmarks/cats-dogs-vision-20260924/REPORT.md)を参照してください。過去の HTTP リクエスト形式を記録しており、一般的な画像正解率は主張しません。6 クラスの廃棄物分類と、プロンプト・採用しきい値を対応付けた評価は [TrashNet 画像ベンチマーク](benchmarks/trashnet-vision-20260925/REPORT.md)を参照してください。
 
+<a id="decision-presets"></a>
+## 判断プリセット
+
+プリセットは起動時に `--preset file.json`(繰り返し可)で読み込む名前付きの判断セットです。ファイルには `name`、任意の `description`、ネイティブの `decisions` を書きます。[triage の例](../../examples/presets/triage.json)を参照してください。以後のリクエストは `decisions` の代わりに `"preset": "<名前>"` を送れます。`/v1/decisions`、`/v1/decision-batches` の各項目、`--stdio`、CLI の `--input` で使えます。
+
+```sh
+target/release/l2s1 --model model.gguf --listen 127.0.0.1:8080 \
+  --preset examples/presets/triage.json
+curl http://127.0.0.1:8080/v1/decisions -H 'Content-Type: application/json' \
+  -d '{"state": "Refund it today or I cancel.", "preset": "triage"}'
+```
+
+プリセットの判断は通常の検証の前に挿入されるため、応答は明示的に送った場合と同じです。名前は `a-z`、`0-9`、`-`、`_` からなる 1–64 文字で、英字か数字で始まります。不正または重複したプリセットは起動を止めます。`preset` と `decisions` を同時に送るか未知の名前を使うと `400 invalid_request` です。`GET /v1/capabilities` の `presets` に名前・説明・判断 ID が出ます。プリセットはプロセス終了まで読み取り専用で、プリセットのリクエストは他のリクエストとまとめて処理されません。
+
 <a id="typesafe-compatible-route"></a>
 ## TypeSafe互換ルート
 

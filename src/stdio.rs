@@ -45,7 +45,11 @@ pub fn serve_stream<B: HttpDecisionBackend, R: BufRead, W: Write>(
             .unwrap_or(b"null");
         let result = match call.op.as_str() {
             "health" => Ok(json!({"status":"ok"})),
-            "capabilities" => Ok(backend.capabilities()),
+            "capabilities" => {
+                let mut capabilities = backend.capabilities();
+                capabilities["presets"] = crate::presets::list();
+                Ok(capabilities)
+            }
             "decide" => crate::http::dispatch_wire(backend, body, false, &call.id),
             "decide_batch" => crate::http::dispatch_wire(backend, body, true, &call.id),
             _ => Err(crate::Error::Invalid("unknown stdio operation".into())),

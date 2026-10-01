@@ -17,6 +17,10 @@ use std::{
 struct Args {
     #[arg(long)]
     model: PathBuf,
+    /// Named decision set JSON ({"name","description","decisions"}); repeatable.
+    /// Requests may then send "preset": "<name>" in place of "decisions".
+    #[arg(long)]
+    preset: Vec<PathBuf>,
     /// Matching multimodal projector GGUF for direct image input.
     #[arg(long)]
     mmproj: Option<PathBuf>,
@@ -177,6 +181,9 @@ impl Args {
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+    for path in &args.preset {
+        l2s1::presets::register_file(path)?;
+    }
     if args.fixed_schema && args.listen.is_none() && !args.stdio {
         return Err("--fixed-schema requires --listen or --stdio".into());
     }
@@ -308,7 +315,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         std::fs::read_to_string(&args.input)?
     };
-    let request: DecisionRequest = serde_json::from_str(&text)?;
+    let request: DecisionRequest =
+        serde_json::from_slice(&l2s1::presets::expand(text.as_bytes(), false)?)?;
 
     let output = if args.preflight {
         match backend.preflight(&request) {

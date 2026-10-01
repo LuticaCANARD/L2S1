@@ -48,6 +48,7 @@ pub fn serve<B: HttpDecisionBackend>(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let (sender, receiver) = mpsc::sync_channel(QUEUE_DEPTH);
     let mut capabilities = backend.capabilities();
+    capabilities["presets"] = crate::presets::list();
     capabilities["http_scheduler"] = json!({"max_requests":8,"max_decisions":128,"max_body_bytes":MAX_BODY,"max_wait_ms":1,"deadline_ms":180000,"native_cancellation":false});
     let _listener = start_listener(address, capabilities.clone(), sender)?;
     let can_batch = capabilities
@@ -162,6 +163,7 @@ pub(crate) fn dispatch_wire<B: HttpDecisionBackend>(
     if body.len() > MAX_BODY {
         return Err(Error::Invalid("decision body exceeds 44 MiB limit".into()));
     }
+    let body = &crate::presets::expand(body, batch)?;
     if batch {
         contract::run_batch(backend, body, request_id)
     } else {

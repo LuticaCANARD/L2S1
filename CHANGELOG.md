@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Decision presets: `--preset file.json` (repeatable) registers named
+  decision sets at startup; requests send `"preset": "<name>"` in place of
+  `decisions` over HTTP, batches, `--stdio` and CLI input. Capabilities list
+  them. Example: `examples/presets/triage.json`.
+
 - HTTP listener: TypeSafe-compatible `POST /v1/systemone` and `GET /v1/models`,
   so TypeSafe SDK clients switch by base URL. FastAPI-style `422`
   issues, `422 STATE_TRUNCATED` on context overflow, `503 QUEUE_FULL` with
