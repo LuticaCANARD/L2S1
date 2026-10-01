@@ -1,0 +1,530 @@
+{
+  "qwen3vl-2b": {
+    "model": "Qwen3-VL-2B-Instruct-Q8_0.gguf",
+    "n": 120,
+    "correct": 95,
+    "raw_top1_accuracy": 0.7916666666666666,
+    "accepted": 120,
+    "abstained": 0,
+    "coverage": 1.0,
+    "accepted_accuracy": 0.7916666666666666,
+    "correct_over_all": 0.7916666666666666,
+    "wilson_95": [
+      0.7105232156701865,
+      0.8547156039189031
+    ],
+    "latency_ms": {
+      "p50": 105.90939300072932,
+      "p95": 125.21529199875658
+    },
+    "startup_seconds": 7.028804659999878,
+    "process_memory_kib": {
+      "VmHWM": 860044,
+      "VmRSS": 860044
+    },
+    "gpu_after": "NVIDIA GeForce RTX 3080, 596.21, 9752",
+    "per_class": {
+      "cardboard": {
+        "n": 20,
+        "correct": 19
+      },
+      "glass": {
+        "n": 20,
+        "correct": 20
+      },
+      "metal": {
+        "n": 20,
+        "correct": 19
+      },
+      "paper": {
+        "n": 20,
+        "correct": 20
+      },
+      "plastic": {
+        "n": 20,
+        "correct": 17
+      },
+      "trash": {
+        "n": 20,
+        "correct": 0
+      }
+    },
+    "confusion": {
+      "cardboard": {
+        "cardboard": 19,
+        "glass": 0,
+        "metal": 0,
+        "paper": 1,
+        "plastic": 0,
+        "trash": 0
+      },
+      "glass": {
+        "cardboard": 0,
+        "glass": 20,
+        "metal": 0,
+        "paper": 0,
+        "plastic": 0,
+        "trash": 0
+      },
+      "metal": {
+        "cardboard": 0,
+        "glass": 1,
+        "metal": 19,
+        "paper": 0,
+        "plastic": 0,
+        "trash": 0
+      },
+      "paper": {
+        "cardboard": 0,
+        "glass": 0,
+        "metal": 0,
+        "paper": 20,
+        "plastic": 0,
+        "trash": 0
+      },
+      "plastic": {
+        "cardboard": 0,
+        "glass": 3,
+        "metal": 0,
+        "paper": 0,
+        "plastic": 17,
+        "trash": 0
+      },
+      "trash": {
+        "cardboard": 0,
+        "glass": 0,
+        "metal": 0,
+        "paper": 9,
+        "plastic": 11,
+        "trash": 0
+      }
+    },
+    "raw_responses_sha256": "1ae3822e04528d7e2bf5032c3398dff83e15b21719907b96e17c55681fb68623",
+    "protocol": {
+      "command": [
+        "/home/lutica/personal/skid/skid-desion/results/restore-small-model-20261001/runtime/l2s1",
+        "--model",
+        "/home/lutica/personal/skid/skid-desion/models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+        "--mmproj",
+        "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3-VL-2B-Instruct-Q8_0.gguf",
+        "--device",
+        "cuda",
+        "--execution-mode",
+        "fresh",
+        "--context",
+        "8192",
+        "--batch",
+        "256",
+        "--ubatch",
+        "256",
+        "--threads",
+        "4",
+        "--flash-attention",
+        "off",
+        "--preparation-cache-bytes",
+        "0",
+        "--model-load-mode",
+        "read",
+        "--listen",
+        "127.0.0.1:44277"
+      ],
+      "source_commit": "72b8ac6049025db84a93f83de4015e1ac29741ef",
+      "binary_sha256": "690744f308699dd6206b85afcbebca805b4588acdfd278cf3f11486991d5edc7",
+      "model_sha256": "b7802e29f71a9e5b5e3f83f613df898a2204342dcea71a231ea501d481813c39",
+      "projector_sha256": "69066c8f279ec85ff48ab4059f6ebba0d2932ca57667f2bbdac7d9805bca9e7b",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "archive_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "runner_sha256": "5a20ba8a3bac16f825b542263996f070b59a9d715a4be7b1abcffed28406d11d",
+      "warmup": 1,
+      "measured": 120,
+      "policy": "omitted: validate default 0/0",
+      "prompt": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": {
+        "cardboard": "A piece of corrugated cardboard or cardboard packaging.",
+        "glass": "A glass object, such as a bottle or jar.",
+        "metal": "A metal object, such as a can or metal container.",
+        "paper": "A sheet of paper, newspaper, or paper packaging that is not cardboard.",
+        "plastic": "A plastic object, such as a bottle or plastic container.",
+        "trash": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+      },
+      "gpu_before": "NVIDIA GeForce RTX 3080, 596.21, 1937",
+      "platform": [
+        "Linux",
+        "lutica-star",
+        "6.18.33.2-microsoft-standard-WSL2",
+        "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "x86_64"
+      ]
+    },
+    "stored_tensor_elements": {
+      "model": 1720574976,
+      "projector": 406957056,
+      "total": 2127532032
+    },
+    "gpu_board_mib": {
+      "before": 1937,
+      "measured_max": 9874
+    },
+    "historical_gate_posthoc": {
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "accepted": 115,
+      "correct": 91,
+      "abstained": 5,
+      "newly_forced_correct": 4,
+      "newly_forced_wrong": 1
+    }
+  },
+  "qwen35-2b": {
+    "model": "Qwen3.5-2B-Q8_0.gguf",
+    "n": 120,
+    "correct": 85,
+    "raw_top1_accuracy": 0.7083333333333334,
+    "accepted": 120,
+    "abstained": 0,
+    "coverage": 1.0,
+    "accepted_accuracy": 0.7083333333333334,
+    "correct_over_all": 0.7083333333333334,
+    "wilson_95": [
+      0.6215576502025923,
+      0.7821843637896146
+    ],
+    "latency_ms": {
+      "p50": 99.5145289998618,
+      "p95": 108.39689700151212
+    },
+    "startup_seconds": 10.534427896000125,
+    "process_memory_kib": {
+      "VmHWM": 1103704,
+      "VmRSS": 1103704
+    },
+    "gpu_after": "NVIDIA GeForce RTX 3080, 596.21, 9359",
+    "per_class": {
+      "cardboard": {
+        "n": 20,
+        "correct": 20
+      },
+      "glass": {
+        "n": 20,
+        "correct": 20
+      },
+      "metal": {
+        "n": 20,
+        "correct": 18
+      },
+      "paper": {
+        "n": 20,
+        "correct": 13
+      },
+      "plastic": {
+        "n": 20,
+        "correct": 14
+      },
+      "trash": {
+        "n": 20,
+        "correct": 0
+      }
+    },
+    "confusion": {
+      "cardboard": {
+        "cardboard": 20,
+        "glass": 0,
+        "metal": 0,
+        "paper": 0,
+        "plastic": 0,
+        "trash": 0
+      },
+      "glass": {
+        "cardboard": 0,
+        "glass": 20,
+        "metal": 0,
+        "paper": 0,
+        "plastic": 0,
+        "trash": 0
+      },
+      "metal": {
+        "cardboard": 1,
+        "glass": 1,
+        "metal": 18,
+        "paper": 0,
+        "plastic": 0,
+        "trash": 0
+      },
+      "paper": {
+        "cardboard": 7,
+        "glass": 0,
+        "metal": 0,
+        "paper": 13,
+        "plastic": 0,
+        "trash": 0
+      },
+      "plastic": {
+        "cardboard": 0,
+        "glass": 5,
+        "metal": 1,
+        "paper": 0,
+        "plastic": 14,
+        "trash": 0
+      },
+      "trash": {
+        "cardboard": 6,
+        "glass": 0,
+        "metal": 1,
+        "paper": 10,
+        "plastic": 3,
+        "trash": 0
+      }
+    },
+    "raw_responses_sha256": "870962c4f150b8a5056309973eb2a44dce6a25606dbd13d91c8b4161b5c10805",
+    "protocol": {
+      "command": [
+        "/home/lutica/personal/skid/skid-desion/results/restore-small-model-20261001/runtime/l2s1",
+        "--model",
+        "/home/lutica/personal/skid/skid-desion/models/Qwen3.5-2B-Q8_0.gguf",
+        "--mmproj",
+        "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3.5-2B-F16.gguf",
+        "--device",
+        "cuda",
+        "--execution-mode",
+        "fresh",
+        "--context",
+        "8192",
+        "--batch",
+        "256",
+        "--ubatch",
+        "256",
+        "--threads",
+        "4",
+        "--flash-attention",
+        "off",
+        "--preparation-cache-bytes",
+        "0",
+        "--model-load-mode",
+        "read",
+        "--listen",
+        "127.0.0.1:52577"
+      ],
+      "source_commit": "72b8ac6049025db84a93f83de4015e1ac29741ef",
+      "binary_sha256": "690744f308699dd6206b85afcbebca805b4588acdfd278cf3f11486991d5edc7",
+      "model_sha256": "1b04acba824817554f4ce23639bc8495ff70453b8fcb047900c731521021f2c1",
+      "projector_sha256": "7035e9cb8d7c6a9681d07eef9a364783e86ea4cd73faab2eabb4f43a101830c7",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "archive_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "runner_sha256": "5a20ba8a3bac16f825b542263996f070b59a9d715a4be7b1abcffed28406d11d",
+      "warmup": 1,
+      "measured": 120,
+      "policy": "omitted: validate default 0/0",
+      "prompt": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": {
+        "cardboard": "A piece of corrugated cardboard or cardboard packaging.",
+        "glass": "A glass object, such as a bottle or jar.",
+        "metal": "A metal object, such as a can or metal container.",
+        "paper": "A sheet of paper, newspaper, or paper packaging that is not cardboard.",
+        "plastic": "A plastic object, such as a bottle or plastic container.",
+        "trash": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+      },
+      "gpu_before": "NVIDIA GeForce RTX 3080, 596.21, 1522",
+      "platform": [
+        "Linux",
+        "lutica-star",
+        "6.18.33.2-microsoft-standard-WSL2",
+        "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "x86_64"
+      ]
+    },
+    "stored_tensor_elements": {
+      "model": 1881825088,
+      "projector": 331416576,
+      "total": 2213241664
+    },
+    "gpu_board_mib": {
+      "before": 1522,
+      "measured_max": 9370
+    },
+    "historical_gate_posthoc": {
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "accepted": 98,
+      "correct": 79,
+      "abstained": 22,
+      "newly_forced_correct": 6,
+      "newly_forced_wrong": 16
+    }
+  },
+  "qwen35-4b": {
+    "model": "Qwen3.5-4B-Q8_0.gguf",
+    "n": 120,
+    "correct": 94,
+    "raw_top1_accuracy": 0.7833333333333333,
+    "accepted": 120,
+    "abstained": 0,
+    "coverage": 1.0,
+    "accepted_accuracy": 0.7833333333333333,
+    "correct_over_all": 0.7833333333333333,
+    "wilson_95": [
+      0.7014563746709164,
+      0.8476327643584851
+    ],
+    "latency_ms": {
+      "p50": 146.8396499994924,
+      "p95": 155.1509029995941
+    },
+    "startup_seconds": 16.546627595000245,
+    "process_memory_kib": {
+      "VmHWM": 1235020,
+      "VmRSS": 1235020
+    },
+    "gpu_after": "NVIDIA GeForce RTX 3080, 596.21, 9738",
+    "per_class": {
+      "cardboard": {
+        "n": 20,
+        "correct": 18
+      },
+      "glass": {
+        "n": 20,
+        "correct": 18
+      },
+      "metal": {
+        "n": 20,
+        "correct": 18
+      },
+      "paper": {
+        "n": 20,
+        "correct": 20
+      },
+      "plastic": {
+        "n": 20,
+        "correct": 19
+      },
+      "trash": {
+        "n": 20,
+        "correct": 1
+      }
+    },
+    "confusion": {
+      "cardboard": {
+        "cardboard": 18,
+        "glass": 0,
+        "metal": 0,
+        "paper": 2,
+        "plastic": 0,
+        "trash": 0
+      },
+      "glass": {
+        "cardboard": 0,
+        "glass": 18,
+        "metal": 1,
+        "paper": 0,
+        "plastic": 1,
+        "trash": 0
+      },
+      "metal": {
+        "cardboard": 0,
+        "glass": 1,
+        "metal": 18,
+        "paper": 0,
+        "plastic": 1,
+        "trash": 0
+      },
+      "paper": {
+        "cardboard": 0,
+        "glass": 0,
+        "metal": 0,
+        "paper": 20,
+        "plastic": 0,
+        "trash": 0
+      },
+      "plastic": {
+        "cardboard": 0,
+        "glass": 1,
+        "metal": 0,
+        "paper": 0,
+        "plastic": 19,
+        "trash": 0
+      },
+      "trash": {
+        "cardboard": 0,
+        "glass": 0,
+        "metal": 0,
+        "paper": 8,
+        "plastic": 11,
+        "trash": 1
+      }
+    },
+    "raw_responses_sha256": "e8a4f988666d01bb13c18fdcff4def4235a6c44aef37d6b945f20fd8a2474bc0",
+    "protocol": {
+      "command": [
+        "/home/lutica/personal/skid/skid-desion/results/restore-small-model-20261001/runtime/l2s1",
+        "--model",
+        "/home/lutica/personal/skid/skid-desion/models/Qwen3.5-4B-Q8_0.gguf",
+        "--mmproj",
+        "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3.5-4B-F16.gguf",
+        "--device",
+        "cuda",
+        "--execution-mode",
+        "fresh",
+        "--context",
+        "8192",
+        "--batch",
+        "256",
+        "--ubatch",
+        "256",
+        "--threads",
+        "4",
+        "--flash-attention",
+        "off",
+        "--preparation-cache-bytes",
+        "0",
+        "--model-load-mode",
+        "read",
+        "--listen",
+        "127.0.0.1:47575"
+      ],
+      "source_commit": "72b8ac6049025db84a93f83de4015e1ac29741ef",
+      "binary_sha256": "690744f308699dd6206b85afcbebca805b4588acdfd278cf3f11486991d5edc7",
+      "model_sha256": "10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1",
+      "projector_sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "archive_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "runner_sha256": "5a20ba8a3bac16f825b542263996f070b59a9d715a4be7b1abcffed28406d11d",
+      "warmup": 1,
+      "measured": 120,
+      "policy": "omitted: validate default 0/0",
+      "prompt": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": {
+        "cardboard": "A piece of corrugated cardboard or cardboard packaging.",
+        "glass": "A glass object, such as a bottle or jar.",
+        "metal": "A metal object, such as a can or metal container.",
+        "paper": "A sheet of paper, newspaper, or paper packaging that is not cardboard.",
+        "plastic": "A plastic object, such as a bottle or plastic container.",
+        "trash": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+      },
+      "gpu_before": "NVIDIA GeForce RTX 3080, 596.21, 1520",
+      "platform": [
+        "Linux",
+        "lutica-star",
+        "6.18.33.2-microsoft-standard-WSL2",
+        "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+        "x86_64"
+      ]
+    },
+    "stored_tensor_elements": {
+      "model": 4205751296,
+      "projector": 333514240,
+      "total": 4539265536
+    },
+    "gpu_board_mib": {
+      "before": 1520,
+      "measured_max": 9738
+    },
+    "historical_gate_posthoc": {
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "accepted": 94,
+      "correct": 77,
+      "abstained": 26,
+      "newly_forced_correct": 17,
+      "newly_forced_wrong": 9
+    }
+  }
+}
