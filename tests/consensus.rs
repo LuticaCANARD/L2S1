@@ -75,7 +75,7 @@ fn semantic_alignment_cancels_code_bias_and_preserves_first_pass_metadata() {
     assert_eq!(result.reused_prefix_tokens, 4);
     assert!(matches!(
         result.value,
-        DecisionValue::Choice { selected: None }
+        DecisionValue::Choice { selected: Some(ref id) } if id == "left"
     ));
 }
 

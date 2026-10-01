@@ -10,7 +10,7 @@ struct Args {
     cuda: bool,
     #[arg(long, default_value_t = 4)]
     threads: usize,
-    #[arg(long, default_value_t = 0.8)]
+    #[arg(long, default_value_t = 0.0)]
     min_top_probability: f64,
     #[arg(long, conflicts_with = "stdio")]
     listen: Option<String>,

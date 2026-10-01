@@ -97,7 +97,7 @@ candidate_mass        = exp(logsumexp(candidate logits) - logsumexp(all vocabula
 
 `option_probability` compares the supplied options. `candidate_mass` measures how much of the model's next-token probability belongs to those options at all. A high candidate-relative probability alone does not establish a reliable answer.
 
-The default `DecisionPolicy` requires top-option probability at least **0.8**, candidate mass at least **0.05**, and no tied top candidates. Otherwise, the selected value is `null` and `abstention_reasons` explains why. Scores are still returned. Ordinal expected values are probability-weighted level values; they remain available when selection is withheld.
+The default policy forces the highest-scoring candidate: both thresholds are **0**, and exact ties select the first candidate in request order. To restore selective classification, set `--min-top-probability 0.8 --min-candidate-mass 0.05` (or the equivalent request `policy`). With either threshold above zero, low scores and tied top candidates can return `null`. Scores, candidate mass and ordinal expected values are still returned; they are not guarantees of correctness. Invalid evidence and inference failures remain errors.
 
 These are model scores, not universal probabilities of correctness. Partial top-k responses or model-generated numeric estimates do not satisfy the exact native evidence contract.
 

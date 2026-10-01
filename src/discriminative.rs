@@ -43,7 +43,7 @@ pub fn score(
     if pmax < threshold {
         reasons.push("low_top_probability");
     }
-    if probabilities.iter().filter(|&&p| p == pmax).count() > 1 {
+    if threshold > 0.0 && probabilities.iter().filter(|&&p| p == pmax).count() > 1 {
         reasons.push("tied_candidates");
     }
     let accepted = reasons.is_empty();
@@ -88,7 +88,10 @@ mod tests {
                 true_label: "yes".into(),
             },
         };
-        let value = score(&d, &[1.0, 1.0], 1.0, 0.0, "test", 10).unwrap();
+        let forced = score(&d, &[1.0, 1.0], 1.0, 0.0, "test", 10).unwrap();
+        assert_eq!(forced["status"], "selected");
+        assert_eq!(forced["value"]["value"], false);
+        let value = score(&d, &[1.0, 1.0], 1.0, 0.1, "test", 10).unwrap();
         assert_eq!(value["status"], "abstained");
         assert!(value["value"]["value"].is_null());
         assert!(value["evidence"].get("candidate_mass").is_none());

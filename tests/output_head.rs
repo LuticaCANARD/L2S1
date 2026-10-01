@@ -41,7 +41,14 @@ fn fixture() -> (Decision, OutputHead, DecisionPolicy) {
         bias: vec![0., 0.],
         temperature: 2.,
     };
-    (d, h, DecisionPolicy::default())
+    (
+        d,
+        h,
+        DecisionPolicy {
+            min_top_probability: 0.8,
+            min_candidate_mass: 0.05,
+        },
+    )
 }
 #[test]
 fn semantic_permutations_and_calibration_preserve_base_mass() {
