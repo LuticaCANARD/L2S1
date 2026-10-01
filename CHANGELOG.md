@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.3 — 2026-10-02
+
 - Ordered multi-image vision: llama fresh mode accepts up to eight still
   images in one decision context through Rust, HTTP and stdio. `media_ids`
   controls image order; capabilities report mode-specific support. SDK and
