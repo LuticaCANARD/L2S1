@@ -68,6 +68,11 @@ impl LlamaBackend {
     /// Attach a vision projector compatible with this GGUF. Text decisions
     /// remain available on the same backend.
     pub fn load_vision_projector(&mut self, path: &Path) -> Result<()> {
+        if self.reasoning.is_thinking() {
+            return Err(Error::Invalid(
+                "thinking does not support image input or vision projectors".into(),
+            ));
+        }
         let path_text = path.to_string_lossy().into_owned();
         let path_c = CString::new(path_text.as_bytes())
             .map_err(|_| Error::Invalid("vision projector path contains NUL".into()))?;

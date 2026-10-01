@@ -111,8 +111,11 @@ pub(crate) fn local_response_json(response: crate::DecisionResponse) -> crate::R
             "calibration_id":result.calibration_id,"truncated":result.truncated,
             "code_prefix_evaluations":result.code_prefix_evaluations,"code_evaluated_tokens":result.code_evaluated_tokens,
             "estimate":estimate});
-        let output = json!({"id":result.id,"value":value,"status":status,"abstention_reasons":result.abstention_reasons,
+        let mut output = json!({"id":result.id,"value":value,"status":status,"abstention_reasons":result.abstention_reasons,
             "evidence":evidence,"usage":{"input_tokens":result.input_tokens,"reused_prefix_tokens":result.reused_prefix_tokens}});
+        if let Some(reasoning) = result.reasoning {
+            output["usage"]["reasoning"] = json!(reasoning);
+        }
         output
     }).collect::<Vec<_>>();
     Ok(
@@ -139,7 +142,12 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
                 "batched_when_compatible"
             },
         });
-        capabilities["reasoning"] = json!({"modes":["direct"],"thinking_supported":false});
+        let thinking_supported = self.supports_thinking();
+        capabilities["reasoning"] = json!({"modes":if thinking_supported { vec!["direct","thinking"] } else { vec!["direct"] },
+            "thinking_supported":thinking_supported,
+            "thinking_scope":"Qwen3 dense text, fresh execution, single-token candidates",
+            "preparation_cache":"must be disabled",
+            "max_tokens_limit":1024,"image_thinking":false});
         capabilities["request_policy"] = json!({"supported":true,
             "target_error_rate":"maps to a model-score threshold; not a guaranteed correctness error rate"});
         capabilities["batch"] = json!({"supported":true,"enabled":info.execution_mode == crate::ExecutionMode::Parallel,
@@ -180,6 +188,31 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
 
     fn decide_json(&mut self, request: &DecisionRequest, images: &[&[u8]]) -> crate::Result<Value> {
         local_decide_json(self, request, images)
+    }
+    /// Request-local reasoning; the previous mode is restored even after failure.
+    fn decide_json_batch_with_reasoning(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[Vec<&[u8]>],
+        reasoning: Option<&crate::ReasoningOptions>,
+    ) -> crate::Result<Vec<Value>> {
+        let Some(options) = reasoning else {
+            return self.decide_json_batch(requests, images);
+        };
+        options.validate()?;
+        if options.is_thinking() && images.iter().any(|items| !items.is_empty()) {
+            return Err(Error::Invalid(
+                "thinking mode currently supports text only; image reasoning is unsupported".into(),
+            ));
+        }
+        let previous = self.reasoning();
+        self.set_reasoning(*options)?;
+        let result = self.decide_json_batch(requests, images);
+        let restored = self.set_reasoning(previous);
+        match (result, restored) {
+            (Ok(value), Ok(())) => Ok(value),
+            (Err(error), _) | (_, Err(error)) => Err(error),
+        }
     }
     fn decide_json_batch(
         &mut self,

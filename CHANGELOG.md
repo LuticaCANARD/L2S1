@@ -7,6 +7,13 @@
   `decisions` over HTTP, batches, `--stdio` and CLI input. Capabilities list
   them. Example: `examples/presets/triage.json`.
 
+- Native Qwen3 thinking is wired back in: `--reasoning-mode thinking`,
+  `--max-reasoning-tokens` (1-1024), `LlamaBackend::set_reasoning`, and the
+  HTTP `reasoning` field, as `docs/REASONING.md` describes. Bounded greedy
+  thinking then scores the typed candidates; `reasoning_limit` and
+  `reasoning_incomplete` fail explicitly. Requires fresh execution, so
+  servers need `--execution-mode fresh`; the fixed-schema default refuses
+  thinking with that instruction.
 - HTTP listener: TypeSafe-compatible `POST /v1/systemone` and `GET /v1/models`,
   so TypeSafe SDK clients switch by base URL. FastAPI-style `422`
   issues, `422 STATE_TRUNCATED` on context overflow, `503 QUEUE_FULL` with
