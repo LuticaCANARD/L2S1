@@ -196,6 +196,12 @@ const request = {
 
 省略 `media_ids` はすべての要求メディアを使用します。 `[]` はテキストのみを選択します。 Rust は、メディア、判断、本体およびモデルの制限を適用します。 [HTTP契約](../GUIDE.md#direct-image-input-and-http-api)を参照してください。
 
+画像の順序は明示した `media_ids` に従います。省略時はアップロード順、`[]` はテキストのみです。
+llama.cpp `fresh` は判断ごとに最大 8 枚、`parallel` と wgpu は 1 枚です。
+llama.cpp `prefix-reuse`/`state-restore` は画像をサポートしません。
+実行中のバックエンドの `media.image.max_per_decision` を確認してください。
+要求ごとに 8 ファイル、画像ごとに 8 MiB、本文全体で 44 MiB までです。
+
 <a id="verification-and-portability"></a>
 ## 検証と移植性
 

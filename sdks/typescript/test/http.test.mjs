@@ -8,6 +8,22 @@ const output = () => ({ api_version: 1, request_id: 'req-1', backend: { runtime:
     evidence: { type: 'selection_only', selected_code: 'B', provider_model: null }, usage: { input_tokens: null, output_tokens: null } }] });
 function client(fetch, options = {}) { return new L2S1Client({ baseUrl: 'http://localhost:8080/proxy/', fetch, ...options }); }
 
+test('seven images retain explicit reference order in one call and unsupported backends never fall back', async () => {
+  const ids = Array.from({ length: 7 }, (_, index) => `photo-${index}`);
+  const payload = { ...request,
+    media: [...ids].reverse().map((id) => ({ type: 'image', id, data_base64: 'eA==' })),
+    decisions: [{ ...request.decisions[0], media_ids: ids }],
+  };
+  let calls = 0;
+  const api = client(async (_url, init) => {
+    calls++;
+    assert.deepEqual(JSON.parse(init.body), payload);
+    return Response.json({ error: { code: 'unsupported_media', message: 'backend permits one image' } }, { status: 400 });
+  });
+  await assert.rejects(api.decide(payload), { code: 'unsupported_media' });
+  assert.equal(calls, 1);
+});
+
 test('native batch sends one request, validates ordered responses and never falls back', async () => {
   let calls = 0;
   const api = client(async (url, init) => {

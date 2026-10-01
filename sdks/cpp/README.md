@@ -84,6 +84,12 @@ omission (all request media) from an empty vector (text only). `decide_json()` a
 response ordering, kinds, selections and abstention. Rust validates requests
 before inference. User-supplied failure text is returned as `Error::user_reason`.
 
+Image order follows explicit `media_ids`; omission uses upload order and `[]` selects text only.
+llama.cpp `fresh` supports up to 8 images per decision, `parallel` and wgpu one;
+llama.cpp `prefix-reuse`/`state-restore` do not support images. Check the running
+backend's `media.image.max_per_decision` capability. Requests allow 8 uploads,
+up to 8 MiB each, within the 44 MiB body limit.
+
 `decide_batch()` sends one native batch RPC; it does not loop over serial
 inference. Select `execution_mode = "parallel"`, and check `capabilities()["batch"]`
 for the active model's limits. Responses retain input order. Unsupported batching

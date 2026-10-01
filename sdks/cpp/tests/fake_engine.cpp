@@ -13,7 +13,7 @@ Json decide(const Json& request,const std::string& id) {
         else { const auto& options=d.at("kind").at(type=="choice"?"options":"levels"); value["selected"]=abstain?Json(nullptr):options.at(0).at("id"); if(type=="ordinal") value["level_value"]=abstain?Json(nullptr):options.at(0).at("value"); }
         results.push_back({{"id",d.at("id")},{"value",value},{"status",abstain?"abstained":"selected"},{"abstention_reasons",abstain?Json::array({"low_candidate_mass"}):Json::array()},{"evidence",{{"type","model_scored"},{"candidate_mass",0.5},{"custom_field","preserved"}}},{"usage",{{"input_tokens",10}}}});
     }
-    return {{"api_version",1},{"request_id",id},{"backend",{{"runtime","fixture"},{"model","fixture"}}},{"policy",nullptr},{"results",results}};
+    return {{"api_version",1},{"request_id",id},{"backend",{{"runtime","fixture"},{"model","fixture"}}},{"policy",nullptr},{"results",results},{"received_request",request}};
 }
 int main(int argc,char** argv) {
     Json launch_args=Json::array(); for(int i=1;i<argc;++i) launch_args.push_back(argv[i]);

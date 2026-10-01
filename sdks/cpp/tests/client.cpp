@@ -28,6 +28,17 @@ int main(int argc,char** argv) {
         options.policy=Policy{0.8123456789123456,0.05123456789123456};
         Request request{{{"temperature_c",6}},{{"cold","Temperature?",Binary{"warm","cold"},std::nullopt}}};
         auto engine=Engine::load(options); check(engine.capabilities()["api_version"]==1);
+        Request images=request;
+        std::vector<std::string> ids;
+        Json media=Json::array();
+        for(int i=0;i<7;++i) ids.push_back("photo-"+std::to_string(i));
+        for(auto it=ids.rbegin();it!=ids.rend();++it) media.push_back({{"type","image"},{"id",*it},{"data_base64","eA=="}});
+        images.decisions[0].media_ids=ids;
+        images.options["media"]=media;
+        auto received=engine.decide(images).raw.at("received_request");
+        check(received==to_json(images));
+        check(received["media"].size()==7 && received["decisions"].size()==1);
+        check(received["decisions"][0]["media_ids"]==ids && received["media"][0]["id"]=="photo-6");
         check(std::stod(engine.capabilities()["launch_policy"].get<std::string>())==options.policy->min_top_probability);
         auto plan=engine.prepare(request.decisions);
         check(std::get<BinaryValue>(plan.decide({{"temperature_c",6}}).results[0].value).value==true);

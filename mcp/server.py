@@ -115,7 +115,7 @@ class Request(StrictModel):
 
     state: JsonValue
     decisions: list[Decision] = Field(min_length=1, max_length=128)
-    media: list[Image] = Field(default_factory=list, max_length=4)
+    media: list[Image] = Field(default_factory=list, max_length=8)
     reasoning: Reasoning | None = None
     policy: Policy | None = None
     target_error_rate: float | None = Field(default=None, ge=0, le=1,

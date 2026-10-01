@@ -25,6 +25,19 @@ WAREHOUSE = json.loads((ROOT / "examples/warehouse.json").read_text())
 
 
 class ValidationTests(unittest.TestCase):
+    def test_multi_image_reference_order_and_eight_upload_limit(self):
+        for count in [7, 8, 9]:
+            ids = [f"photo-{i}" for i in range(count)]
+            request = deepcopy(WAREHOUSE)
+            request["decisions"] = [request["decisions"][0]]
+            request["decisions"][0]["media_ids"] = ids
+            request["media"] = [{"type": "image", "id": id, "data_base64": "eA=="} for id in reversed(ids)]
+            if count > 8:
+                with self.assertRaises(ValidationError):
+                    Request.model_validate(request)
+            else:
+                self.assertEqual(json.loads(Request.model_validate(request).body()), request)
+
     def test_valid_kinds_and_exact_body(self):
         self.assertEqual(json.loads(Request.model_validate(WAREHOUSE).body()), WAREHOUSE)
         request = Request.model_validate({"state": None, "decisions": [WAREHOUSE["decisions"][1]]})

@@ -68,6 +68,6 @@ HTTP は `api_version`、`request_id`、バックエンドのエンベロープ�
 
 `status == "abstained"` は、MCP ツールエラーや HTTP 転送・バックエンドエラーとは異なる正常な結果です。タイムアウトはモデル処理の取消を証明しません。アダプターは自動再試行しません。
 
-画像の HTTP は `{"type":"image","id":"photo","data_base64":"..."}` の `media` と判断の `media_ids` を受け付けます。`media_ids` の省略は全画像を、`[]` はテキストのみを選びます。ローカルバックエンドは判断ごとに最大 1 画像です。アダプターは安定した `state`、`decisions`、`media` と、最大 128 判断、4 メディア、復号画像 8 MiB、エンコード済み HTTP 本文 44 MiB に対応します。復号対応とモデル固有の制限はバックエンドが適用します。
+画像の HTTP は `{"type":"image","id":"photo","data_base64":"..."}` の `media` と判断の `media_ids` を受け付けます。明示した `media_ids` が画像順序を決め、省略時はアップロード順の全画像を、`[]` はテキストのみを選びます。llama.cpp `fresh` は判断ごとに最大 8 枚、llama.cpp `parallel` と wgpu は 1 枚を受け付けます。llama.cpp `prefix-reuse`/`state-restore` は画像をサポートしません。先に capability を確認してください。画像例では学習参照 6 枚の位置とラベルを明示し、ラベルのない評価対象 1 枚を最後に送り、対象の正解はリクエストに含めません。アダプターは安定した `state`、`decisions`、`media` と、最大 128 判断、8 メディア、復号画像 8 MiB、エンコード済み HTTP 本文 44 MiB に対応します。復号対応とモデル固有の制限はバックエンドが適用します。
 
 任意の HTTP フィールドは `reasoning`（`mode: "direct" | "thinking"`、`max_tokens: 1..1024`、デフォルト 128）、`policy`（`min_top_probability`、`min_candidate_mass` ともに `[0,1]`）、`[0,1]` の `target_error_rate`、`failure_reasons` です。使用前に capability を確認してください。古いサーバーは未対応フィールドを拒否し、選択のみの根拠はスコアポリシーを使えません。`target_error_rate` は候補質量検査を維持し、最上位しきい値を `1 - rate` に変えますが正解率を保証しません。失敗文言のキーは `low_top_probability`、`low_candidate_mass`、`tied_candidates`、`reasoning_limit`、`native_failure` で、空白のみではない最大 512 UTF-8 バイトの文言です。HTTP 専用で、コア `DecisionRequest` と CLI テキスト JSON は受け付けません。

@@ -127,6 +127,12 @@ Python 메서드·옵션은 snake case이고 JSON 키는 같습니다. `false`, 
 `L2S1Error`는 서버 `code/status/request_id/user_reason`을 보존하고 네트워크·취소는
 HTTPX/asyncio 예외를 보존합니다. 자동 재시도는 없습니다.
 
+명시한 `media_ids`가 이미지 순서를 정합니다. 생략하면 업로드 순서, `[]`는 텍스트만 사용합니다.
+llama.cpp `fresh`는 판단당 최대 8장, `parallel`과 wgpu는 1장입니다.
+llama.cpp `prefix-reuse`/`state-restore`는 이미지를 지원하지 않습니다.
+실행 중인 백엔드의 `media.image.max_per_decision`을 확인하세요.
+요청당 업로드 8개, 이미지당 8 MiB, 전체 본문 44 MiB 제한입니다.
+
 `close()`는 멱등적입니다. HTTP 클라이언트 종료는 로컬 요청을 취소하고 원격 서버를
 계속 유지합니다. 소유 엔진 종료는 Rust 자식 프로세스를 종료하고 기다립니다.
 호출 취소·timeout은 네이티브 추론 중단을 보장하지 않습니다. 기본 stdio는 포트를

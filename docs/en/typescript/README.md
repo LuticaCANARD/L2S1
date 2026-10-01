@@ -203,6 +203,12 @@ const request = {
 
 Omitted `media_ids` uses all request media; `[]` selects text only. Rust enforces media, decision, body and model limits. See the [HTTP contract](../GUIDE.md#direct-image-input-and-http-api).
 
+Image order follows explicit `media_ids`; omission uses upload order and `[]` selects text only.
+llama.cpp `fresh` supports up to 8 images per decision, `parallel` and wgpu one;
+llama.cpp `prefix-reuse`/`state-restore` do not support images. Check the running
+backend's `media.image.max_per_decision` capability. Requests allow 8 uploads,
+up to 8 MiB each, within the 44 MiB body limit.
+
 ## Verification and portability
 
 ```sh

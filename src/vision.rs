@@ -3,6 +3,8 @@
 use crate::{DecisionBackend, DecisionRequest, DecisionResponse, Error, Result};
 
 pub const MAX_IMAGE_BYTES: usize = 8 * 1024 * 1024;
+/// Maximum ordered images in one local llama vision decision.
+pub const MAX_VISION_IMAGES: usize = 8;
 
 pub fn validate_image(image: &[u8]) -> Result<()> {
     if image.is_empty() || image.len() > MAX_IMAGE_BYTES {
@@ -19,6 +21,24 @@ pub trait VisionDecisionBackend: DecisionBackend {
         request: &DecisionRequest,
         image: &[u8],
     ) -> Result<DecisionResponse>;
+
+    /// Score one request against an ordered image set. This is one shared
+    /// visual context, unlike `decide_vision_batch`'s independent requests.
+    /// Empty image sets use text inference; single-image backends retain their
+    /// existing implementation and explicitly reject additional images.
+    fn decide_vision_images(
+        &mut self,
+        request: &DecisionRequest,
+        images: &[&[u8]],
+    ) -> Result<DecisionResponse> {
+        match images {
+            [] => self.decide(request),
+            [image] => self.decide_vision(request, image),
+            _ => Err(Error::Invalid(
+                "this backend accepts at most one image per decision".into(),
+            )),
+        }
+    }
 
     /// Evaluate independent image requests. Backends may override this to use
     /// native batching; the default preserves serial execution and metadata.
@@ -48,6 +68,18 @@ impl VisionDecisionBackend for crate::llama::LlamaBackend {
         image: &[u8],
     ) -> Result<DecisionResponse> {
         crate::llama::LlamaBackend::decide_vision(self, request, image)
+    }
+
+    fn decide_vision_images(
+        &mut self,
+        request: &DecisionRequest,
+        images: &[&[u8]],
+    ) -> Result<DecisionResponse> {
+        if images.is_empty() {
+            self.decide(request)
+        } else {
+            crate::llama::LlamaBackend::decide_vision_images(self, request, images)
+        }
     }
 
     fn decide_vision_batch(

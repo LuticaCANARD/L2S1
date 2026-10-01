@@ -28,7 +28,7 @@ pub mod stdio;
 mod vision;
 #[cfg(feature = "wgpu")]
 pub mod wgpu;
-pub use vision::{MAX_IMAGE_BYTES, VisionDecisionBackend, validate_image};
+pub use vision::{MAX_IMAGE_BYTES, MAX_VISION_IMAGES, VisionDecisionBackend, validate_image};
 
 mod calibration;
 mod consensus;

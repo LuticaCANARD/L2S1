@@ -143,6 +143,12 @@ extensions. Unsupported controls are never silently dropped. Model scores and
 `code`, `status`, `request_id` and `user_reason`; network errors and task
 cancellation retain their HTTPX/asyncio exceptions. There are no automatic retries.
 
+Image order follows explicit `media_ids`; omission uses upload order and `[]` selects text only.
+llama.cpp `fresh` supports up to 8 images per decision, `parallel` and wgpu one;
+llama.cpp `prefix-reuse`/`state-restore` do not support images. Check the running
+backend's `media.image.max_per_decision` capability. Requests allow 8 uploads,
+up to 8 MiB each, within the 44 MiB body limit.
+
 `close()` is idempotent. Closing an HTTP client cancels its local HTTP tasks and
 leaves the remote server running. Closing an owned engine terminates and waits
 for the Rust child. Cancelling or timing out a call does not guarantee

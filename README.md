@@ -176,7 +176,7 @@ For a still image, load the vision model and its matching projector:
   --input examples/warehouse.json
 ```
 
-HTTP image requests use named `media` and per-decision `media_ids`. Local backends accept one image per decision. See the [image and HTTP contract](docs/en/GUIDE.md#direct-image-input-and-http-api) for payloads, limits, and backend-specific behavior.
+HTTP image requests use named `media` and per-decision `media_ids`. The llama `fresh` path accepts up to eight ordered images in one decision, including six labeled reference photos and one target. The llama `parallel` path and WGPU accept one image per decision; llama prefix-reuse and state-restore modes do not accept images. Inspect `/v1/capabilities` for the loaded backend. See the [image and HTTP contract](docs/en/GUIDE.md#direct-image-input-and-http-api) for payloads, limits, and backend-specific behavior.
 
 ## Use from TypeScript
 

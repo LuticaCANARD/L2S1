@@ -15,6 +15,38 @@ pub struct NativeVisionInput {
     pub suffix_len: usize,
 }
 
+/// One encoded still image; backing bytes must outlive the native call.
+#[repr(C)]
+pub struct NativeVisionImage {
+    pub data: *const u8,
+    pub len: usize,
+}
+
+/// Ordered images in one user-data segment and one decoder sequence.
+/// Kept separate from the existing independent-request ABI.
+#[repr(C)]
+pub struct NativeVisionImagesInput {
+    pub prefix: *const c_char,
+    pub prefix_len: usize,
+    pub data_before: *const c_char,
+    pub before_len: usize,
+    pub images: *const NativeVisionImage,
+    pub image_count: usize,
+    pub data_after: *const c_char,
+    pub after_len: usize,
+    pub suffix: *const c_char,
+    pub suffix_len: usize,
+}
+
+/// Fresh-context media counters. Tiled projectors can produce more chunks
+/// than input images. Populated only after a successful complete evaluation.
+#[repr(C)]
+#[derive(Default, Clone, Copy, Debug)]
+pub struct NativeVisionImagesMetrics {
+    pub images: usize,
+    pub image_chunks: usize,
+}
+
 #[repr(C)]
 #[derive(Default, Clone, Copy, Debug)]
 pub struct NativeVisionBatchMetrics {
@@ -51,6 +83,35 @@ unsafe extern "C" {
         completed: *mut bool,
         logits: *mut f32,
         logits_count: usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+    pub fn sd_vision_images_metrics(
+        engine: *const c_void,
+        metrics: *mut NativeVisionImagesMetrics,
+    ) -> bool;
+    pub fn sd_forward_vision_images(
+        engine: *mut c_void,
+        input: *const NativeVisionImagesInput,
+        continuation: *const i32,
+        continuation_count: usize,
+        logits: *mut f32,
+        logits_count: usize,
+        input_tokens: *mut usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+    pub fn sd_forward_vision_images_compact(
+        engine: *mut c_void,
+        input: *const NativeVisionImagesInput,
+        continuation: *const i32,
+        continuation_count: usize,
+        candidate_ids: *const i32,
+        candidate_count: usize,
+        logits: *mut f32,
+        logits_count: usize,
+        log_normalizer: *mut f64,
+        input_tokens: *mut usize,
         error: *mut c_char,
         cap: usize,
     ) -> bool;
