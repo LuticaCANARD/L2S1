@@ -1,0 +1,195 @@
+{
+  "source_base": "b59239e2c395e86be3246d060042889dcfcd2947",
+  "restored_profile_commit": "0d95fba1811d8d0fd0c5e085494adfb36cef4697",
+  "selection_sha256": "de4f5ff3a4c0a555bfa09bfca683a9d752f7137cac1dfc25a70daf28e8f83639",
+  "plan_sha256": "79b9ab797434c7684605bbc6a715de99e89899a27445501a5c86621270093707",
+  "scorer_sha256": "f6417f2607002e12b1f10f3e95f6b1db41a92c76a295ac9b01d03b376c2b9a1b",
+  "prepare_sha256": "13129ee3894645b8a0ea34eb73779261b0241e42104ae9b8e622192920968e60",
+  "native_source": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "models": {
+    "e2b": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+    "e4b": "840e3f50e5a9c218727f44e121d1b37cc9e2c3b318c8eb422ba6ef2e27b618a2"
+  },
+  "evaluators": [
+    "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862"
+  ],
+  "runs": [
+    {
+      "run": "holdout/e2b/model",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "dfc8006ee9c73e1547ba86a583672e59e23c3693cdf3006f64d67f8947f7546b",
+      "output": "500ee228908538c6dd8b2e8d75700c6154d0c237dde57307c2791f852e59c972",
+      "started": 1790852979.574015,
+      "finished": 1790853052.0833118,
+      "max_rss_kib": 5195504,
+      "whole_board_max_gpu_mib": 4716
+    },
+    {
+      "run": "holdout/e4b/model",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "dfc8006ee9c73e1547ba86a583672e59e23c3693cdf3006f64d67f8947f7546b",
+      "output": "93fcef69b3a7a2be1efa72bc9936906e41bbf84191d36181c76399b70af9934c",
+      "started": 1790853052.160882,
+      "finished": 1790853159.1222942,
+      "max_rss_kib": 8161984,
+      "whole_board_max_gpu_mib": 7632
+    },
+    {
+      "run": "holdout/e4b/winnow",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "dfc8006ee9c73e1547ba86a583672e59e23c3693cdf3006f64d67f8947f7546b",
+      "output": "ffb3f5e276a5d1685408028ffb62c3ab66b4ab51f548ff89624feb32809c3c30",
+      "started": 1790853159.2044945,
+      "finished": 1790853267.941597,
+      "max_rss_kib": 8162156,
+      "whole_board_max_gpu_mib": 7579
+    },
+    {
+      "run": "typed-test/e2b/model",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "a1c31702b40c3265871e1d6673858c33d94cc01a711967c0a0db0448fb166a34",
+      "output": "8d2d51f0423b1919aaea150253aab06421aef6a412a4a50ca350550b32549b3c",
+      "started": 1790853268.866521,
+      "finished": 1790853419.1083317,
+      "max_rss_kib": 5198860,
+      "whole_board_max_gpu_mib": 4794
+    },
+    {
+      "run": "typed-test/e4b/model",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "a1c31702b40c3265871e1d6673858c33d94cc01a711967c0a0db0448fb166a34",
+      "output": "33fb069c5a0ca5a3e273902f569ca37e9be2b3b73697cd9a81dd87c95cebb346",
+      "started": 1790853419.1802475,
+      "finished": 1790853615.491278,
+      "max_rss_kib": 8159980,
+      "whole_board_max_gpu_mib": 7635
+    },
+    {
+      "run": "typed-test/e4b/winnow",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "a1c31702b40c3265871e1d6673858c33d94cc01a711967c0a0db0448fb166a34",
+      "output": "135caf06cc3e696b2f4dcb3ee2b132b3e6fe21f8fab5cb9d199838217b493e95",
+      "started": 1790853615.6027718,
+      "finished": 1790853833.680129,
+      "max_rss_kib": 8164048,
+      "whole_board_max_gpu_mib": 7785
+    },
+    {
+      "run": "dev/e2b/model-typed",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "f74b5c11c908d13267a373c15755fb3b3a60901ae4a84ae56bff2a7aa819f628",
+      "output": "8f4360a6a7fb8afbf63970cd8d64cb8b8651286d2f9d064d4b07f360bfda3b80",
+      "started": 1790852829.7688775,
+      "finished": 1790852899.0232434,
+      "max_rss_kib": 5194672,
+      "whole_board_max_gpu_mib": 4793
+    },
+    {
+      "run": "dev/e2b/gemma4-decision",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "f74b5c11c908d13267a373c15755fb3b3a60901ae4a84ae56bff2a7aa819f628",
+      "output": "c6d75e1dd6a56d6b21ae4e1c0c45dc83135ccda456684d2d0fdbc7470df49c13",
+      "started": 1790852600.07392,
+      "finished": 1790852662.3251956,
+      "max_rss_kib": 5194564,
+      "whole_board_max_gpu_mib": 4853
+    },
+    {
+      "run": "dev/e2b/model",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "f74b5c11c908d13267a373c15755fb3b3a60901ae4a84ae56bff2a7aa819f628",
+      "output": "d60dd1a95c827df428d84b19c9894c3c3e2ae5e026d5dcda8fca77b08b69ad58",
+      "started": 1790852491.848245,
+      "finished": 1790852544.2841883,
+      "max_rss_kib": 5196468,
+      "whole_board_max_gpu_mib": 4789
+    },
+    {
+      "run": "dev/e2b/model-typed-examples",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "f74b5c11c908d13267a373c15755fb3b3a60901ae4a84ae56bff2a7aa819f628",
+      "output": "5d0e1b8df29d85bdb5542da27bd7edfe90f45a23a0f7e37cf3ddc336d2032f0d",
+      "started": 1790852899.0910594,
+      "finished": 1790852979.4499211,
+      "max_rss_kib": 5194272,
+      "whole_board_max_gpu_mib": 4801
+    },
+    {
+      "run": "dev/e2b/winnow",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "f74b5c11c908d13267a373c15755fb3b3a60901ae4a84ae56bff2a7aa819f628",
+      "output": "8fdc83512fb68134ce58ad7d12b55e7d31cc40a5ac88c9d982e30bdd1790dd4d",
+      "started": 1790852544.3554587,
+      "finished": 1790852599.9849758,
+      "max_rss_kib": 5194904,
+      "whole_board_max_gpu_mib": 4828
+    },
+    {
+      "run": "dev/e4b/model",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "f74b5c11c908d13267a373c15755fb3b3a60901ae4a84ae56bff2a7aa819f628",
+      "output": "547655bef513ef0b62fba0735588a1ce38e8f091cceb90ecb0e761a08dd28c5e",
+      "started": 1790852662.3843722,
+      "finished": 1790852742.1522763,
+      "max_rss_kib": 8159020,
+      "whole_board_max_gpu_mib": 7557
+    },
+    {
+      "run": "dev/e4b/winnow",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "f74b5c11c908d13267a373c15755fb3b3a60901ae4a84ae56bff2a7aa819f628",
+      "output": "0b51e06510c1e76db5456aef9a83f20a817169173a7ca6a21da6df44820e18d2",
+      "started": 1790852742.2393868,
+      "finished": 1790852816.2440138,
+      "max_rss_kib": 8161416,
+      "whole_board_max_gpu_mib": 7642
+    },
+    {
+      "run": "regression/e2b/model",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+      "output": "efbb730168af73e2e27dbfec56b73f93bf2bfab21540d8505d6462fe51932309",
+      "started": 1790853834.9428873,
+      "finished": 1790853877.2112327,
+      "max_rss_kib": 5194396,
+      "whole_board_max_gpu_mib": 4833
+    },
+    {
+      "run": "regression/e4b/model",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+      "output": "4d20eaa3c63071bf39ecd6784e60b1b697a7bdc2c64c71bc76e9254301ab7ab2",
+      "started": 1790853877.2837653,
+      "finished": 1790853949.3041081,
+      "max_rss_kib": 8154472,
+      "whole_board_max_gpu_mib": 7801
+    },
+    {
+      "run": "regression/e4b/winnow",
+      "binary": "57c1133e79ed446e3a7ca8ce2053e25699cdb51a0d9ea7ecce99181c54b0f862",
+      "input": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+      "output": "84e38b44528152997b01b4c6bd3dc33c6e0a319b36f0de34bf8d3b215172f269",
+      "started": 1790853949.4014883,
+      "finished": 1790854014.0567844,
+      "max_rss_kib": 8161344,
+      "whole_board_max_gpu_mib": 7888
+    }
+  ],
+  "source_sha256": {
+    "src/prompt.rs": "121369123336a20086f90768e5b01886333a61df2d80abc2e0f47ee957ee1bfe",
+    "src/llama.rs": "a373c54284009b581b45322ec94a4d2e5c24287f32891d1249247a0492dfa6ee",
+    "src/llama/interchange.rs": "ea3f6e6fb580ac9bd109d0d109185b149411fc1d892bd08d918e3278e04cbc9a",
+    "src/llama/code_sequences.rs": "2b2f70d71ff5ed514089206467097b5e02bb45ea78994841f02e10b34b854cbb",
+    "src/llama/vision.rs": "32fa43500d8a8218bdf6bf2e0c986a7270cad655ec33eb64aed75fad2237eb1c",
+    "examples/evaluate_jsonl.rs": "c6e98144f8df56ce4a82d6359dd74a1aa11485a2c64309fc32008866d6e069a4",
+    "Cargo.lock": "cf90ba0c2797ded979971eddc984d932f3381a93e1087bdcf051c512b58f45f6"
+  },
+  "native_libraries": {
+    "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+    "libggml-cpu.so.0.24.0": "1db853651096438e458c68ddca0d3d90de5ff42cf12474be05062f1d8ca3471d",
+    "libggml-cuda.so.0.24.0": "7d650fbe9b935d91c51815a13cf80d4eba4ed9422dff4f8402aaedcafb70b38b",
+    "libggml.so.0.24.0": "f1f1289d74169ce3be4e4665ae36c4c6f40dfbe32ddcaf6e9eb0fa860bf3cb60",
+    "libllama.so.0.4.1": "296f1d42d298098b9528433fd20f1f37dc3deef7abe6233d69cabfa6c4547aa9",
+    "libmtmd.so.0.4.1": "b00b6d2c772346bc0f72ce3f3227cb7b7ac6060af776dcf5bd45822a5dd017d8"
+  }
+}

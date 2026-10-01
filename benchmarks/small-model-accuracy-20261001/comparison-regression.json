@@ -1,0 +1,186 @@
+{
+  "e2b": {
+    "profile": "model",
+    "baseline": {
+      "n": 231,
+      "correct": 159,
+      "raw_accuracy": 0.6883116883116883,
+      "returned": 231,
+      "coverage": 1.0,
+      "accepted_correct": 159,
+      "accepted_accuracy": 0.6883116883116883,
+      "accepted_correct_all": 0.6883116883116883,
+      "abstained": 0,
+      "nll": 2.1373711689167747,
+      "ece15": 0.27686001775279967,
+      "historical_gate": {
+        "accepted": 213,
+        "correct": 153
+      },
+      "by_type": {
+        "choice": {
+          "n": 139,
+          "correct": 94,
+          "accuracy": 0.6762589928057554
+        },
+        "binary": {
+          "n": 74,
+          "correct": 53,
+          "accuracy": 0.7162162162162162
+        },
+        "ordinal": {
+          "n": 18,
+          "correct": 12,
+          "accuracy": 0.6666666666666666
+        }
+      },
+      "latency": {
+        "p50_ms": 40.257702,
+        "p95_ms": 443.472626,
+        "total_ms": 27419.058593
+      },
+      "input_tokens": 154166,
+      "reused_prefix_tokens": 0
+    },
+    "improved": {
+      "n": 231,
+      "correct": 159,
+      "raw_accuracy": 0.6883116883116883,
+      "returned": 231,
+      "coverage": 1.0,
+      "accepted_correct": 159,
+      "accepted_accuracy": 0.6883116883116883,
+      "accepted_correct_all": 0.6883116883116883,
+      "abstained": 0,
+      "nll": 2.1373711689167747,
+      "ece15": 0.27686001775279967,
+      "historical_gate": {
+        "accepted": 213,
+        "correct": 153
+      },
+      "by_type": {
+        "choice": {
+          "n": 139,
+          "correct": 94,
+          "accuracy": 0.6762589928057554
+        },
+        "binary": {
+          "n": 74,
+          "correct": 53,
+          "accuracy": 0.7162162162162162
+        },
+        "ordinal": {
+          "n": 18,
+          "correct": 12,
+          "accuracy": 0.6666666666666666
+        }
+      },
+      "latency": {
+        "p50_ms": 40.257702,
+        "p95_ms": 443.472626,
+        "total_ms": 27419.058593
+      },
+      "input_tokens": 154166,
+      "reused_prefix_tokens": 0
+    },
+    "delta": 0.0,
+    "state_bootstrap_95": [
+      0.0,
+      0.0
+    ],
+    "corrected": 0,
+    "regressed": 0
+  },
+  "e4b": {
+    "profile": "winnow",
+    "baseline": {
+      "n": 231,
+      "correct": 180,
+      "raw_accuracy": 0.7792207792207793,
+      "returned": 231,
+      "coverage": 1.0,
+      "accepted_correct": 180,
+      "accepted_accuracy": 0.7792207792207793,
+      "accepted_correct_all": 0.7792207792207793,
+      "abstained": 0,
+      "nll": 0.502286387067155,
+      "ece15": 0.09322520949698558,
+      "historical_gate": {
+        "accepted": 174,
+        "correct": 160
+      },
+      "by_type": {
+        "choice": {
+          "n": 139,
+          "correct": 108,
+          "accuracy": 0.7769784172661871
+        },
+        "binary": {
+          "n": 74,
+          "correct": 58,
+          "accuracy": 0.7837837837837838
+        },
+        "ordinal": {
+          "n": 18,
+          "correct": 14,
+          "accuracy": 0.7777777777777778
+        }
+      },
+      "latency": {
+        "p50_ms": 64.945488,
+        "p95_ms": 685.066771,
+        "total_ms": 42058.498361
+      },
+      "input_tokens": 154166,
+      "reused_prefix_tokens": 0
+    },
+    "improved": {
+      "n": 231,
+      "correct": 186,
+      "raw_accuracy": 0.8051948051948052,
+      "returned": 231,
+      "coverage": 1.0,
+      "accepted_correct": 186,
+      "accepted_accuracy": 0.8051948051948052,
+      "accepted_correct_all": 0.8051948051948052,
+      "abstained": 0,
+      "nll": 0.4967894372544971,
+      "ece15": 0.07872946084068422,
+      "historical_gate": {
+        "accepted": 174,
+        "correct": 157
+      },
+      "by_type": {
+        "choice": {
+          "n": 139,
+          "correct": 111,
+          "accuracy": 0.7985611510791367
+        },
+        "binary": {
+          "n": 74,
+          "correct": 60,
+          "accuracy": 0.8108108108108109
+        },
+        "ordinal": {
+          "n": 18,
+          "correct": 15,
+          "accuracy": 0.8333333333333334
+        }
+      },
+      "latency": {
+        "p50_ms": 60.914703,
+        "p95_ms": 777.523506,
+        "total_ms": 45965.483926
+      },
+      "input_tokens": 158996,
+      "reused_prefix_tokens": 0
+    },
+    "delta": 0.025974025974025983,
+    "state_bootstrap_95": [
+      -0.008658008658008658,
+      0.06493506493506493
+    ],
+    "corrected": 13,
+    "regressed": 7
+  }
+}

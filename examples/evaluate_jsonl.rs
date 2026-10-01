@@ -120,6 +120,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         prompt_layout: PromptLayout,
         #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
         prompt_detail: PromptDetail,
+        #[arg(long, value_enum, default_value_t = PromptProfile::Auto)]
+        prompt_profile: PromptProfile,
         #[arg(long, default_value_t = 0)]
         code_rotation: u32,
         #[arg(long, default_value_t = 4, value_parser = clap::value_parser!(u32).range(1..=32))]
@@ -227,7 +229,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 min_top_probability: args.min_top_probability,
                 min_candidate_mass: args.min_candidate_mass,
             },
-            PromptProfile::Auto,
+            args.prompt_profile,
         )?
     } else {
         LlamaBackend::load_with_options(
@@ -238,7 +240,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 min_top_probability: args.min_top_probability,
                 min_candidate_mass: args.min_candidate_mass,
             },
-            PromptProfile::Auto,
+            args.prompt_profile,
         )?
     };
     if let Some(path) = &args.lora {

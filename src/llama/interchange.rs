@@ -175,6 +175,21 @@ impl LlamaBackend {
             ));
         }
         self.check_evidence_transfer()?;
+        if matches!(
+            self.profile,
+            PromptProfile::Winnow | PromptProfile::Gemma4Decision
+        ) {
+            for decision in &request.decisions {
+                crate::prompt::validate_winnow_input(
+                    crate::PromptInput {
+                        state: &request.state,
+                        shared: request.shared.as_ref(),
+                    },
+                    decision,
+                    self.prompt_detail,
+                )?;
+            }
+        }
         if request.decisions.iter().any(|d| d.options().len() > 26) {
             self.check_sequence_config()?;
         }

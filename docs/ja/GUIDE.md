@@ -516,3 +516,11 @@ flowchart TD
 | プレフィックスの再利用と並列実行 | [プレフィックスアルゴリズム](SEMIF_ALGORITHM.md)、[並列実行](PARALLEL_EXECUTION.md) |
 | 評価方法 | [合成ベンチマーク](BENCHMARK.md)、[AG ニュース](KAGGLE_BENCHMARK.md)、[JevBench](JEVBENCH.md)、[Laya/Jev タスクとCPU キャッシュ](LAYA_BENCHMARK.md) |
 | オプションのモデル/タスク適応 | [意思判断微調整](DECISION_FINETUNE.md)、[出力ヘッド](OUTPUT_HEAD.md) |
+
+## 小型 Gemma 4 分類プロファイル
+
+`--prompt-profile winnow` は Winnow 分類形式を使います。明示指定の実験用 `--prompt-profile gemma4-decision` は選択問題に Winnow 形式、二値問題にモデルテンプレート、順序問題に型と段階情報を使います。両者とも Gemma 4 GGUF、テキスト入力、minimal detail、shared なし、選択肢2–26件が必要です。実際のレイアウトは state-first に固定され、非対応の入力は preflight で拒否されます。`auto` は従来のモデルテンプレートを維持します。
+
+Python は `LoadOptions(prompt_profile="winnow", ...)`、TypeScript は `promptProfile: 'winnow'` で指定します。ネイティブ JSONL 評価器もサーバーと同じ `--prompt-profile` を受け付けます。モデル識別情報には実際のプロファイルとプロンプトバージョンが含まれます。変更時は既存の確率補正を再評価してください。
+
+適用範囲は [2B/4B の同一モデル比較](../../benchmarks/small-model-accuracy-20261001/README.md) を確認してください。候補確率の上昇や棄権の解除は raw 正解率の改善を意味しません。どのプロファイルも全タスクの精度を保証しません。

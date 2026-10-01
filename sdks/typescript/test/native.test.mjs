@@ -49,8 +49,9 @@ test('resident reuse defaults and explicit overrides reach the native process', 
       [{ fixedSchema: true }, 'prefix-reuse', true],
       [{ fixedSchema: false, executionMode: 'parallel' }, 'parallel', false],
     ]) {
-      await assert.rejects(L2S1.load({ model: 'fixture', binaryPath: binary, ...options }));
+      await assert.rejects(L2S1.load({ model: 'fixture', binaryPath: binary, promptProfile: 'winnow', ...options }));
       const args = JSON.parse(await readFile(record, 'utf8'));
+      assert.equal(args[args.indexOf('--prompt-profile') + 1], 'winnow');
       const index = args.indexOf('--execution-mode');
       assert.equal(index < 0 ? undefined : args[index + 1], expected);
       assert.equal(args.includes('--fixed-schema'), required);

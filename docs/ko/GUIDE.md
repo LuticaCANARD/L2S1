@@ -516,3 +516,11 @@ flowchart TD
 | 접두사 재사용 및 병렬 실행 | [접두사 알고리즘](SEMIF_ALGORITHM.md), [병렬 실행](PARALLEL_EXECUTION.md) |
 | 평가방법 | [합성 벤치마크](BENCHMARK.md), [AG News](KAGGLE_BENCHMARK.md), [JevBench](JEVBENCH.md), [Laya/Jev 작업 및 CPU 캐싱](LAYA_BENCHMARK.md) |
 | 선택적 모델/작업 적응 | [판단 미세 조정](DECISION_FINETUNE.md), [출력 헤드](OUTPUT_HEAD.md) |
+
+## 소형 Gemma 4 분류 프로필
+
+`--prompt-profile winnow`는 Winnow 분류 형식을 사용합니다. 명시적으로 선택하는 실험용 `--prompt-profile gemma4-decision`은 선택형에 Winnow 형식, 이진형에 모델 템플릿, 순서형에 타입과 단계 정보를 사용합니다. 두 프로필 모두 Gemma 4 GGUF, 텍스트 입력, minimal detail, shared 없는 요청, 선택지 2–26개를 요구합니다. 실제 레이아웃은 state-first로 고정하며, 지원하지 않는 요청은 preflight에서 거부합니다. `auto`는 기존 모델 템플릿을 유지합니다.
+
+Python은 `LoadOptions(prompt_profile="winnow", ...)`, TypeScript는 `promptProfile: 'winnow'`로 지정합니다. 네이티브 JSONL 평가기도 서버와 같은 `--prompt-profile`을 지원합니다. 모델 식별 정보에 실제 프로필과 프롬프트 버전이 포함되며, 프로필을 바꾸면 기존 보정의 적합성을 다시 평가해야 합니다.
+
+적용할 설정은 [2B/4B 동일 모델 비교](../../benchmarks/small-model-accuracy-20261001/README.md)의 검증 범위를 확인하세요. 후보 확률이 높거나 기권을 없앴다는 사실은 원시 정확도가 높아졌다는 증거가 아닙니다. 모든 업무에서 더 높은 정확도를 보장하는 프로필은 없습니다.

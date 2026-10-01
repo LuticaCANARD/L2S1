@@ -1,0 +1,13 @@
+{
+  "gpu": "NVIDIA GeForce RTX3080 10GiB",
+  "cpu": "Intel Core i9-9900K; 4 CPUs exposed to this WSL2 environment",
+  "os": "Linux 6.18.33.2-microsoft-standard-WSL2",
+  "cmake_toolchain": [
+    "CMAKE_CUDA_ARCHITECTURES:UNINITIALIZED=86",
+    "CMAKE_CUDA_COMPILER:FILEPATH=/usr/bin/nvcc",
+    "CMAKE_CXX_COMPILER:STRING=/usr/bin/c++",
+    "FETCHCONTENT_SOURCE_DIR_LLAMA_CPP:PATH=/home/lutica/personal/Openweight-Test/llama.cpp"
+  ],
+  "llama_cpp_revision": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "gpu_monitor": "200ms whole-board samples including desktop/loading; clocks not locked"
+}

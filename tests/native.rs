@@ -436,3 +436,59 @@ fn vocab_only_deployment_context_preserves_shared_evidence_and_prompt_settings()
     }
     assert!(vocab.decide(&request).is_err());
 }
+
+#[test]
+#[ignore = "requires SKID_GEMMA4_MODEL; verifies token routing without inference"]
+fn gemma4_decision_routes_exact_model_local_prompts() {
+    let model = std::env::var("SKID_GEMMA4_MODEL").expect("set SKID_GEMMA4_MODEL");
+    let request: DecisionRequest =
+        serde_json::from_str(include_str!("../examples/warehouse.json")).unwrap();
+    let load = |profile| {
+        LlamaBackend::load_vocab_only_with_options(
+            model.as_ref(),
+            ComputeOptions {
+                context: 2048,
+                threads: 2,
+                ..ComputeOptions::default()
+            },
+            profile,
+        )
+        .unwrap()
+    };
+    let mut routed = load(PromptProfile::Gemma4Decision);
+    routed.set_prompt_layout(PromptLayout::Legacy);
+    assert_eq!(routed.info().prompt_layout, PromptLayout::StateFirst);
+    assert_eq!(routed.info().prompt_version, "gemma4-decision-v1");
+    let mut reference = load(PromptProfile::Model);
+    reference.set_prompt_layout(PromptLayout::StateFirst);
+    for decision in &request.decisions {
+        if matches!(decision.kind, DecisionKind::Choice { .. }) {
+            continue;
+        }
+        reference.set_prompt_detail(if matches!(decision.kind, DecisionKind::Ordinal { .. }) {
+            PromptDetail::Typed
+        } else {
+            PromptDetail::Minimal
+        });
+        assert_eq!(
+            routed.encode_decision(request.input(), decision).unwrap(),
+            reference
+                .encode_decision(request.input(), decision)
+                .unwrap()
+        );
+    }
+    drop(reference);
+    let reference = load(PromptProfile::Winnow);
+    let decision = &request.decisions[0];
+    assert_eq!(
+        routed.encode_decision(request.input(), decision).unwrap(),
+        reference
+            .encode_decision(request.input(), decision)
+            .unwrap()
+    );
+    let mut unsupported = request.clone();
+    unsupported.shared = Some(serde_json::json!({"note":"shared"}));
+    assert!(routed.preflight(&unsupported).is_err());
+    routed.set_prompt_detail(PromptDetail::Typed);
+    assert!(routed.preflight(&request).is_err());
+}

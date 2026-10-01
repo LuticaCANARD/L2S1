@@ -1,0 +1,25 @@
+{
+  "e2b": {
+    "profile": "model",
+    "correct": 363,
+    "n": 640,
+    "candidates": {
+      "model": 363,
+      "winnow": 328,
+      "gemma4-decision": 326,
+      "model-typed": 347,
+      "model-typed-examples": 336
+    },
+    "frozen_at": 1790852979.512672
+  },
+  "e4b": {
+    "profile": "winnow",
+    "correct": 450,
+    "n": 640,
+    "candidates": {
+      "model": 419,
+      "winnow": 450
+    },
+    "frozen_at": 1790852979.5133097
+  }
+}

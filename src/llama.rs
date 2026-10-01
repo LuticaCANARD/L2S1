@@ -76,6 +76,7 @@ pub struct LlamaBackend {
     architecture: String,
     profile: PromptProfile,
     chat_skeleton: Option<String>,
+    winnow_thought_boundary: bool,
     execution_mode: ExecutionMode,
     parallel_width: usize,
     parallel_context_dynamic: bool,
@@ -167,6 +168,9 @@ fn resolve_profile(
         other => other,
     };
     match resolved {
+        PromptProfile::Winnow | PromptProfile::Gemma4Decision if architecture != "gemma4" => Err(
+            Error::Backend("winnow/gemma4-decision profiles require a gemma4 GGUF".into()),
+        ),
         PromptProfile::Qwen3 if !qwen3 => Err(Error::Backend(
             "qwen3 profile requires Qwen3 dense chat GGUF with enable_thinking template".into(),
         )),
@@ -350,6 +354,7 @@ impl LlamaBackend {
             architecture: String::new(),
             profile,
             chat_skeleton: None,
+            winnow_thought_boundary: false,
             lora_path: None,
             output_head: None,
             output_head_path: None,
@@ -641,8 +646,9 @@ impl LlamaBackend {
         }
         let template = unsafe { CStr::from_ptr(template_ptr) }.to_string_lossy();
         self.profile = resolve_profile(requested, &self.architecture, &template)?;
+        self.winnow_thought_boundary = template.contains("<|channel>thought\n<channel|>");
         match self.profile {
-            PromptProfile::Model | PromptProfile::GptOssFinal => {
+            PromptProfile::Model | PromptProfile::GptOssFinal | PromptProfile::Gemma4Decision => {
                 // Token text belongs to the model and remains live during rendering.
                 let bos =
                     unsafe { CStr::from_ptr(sd_bos_text(self.engine.as_ptr())) }.to_string_lossy();
@@ -695,7 +701,7 @@ impl LlamaBackend {
     /// exact token prefix) and every other configuration, including a backend
     /// with a vision projector (whose waves share no prefix KV), uses
     /// `Legacy`. Layout changes the prompt; validate workload accuracy and
-    /// bind calibration to it.
+    /// bind calibration to it. Gemma4 classification profiles always use state-first format.
     pub fn set_prompt_layout(&mut self, layout: PromptLayout) {
         unsafe { sd_clear(self.engine.as_ptr()) };
         self.prompt_layout = Some(layout);
@@ -711,6 +717,12 @@ impl LlamaBackend {
 
     /// The prompt layout used for the current configuration.
     pub fn prompt_layout(&self) -> PromptLayout {
+        if matches!(
+            self.profile,
+            PromptProfile::Winnow | PromptProfile::Gemma4Decision
+        ) {
+            return PromptLayout::StateFirst;
+        }
         self.prompt_layout.unwrap_or(
             if self.execution_mode == ExecutionMode::Parallel
                 && self.vision_projector_path.is_none()
@@ -861,29 +873,52 @@ impl LlamaBackend {
         state: crate::PromptInput<'_>,
         decision: &Decision,
     ) -> std::result::Result<(Vec<i32>, Vec<i32>), DecisionFailure> {
-        let parts = match &self.chat_skeleton {
-            _ if self.reasoning.is_thinking() => crate::prompt::compile_thinking_prompt(
+        if self.profile == PromptProfile::Gemma4Decision {
+            crate::prompt::validate_winnow_input(state, decision, self.prompt_detail)?;
+        }
+        let detail = if self.profile == PromptProfile::Gemma4Decision
+            && matches!(decision.kind, crate::DecisionKind::Ordinal { .. })
+        {
+            PromptDetail::Typed
+        } else {
+            self.prompt_detail
+        };
+        let parts = if self.profile == PromptProfile::Winnow
+            || (self.profile == PromptProfile::Gemma4Decision
+                && matches!(decision.kind, crate::DecisionKind::Choice { .. }))
+        {
+            crate::prompt::compile_winnow_prompt(
                 state,
                 decision,
-                self.prompt_layout(),
+                self.winnow_thought_boundary,
                 self.prompt_detail,
                 self.code_rotation,
-            ),
-            Some(skeleton) => crate::prompt::compile_model_prompt_with_detail(
-                skeleton,
-                state,
-                decision,
-                self.prompt_layout(),
-                self.prompt_detail,
-                self.code_rotation,
-            )?,
-            None => compile_prompt_with_detail(
-                state,
-                decision,
-                self.prompt_layout(),
-                self.prompt_detail,
-                self.code_rotation,
-            ),
+            )?
+        } else {
+            match &self.chat_skeleton {
+                _ if self.reasoning.is_thinking() => crate::prompt::compile_thinking_prompt(
+                    state,
+                    decision,
+                    self.prompt_layout(),
+                    detail,
+                    self.code_rotation,
+                ),
+                Some(skeleton) => crate::prompt::compile_model_prompt_with_detail(
+                    skeleton,
+                    state,
+                    decision,
+                    self.prompt_layout(),
+                    detail,
+                    self.code_rotation,
+                )?,
+                None => compile_prompt_with_detail(
+                    state,
+                    decision,
+                    self.prompt_layout(),
+                    detail,
+                    self.code_rotation,
+                ),
+            }
         };
         let mut input = Vec::new();
         for part in &parts {
@@ -1318,6 +1353,8 @@ impl LlamaBackend {
             model_description: description,
             model_architecture: self.architecture.clone(),
             prompt_profile: match self.profile {
+                PromptProfile::Winnow => "winnow",
+                PromptProfile::Gemma4Decision => "gemma4-decision",
                 PromptProfile::Qwen3 => "qwen3",
                 PromptProfile::GptOssFinal => "gpt-oss-final",
                 _ => "model",
@@ -1326,6 +1363,8 @@ impl LlamaBackend {
             prompt_layout: self.prompt_layout(),
             prompt_version: {
                 let base = match (self.prompt_layout(), self.profile) {
+                    (_, PromptProfile::Winnow) => "winnow-text-v1",
+                    (_, PromptProfile::Gemma4Decision) => "gemma4-decision-v1",
                     (PromptLayout::Legacy, PromptProfile::Qwen3) => PROMPT_VERSION,
                     (PromptLayout::Legacy, PromptProfile::GptOssFinal) => {
                         GPT_OSS_FINAL_PROMPT_VERSION
@@ -1446,6 +1485,16 @@ mod tests {
             resolve_profile(PromptProfile::Model, "gpt-oss", "").unwrap(),
             PromptProfile::Model
         );
+        assert_eq!(
+            resolve_profile(PromptProfile::Winnow, "gemma4", "").unwrap(),
+            PromptProfile::Winnow
+        );
+        assert!(resolve_profile(PromptProfile::Winnow, "gemma3", "").is_err());
+        assert_eq!(
+            resolve_profile(PromptProfile::Gemma4Decision, "gemma4", "").unwrap(),
+            PromptProfile::Gemma4Decision
+        );
+        assert!(resolve_profile(PromptProfile::Gemma4Decision, "gemma3", "").is_err());
         assert!(resolve_profile(PromptProfile::GptOssFinal, "gemma3", "").is_err());
         assert!(resolve_profile(PromptProfile::Qwen3, "gpt-oss", "enable_thinking").is_err());
     }

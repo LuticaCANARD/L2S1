@@ -506,3 +506,11 @@ The standard CLI calls `LlamaBackend` directly; the optional GPU CLI calls `Wgpu
 | Prefix reuse and parallel execution | [Prefix algorithm](SEMIF_ALGORITHM.md), [parallel execution](PARALLEL_EXECUTION.md) |
 | Evaluation methods | [Synthetic benchmark](BENCHMARK.md), [AG News](KAGGLE_BENCHMARK.md), [JevBench](JEVBENCH.md), [Laya/Jev tasks and CPU caching](LAYA_BENCHMARK.md) |
 | Optional model/task adaptation | [Decision fine-tuning](DECISION_FINETUNE.md), [output heads](OUTPUT_HEAD.md) |
+
+## Small Gemma 4 classification profiles
+
+`--prompt-profile winnow` uses the Winnow classification format. The explicit experimental `--prompt-profile gemma4-decision` uses Winnow formatting for choices, the embedded template for binary questions, and typed level information for ordinal questions. Both require a Gemma 4 GGUF, text-only input, minimal detail, no shared evidence, and 2–26 options. Both fix the effective layout to state-first; unsupported requests fail preflight rather than silently changing semantics. `auto` continues to use the embedded model template.
+
+Python exposes `LoadOptions(prompt_profile="winnow", ...)`; TypeScript exposes `promptProfile: 'winnow'`. The native JSONL evaluator now accepts the same `--prompt-profile` option as the server, so benchmarks can reproduce serving prompts. Model identity includes the effective profile and prompt version. Changing profiles requires re-evaluating any calibration.
+
+Use the [paired 2B/4B evaluation](../benchmarks/small-model-accuracy-20261001/README.md) to select a measured configuration. Classification scores are conditional candidate probabilities; a larger score or removing abstention is not evidence of higher raw accuracy. No profile is a universal quality guarantee.

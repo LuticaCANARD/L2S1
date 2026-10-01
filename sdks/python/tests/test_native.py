@@ -24,6 +24,7 @@ class Startup(unittest.IsolatedAsyncioTestCase):
         started = asyncio.Event()
 
         async def replacement(*args: object, **kwargs: object) -> asyncio.subprocess.Process:
+            self.assertEqual(args[args.index("--prompt-profile") + 1], "winnow")
             # Real child process with a deliberately stalled startup; no server.
             child = await spawn(sys.executable, "-c", "import time; time.sleep(30)",
                                 stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE)
@@ -33,10 +34,10 @@ class Startup(unittest.IsolatedAsyncioTestCase):
 
         with patch("l2s1.native.asyncio.create_subprocess_exec", side_effect=replacement):
             with self.assertRaises(TimeoutError):
-                await L2S1.load(LoadOptions(model="fixture", binary_path=sys.executable, startup_timeout_ms=30))
+                await L2S1.load(LoadOptions(model="fixture", binary_path=sys.executable, prompt_profile="winnow", startup_timeout_ms=30))
             self.assertIsNotNone(children[-1].returncode)
             started.clear()
-            pending = asyncio.create_task(L2S1.load(LoadOptions(model="fixture", binary_path=sys.executable)))
+            pending = asyncio.create_task(L2S1.load(LoadOptions(model="fixture", binary_path=sys.executable, prompt_profile="winnow")))
             await started.wait()
             pending.cancel()
             with self.assertRaises(asyncio.CancelledError):

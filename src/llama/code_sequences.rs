@@ -3,6 +3,14 @@ use super::*;
 
 impl LlamaBackend {
     pub(super) fn check_sequence_config(&self) -> Result<()> {
+        if matches!(
+            self.profile,
+            PromptProfile::Winnow | PromptProfile::Gemma4Decision
+        ) {
+            return Err(Error::Invalid(
+                "winnow/gemma4-decision supports only 2..26 options".into(),
+            ));
+        }
         if !matches!(
             self.execution_mode,
             ExecutionMode::Fresh | ExecutionMode::PrefixReuse
