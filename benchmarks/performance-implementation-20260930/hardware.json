@@ -1,0 +1,32 @@
+{
+  "platform": {
+    "system": "Linux",
+    "release": "6.18.33.2-microsoft-standard-WSL2",
+    "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+    "machine": "x86_64",
+    "processor": ""
+  },
+  "cpu": "Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz",
+  "threads_per_inference": 4,
+  "gpu": "NVIDIA GeForce RTX 3080, 10240, 596.21",
+  "nvcc": [
+    "Cuda compilation tools, release 12.4, V12.4.131",
+    "Build cuda_12.4.r12.4/compiler.34097967_0"
+  ],
+  "native_source_revision": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "model_placement": {
+    "12b": {
+      "gpu_layers": "49/49",
+      "cuda_model_mib": 6637.69,
+      "cpu_mapped_model_mib": 787.5
+    },
+    "e2b": {
+      "gpu_layers": "36/36",
+      "cuda_model_mib": 2342.3,
+      "cpu_mapped_model_mib": 2788.0
+    }
+  },
+  "transport": "native Rust in-process, one model process at a time",
+  "warmup": "one excluded ordinary request batch per process; resident starts after warmup",
+  "memory_scope": "sampled whole-board GPU memory including desktop and loading; Linux process RSS/HWM samples include loading"
+}

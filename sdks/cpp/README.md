@@ -24,7 +24,7 @@ expects the consumer to provide `nlohmann_json` through its CMake package config
 In a consuming CMake project:
 
 ```cmake
-find_package(l2s1_cpp 0.1 CONFIG REQUIRED)
+find_package(l2s1_cpp 0.2 CONFIG REQUIRED)
 target_link_libraries(your_app PRIVATE l2s1::cpp)
 ```
 
@@ -35,6 +35,19 @@ llama --bin l2s1`; CUDA uses `llama-cuda`, macOS Metal uses `llama-metal`.
 See the [native build requirements](../../crates/l2s1-llama-sys/README.md).
 
 ## Reuse a decision
+
+Omit `execution_mode` to inherit automatic fixed-schema prefix reuse from a
+compatible resident runtime. Set `execution_mode = "fresh"` or
+`fixed_schema = false` to opt out; `fixed_schema = true` requires support.
+An explicit execution mode takes precedence over `fixed_schema = false`.
+The runtime clears retained snapshots whenever the ordered decision schema changes,
+including when an older prepared plan is used again. State changes reuse the
+prefix and compute new results. Check `capabilities()["prefix_reuse"]` and
+`Result::usage["reused_prefix_tokens"]`; `prepare()` itself performs no inference.
+These C++ defaults and schema invalidation require runtime/SDK 0.2.1 or later.
+`execution_mode` is now `std::optional<std::string>`; `std::nullopt` inherits the runtime default.
+
+The example below explicitly selects parallel execution for `decide_batch`:
 
 ```cpp
 #include <l2s1/l2s1.hpp>

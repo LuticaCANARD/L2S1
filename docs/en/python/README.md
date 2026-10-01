@@ -4,14 +4,14 @@
 Python 3.11+ async SDK for the resident Rust engine. Requests and responses use the
 same HTTP v1 field names, decision kinds, policies and evidence as `@l2s1/node`.
 The package includes Pydantic runtime validation and PEP 561 type information.
-[l2s1-sdk 0.1.4](https://pypi.org/project/l2s1-sdk/0.1.4/) is published on PyPI; the import remains `import l2s1`.
+[l2s1-sdk 0.2.2](https://pypi.org/project/l2s1-sdk/0.2.2/) is published on PyPI; the import remains `import l2s1`.
 
 ## Install
 
 From PyPI:
 
 ```sh
-pip install l2s1-sdk==0.1.4
+pip install l2s1-sdk==0.2.2
 ```
 
 From a source checkout:
@@ -23,7 +23,7 @@ python -m pip install ./sdks/python
 From a built package:
 
 ```sh
-python -m pip install ./l2s1_sdk-0.1.4-py3-none-any.whl
+python -m pip install ./l2s1_sdk-0.2.2-py3-none-any.whl
 ```
 
 The wheel contains the Python SDK. Supply the Rust engine and GGUF weights
@@ -173,7 +173,7 @@ GGUF, CUDA or Metal quality/performance evidence. The CI matrix targets Python
 3.11 and 3.14 on Linux, macOS and Windows; local verification covers only the
 actual host. The release pipeline publishes validated wheel/sdist artifacts to PyPI.
 
-The [release pipeline](../RELEASE_PIPELINE.md) publishes validated GitHub Release, npm, PyPI and native Cargo packages using configured trusted publishers. [v0.1.4](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.1.4) is available.
+The [release pipeline](../RELEASE_PIPELINE.md) publishes validated GitHub Release, npm, PyPI and native Cargo packages using configured trusted publishers. [v0.2.2](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.2) is available.
 
 ## Resident prefix reuse
 
@@ -182,3 +182,5 @@ Compatible resident text servers (`--listen` / `--stdio`, including SDK `load`) 
 Omit `fixed_schema` to inherit the runtime default. Set it to true to require support, or false to select fresh when no execution mode is specified. An explicit execution mode takes precedence over false.
 
 This default is available in v0.1.4. Published v0.1.3 requires explicit `fixedSchema: true` / `fixed_schema=True`.
+
+With a runtime built from this change, changing the ordered decision schema clears all retained prefixes. Returning to an older prepared plan starts cold; changing only state keeps prefix reuse. Check `capabilities().prefix_reuse.schema_change == "clear_all"`. Existing published runtimes do not gain this behavior automatically.

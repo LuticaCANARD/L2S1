@@ -3,7 +3,9 @@
 //! Typed decision contracts and scoring, independent of the inference backend.
 mod codes;
 mod decision;
+mod facts;
 pub use codes::{option_code, option_code_width};
+pub use facts::{FactOperation, FactSpec, derive_facts};
 mod output_head;
 mod prompt;
 mod reasoning;
@@ -15,12 +17,13 @@ pub use prompt::{
     STATE_FIRST_MODEL_PROMPT_VERSION, STATE_FIRST_PROMPT_VERSION, compile_prompt,
     compile_prompt_with_detail, compile_prompt_with_layout,
 };
-pub use reasoning::{ReasoningMode, ReasoningOptions};
+pub use reasoning::{ReasoningMode, ReasoningOptions, ReasoningUsage};
 pub mod http;
 #[cfg(feature = "llama")]
 pub mod llama;
 #[cfg(feature = "openrouter")]
 pub mod openrouter;
+pub mod presets;
 pub mod stdio;
 mod vision;
 #[cfg(feature = "wgpu")]

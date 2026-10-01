@@ -1,5 +1,7 @@
 # Documentation index
 
+[Performance review](PERFORMANCE_REVIEW.md): current measurements, failure analysis and prioritized experiments.
+
 [English](../en/README.md) · [한국어](../ko/README.md) · [日本語](../ja/README.md)
 
 Start with the [English README](../../README.md) to build L2S1 and run a first decision. This index covers all public supplementary guides, package documentation, and benchmark reports. Every listed guide, package document, and benchmark report has a complete English, Korean, and Japanese body. Use the language links in a document to switch to the same document in another language. Code, commands, identifiers, and measurements retain their source values.

@@ -83,7 +83,7 @@
   <main id="main">
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="status-dot"></span> {t('eyebrowHero')} <span class="version">v0.1.1</span></p>
+        <p class="eyebrow"><span class="status-dot"></span> {t('eyebrowHero')} <span class="version">v0.2.2</span></p>
         <h1>{t('heroTitle')}<br /><em>{t('heroTitleEmphasis')}</em></h1>
         <p class="hero-description">{t('heroDescription')}<br />{t('heroDescriptionAnswer')}</p>
         <p class="hero-detail">{t('heroDetail')}</p>

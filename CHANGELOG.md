@@ -1,6 +1,70 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## Unreleased
+
+- Decision presets: `--preset file.json` (repeatable) registers named
+  decision sets at startup; requests send `"preset": "<name>"` in place of
+  `decisions` over HTTP, batches, `--stdio` and CLI input. Capabilities list
+  them. Example: `examples/presets/triage.json`.
+
+- Native Qwen3 thinking is wired back in: `--reasoning-mode thinking`,
+  `--max-reasoning-tokens` (1-1024), `LlamaBackend::set_reasoning`, and the
+  HTTP `reasoning` field, as `docs/REASONING.md` describes. Bounded greedy
+  thinking then scores the typed candidates; `reasoning_limit` and
+  `reasoning_incomplete` fail explicitly. Requires fresh execution, so
+  servers need `--execution-mode fresh`; the fixed-schema default refuses
+  thinking with that instruction.
+- HTTP listener: TypeSafe-compatible `POST /v1/systemone` and `GET /v1/models`,
+  so TypeSafe SDK clients switch by base URL. FastAPI-style `422`
+  issues, `422 STATE_TRUNCATED` on context overflow, `503 QUEUE_FULL` with
+  `Retry-After`, `x-typesafe-request-id`. Checked with the unmodified
+  `typesafe-sdk` 0.7.1. `/v1/decisions` is unchanged.
+
+## 0.2.2 (2026-09-30)
+
+- Release the SDK/native runtimes at 0.2.2 and the source-installable training
+  tools at 0.1.1. Training remains available from this pinned source tag.
+
+- `l2s1-train prepare --prompt-layout {legacy,state-first} --prompt-detail
+  {minimal,typed,typed-examples}` records the prompt the application deploys in
+  the protocol and token seal; `run` exports, trains and evaluates with it.
+  Defaults keep the frozen pilot protocol (`legacy` / `minimal`). (#89)
+- `LlamaBackend::load_vocab_only_with_options` and `export_decision_tokens
+  --context`: vocab-only preparation enforces the deployment context instead of
+  a fixed 2048 tokens; `run` exports with the evaluator's 8192. (#87)
+- `export_decision_tokens` renders a request's `shared` evidence (previously
+  dropped).
+- Jev Score criteria may be an ordered object, keeping application level IDs
+  (for example `low` / `medium` / `high`) instead of `"0"`, `"1"`, ...
+- MLX training maps LoRA modules to the checkpoint's own tensor names (Gemma 4
+  prefixes), loads lazily and checkpoints gradients: Gemma 4 12B trains in
+  12.8 GiB on a 36 GiB Mac.
+
+- `l2s1-train run --eval-execution parallel` and `evaluate_jsonl
+  --parallel-prefix-alignment` opt into parallel scoring. The training runner
+  checks evaluator compatibility before export. Validate decisions and abstentions
+  on the deployment model/device; `fresh` remains the default.
+- Jev preparation preserves shared evidence through token export and evaluation;
+  training rejects prompt identity/layout mismatches and invalid token contexts.
+
+## 0.2.1 (2026-09-30)
+
+- Compatible resident servers clear retained KV snapshots and schema tokens when
+  the ordered decision schema changes. State-only changes keep prefix reuse;
+  returning to an older schema starts cold. Capabilities expose
+  `prefix_reuse.schema_change: "clear_all"`.
+- C++ `Engine::load()` now inherits automatic resident reuse like Python and
+  TypeScript. `LoadOptions::execution_mode` is optional; `fixed_schema` can
+  require reuse or opt out. Explicit fresh/parallel modes remain available.
+  This changes C++'s previous fresh default and can change scores through the
+  resident split plan; revalidate application decisions when upgrading.
+- Add checked structured integer/time/graph facts, explicit resident JSONL
+  evaluation, and repeated compute tuning with correctness and latency gates.
+  Facts, Flash Attention and parallel execution remain opt-in.
+- Include reproducible performance/JevBench evidence and real CUDA schema/SDK
+  validation across E2B and 12B. See [usage and validation](docs/DECISION_PERFORMANCE.md).
+
+## 0.2.0 (2026-09-30)
 
 Parallel prefix sharing. Several defaults change prompts or wave schedules, so
 decisions, scores and calibration identities can differ from 0.1.4. Re-evaluate

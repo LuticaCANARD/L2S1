@@ -38,7 +38,7 @@
     {
       "source": "docs/GUIDE.md",
       "path": "GUIDE.md",
-      "source_sha256": "725b5b211529708bf5b39460dd71108fce59289bbb6380b86f28c8c9a15e4e3e",
+      "source_sha256": "f3858a59bff870621f71b8882a0146d3a662c913c540caed637bfcdd3815ae22",
       "languages": [
         "en",
         "ko",
@@ -68,7 +68,7 @@
     {
       "source": "docs/JEVBENCH.md",
       "path": "JEVBENCH.md",
-      "source_sha256": "ab3a1fc41d600d0b34f214629579c0c9dbb616e2ae539d00c753434d05a5f4da",
+      "source_sha256": "13e8b0188c990fc1486387ee953819ec0ae0581a88b3c047f50e52f72a41d3f4",
       "languages": [
         "en",
         "ko",
@@ -118,7 +118,7 @@
     {
       "source": "docs/MODEL_RESULTS.md",
       "path": "MODEL_RESULTS.md",
-      "source_sha256": "b7d682e6d02069321ca39441b80c2485d63a25240a36623fa97456a88f89610a",
+      "source_sha256": "151e91a2d45843c4951de01f24bf91fcec13427f0c14fcda725f0f38ec13b091",
       "languages": [
         "en",
         "ko",
@@ -168,7 +168,7 @@
     {
       "source": "docs/REASONING.md",
       "path": "REASONING.md",
-      "source_sha256": "9df6dc28b552620e948f2f302a09829fbaa02dea55b1667a33e5448ecdfebab6",
+      "source_sha256": "6722822414b57d1d0f480d6a6654a8b4b68610084d2bd6b39aaa80bbffd14cc3",
       "languages": [
         "en",
         "ko",
@@ -308,7 +308,7 @@
     {
       "source": "sdks/typescript/README.md",
       "path": "typescript/README.md",
-      "source_sha256": "70d91dfb155186510de494dd0730d6d13d1c6cc685a8f27db6e74ba461cf04d2",
+      "source_sha256": "9c47ef5be470119cf3175d578e3ad705afc03a09b0950d0b1ecd36cb79261b9d",
       "languages": [
         "en",
         "ko",
@@ -428,7 +428,7 @@
     {
       "source": "docs/RELEASE_PIPELINE.md",
       "path": "RELEASE_PIPELINE.md",
-      "source_sha256": "4197637966468ba942ca1e9fed88824f8f5dca898213fe23791595acbac96556",
+      "source_sha256": "78cf303bf8447cc739b0ea47ea741511a09f426ff646f635507f7905acd061c0",
       "languages": [
         "en",
         "ko",
@@ -438,7 +438,7 @@
     {
       "source": "sdks/python/README.md",
       "path": "python/README.md",
-      "source_sha256": "0f746b2f4f5581c2bdd392c07c7a48f9b5c64f71aca0ca4b52036c42910e1d1b",
+      "source_sha256": "8f5d45c502a334c0def872897ce4940c3150c835c6ef0705c17de2d997785321",
       "languages": [
         "en",
         "ko",
@@ -459,6 +459,16 @@
       "source": "docs/FAST_DECISIONS.md",
       "path": "FAST_DECISIONS.md",
       "source_sha256": "4e63ba6b69b410cc786728c5b04bdc0465a291c461eff7be29b860a56f9edcaf",
+      "languages": [
+        "en",
+        "ko",
+        "ja"
+      ]
+    },
+    {
+      "source": "docs/PERFORMANCE_REVIEW.md",
+      "path": "PERFORMANCE_REVIEW.md",
+      "source_sha256": "182cf17fc79b63ea4798b1958ac20538491dd1e3853a7085c7f6ffa390ec0214",
       "languages": [
         "en",
         "ko",

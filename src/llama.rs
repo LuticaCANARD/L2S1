@@ -19,6 +19,7 @@ mod fixed_schema;
 mod interchange;
 mod model_hash;
 mod prepared_cache;
+mod reasoning;
 mod shared_decision;
 pub use fixed_schema::FixedSchemaBackend;
 mod parallel_session;
@@ -40,6 +41,7 @@ pub struct PreparationCacheStats {
 use l2s1_llama_sys::*;
 
 pub struct LlamaBackend {
+    reasoning: ReasoningOptions,
     engine: NonNull<c_void>,
     prompt_detail: PromptDetail,
     code_rotation: usize,
@@ -237,13 +239,18 @@ impl LlamaBackend {
     /// and prompt setters. Preparation matches a default-compute CPU backend
     /// (2048-token limit, same identity); anything needing logits errors.
     pub fn load_vocab_only(path: &Path, profile: PromptProfile) -> Result<Self> {
-        Self::load_with_device_options(
-            path,
-            ComputeOptions::default(),
-            -1,
-            DecisionPolicy::default(),
-            profile,
-        )
+        Self::load_vocab_only_with_options(path, ComputeOptions::default(), profile)
+    }
+
+    /// `load_vocab_only` with the deployment's compute options, so preparation
+    /// enforces the same `context` limit (and records the same identity) as the
+    /// backend that will run these prompts. No context is allocated either way.
+    pub fn load_vocab_only_with_options(
+        path: &Path,
+        compute: ComputeOptions,
+        profile: PromptProfile,
+    ) -> Result<Self> {
+        Self::load_with_device_options(path, compute, -1, DecisionPolicy::default(), profile)
     }
 
     /// Load a GGUF through the pinned llama.cpp Metal backend on macOS.
@@ -330,6 +337,7 @@ impl LlamaBackend {
             candidate_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
             vision_prepared_cache: RefCell::new(BoundedTokenCache::new(0, 0)),
             logits_buffer: Vec::new(),
+            reasoning: ReasoningOptions::default(),
             model_path,
             vision_projector_path: None,
             vision_projector_sha256: None,
@@ -459,6 +467,9 @@ impl LlamaBackend {
     /// Opt in to one compatible GGUF LoRA at scale 1. Clears cached base logits.
     /// A second adapter requires a new backend; defaults remain unchanged.
     pub fn load_lora(&mut self, path: &Path) -> Result<()> {
+        if self.reasoning.is_thinking() {
+            return Err(Error::Invalid("thinking does not support LoRA".into()));
+        }
         if self.output_head.is_some() || self.has_calibrations() {
             return Err(Error::Invalid(
                 "LoRA and output heads cannot be combined".into(),
@@ -490,6 +501,11 @@ impl LlamaBackend {
 
     /// Load one explicitly scoped head bound to this GGUF and inference configuration.
     pub fn load_output_head(&mut self, path: &Path) -> Result<()> {
+        if self.reasoning.is_thinking() {
+            return Err(Error::Invalid(
+                "thinking does not support output heads".into(),
+            ));
+        }
         if self.evidence_transfer != EvidenceTransfer::Full {
             return Err(Error::Invalid(
                 "output heads require full evidence transfer".into(),
@@ -559,6 +575,7 @@ impl LlamaBackend {
         let result = (|| {
             request.validate()?;
             if request.decisions.len() != 1
+                || self.reasoning.is_thinking()
                 || self.execution_mode != ExecutionMode::Fresh
                 || self.lora_path.is_some()
                 || self.output_head.is_some()
@@ -845,6 +862,13 @@ impl LlamaBackend {
         decision: &Decision,
     ) -> std::result::Result<(Vec<i32>, Vec<i32>), DecisionFailure> {
         let parts = match &self.chat_skeleton {
+            _ if self.reasoning.is_thinking() => crate::prompt::compile_thinking_prompt(
+                state,
+                decision,
+                self.prompt_layout(),
+                self.prompt_detail,
+                self.code_rotation,
+            ),
             Some(skeleton) => crate::prompt::compile_model_prompt_with_detail(
                 skeleton,
                 state,
@@ -884,7 +908,23 @@ impl LlamaBackend {
                 ),
             ));
         }
-        let candidates = self.prepare_candidate_tokens(decision, &parts.last().unwrap().text)?;
+        // Thinking scores the code after the generated </think> and this separator.
+        let tail = if self.reasoning.is_thinking() {
+            let tail = "\n\n";
+            let budget = self.reasoning.max_tokens + self.tokenize(tail, true)?.len();
+            if input.len().saturating_add(budget) > self.context {
+                return Err(DecisionFailure::new(
+                    FailureKind::ContextExceeded,
+                    "prepare",
+                    Some(&decision.id),
+                    "thinking prompt plus maximum reasoning tokens and final separator exceed context; input was not truncated",
+                ));
+            }
+            tail
+        } else {
+            &parts.last().unwrap().text
+        };
+        let candidates = self.prepare_candidate_tokens(decision, tail)?;
         Ok((input, candidates))
     }
 
@@ -957,6 +997,9 @@ impl LlamaBackend {
         boundary: Option<usize>,
         reuse: bool,
     ) -> Result<DecisionResult> {
+        if self.reasoning.is_thinking() {
+            return self.evaluate_thinking(state, decision);
+        }
         if decision.options().len() > 26 {
             return self.evaluate_code_sequences(state, decision);
         }
@@ -1294,13 +1337,22 @@ impl LlamaBackend {
                     }
                     (PromptLayout::StateFirst, _) => STATE_FIRST_MODEL_PROMPT_VERSION,
                 };
-                if self.prompt_detail.is_minimal() && self.code_rotation == 0 {
+                let version: String = if self.prompt_detail.is_minimal() && self.code_rotation == 0
+                {
                     base.into()
                 } else {
                     format!(
                         "{base}/detail-{:?}-v1/rotation-{}",
                         self.prompt_detail, self.code_rotation
                     )
+                };
+                if self.reasoning.is_thinking() {
+                    format!(
+                        "{version}/thinking-greedy-v1/max-{}",
+                        self.reasoning.max_tokens
+                    )
+                } else {
+                    version
                 }
             },
             runtime: "local-libllama".into(),

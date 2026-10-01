@@ -113,6 +113,19 @@ Gemma 4 12B IT is recorded in
 [jev-lora-mlx-gemma4-12b-20260930](../benchmarks/jev-lora-mlx-gemma4-12b-20260930/README.md).
 Use a custom `--profiles` registry for checkpoints outside the bundled profiles.
 
+`--eval-execution parallel` scores each case's decisions together instead of
+one fresh call each. It can change probabilities, selected decisions and abstentions,
+so validate the deployment model/device and compare base and adapter under the same mode.
+The runner checks evaluator support before exporting or training. A [CUDA regression check](../benchmarks/training-pr-review-20260930/README.md#parallel-inference-review-pr-90)
+changed 2/192 E2B top-1 answers with a maximum probability difference of 0.584;
+12B retained 192/192 answers with a 0.0044 maximum difference. Treat numerical
+equivalence as model/device-specific. The speedup
+comes from sharing the state prefix and therefore needs `state-first` prompts;
+with the pilot's `legacy` layout it measured no faster than `fresh`. Batching
+several training examples per forward pass was also measured and rejected:
+on Gemma 4 12B it was 2.6× slower and, because MLX quantized matmuls round
+differently by batch shape, changed the loss.
+
 Download the pinned dataset's `all/train-00000-of-00001.parquet` and
 `all/test-00000-of-00001.parquet` to a source directory as `train.parquet` and
 `test.parquet`. Retain the dataset card there as `README.md`.
@@ -177,13 +190,17 @@ probabilities. Reports retain failed cases and exit nonzero if any case fails.
 Probabilities must be finite, nonnegative,
 and sum to one within 1e-4. Criteria and instructions must be nonempty strings.
 Case/question IDs cannot contain `/`, which separates native training IDs.
+An optional `shared` JSON value supplies common evidence. Preparation preserves it
+in both inference requests and every single-question token export; labels stay
+separate. Exact-state overlap is still rejected even if shared evidence differs.
 
 ```json
 {"id":"train-1","workflow":"routing","state":{"items":2},"questions":{"multiple":{"type":"noul","instructions":"Are there multiple items?"}},"gold":{"multiple":{"type":"noul","label":"true","probabilities":{"false":0.1,"true":0.9}}}}
 ```
 
 Choice uses a criteria object keyed by label; Noul uses `false`/`true`; Score uses
-an ordered criteria array and zero-based string labels (`"0"`, `"1"`, ...).
+an ordered criteria array and zero-based string labels (`"0"`, `"1"`, ...), or an
+ordered criteria object whose keys become the level labels (`{"low": ..., "high": ...}`).
 See [`training/examples`](../training/examples) for all three types. The example
 splits only demonstrate the file format, not a useful training dataset.
 
@@ -192,6 +209,13 @@ l2s1-train prepare --train my-data/train.jsonl \
   --development my-data/development.jsonl --test my-data/test.jsonl \
   --output results/my-jev-data
 ```
+
+An adapter only helps prompts rendered the way it was trained. If the application
+runs another layout or detail, prepare with the same settings, for example
+`--prompt-layout state-first --prompt-detail typed`. They are recorded in the
+protocol and token seal, and `run` exports, trains and evaluates with them; the
+default stays `legacy` / `minimal` (the pilot protocol). Export enforces the
+evaluator's 8192-token context.
 
 Use that directory as `run --data`. Preparation rejects duplicate IDs and exact
 canonical states both within and across splits. Native inference files contain

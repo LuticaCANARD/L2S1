@@ -284,6 +284,39 @@ Gemma는 가능한 비전 백엔드입니다: Gemma 3 4B/12B/27B 및 Gemma 4 E2B
 
 CPU/CUDA Gemma 4 및 2개의 레이블이 지정된 이미지 고정 장치를 사용하여 대기 시간을 측정하려면 [direct 비전 벤치마크](VISION_BENCHMARK.md)를 참조하세요. 30 클래스,  150 이미지 CUDA가 HTTP 비전 API를 통해 실행되는 경우 [Caltech-101를 참조하세요. 벤치마크](benchmarks/caltech101-vision-20260924/README.md). 두 가지 답변 순서가 모두 포함된 70 이미지 고양이/개 검증에 대해서는 [Cats 및 Dogs 비전 보고서](benchmarks/cats-dogs-vision-20260924/REPORT.md)를 참조하세요. 이는 과거 HTTP 요청 형태를 기록하고 일반 이미지 정답률을 주장하지 않습니다. 6가지 종류의 폐기물 분류 및 프롬프트/수용 임계값 쌍 연구에 대해서는 [TrashNet 비전 벤치마크](benchmarks/trashnet-vision-20260925/REPORT.md)를 참조하세요.
 
+<a id="decision-presets"></a>
+## 판단 프리셋
+
+프리셋은 시작할 때 `--preset file.json`(반복 가능)으로 불러오는 이름 붙은 판단 세트입니다. 파일에는 `name`, 선택적 `description`, 네이티브 `decisions`가 들어갑니다. [triage 예제](../../examples/presets/triage.json)를 참고하세요. 이후 요청은 `decisions` 대신 `"preset": "<이름>"`을 보낼 수 있으며, `/v1/decisions`, `/v1/decision-batches`의 각 항목, `--stdio`, CLI `--input`에서 쓸 수 있습니다.
+
+```sh
+target/release/l2s1 --model model.gguf --listen 127.0.0.1:8080 \
+  --preset examples/presets/triage.json
+curl http://127.0.0.1:8080/v1/decisions -H 'Content-Type: application/json' \
+  -d '{"state": "Refund it today or I cancel.", "preset": "triage"}'
+```
+
+프리셋의 판단은 일반 검증 전에 삽입되므로 응답은 직접 보낸 것과 같습니다. 이름은 `a-z`, `0-9`, `-`, `_`로 된 1–64자이며 문자나 숫자로 시작합니다. 잘못되었거나 중복된 프리셋은 시작을 중단시킵니다. `preset`과 `decisions`를 함께 보내거나 모르는 이름을 쓰면 `400 invalid_request`입니다. `GET /v1/capabilities`의 `presets`에 이름, 설명, 판단 ID가 나옵니다. 프리셋은 프로세스가 끝날 때까지 읽기 전용이며, 프리셋 요청은 다른 요청과 묶어 처리되지 않습니다.
+
+<a id="typesafe-compatible-route"></a>
+## TypeSafe 호환 경로
+
+로컬 수신기는 TypeSafe 와이어 형식도 받습니다. TypeSafe SDK 클라이언트는 기본 URL만 바꿔 전환할 수 있습니다: `TYPESAFE_BASE_URL=http://127.0.0.1:8080`, 비어 있지 않은 아무 `TYPESAFE_API_KEY`, 그리고 `GET /v1/models`가 알려주는 이름(GGUF 파일 이름에서 확장자를 뺀 것)을 `TYPESAFE_DEFAULT_MODEL`로 설정하세요.
+
+```sh
+curl http://127.0.0.1:8080/v1/systemone -d '{
+  "model": "Qwen3-0.6B-Q8_0",
+  "state": "Third time you double-charged me. Refund it today.",
+  "questions": {
+    "intent": {"type": "choice", "criteria": {"refund": "Wants money back", "other": "Anything else"}},
+    "is_urgent": {"type": "noul"},
+    "frustration": {"type": "score", "criteria": ["Calm", "Annoyed", "Angry"]}
+  }
+}'
+```
+
+`noul`은 binary, `choice`는 choice, `score`는 `0..n-1` 단계의 ordinal로 변환됩니다. `instructions`가 없으면 질문 ID를 쓰며, 답변 코드가 criteria 순서로 정해지므로 순서를 유지합니다. 응답은 정확히 `model`, `answers`, `usage`이며 TypeSafe의 `choice`/`score`/`noul` 형식과 소수 넷째 자리 반올림을 따릅니다. 이 경로에는 네이티브 수락 정책이 적용되지 않아 답변에 확률만 있고 보류가 없습니다. 검증 오류는 FastAPI식 `detail` 이슈를 모두 담은 `422 INVALID_REQUEST`, 컨텍스트 초과는 잘라내지 않고 `422 STATE_TRUNCATED`, 다른 `model`은 `404 MODEL_NOT_FOUND`, 큐가 가득 차면 `Retry-After: 1`과 함께 `503 QUEUE_FULL`을 반환합니다. 모든 응답에 `x-typesafe-request-id`가 있습니다. 질문은 최대 128개입니다. `POST /v1/decisions`는 네이티브 스키마를 유지하며 TypeSafe 별칭이 아닙니다.
+
 <a id="openrouter-adapter"></a>
 ## 오픈라우터 어댑터
 

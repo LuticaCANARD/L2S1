@@ -67,7 +67,14 @@ std::vector<std::string> arguments(const LoadOptions& o) {
     if (o.model.empty() || o.binary_path.empty()) throw Error("model and binary_path are required","invalid_options");
     valid_timeout(o.startup_timeout); valid_timeout(o.timeout);
     if (o.device != "cpu" && o.device != "cuda" && o.device != "metal") throw Error("invalid device","invalid_options");
-    std::vector<std::string> args{o.binary_path,"--model",o.model,"--device",o.device,"--execution-mode",o.execution_mode};
+    std::vector<std::string> args{o.binary_path,"--model",o.model,"--device",o.device};
+    if (o.fixed_schema.value_or(false)) {
+        if (o.execution_mode && *o.execution_mode != "prefix-reuse") throw Error("fixed_schema requires prefix-reuse","invalid_options");
+        args.emplace_back("--fixed-schema");
+        if (!o.execution_mode) args.insert(args.end(),{"--execution-mode","prefix-reuse"});
+    }
+    if (o.fixed_schema == false && !o.execution_mode) args.insert(args.end(),{"--execution-mode","fresh"});
+    if (o.execution_mode) args.insert(args.end(),{"--execution-mode",*o.execution_mode});
     auto number = [&](const char* flag, auto value) { if (value) { args.emplace_back(flag); args.push_back(std::to_string(*value)); } };
     auto string = [&](const char* flag, const auto& value) { if (value) { args.emplace_back(flag); args.push_back(*value); } };
     string("--mmproj",o.mmproj); string("--lora",o.lora);

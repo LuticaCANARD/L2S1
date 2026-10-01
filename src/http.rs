@@ -27,6 +27,7 @@ static NEXT_REQUEST_ID: AtomicU64 = AtomicU64::new(1);
 static INFLIGHT_BODY_BYTES: AtomicUsize = AtomicUsize::new(0);
 
 pub(crate) mod contract;
+mod typesafe;
 pub use contract::HttpDecisionBackend;
 use contract::run_request;
 pub(crate) use contract::user_failure_messages;
@@ -47,6 +48,7 @@ pub fn serve<B: HttpDecisionBackend>(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let (sender, receiver) = mpsc::sync_channel(QUEUE_DEPTH);
     let mut capabilities = backend.capabilities();
+    capabilities["presets"] = crate::presets::list();
     capabilities["http_scheduler"] = json!({"max_requests":8,"max_decisions":128,"max_body_bytes":MAX_BODY,"max_wait_ms":1,"deadline_ms":180000,"native_cancellation":false});
     let _listener = start_listener(address, capabilities.clone(), sender)?;
     let can_batch = capabilities
@@ -161,6 +163,7 @@ pub(crate) fn dispatch_wire<B: HttpDecisionBackend>(
     if body.len() > MAX_BODY {
         return Err(Error::Invalid("decision body exceeds 44 MiB limit".into()));
     }
+    let body = &crate::presets::expand(body, batch)?;
     if batch {
         contract::run_batch(backend, body, request_id)
     } else {
@@ -238,6 +241,13 @@ fn handle(
     if request.method == "GET" && request.path == "/v1/capabilities" {
         return respond(stream, 200, capabilities);
     }
+    if request.method == "GET" && request.path == "/v1/models" {
+        let body = serde_json::to_vec(&typesafe::models(capabilities))?;
+        return respond_bytes(stream, 200, &body, &typesafe_headers(request_id, 200));
+    }
+    if request.path == "/v1/systemone" {
+        return handle_systemone(stream, sender, capabilities, request, request_id);
+    }
     let batch = request.path == "/v1/decision-batches";
     if request.method != "POST" || !(request.path == "/v1/decisions" || batch) {
         return respond_error(
@@ -258,44 +268,16 @@ fn handle(
             request_id,
         );
     }
-    let (reply, receiver) = mpsc::channel();
     let failure_messages = contract::user_failure_messages(&request.body);
-    let cancelled = Arc::new(AtomicBool::new(false));
-    match sender.try_send(Job {
-        body: std::mem::take(&mut request.body),
-        request_id: request_id.into(),
-        batch,
-        admitted: Instant::now(),
-        cancelled: Arc::clone(&cancelled),
-        reply,
-    }) {
-        Ok(()) => {}
-        Err(TrySendError::Full(_)) => {
-            return respond_error(stream, 503, "busy", "inference queue is full", request_id);
+    let result = match run_job(sender, std::mem::take(&mut request.body), request_id, batch) {
+        Ok(result) => result,
+        Err((status, code, message)) => {
+            return respond_error(stream, status, code, message, request_id);
         }
-        Err(TrySendError::Disconnected(_)) => {
-            return respond_error(
-                stream,
-                503,
-                "unavailable",
-                "inference worker unavailable",
-                request_id,
-            );
-        }
-    }
-    match receiver.recv_timeout(Duration::from_secs(180)) {
-        Err(mpsc::RecvTimeoutError::Timeout) => {
-            cancelled.store(true, Ordering::Release);
-            respond_error(
-                stream,
-                504,
-                "deadline_exceeded",
-                "request deadline exceeded; queued work is cancelled",
-                request_id,
-            )
-        }
-        Ok(Ok(output)) => respond(stream, 200, &output),
-        Ok(Err(Error::Invalid(message))) => {
+    };
+    match result {
+        Ok(output) => respond(stream, 200, &output),
+        Err(Error::Invalid(message)) => {
             let code = if message.starts_with("batch_unsupported:") {
                 "batch_unsupported"
             } else if message.starts_with("batch_not_enabled:") {
@@ -305,7 +287,7 @@ fn handle(
             };
             respond_error(stream, 400, code, &message, request_id)
         }
-        Ok(Err(Error::Backend(message))) => {
+        Err(Error::Backend(message)) => {
             let (status, code, user_reason) = if message.starts_with("deadline_exceeded:") {
                 (504, "deadline_exceeded", None)
             } else if message.starts_with("reasoning_limit:") {
@@ -323,19 +305,106 @@ fn handle(
             };
             respond_error_with_reason(stream, status, code, &message, request_id, user_reason)
         }
-        Ok(Err(Error::ModelLoad(message))) => {
+        Err(Error::ModelLoad(message)) => {
             respond_error(stream, 500, "model_load_failed", &message, request_id)
         }
-        Ok(Err(Error::Upstream(message))) => {
+        Err(Error::Upstream(message)) => {
             respond_error(stream, 502, "upstream_error", &message, request_id)
         }
-        Err(_) => respond_error(
-            stream,
-            503,
-            "unavailable",
-            "inference worker unavailable",
-            request_id,
-        ),
+    }
+}
+
+/// Queue a native body and wait for the worker; scheduler failures are `(status, code, message)`.
+fn run_job(
+    sender: &SyncSender<Job>,
+    body: Vec<u8>,
+    request_id: &str,
+    batch: bool,
+) -> Result<Result<Value, Error>, (u16, &'static str, &'static str)> {
+    let (reply, receiver) = mpsc::channel();
+    let cancelled = Arc::new(AtomicBool::new(false));
+    match sender.try_send(Job {
+        body,
+        request_id: request_id.into(),
+        batch,
+        admitted: Instant::now(),
+        cancelled: Arc::clone(&cancelled),
+        reply,
+    }) {
+        Ok(()) => {}
+        Err(TrySendError::Full(_)) => return Err((503, "busy", "inference queue is full")),
+        Err(TrySendError::Disconnected(_)) => {
+            return Err((503, "unavailable", "inference worker unavailable"));
+        }
+    }
+    match receiver.recv_timeout(Duration::from_secs(180)) {
+        Ok(result) => Ok(result),
+        Err(mpsc::RecvTimeoutError::Timeout) => {
+            cancelled.store(true, Ordering::Release);
+            Err((
+                504,
+                "deadline_exceeded",
+                "request deadline exceeded; queued work is cancelled",
+            ))
+        }
+        Err(_) => Err((503, "unavailable", "inference worker unavailable")),
+    }
+}
+
+fn typesafe_headers(request_id: &str, status: u16) -> String {
+    let retry = if status == 503 {
+        "Retry-After: 1\r\n"
+    } else {
+        ""
+    };
+    format!("x-typesafe-request-id: {request_id}\r\n{retry}")
+}
+
+/// TypeSafe-compatible decision route; see `typesafe.rs`.
+fn handle_systemone(
+    stream: &mut TcpStream,
+    sender: &SyncSender<Job>,
+    capabilities: &Value,
+    request: HttpRequest,
+    request_id: &str,
+) -> std::io::Result<()> {
+    let fail = |stream: &mut TcpStream, failure: typesafe::Failure| {
+        let body = serde_json::to_vec(&failure.body())?;
+        let headers = typesafe_headers(request_id, failure.status);
+        respond_bytes(stream, failure.status, &body, &headers)
+    };
+    if request.method != "POST" {
+        let failure = typesafe::Failure::new(405, "METHOD_NOT_ALLOWED", "use POST");
+        return fail(stream, failure);
+    }
+    if capabilities.get("evidence").and_then(Value::as_str) == Some("selection_only") {
+        let failure = typesafe::Failure::new(
+            501,
+            "UNSUPPORTED_MODEL",
+            "this backend returns no option probabilities for TypeSafe answers",
+        );
+        return fail(stream, failure);
+    }
+    let translated = match typesafe::translate(&request.body, &typesafe::served_name(capabilities))
+    {
+        Ok(translated) => translated,
+        Err(failure) => return fail(stream, failure),
+    };
+    let output = match run_job(sender, translated.body.clone(), request_id, false) {
+        Ok(Ok(output)) => output,
+        Ok(Err(error)) => return fail(stream, typesafe::Failure::from_native(&error)),
+        Err((status, code, message)) => {
+            let code = match code {
+                "busy" => "QUEUE_FULL",
+                "deadline_exceeded" => "DEADLINE_EXCEEDED",
+                _ => "INTERNAL",
+            };
+            return fail(stream, typesafe::Failure::new(status, code, message));
+        }
+    };
+    match typesafe::answers(&translated, &output) {
+        Ok(body) => respond_bytes(stream, 200, &body, &typesafe_headers(request_id, 200)),
+        Err(error) => fail(stream, typesafe::Failure::from_native(&error)),
     }
 }
 
@@ -471,11 +540,24 @@ fn read_request(stream: &mut TcpStream) -> Result<HttpRequest, (u16, &'static st
 }
 
 fn respond(stream: &mut TcpStream, status: u16, body: &Value) -> std::io::Result<()> {
-    let json = serde_json::to_vec(body)?;
+    respond_bytes(stream, status, &serde_json::to_vec(body)?, "")
+}
+
+/// `headers` is zero or more complete `Name: value\r\n` lines.
+fn respond_bytes(
+    stream: &mut TcpStream,
+    status: u16,
+    json: &[u8],
+    headers: &str,
+) -> std::io::Result<()> {
     let reason = match status {
         200 => "OK",
         400 => "Bad Request",
         404 => "Not Found",
+        405 => "Method Not Allowed",
+        422 => "Unprocessable Content",
+        501 => "Not Implemented",
+        504 => "Gateway Timeout",
         411 => "Length Required",
         413 => "Content Too Large",
         415 => "Unsupported Media Type",
@@ -487,10 +569,10 @@ fn respond(stream: &mut TcpStream, status: u16, body: &Value) -> std::io::Result
     };
     write!(
         stream,
-        "HTTP/1.1 {status} {reason}\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+        "HTTP/1.1 {status} {reason}\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: {}\r\n{headers}Connection: close\r\n\r\n",
         json.len()
     )?;
-    stream.write_all(&json)
+    stream.write_all(json)
 }
 
 #[cfg(test)]
@@ -633,6 +715,42 @@ mod tests {
             .send(Ok(json!({"api_version":1,"results":[]})))
             .unwrap();
         assert!(client.join().unwrap().starts_with("HTTP/1.1 200"));
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn typesafe_route_translates_through_the_native_worker() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let (sender, receiver) = mpsc::sync_channel(1);
+        let server = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            let capabilities = json!({"backend":{"model":"models/m.gguf"}});
+            handle(&mut stream, &sender, &capabilities, "req-ts").unwrap();
+        });
+        let body = r#"{"model":"m","state":{},"questions":{"spam":{"type":"noul"}}}"#;
+        let mut client = TcpStream::connect(address).unwrap();
+        // TypeSafe's curl examples send no Content-Type.
+        write!(
+            client,
+            "POST /v1/systemone HTTP/1.1\r\nContent-Length: {}\r\n\r\n{body}",
+            body.len()
+        )
+        .unwrap();
+        let job = receiver.recv_timeout(Duration::from_secs(2)).unwrap();
+        let native: Value = serde_json::from_slice(&job.body).unwrap();
+        assert_eq!(native["decisions"][0]["kind"]["type"], "binary");
+        job.reply
+            .send(Ok(
+                json!({"results":[{"id":"spam","usage":{"input_tokens":4},"evidence":{"scores":[
+                {"id":"false","option_probability":0.9},{"id":"true","option_probability":0.1}]}}]}),
+            ))
+            .unwrap();
+        let mut response = String::new();
+        client.read_to_string(&mut response).unwrap();
+        assert!(response.starts_with("HTTP/1.1 200 OK"), "{response}");
+        assert!(response.contains("x-typesafe-request-id: req-ts\r\n"));
+        assert!(response.ends_with(r#"{"model":"m","answers":{"spam":{"type":"noul","noul":0.1}},"usage":{"input_tokens":4,"output_tokens":0}}"#));
         server.join().unwrap();
     }
 

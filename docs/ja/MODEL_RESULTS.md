@@ -1,4 +1,6 @@
 <a id="recorded-model-results"></a>
+
+[性能改善の検討](PERFORMANCE_REVIEW.md): 最近の測定、失敗分析、実験の優先順位。
 # 記録されたモデル結果
 
 [English](../en/MODEL_RESULTS.md) · [한국어](../ko/MODEL_RESULTS.md) · [日本語](MODEL_RESULTS.md)

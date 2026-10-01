@@ -1,0 +1,7 @@
+{
+  "src/facts.rs": "a1ead2c7093da26909b4ad8215c2908ec4bbf0d899042a09b422c6f952e0d20d",
+  "src/lib.rs": "11bd013eb32af58477ebed564bce12ed7424e99b2ec78fad80f621b5524b0875",
+  "examples/evaluate_jsonl.rs": "200348abc1a0fea6b72da323f2f80d805a4f670681642f7caad9b35442007ee0",
+  "scripts/benchmark_decision_performance.py": "84034f4f9f6d49735d9ae1244ae9cb2fa7de40b2bcc1c8b78680df6a55ec0746",
+  "benchmarks/performance-implementation-20260930/protocol.json": "4b9bbe39cc577b85eeba5fde56fee619fcdbd4167d0daedade89b7efe0ad41fe"
+}

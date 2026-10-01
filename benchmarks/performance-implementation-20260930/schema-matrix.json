@@ -1,0 +1,53 @@
+[
+  {
+    "name": "fresh",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on"
+    ]
+  },
+  {
+    "name": "split-cold",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--execution-mode",
+      "prefix-reuse"
+    ]
+  },
+  {
+    "name": "split-resident",
+    "args": [
+      "--context",
+      "4096",
+      "--batch",
+      "128",
+      "--threads",
+      "4",
+      "--prompt-layout",
+      "legacy",
+      "--flash-attention",
+      "on",
+      "--execution-mode",
+      "prefix-reuse",
+      "--resident",
+      "fixed-schema"
+    ]
+  }
+]

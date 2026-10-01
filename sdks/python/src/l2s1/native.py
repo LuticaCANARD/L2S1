@@ -19,7 +19,7 @@ from .http import L2S1Client
 from .stdio import StdioClient
 from .models import Capabilities, DecisionPolicy, DecisionRequest, DecisionResponse
 
-VERSION = "0.2.0"
+VERSION = "0.2.2"
 Device = Literal["cpu", "cuda", "metal"]
 ExecutionMode = Literal["fresh", "prefix-reuse", "state-restore", "parallel"]
 
@@ -39,6 +39,7 @@ class LoadOptions:
     threads: int | None = None
     gpu_layers: int | None = None
     # None inherits the runtime default; False explicitly disables automatic reuse.
+    # The runtime owns schema detection/invalidation; prepared plans cache no answers.
     fixed_schema: bool | None = None
     execution_mode: ExecutionMode | None = None
     parallel_width: int | None = None

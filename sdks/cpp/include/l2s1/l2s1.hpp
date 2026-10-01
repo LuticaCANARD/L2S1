@@ -58,7 +58,10 @@ struct LoadOptions {
     std::optional<std::string> mmproj, lora;
     std::optional<unsigned> context, batch, ubatch, threads, parallel_width;
     std::optional<int> gpu_layers;
-    std::string execution_mode = "fresh";
+    // Omit to use automatic resident schema-prefix reuse when compatible.
+    std::optional<std::string> execution_mode;
+    // true requires reuse; false opts out unless an explicit mode is supplied.
+    std::optional<bool> fixed_schema;
     std::optional<Policy> policy;
     std::chrono::milliseconds startup_timeout{120000}, timeout{180000};
     std::vector<std::string> extra_args;
