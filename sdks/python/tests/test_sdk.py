@@ -38,7 +38,23 @@ def response(value: bool | None = False) -> dict[str, object]:
     }]}
 
 
+def image_request(count: int = 7) -> DecisionRequest:
+    payload = request().model_dump(exclude_unset=True)
+    # Upload order deliberately differs from reference order.
+    ids = [f"photo-{index}" for index in range(count)]
+    payload["media"] = [{"type": "image", "id": id, "data_base64": "eA=="} for id in reversed(ids)]
+    payload["decisions"][0]["media_ids"] = ids
+    return DecisionRequest.model_validate(payload)
+
+
 class Models(unittest.TestCase):
+    def test_eight_image_upload_limit_and_reference_order(self) -> None:
+        payload = image_request(8).model_dump(exclude_unset=True)
+        self.assertEqual(payload["decisions"][0]["media_ids"], [f"photo-{i}" for i in range(8)])
+        self.assertEqual(payload["media"][0]["id"], "photo-7")
+        with self.assertRaises(ValidationError):
+            image_request(9)
+
     def test_default_discriminators_and_unset_extensions_match_typescript(self) -> None:
         item = Decision(id="cold", instruction="Cold?", kind=BinaryKind(false_label="No", true_label="Yes"))
         payload = DecisionRequest(state={"temperature_c": 6}, decisions=[item]).model_dump(exclude_unset=True)
@@ -98,6 +114,18 @@ class Models(unittest.TestCase):
 
 
 class Transport(unittest.IsolatedAsyncioTestCase):
+    async def test_seven_images_keep_payload_and_reference_order_in_one_decision(self) -> None:
+        expected = image_request().model_dump(exclude_unset=True)
+        calls = []
+
+        def handle(req: httpx.Request) -> httpx.Response:
+            calls.append(json.loads(req.content))
+            return httpx.Response(200, json=response())
+
+        async with L2S1Client("http://fixture", transport=httpx.MockTransport(handle)) as client:
+            await client.decide(image_request())
+        self.assertEqual(calls, [expected])
+
     async def test_repeated_prepared_calls_and_native_batch_preserve_independent_state(self) -> None:
         seen: list[object] = []
 

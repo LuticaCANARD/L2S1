@@ -127,6 +127,12 @@ Python のメソッドとオプションは snake case、JSON キーは共通で
 保証ではありません。`L2S1Error` はサーバーの `code/status/request_id/user_reason` を
 保持し、ネットワーク・キャンセルは HTTPX/asyncio の例外を保持します。自動再試行はありません。
 
+画像の順序は明示した `media_ids` に従います。省略時はアップロード順、`[]` はテキストのみです。
+llama.cpp `fresh` は判断ごとに最大 8 枚、`parallel` と wgpu は 1 枚です。
+llama.cpp `prefix-reuse`/`state-restore` は画像をサポートしません。
+実行中のバックエンドの `media.image.max_per_decision` を確認してください。
+要求ごとに 8 ファイル、画像ごとに 8 MiB、本文全体で 44 MiB までです。
+
 `close()` は冪等です。HTTP クライアントを閉じるとローカル要求をキャンセルし、
 共有サーバーは動き続けます。所有エンジンを閉じると Rust 子プロセスを終了して
 待機します。キャンセル・timeout は native 推論停止を保証しません。既定の stdio は

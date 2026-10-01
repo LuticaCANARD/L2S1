@@ -122,6 +122,41 @@ impl LlamaBackend {
         result
     }
 
+    /// Score one decision request against ordered still images in one native
+    /// context. Images remain in the user-data segment in their original order;
+    /// the request can map image ordinals to labels and identify the target.
+    /// Supports at most eight images. Use fresh execution and a sufficiently
+    /// large context (8192 is recommended for six references plus one target).
+    /// Oversized prompts fail without truncating any text or image.
+    pub fn decide_vision_images(
+        &mut self,
+        request: &DecisionRequest,
+        images: &[&[u8]],
+    ) -> Result<DecisionResponse> {
+        if images.len() == 1 {
+            return self.decide_vision(request, images[0]);
+        }
+        let mut cleanup = VisionCleanup::new(self.engine.as_ptr());
+        let result = (|| {
+            if images.is_empty() || images.len() > crate::MAX_VISION_IMAGES {
+                return Err(Error::Invalid(format!(
+                    "vision requests require 1 to {} images",
+                    crate::MAX_VISION_IMAGES
+                )));
+            }
+            if self.execution_mode != ExecutionMode::Fresh {
+                return Err(Error::Invalid(
+                    "multiple images per request require fresh execution".into(),
+                ));
+            }
+            self.decide_vision_images_inner(request, images)
+        })();
+        if result.is_ok() {
+            cleanup.complete();
+        }
+        result
+    }
+
     /// Batch independent image requests into isolated native sequences. Each
     /// request keeps its own state and image; results preserve request and
     /// decision order. Fresh execution stays serial. Parallel execution uses
@@ -327,6 +362,19 @@ impl LlamaBackend {
         responses
     }
 
+    /// Actual input image and native media-chunk counts for the latest
+    /// successful fresh vision evaluation, after encoding all ordered images.
+    /// A tiled projector can produce several chunks per input image.
+    pub fn vision_images_metrics(&self) -> Result<NativeVisionImagesMetrics> {
+        let mut metrics = NativeVisionImagesMetrics::default();
+        if !unsafe { sd_vision_images_metrics(self.engine.as_ptr(), &mut metrics) } {
+            return Err(Error::Backend(
+                "unable to read native vision image metrics".into(),
+            ));
+        }
+        Ok(metrics)
+    }
+
     /// Native execution counters for the latest parallel image wave. These
     /// remain available after request-local KV cleanup and measure actual
     /// projector batches and decoder sequences, rather than HTTP grouping.
@@ -477,7 +525,24 @@ impl LlamaBackend {
         request: &DecisionRequest,
         image: &[u8],
     ) -> Result<DecisionResponse> {
-        self.validate_vision_request(request, image)?;
+        self.decide_vision_images_inner(request, &[image])
+    }
+
+    fn decide_vision_images_inner(
+        &mut self,
+        request: &DecisionRequest,
+        images: &[&[u8]],
+    ) -> Result<DecisionResponse> {
+        for image in images {
+            self.validate_vision_request(request, image)?;
+        }
+        let native_images = images
+            .iter()
+            .map(|image| NativeVisionImage {
+                data: image.as_ptr(),
+                len: image.len(),
+            })
+            .collect::<Vec<_>>();
         let mut results = Vec::with_capacity(request.decisions.len());
         for decision in &request.decisions {
             let started = Instant::now();
@@ -486,8 +551,24 @@ impl LlamaBackend {
             let parts = &prepared.parts;
             // Media stays in the user-data segment; control tokens remain in
             // the trusted prefix and suffix.
-            let before = "Image:\n";
+            let before = if images.len() == 1 {
+                "Image:\n".to_owned()
+            } else {
+                format!("Images (1-based order, {} total):\n", images.len())
+            };
             let after = &prepared.after;
+            let native_input = NativeVisionImagesInput {
+                prefix: parts[0].text.as_ptr().cast(),
+                prefix_len: parts[0].text.len(),
+                data_before: before.as_ptr().cast(),
+                before_len: before.len(),
+                images: native_images.as_ptr(),
+                image_count: native_images.len(),
+                data_after: after.as_ptr().cast(),
+                after_len: after.len(),
+                suffix: parts[2].text.as_ptr().cast(),
+                suffix_len: parts[2].text.len(),
+            };
             let size = unsafe { sd_vocab_size(self.engine.as_ptr()) };
             if size <= 0 {
                 return Err(Error::Backend("invalid vocabulary size".into()));
@@ -506,18 +587,9 @@ impl LlamaBackend {
                     let mut error = [0 as c_char; 1024];
                     let start = Instant::now();
                     let ok = unsafe {
-                        sd_forward_vision(
+                        sd_forward_vision_images(
                             self.engine.as_ptr(),
-                            parts[0].text.as_ptr().cast(),
-                            parts[0].text.len(),
-                            before.as_ptr().cast(),
-                            before.len(),
-                            image.as_ptr(),
-                            image.len(),
-                            after.as_ptr().cast(),
-                            after.len(),
-                            parts[2].text.as_ptr().cast(),
-                            parts[2].text.len(),
+                            &native_input,
                             prefix.as_ptr(),
                             prefix.len(),
                             self.logits_buffer.as_mut_ptr(),
@@ -584,18 +656,9 @@ impl LlamaBackend {
             let start = Instant::now();
             let ok = unsafe {
                 if compact {
-                    sd_forward_vision_compact(
+                    sd_forward_vision_images_compact(
                         self.engine.as_ptr(),
-                        parts[0].text.as_ptr().cast(),
-                        parts[0].text.len(),
-                        before.as_ptr().cast(),
-                        before.len(),
-                        image.as_ptr(),
-                        image.len(),
-                        after.as_ptr().cast(),
-                        after.len(),
-                        parts[2].text.as_ptr().cast(),
-                        parts[2].text.len(),
+                        &native_input,
                         std::ptr::null(),
                         0,
                         candidates.as_ptr(),
@@ -608,18 +671,9 @@ impl LlamaBackend {
                         error.len(),
                     )
                 } else {
-                    sd_forward_vision(
+                    sd_forward_vision_images(
                         self.engine.as_ptr(),
-                        parts[0].text.as_ptr().cast(),
-                        parts[0].text.len(),
-                        before.as_ptr().cast(),
-                        before.len(),
-                        image.as_ptr(),
-                        image.len(),
-                        after.as_ptr().cast(),
-                        after.len(),
-                        parts[2].text.as_ptr().cast(),
-                        parts[2].text.len(),
+                        &native_input,
                         std::ptr::null(),
                         0,
                         self.logits_buffer.as_mut_ptr(),

@@ -87,9 +87,13 @@ cancelled; the adapter never retries automatically.
 
 For images, HTTP additionally accepts `media` with
 `{"type":"image","id":"photo","data_base64":"..."}` and decision `media_ids`.
-Omitting `media_ids` selects all request images; `[]` makes a decision text only.
-Local backends accept at most one image per decision. The adapter supports the
-stable `state`, `decisions`, `media` fields, up to 128 decisions, 4 media items,
+Explicit `media_ids` sets image order; omission selects all images in upload order;
+`[]` makes a decision text only. Fresh llama.cpp accepts up to 8 images per
+decision; parallel llama.cpp and wgpu accept one. llama.cpp prefix-reuse/state-restore
+do not support images. Inspect capabilities before selecting image examples.
+Use six labeled training references followed by an unlabeled held-out target, and
+state each reference position and label; keep the target answer outside the request.
+The adapter supports stable `state`, `decisions`, `media` fields, up to 128 decisions, 8 media items,
 8 MiB per decoded image, and 44 MiB per encoded HTTP body. Decode support and
 model-dependent limits are enforced by the backend.
 

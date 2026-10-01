@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Ordered multi-image vision: llama fresh mode accepts up to eight still
+  images in one decision context through Rust, HTTP and stdio. `media_ids`
+  controls image order; capabilities report mode-specific support. SDK and
+  MCP upload limits support six labelled references plus an unlabelled target.
+  Native image/chunk counters and mixed text/image route metadata are exposed.
+
 - Decision presets: `--preset file.json` (repeatable) registers named
   decision sets at startup; requests send `"preset": "<name>"` in place of
   `decisions` over HTTP, batches, `--stdio` and CLI input. Capabilities list

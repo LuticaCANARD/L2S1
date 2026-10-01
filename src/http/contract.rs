@@ -65,7 +65,7 @@ pub trait HttpDecisionBackend {
 }
 
 #[cfg(any(feature = "llama", feature = "wgpu", test))]
-fn local_capabilities(info: &crate::BackendInfo) -> Value {
+fn local_capabilities(info: &crate::BackendInfo, max_images: usize) -> Value {
     let (formats, format_support) = if info.runtime == "rullama-engine-wgpu" {
         (vec!["png", "jpeg", "webp"], "enumerated")
     } else {
@@ -73,7 +73,7 @@ fn local_capabilities(info: &crate::BackendInfo) -> Value {
     };
     json!({"api_version":1,"backend":{"runtime":info.runtime,"model":info.model_path},
         "decision_types":["binary","choice","ordinal"],"evidence":"model_scored",
-        "media":{"image":{"supported":info.vision_projector_path.is_some(),"max_per_decision":1,
+        "media":{"image":{"supported":info.vision_projector_path.is_some(),"max_per_decision":max_images,
             "max_bytes_each":crate::MAX_IMAGE_BYTES,"formats":formats,"format_support":format_support}},
         "limits":{"max_body_bytes":MAX_BODY,"max_media":MAX_MEDIA,"max_decisions":MAX_DECISIONS,"max_connections":MAX_CONNECTIONS,"queued_inference_requests":QUEUE_DEPTH,"max_inflight_body_bytes":MAX_INFLIGHT_BODY_BYTES}})
 }
@@ -84,16 +84,61 @@ fn local_decide_json<B: VisionDecisionBackend>(
     request: &DecisionRequest,
     images: &[&[u8]],
 ) -> crate::Result<Value> {
-    let response = match images {
-        [] => backend.decide(request)?,
-        [image] => backend.decide_vision(request, image)?,
-        _ => {
-            return Err(Error::Invalid(
-                "this backend accepts at most one image per decision".into(),
-            ));
-        }
-    };
+    let response = backend.decide_vision_images(request, images)?;
     local_response_json(response)
+}
+
+/// Fresh text and image groups share one engine but use distinct prompt paths.
+/// Preserve those paths while requiring every other backend field to agree.
+#[cfg(any(feature = "llama", test))]
+fn normalize_mixed_local_metadata(
+    outputs: &mut [Value],
+    requests: &[DecisionRequest],
+    images: &[Vec<&[u8]>],
+) -> crate::Result<()> {
+    let Some(text_index) = images.iter().position(Vec::is_empty) else {
+        return Ok(());
+    };
+    if images.iter().all(Vec::is_empty) {
+        return Ok(());
+    }
+    let common = outputs[text_index]["backend"].clone();
+    let comparable = |metadata: &Value| {
+        let mut metadata = metadata.clone();
+        if let Some(object) = metadata.as_object_mut() {
+            object.remove("runtime");
+        }
+        if let Some(details) = metadata["details"].as_object_mut() {
+            details.remove("runtime");
+            details.remove("prompt_version");
+        }
+        metadata
+    };
+    let expected = comparable(&common);
+    if outputs
+        .iter()
+        .any(|output| comparable(&output["backend"]) != expected)
+    {
+        return Err(Error::Backend(
+            "backend metadata changed within request".into(),
+        ));
+    }
+    let groups = requests.iter().zip(images).zip(outputs.iter()).map(|((request, images), output)| {
+        json!({
+            "decision_ids": request.decisions.iter().map(|decision| &decision.id).collect::<Vec<_>>(),
+            "image_count": images.len(),
+            "runtime": output["backend"]["runtime"],
+            "prompt_version": output["backend"]["details"]["prompt_version"],
+        })
+    }).collect::<Vec<_>>();
+    for output in outputs {
+        output["backend"]["runtime"] = common["runtime"].clone();
+        output["backend"]["details"]["runtime"] = common["details"]["runtime"].clone();
+        output["backend"]["details"]["prompt_version"] =
+            common["details"]["prompt_version"].clone();
+        output["backend"]["details"]["media_groups"] = json!(groups);
+    }
+    Ok(())
 }
 
 #[cfg(any(feature = "llama", feature = "wgpu", test))]
@@ -128,10 +173,24 @@ pub(crate) fn local_response_json(response: crate::DecisionResponse) -> crate::R
 impl HttpDecisionBackend for crate::llama::LlamaBackend {
     fn capabilities(&self) -> Value {
         let info = self.info();
-        let mut capabilities = local_capabilities(&info);
+        let max_images = match info.execution_mode {
+            crate::ExecutionMode::Fresh => crate::MAX_VISION_IMAGES,
+            crate::ExecutionMode::Parallel => 1,
+            crate::ExecutionMode::PrefixReuse | crate::ExecutionMode::StateRestore => 0,
+        };
+        let image_supported = info.vision_projector_path.is_some() && max_images != 0;
+        let mut capabilities = local_capabilities(&info, max_images);
+        capabilities["media"]["image"]["supported"] = json!(image_supported);
+        capabilities["media"]["image"]["multi_image"] = json!({
+            "supported": image_supported
+                && info.execution_mode == crate::ExecutionMode::Fresh,
+            "execution_mode": "fresh",
+            "order": "media_ids_or_upload_order",
+            "context": "one_decision",
+        });
         capabilities["artifact_id"] = self.serving_artifact_id().into();
         capabilities["media"]["image"]["parallel"] = json!({
-            "supported": info.vision_projector_path.is_some(),
+            "supported": image_supported,
             "enabled": info.execution_mode == crate::ExecutionMode::Parallel,
             "max_decisions_per_wave": info.parallel_width,
             "max_options_per_decision": 26,
@@ -153,7 +212,7 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
         capabilities["batch"] = json!({"supported":true,"enabled":info.execution_mode == crate::ExecutionMode::Parallel,
             "execution":"native_parallel","max_requests":super::MAX_BATCH_REQUESTS,
             "max_decisions":MAX_DECISIONS,"max_decisions_per_wave":info.parallel_width,
-            "text":true,"image":info.vision_projector_path.is_some(),"mixed_media":false,"reasoning_modes":["direct"]});
+            "text":true,"image":image_supported,"mixed_media":false,"reasoning_modes":["direct"]});
         capabilities
     }
 
@@ -258,11 +317,17 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
                 .zip(images)
                 .map(|(request, images)| self.decide_json(request, images))
                 .collect::<crate::Result<Vec<_>>>()?;
-            if !requests.is_empty() && images.iter().all(|images| images.len() == 1) {
+            if self.info().execution_mode == crate::ExecutionMode::Fresh {
+                normalize_mixed_local_metadata(&mut outputs, requests, images)?;
+            }
+            if !requests.is_empty() && images.iter().any(|images| !images.is_empty()) {
                 // Attach one shared snapshot after all serial media groups, so
                 // their backend metadata still agrees in the wire contract.
                 let cache = self.preparation_cache_stats();
                 let metrics = self.vision_batch_metrics()?;
+                let image_metrics = (self.info().execution_mode == crate::ExecutionMode::Fresh)
+                    .then(|| self.vision_images_metrics())
+                    .transpose()?;
                 for output in &mut outputs {
                     output["backend"]["details"]["vision_preparation"] = json!({
                         "scope": "backend_lifetime_since_cache_configuration",
@@ -273,6 +338,13 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
                         "calls": metrics.kv_clear_calls,
                         "skipped": metrics.kv_clear_skipped,
                     });
+                    if let Some(image_metrics) = &image_metrics {
+                        output["backend"]["details"]["vision_images"] = json!({
+                            "scope": "last_native_vision_request",
+                            "images": image_metrics.images,
+                            "image_chunks": image_metrics.image_chunks,
+                        });
+                    }
                 }
             }
             Ok(outputs)
@@ -283,7 +355,7 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
 #[cfg(feature = "wgpu")]
 impl HttpDecisionBackend for crate::wgpu::WgpuBackend {
     fn capabilities(&self) -> Value {
-        local_capabilities(self.inspect())
+        local_capabilities(self.inspect(), 1)
     }
     fn decide_json(&mut self, request: &DecisionRequest, images: &[&[u8]]) -> crate::Result<Value> {
         local_decide_json(self, request, images)
@@ -964,11 +1036,143 @@ mod tests {
         }
     }
 
+    #[derive(Default)]
+    struct MultiImageLocalProbe {
+        images: Vec<Vec<u8>>,
+        decisions: Vec<String>,
+    }
+    impl DecisionBackend for MultiImageLocalProbe {
+        fn decide(&mut self, request: &DecisionRequest) -> crate::Result<DecisionResponse> {
+            LocalProbe.decide(request)
+        }
+    }
+    impl VisionDecisionBackend for MultiImageLocalProbe {
+        fn decide_vision(
+            &mut self,
+            _: &DecisionRequest,
+            _: &[u8],
+        ) -> crate::Result<DecisionResponse> {
+            panic!("multi-image context must not dispatch individual image decisions")
+        }
+        fn decide_vision_images(
+            &mut self,
+            request: &DecisionRequest,
+            images: &[&[u8]],
+        ) -> crate::Result<DecisionResponse> {
+            self.images = images.iter().map(|image| image.to_vec()).collect();
+            self.decisions = request
+                .decisions
+                .iter()
+                .map(|decision| decision.id.clone())
+                .collect();
+            self.decide(request)
+        }
+    }
+
+    #[test]
+    fn local_multi_image_dispatch_keeps_one_decision_and_ordered_context() {
+        let request: DecisionRequest = serde_json::from_value(json!({"state":{},"decisions":[{
+            "id":"flag","instruction":"Choose","kind":{"type":"binary","false_label":"no","true_label":"yes"}}]})).unwrap();
+        let bytes = (0..7).map(|index| vec![index]).collect::<Vec<_>>();
+        let images = bytes.iter().map(Vec::as_slice).collect::<Vec<_>>();
+        let mut backend = MultiImageLocalProbe::default();
+        let output = local_decide_json(&mut backend, &request, &images).unwrap();
+        assert_eq!(backend.images, bytes);
+        assert_eq!(backend.decisions, vec!["flag"]);
+        assert_eq!(output["results"].as_array().unwrap().len(), 1);
+        assert!(
+            matches!(local_decide_json(&mut LocalProbe, &request, &images),
+            Err(Error::Invalid(message)) if message.contains("at most one image"))
+        );
+        assert!(local_decide_json(&mut LocalProbe, &request, &images[..1]).is_ok());
+        assert!(local_decide_json(&mut LocalProbe, &request, &[]).is_ok());
+    }
+
+    struct MixedLocalProbe;
+    impl HttpDecisionBackend for MixedLocalProbe {
+        fn capabilities(&self) -> Value {
+            json!({"media":{"image":{"supported":true,"max_per_decision":8}}})
+        }
+        fn decide_json(
+            &mut self,
+            request: &DecisionRequest,
+            images: &[&[u8]],
+        ) -> crate::Result<Value> {
+            let mut output = local_decide_json(&mut LocalProbe, request, &[])?;
+            output["results"][0]["id"] = json!(request.decisions[0].id);
+            if !images.is_empty() {
+                output["backend"]["runtime"] = json!("local-test-mtmd");
+                output["backend"]["details"]["runtime"] = json!("local-test-mtmd");
+                output["backend"]["details"]["prompt_version"] = json!("v1/vision-image-v1");
+            }
+            Ok(output)
+        }
+        fn decide_json_batch(
+            &mut self,
+            requests: &[DecisionRequest],
+            images: &[Vec<&[u8]>],
+        ) -> crate::Result<Vec<Value>> {
+            let mut outputs = requests
+                .iter()
+                .zip(images)
+                .map(|(request, images)| self.decide_json(request, images))
+                .collect::<crate::Result<Vec<_>>>()?;
+            normalize_mixed_local_metadata(&mut outputs, requests, images)?;
+            Ok(outputs)
+        }
+    }
+
+    #[test]
+    fn fresh_mixed_media_keeps_seven_single_and_text_routes_without_hiding_other_metadata() {
+        let media = (0..7)
+            .map(|index| json!({"id":format!("i-{index}"),"type":"image","data_base64":"AA=="}))
+            .collect::<Vec<_>>();
+        let decisions = [("references", None), ("single", Some(json!(["i-6"]))), ("text", Some(json!([])))].into_iter().map(|(id, images)| {
+            let mut decision = json!({"id":id,"instruction":"Choose","kind":{"type":"binary","false_label":"no","true_label":"yes"}});
+            if let Some(images) = images { decision["media_ids"] = images; }
+            decision
+        }).collect::<Vec<_>>();
+        let body =
+            serde_json::to_vec(&json!({"state":{},"media":media,"decisions":decisions})).unwrap();
+        let output = run_request(&mut MixedLocalProbe, &body).unwrap();
+        assert_eq!(output["results"].as_array().unwrap().len(), 3);
+        assert_eq!(output["backend"]["runtime"], "local-test");
+        let groups = &output["backend"]["details"]["media_groups"];
+        assert_eq!(groups[0]["image_count"], 7);
+        assert_eq!(groups[1]["image_count"], 1);
+        assert_eq!(groups[2]["image_count"], 0);
+        assert_eq!(groups[0]["runtime"], "local-test-mtmd");
+        assert_eq!(groups[0]["prompt_version"], "v1/vision-image-v1");
+        assert_eq!(groups[2]["runtime"], "local-test");
+        assert_eq!(groups[2]["prompt_version"], "v1");
+
+        let prepared = prepare_request(&MixedLocalProbe, &body).unwrap();
+        let images = prepared.images();
+        let outputs = prepared
+            .groups
+            .iter()
+            .zip(&images)
+            .map(|(request, images)| MixedLocalProbe.decide_json(request, images))
+            .collect::<crate::Result<Vec<_>>>()
+            .unwrap();
+        for field in ["model_path", "compute", "execution_mode"] {
+            let mut changed = outputs.clone();
+            changed[0]["backend"]["details"][field] = json!("changed");
+            assert!(
+                normalize_mixed_local_metadata(&mut changed, &prepared.groups, &images).is_err()
+            );
+        }
+        let mut changed_policy = outputs;
+        changed_policy[0]["policy"]["min_top_probability"] = json!(0.1);
+        normalize_mixed_local_metadata(&mut changed_policy, &prepared.groups, &images).unwrap();
+        assert!(finish_request(prepared, changed_policy).is_err());
+    }
+
     #[test]
     fn local_response_keeps_logits_only_in_evidence() {
         let request: DecisionRequest = serde_json::from_value(json!({"state":{},"decisions":[{
             "id":"flag","instruction":"Choose","kind":{"type":"binary","false_label":"no","true_label":"yes"}}]})).unwrap();
-        let capabilities = local_capabilities(&LocalProbe.decide(&request).unwrap().backend);
+        let capabilities = local_capabilities(&LocalProbe.decide(&request).unwrap().backend, 1);
         assert_eq!(capabilities["media"]["image"]["supported"], false);
         assert_eq!(capabilities["evidence"], "model_scored");
         let output = local_decide_json(&mut LocalProbe, &request, &[]).unwrap();

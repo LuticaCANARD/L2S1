@@ -10,7 +10,7 @@ export interface Decision {
   id: string;
   instruction: string;
   kind: DecisionKind;
-  /** Omitted uses all request media; [] means text only. */
+  /** Explicit references set image order; omitted uses upload order; [] is text only. */
   media_ids?: string[];
 }
 export interface DecisionPolicy { min_top_probability: number; min_candidate_mass: number }
@@ -21,6 +21,7 @@ export interface DecisionRequest {
   shared?: JsonValue;
   state: JsonValue;
   decisions: Decision[];
+  /** At most 8 uploads. Per-decision limits depend on the active backend. */
   media?: { type: 'image'; id: string; data_base64: string }[];
   policy?: DecisionPolicy;
   reasoning?: ReasoningOptions;

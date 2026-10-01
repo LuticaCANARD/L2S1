@@ -92,8 +92,11 @@ change selections. Check task quality and coverage when changing them.
 
 - Build `llama` for CPU, `llama-cuda` for CUDA, or `llama-metal` for Metal; select
   the corresponding device explicitly. GPU requests have no silent CPU fallback.
-- Local images require a supported vision GGUF and its matching `mmproj`; each
-  local decision accepts at most one image. Inspect backend capabilities first.
+- Local images require a supported vision GGUF and its matching `mmproj`.
+  Fresh llama.cpp accepts up to 8 ordered images per decision; parallel llama.cpp
+  and wgpu accept one. llama.cpp prefix-reuse/state-restore reject images.
+  Inspect backend capabilities first. Requests allow 8 uploads, each at most
+  8 MiB, within the 44 MiB encoded body limit.
 - The wgpu executable is Gemma 4 specific. OpenRouter is a separate remote adapter;
   calling it sends the request to a provider and may incur cost.
 - Read `docs/PARALLEL_EXECUTION.md` before parallel or optimized vision use.

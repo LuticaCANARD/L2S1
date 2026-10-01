@@ -86,6 +86,7 @@ class Decision(RequestModel):
     id: Text
     instruction: Text
     kind: DecisionKind
+    # Explicit references set image order; None uses upload order, [] is text only.
     media_ids: list[str] | None = None
 
 
@@ -122,7 +123,7 @@ class DecisionRequest(RequestModel):
     shared: JsonValue | None = None
     state: JsonValue
     decisions: list[Decision] = Field(min_length=1, max_length=128)
-    media: list[ImageMedia] = Field(default_factory=list, max_length=4)
+    media: list[ImageMedia] = Field(default_factory=list, max_length=8)
     policy: DecisionPolicy | None = None
     reasoning: ReasoningOptions | None = None
     target_error_rate: float | None = Field(default=None, ge=0, le=1)

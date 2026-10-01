@@ -108,7 +108,7 @@ and per-decision `media_ids`, plus optional `reasoning`, `policy`,
 `target_error_rate` and `failure_reasons`. Inspect capabilities before using optional
 features; an older backend can reject fields it does not support. A request error
 rate is a score threshold, not a correctness guarantee. Unknown fields are rejected.
-The adapter checks the HTTP ceilings of 128 decisions, 4 media items,
+The adapter checks the HTTP ceilings of 128 decisions, 8 media items,
 8 MiB per decoded image and 44 MiB
 per body. Validation is structural: image decoding, model/token/context
 preflight, and backend-specific limits still require the runtime. Images in the

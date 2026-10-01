@@ -23,6 +23,7 @@ using Kind = std::variant<Binary, Choice, Ordinal>;
 struct Decision {
     std::string id, instruction;
     Kind kind;
+    // Explicit references set image order; nullopt uses upload order; an empty vector is text only.
     std::optional<std::vector<std::string>> media_ids;
 };
 Json to_json(const Decision& decision);

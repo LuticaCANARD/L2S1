@@ -71,7 +71,7 @@ cargo build --release --locked --features llama --bin l2s1
 
 두 요청 도구는 검색 시 `binary`, `choice`, `ordinal`, 이미지 필드의 상세 JSON Schema를 제공합니다. 정적 리소스는 같은 문서를 `l2s1://docs/<name>`, 예제를 `l2s1://examples/<name>`, 스키마를 `l2s1://schema/request`에 공개합니다. 리소스를 에이전트에 제공하지 않는 클라이언트도 같은 기능의 도구를 사용할 수 있습니다. `design_decision(task)` 프롬프트는 요청 설계를 돕습니다.
 
-어댑터는 HTTP v1의 `state`, `decisions`, 선택적인 `media`, 질문별 `media_ids`, 선택적인 `reasoning`, `policy`, `target_error_rate`, `failure_reasons`를 지원합니다. 선택 기능을 사용하기 전에 capability를 확인하세요. 오래된 백엔드는 미지원 필드를 거부할 수 있습니다. 요청의 오류율은 점수 임계값이며 정답 보장이 아닙니다. 알 수 없는 필드는 거부합니다. 어댑터는 HTTP 한도인 판단 128개, 미디어 4개, 디코딩된 이미지당 8 MiB, 본문당 44 MiB를 확인합니다. 검증은 구조적입니다. 이미지 디코딩, 모델·토큰·컨텍스트 사전 검증, 백엔드별 제한은 런타임이 필요합니다. 템플릿 이미지의 자리표시는 실제 표준 base64 바이트로 교체해야 합니다.
+어댑터는 HTTP v1의 `state`, `decisions`, 선택적인 `media`, 질문별 `media_ids`, 선택적인 `reasoning`, `policy`, `target_error_rate`, `failure_reasons`를 지원합니다. 선택 기능을 사용하기 전에 capability를 확인하세요. 오래된 백엔드는 미지원 필드를 거부할 수 있습니다. 요청의 오류율은 점수 임계값이며 정답 보장이 아닙니다. 알 수 없는 필드는 거부합니다. 어댑터는 HTTP 한도인 판단 128개, 미디어 8개, 디코딩된 이미지당 8 MiB, 본문당 44 MiB를 확인합니다. 검증은 구조적입니다. 이미지 디코딩, 모델·토큰·컨텍스트 사전 검증, 백엔드별 제한은 런타임이 필요합니다. 템플릿 이미지의 자리표시는 실제 표준 base64 바이트로 교체해야 합니다.
 
 일반적인 흐름은 가이드·예제 읽기, 요청 설계, 검증, 백엔드 capability 확인, `l2s1_decide` 호출입니다. 보류한 결과도 `status: "abstained"`와 null 선택값을 가진 성공한 도구 실행입니다. 전송, 검증, 백엔드 실패는 MCP 도구 오류가 됩니다. 백엔드 HTTP 상태와 구조화된 오류 본문은 오류 메시지에 유지됩니다. 시간 제한 후에도 추론이 실행 중일 수 있으며 어댑터는 자동 재전송하지 않습니다.
 

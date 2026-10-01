@@ -176,7 +176,7 @@ curl -sS -H 'Content-Type: application/json' \
   --input examples/warehouse.json
 ```
 
-HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 사용합니다. 로컬 백엔드는 질문 하나당 이미지 한 장을 받습니다. 요청 구조, 제한, 백엔드별 동작은 [이미지와 HTTP 계약](docs/ko/GUIDE.md#direct-image-input-and-http-api)에 설명되어 있습니다.
+HTTP 이미지 요청은 이름이 있는 `media`와 질문별 `media_ids`를 사용합니다. llama `fresh` 경로는 질문 하나에 최대 8장의 이미지를 순서대로 받아, 예시 사진 6장과 대상 사진 1장을 함께 분류할 수 있습니다. llama `parallel` 경로와 WGPU는 질문당 1장을 받으며, llama prefix-reuse·state-restore 모드는 이미지를 받지 않습니다. 로드한 백엔드의 `/v1/capabilities`를 확인하세요. 요청 구조, 제한, 백엔드별 동작은 [이미지와 HTTP 계약](docs/ko/GUIDE.md#direct-image-input-and-http-api)에 설명되어 있습니다.
 
 ## TypeScript에서 사용하기
 

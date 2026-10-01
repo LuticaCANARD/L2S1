@@ -196,6 +196,12 @@ const request = {
 
 생략됨 `media_ids`는 모든 요청 미디어를 사용합니다. `[]`는 텍스트만 선택합니다. Rust는 미디어, 판단, 본문 및 모델 제한을 적용합니다. [HTTP 계약](../GUIDE.md#direct-image-input-and-http-api)를 참조하세요.
 
+명시한 `media_ids`가 이미지 순서를 정합니다. 생략하면 업로드 순서, `[]`는 텍스트만 사용합니다.
+llama.cpp `fresh`는 판단당 최대 8장, `parallel`과 wgpu는 1장입니다.
+llama.cpp `prefix-reuse`/`state-restore`는 이미지를 지원하지 않습니다.
+실행 중인 백엔드의 `media.image.max_per_decision`을 확인하세요.
+요청당 업로드 8개, 이미지당 8 MiB, 전체 본문 44 MiB 제한입니다.
+
 <a id="verification-and-portability"></a>
 ## 검증 및 이식성
 

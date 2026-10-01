@@ -47,7 +47,7 @@ Rust 呼び出しでは JSON ファイル解析に仕様を隠さず、`Decision
 別のモードが必要になるまで `fresh` をデフォルトにします。モデル、プロンプト配置、候補順序、コード回転、校正、並列設定は選択を変える場合があります。変更時はタスク品質と採用率を確認します。
 
 - CPU は `llama`、CUDA は `llama-cuda`、Metal は `llama-metal` をビルドし、対応デバイスを明示します。GPU リクエストは黙って CPU にフォールバックしません。
-- ローカル画像には対応するビジョン GGUF と `mmproj` が必要です。各ローカル判断は最大 1 枚の画像を受け付けます。先に capability を確認します。
+- ローカル画像には対応するビジョン GGUF と `mmproj` が必要です。llama.cpp `fresh` は判断ごとに最大 8 枚の順序付き画像を、llama.cpp `parallel` と wgpu は 1 枚を受け付けます。llama.cpp `prefix-reuse`/`state-restore` は画像をサポートしません。先に capability を確認します。アップロードは最大 8 件、各画像は 8 MiB、エンコード済み本文は 44 MiB が上限です。
 - wgpu 実行ファイルは Gemma 4 専用です。OpenRouter は別のリモートアダプターで、呼び出すと提供元にリクエストを送り、料金が発生する場合があります。
 - 並列・画像最適化の前に `docs/PARALLEL_EXECUTION.md` を読みます。並列モードは再帰型・ハイブリッドモデルを拒否し、画像並列の候補上限は 26 個です。準備キャッシュのヒットは KV 再利用や高速推論の証拠ではありません。
 - Rust ワーカーの所有・終了は `docs/MODEL_INTERCHANGEABILITY.md` を参照します。特に Metal では `BackendWorker::close()` を呼び、所有スレッドを待ちます。

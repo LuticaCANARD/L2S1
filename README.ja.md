@@ -174,7 +174,7 @@ curl -sS -H 'Content-Type: application/json' \
   --input examples/warehouse.json
 ```
 
-HTTP の画像リクエストでは、名前付きの `media` と判断ごとの `media_ids` を使います。ローカルバックエンドは、判断ごとに 1 枚の画像を受け付けます。ペイロード、制限、バックエンドごとの動作については[画像と HTTP の仕様](docs/ja/GUIDE.md#direct-image-input-and-http-api)を参照してください。
+HTTP の画像リクエストでは、名前付きの `media` と判断ごとの `media_ids` を使います。llama の fresh モードは、指定順に最大 8 枚を 1 つの判断へ渡せます。parallel と WGPU は 1 枚、prefix_reuse と state_restore は画像入力に対応していません。利用可能な枚数は capabilities で確認してください。ペイロードと制限については[画像と HTTP の仕様](docs/ja/GUIDE.md#direct-image-input-and-http-api)を参照してください。
 
 ## TypeScript から使う
 

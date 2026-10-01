@@ -17,7 +17,7 @@ use std::{
 
 const MAX_HEADER: usize = 16 * 1024;
 const MAX_BODY: usize = 44 * 1024 * 1024;
-const MAX_MEDIA: usize = 4;
+const MAX_MEDIA: usize = crate::vision::MAX_VISION_IMAGES;
 const MAX_DECISIONS: usize = 128;
 const MAX_BATCH_REQUESTS: usize = 128;
 const MAX_CONNECTIONS: usize = 32;
@@ -635,6 +635,134 @@ mod tests {
         );
         assert_eq!(probe.calls[1], (vec!["c".into()], vec![vec![4, 5, 6]]));
         assert_eq!(probe.calls[2], (vec!["d".into()], vec![]));
+    }
+
+    fn seven_image_request() -> Value {
+        let ids = (0..7)
+            .map(|index| format!("image-{index}"))
+            .collect::<Vec<_>>();
+        let media = ids.iter().enumerate().map(|(index, id)| json!({
+            "id":id,"type":"image",
+            "data_base64":base64::Engine::encode(&base64::engine::general_purpose::STANDARD, [index as u8]),
+        })).collect::<Vec<_>>();
+        json!({"state":{},"media":media,"decisions":[
+            decision("upload-order",None),
+            decision("explicit-order",Some(json!(ids.iter().rev().collect::<Vec<_>>()))),
+            decision("target-only",Some(json!(["image-6"]))),
+            decision("text",Some(json!([]))),
+        ]})
+    }
+
+    fn assert_seven_image_calls(probe: &Probe) {
+        assert_eq!(probe.calls.len(), 4);
+        assert_eq!(
+            probe.calls[0],
+            (
+                vec!["upload-order".into()],
+                (0..7).map(|index| vec![index]).collect()
+            )
+        );
+        assert_eq!(
+            probe.calls[1],
+            (
+                vec!["explicit-order".into()],
+                (0..7).rev().map(|index| vec![index]).collect()
+            )
+        );
+        assert_eq!(probe.calls[2], (vec!["target-only".into()], vec![vec![6]]));
+        assert_eq!(probe.calls[3], (vec!["text".into()], vec![]));
+    }
+
+    #[test]
+    fn example_images_and_target_preserve_context_order_and_subsets() {
+        let mut probe = Probe {
+            max_images: MAX_MEDIA,
+            ..Default::default()
+        };
+        let output = run_request(
+            &mut probe,
+            &serde_json::to_vec(&seven_image_request()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(output["results"].as_array().unwrap().len(), 4);
+        assert_seven_image_calls(&probe);
+    }
+
+    #[test]
+    fn stdio_uses_the_same_seven_image_contract() {
+        let mut probe = Probe {
+            max_images: MAX_MEDIA,
+            ..Default::default()
+        };
+        let call = json!({"id":"examples","op":"decide","body":seven_image_request()});
+        let mut input = serde_json::to_vec(&call).unwrap();
+        input.push(b'\n');
+        let mut output = Vec::new();
+        crate::stdio::serve_stream(&mut probe, std::io::Cursor::new(input), &mut output).unwrap();
+        let response: Value = serde_json::from_slice(&output).unwrap();
+        assert_eq!(response["id"], "examples");
+        assert_eq!(response["result"]["results"].as_array().unwrap().len(), 4);
+        assert_seven_image_calls(&probe);
+    }
+
+    #[test]
+    fn multi_image_limits_and_references_fail_before_inference() {
+        let valid = seven_image_request();
+        let mut missing = valid.clone();
+        missing["decisions"][0]["media_ids"] = json!(["image-0", "missing"]);
+        let mut duplicate_reference = valid.clone();
+        duplicate_reference["decisions"][0]["media_ids"] = json!(["image-0", "image-0"]);
+        let mut duplicate_id = valid.clone();
+        duplicate_id["media"][1]["id"] = json!("image-0");
+        let mut bad_base64 = valid.clone();
+        bad_base64["media"][0]["data_base64"] = json!("***");
+        let mut empty_image = valid.clone();
+        empty_image["media"][0]["data_base64"] = json!("");
+        let mut too_many = valid.clone();
+        for index in 7..9 {
+            too_many["media"].as_array_mut().unwrap().push(json!({
+                "id":format!("image-{index}"),"type":"image","data_base64":"AA=="}));
+        }
+        for request in [
+            missing,
+            duplicate_reference,
+            duplicate_id,
+            bad_base64,
+            empty_image,
+            too_many,
+        ] {
+            let mut probe = Probe {
+                max_images: MAX_MEDIA,
+                ..Default::default()
+            };
+            assert!(matches!(
+                run_request(&mut probe, &serde_json::to_vec(&request).unwrap()),
+                Err(Error::Invalid(_))
+            ));
+            assert!(probe.calls.is_empty());
+        }
+        // Capabilities still constrain single-image engines such as WGPU or
+        // native parallel vision, even with a larger request-level media pool.
+        let mut probe = Probe {
+            max_images: 1,
+            ..Default::default()
+        };
+        assert!(
+            matches!(run_request(&mut probe, &serde_json::to_vec(&valid).unwrap()),
+            Err(Error::Invalid(message)) if message.contains("at most 1 images"))
+        );
+        assert!(probe.calls.is_empty());
+        let mut eight = valid;
+        eight["media"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":"image-7","type":"image","data_base64":"Bw=="}));
+        let mut probe = Probe {
+            max_images: MAX_MEDIA,
+            ..Default::default()
+        };
+        run_request(&mut probe, &serde_json::to_vec(&eight).unwrap()).unwrap();
+        assert_eq!(probe.calls[0].1.len(), MAX_MEDIA);
     }
 
     #[test]

@@ -47,7 +47,7 @@ Rust 호출자는 JSON 파일 파싱 뒤에 계약을 숨기지 말고 `Decision
 작업에 다른 모드가 필요하기 전까지 `fresh`를 기본으로 사용합니다. 모델, 프롬프트 구성, 후보 순서, 코드 회전, 보정, 병렬 설정은 선택을 바꿀 수 있습니다. 변경할 때 작업 품질과 수락률을 확인하세요.
 
 - CPU는 `llama`, CUDA는 `llama-cuda`, Metal은 `llama-metal`을 빌드하며 해당 장치를 명시적으로 선택합니다. GPU 요청은 조용히 CPU로 대체되지 않습니다.
-- 로컬 이미지는 지원되는 비전 GGUF와 대응 `mmproj`가 필요합니다. 각 로컬 판단은 최대 이미지 한 장을 받습니다. 백엔드 capability를 먼저 확인하세요.
+- 로컬 이미지는 지원되는 비전 GGUF와 대응 `mmproj`가 필요합니다. llama.cpp `fresh`는 판단당 순서가 있는 이미지 최대 8장을, llama.cpp `parallel`과 wgpu는 한 장을 받습니다. llama.cpp `prefix-reuse`/`state-restore`는 이미지를 지원하지 않습니다. 백엔드 capability를 먼저 확인하세요. 요청은 업로드 최대 8개, 이미지당 8 MiB, 인코딩된 본문 44 MiB 한도를 유지합니다.
 - wgpu 실행 파일은 Gemma 4 전용입니다. OpenRouter는 별도 원격 어댑터이며 호출하면 제공자에게 요청을 보내고 비용이 발생할 수 있습니다.
 - 병렬·최적화 비전 사용 전에 `docs/PARALLEL_EXECUTION.md`를 읽습니다. 병렬 모드는 순환형·하이브리드 모델을 거부하며 비전 병렬은 후보 26개 제한입니다. 준비 캐시 적중은 KV 재사용이나 빠른 추론의 증거가 아닙니다.
 - Rust 워커 소유권과 종료는 `docs/MODEL_INTERCHANGEABILITY.md`를 참고합니다. 특히 Metal에서는 `BackendWorker::close()`를 호출하고 소유 스레드를 기다리세요.

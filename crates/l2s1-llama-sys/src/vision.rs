@@ -4,7 +4,10 @@
     clippy::missing_safety_doc,
     clippy::too_many_arguments
 )]
-use crate::{NativeVisionBatchMetrics, NativeVisionInput, bridge::*, raw::*};
+use crate::{
+    NativeVisionBatchMetrics, NativeVisionImage, NativeVisionImagesInput,
+    NativeVisionImagesMetrics, NativeVisionInput, bridge::*, raw::*,
+};
 use std::{
     ffi::{CStr, c_char},
     ptr, slice,
@@ -49,30 +52,60 @@ impl Drop for Attention {
 }
 
 unsafe fn tokenize(e: &Engine, input: &NativeVisionInput) -> Result<Chunks> {
+    let image = NativeVisionImage {
+        data: input.image,
+        len: input.image_len,
+    };
+    tokenize_images(
+        e,
+        &NativeVisionImagesInput {
+            prefix: input.prefix,
+            prefix_len: input.prefix_len,
+            data_before: input.data_before,
+            before_len: input.before_len,
+            images: &image,
+            image_count: 1,
+            data_after: input.data_after,
+            after_len: input.after_len,
+            suffix: input.suffix,
+            suffix_len: input.suffix_len,
+        },
+    )
+}
+
+unsafe fn tokenize_images(e: &Engine, input: &NativeVisionImagesInput) -> Result<Chunks> {
     if e.vision.is_null()
         || input.prefix.is_null()
         || input.data_before.is_null()
-        || input.image.is_null()
-        || input.image_len == 0
+        || input.images.is_null()
+        || !(1..=8).contains(&input.image_count)
         || input.data_after.is_null()
         || input.suffix.is_null()
     {
-        return Err("invalid vision inference arguments".into());
+        return Err("invalid vision inference arguments; provide 1 to 8 images".into());
     }
-    let wrapped = mtmd_helper_bitmap_init_from_buf(
-        e.vision,
-        input.image,
-        input.image_len,
-        false,
-        mtmd_helper_init_opt_default(),
-    );
-    let bitmap = Bitmap(wrapped.bitmap);
-    if !wrapped.video_ctx.is_null() {
-        mtmd_helper_video_free(wrapped.video_ctx);
-        return Err("video input is unsupported; provide one still image".into());
-    }
-    if bitmap.0.is_null() || mtmd_bitmap_is_audio(bitmap.0) {
-        return Err("image must be a supported still-image format".into());
+    let images = slice::from_raw_parts(input.images, input.image_count);
+    let mut bitmaps = Vec::with_capacity(images.len());
+    for image in images {
+        if image.data.is_null() || image.len == 0 {
+            return Err("invalid vision image arguments".into());
+        }
+        let wrapped = mtmd_helper_bitmap_init_from_buf(
+            e.vision,
+            image.data,
+            image.len,
+            false,
+            mtmd_helper_init_opt_default(),
+        );
+        let bitmap = Bitmap(wrapped.bitmap);
+        if !wrapped.video_ctx.is_null() {
+            mtmd_helper_video_free(wrapped.video_ctx);
+            return Err("video input is unsupported; provide still images".into());
+        }
+        if bitmap.0.is_null() || mtmd_bitmap_is_audio(bitmap.0) {
+            return Err("image must be a supported still-image format".into());
+        }
+        bitmaps.push(bitmap);
     }
     let texts = [
         mtmd_input_text {
@@ -100,29 +133,14 @@ unsafe fn tokenize(e: &Engine, input: &NativeVisionInput) -> Result<Chunks> {
             parse_special: true,
         },
     ];
-    let parts = [
-        mtmd_input_part {
-            text: &texts[0],
-            bitmap: ptr::null(),
-        },
-        mtmd_input_part {
-            text: &texts[1],
-            bitmap: ptr::null(),
-        },
-        mtmd_input_part {
-            text: ptr::null(),
-            bitmap: bitmap.0,
-        },
-        mtmd_input_part {
-            text: &texts[2],
-            bitmap: ptr::null(),
-        },
-        mtmd_input_part {
-            text: &texts[3],
-            bitmap: ptr::null(),
-        },
-    ];
-    let ptrs = parts.each_ref().map(|p| p as *const mtmd_input_part);
+    let parts = ordered_parts(
+        &texts,
+        bitmaps.iter().map(|bitmap| bitmap.0 as *const mtmd_bitmap),
+    );
+    let ptrs = parts
+        .iter()
+        .map(|p| p as *const mtmd_input_part)
+        .collect::<Vec<_>>();
     let chunks = Chunks(mtmd_input_chunks_init());
     if chunks.0.is_null()
         || mtmd_tokenize_from_parts(e.vision, chunks.0, ptrs.as_ptr(), ptrs.len(), true) != 0
@@ -131,6 +149,34 @@ unsafe fn tokenize(e: &Engine, input: &NativeVisionInput) -> Result<Chunks> {
     }
     Ok(chunks)
 }
+/// Media is contained between untrusted data text, with trusted model
+/// controls surrounding the complete segment. Do not sort/deduplicate images.
+fn ordered_parts(
+    texts: &[mtmd_input_text; 4],
+    bitmaps: impl ExactSizeIterator<Item = *const mtmd_bitmap>,
+) -> Vec<mtmd_input_part> {
+    let mut parts = Vec::with_capacity(4 + bitmaps.len());
+    for text in &texts[..2] {
+        parts.push(mtmd_input_part {
+            text,
+            bitmap: ptr::null(),
+        });
+    }
+    for bitmap in bitmaps {
+        parts.push(mtmd_input_part {
+            text: ptr::null(),
+            bitmap,
+        });
+    }
+    for text in &texts[2..] {
+        parts.push(mtmd_input_part {
+            text,
+            bitmap: ptr::null(),
+        });
+    }
+    parts
+}
+
 unsafe fn copy_output(
     e: &Engine,
     output: *const f32,
@@ -151,7 +197,7 @@ unsafe fn copy_output(
 }
 unsafe fn forward_vision(
     e: *mut Engine,
-    input: NativeVisionInput,
+    input: &NativeVisionImagesInput,
     continuation: *const i32,
     continuation_count: usize,
     logits: *mut f32,
@@ -177,6 +223,7 @@ unsafe fn forward_vision(
             return Err("invalid vision inference arguments".into());
         }
         e.vision_metrics = NativeVisionBatchMetrics::default();
+        e.vision_images_metrics = NativeVisionImagesMetrics::default();
         let ids = if candidate_ids.is_null() {
             None
         } else {
@@ -189,7 +236,7 @@ unsafe fn forward_vision(
         };
         e.ensure_sequences(1, 0, false, true)?;
         e.clear();
-        let chunks = tokenize(e, &input)?;
+        let chunks = tokenize_images(e, input)?;
         let tokens = mtmd_helper_get_n_tokens(chunks.0);
         let positions = mtmd_helper_get_n_pos(chunks.0);
         if tokens == 0
@@ -247,10 +294,145 @@ unsafe fn forward_vision(
             log_normalizer,
         )?;
         *input_tokens = tokens;
+        let image_chunks = (0..mtmd_input_chunks_size(chunks.0))
+            .filter(|&index| {
+                mtmd_input_chunk_get_type(mtmd_input_chunks_get(chunks.0, index))
+                    == mtmd_input_chunk_type_MTMD_INPUT_CHUNK_TYPE_IMAGE
+            })
+            .count();
+        e.vision_images_metrics = NativeVisionImagesMetrics {
+            images: input.image_count,
+            image_chunks,
+        };
         Ok(())
     });
     sd_clear(e);
     ok
+}
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn sd_vision_images_metrics(
+    e: *const Engine,
+    out: *mut NativeVisionImagesMetrics,
+) -> bool {
+    if e.is_null() || out.is_null() {
+        return false;
+    }
+    *out = (*e).vision_images_metrics;
+    true
+}
+
+unsafe fn forward_single(
+    e: *mut Engine,
+    input: NativeVisionInput,
+    continuation: *const i32,
+    continuation_count: usize,
+    logits: *mut f32,
+    logits_count: usize,
+    input_tokens: *mut usize,
+    candidate_ids: *const i32,
+    candidate_count: usize,
+    log_normalizer: *mut f64,
+    error: *mut c_char,
+    cap: usize,
+) -> bool {
+    let image = NativeVisionImage {
+        data: input.image,
+        len: input.image_len,
+    };
+    forward_vision(
+        e,
+        &NativeVisionImagesInput {
+            prefix: input.prefix,
+            prefix_len: input.prefix_len,
+            data_before: input.data_before,
+            before_len: input.before_len,
+            images: &image,
+            image_count: 1,
+            data_after: input.data_after,
+            after_len: input.after_len,
+            suffix: input.suffix,
+            suffix_len: input.suffix_len,
+        },
+        continuation,
+        continuation_count,
+        logits,
+        logits_count,
+        input_tokens,
+        candidate_ids,
+        candidate_count,
+        log_normalizer,
+        error,
+        cap,
+    )
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn sd_forward_vision_images(
+    e: *mut Engine,
+    input: *const NativeVisionImagesInput,
+    continuation: *const i32,
+    continuation_count: usize,
+    logits: *mut f32,
+    logits_count: usize,
+    input_tokens: *mut usize,
+    error: *mut c_char,
+    cap: usize,
+) -> bool {
+    if input.is_null() {
+        sd_clear(e);
+        report(error, cap, "null vision images input");
+        return false;
+    }
+    forward_vision(
+        e,
+        &*input,
+        continuation,
+        continuation_count,
+        logits,
+        logits_count,
+        input_tokens,
+        ptr::null(),
+        0,
+        ptr::null_mut(),
+        error,
+        cap,
+    )
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn sd_forward_vision_images_compact(
+    e: *mut Engine,
+    input: *const NativeVisionImagesInput,
+    continuation: *const i32,
+    continuation_count: usize,
+    candidate_ids: *const i32,
+    candidate_count: usize,
+    logits: *mut f32,
+    logits_count: usize,
+    log_normalizer: *mut f64,
+    input_tokens: *mut usize,
+    error: *mut c_char,
+    cap: usize,
+) -> bool {
+    if input.is_null() || candidate_ids.is_null() || log_normalizer.is_null() {
+        sd_clear(e);
+        report(error, cap, "null vision images compact argument");
+        return false;
+    }
+    forward_vision(
+        e,
+        &*input,
+        continuation,
+        continuation_count,
+        logits,
+        logits_count,
+        input_tokens,
+        candidate_ids,
+        candidate_count,
+        log_normalizer,
+        error,
+        cap,
+    )
 }
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn sd_forward_vision(
@@ -273,7 +455,7 @@ pub unsafe extern "C" fn sd_forward_vision(
     error: *mut c_char,
     cap: usize,
 ) -> bool {
-    forward_vision(
+    forward_single(
         e,
         NativeVisionInput {
             prefix,
@@ -328,7 +510,7 @@ pub unsafe extern "C" fn sd_forward_vision_compact(
         report(error, cap, "null vision compact argument");
         return false;
     }
-    forward_vision(
+    forward_single(
         e,
         NativeVisionInput {
             prefix,
@@ -896,4 +1078,84 @@ pub unsafe extern "C" fn sd_forward_vision_parallel_compact(
         error,
         cap,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn image_parts_preserve_references_target_and_duplicates_between_data_segments() {
+        let text = |parse_special| mtmd_input_text {
+            text: c"text".as_ptr(),
+            text_len: 4,
+            add_special: false,
+            parse_special,
+        };
+        let texts = [text(true), text(false), text(false), text(true)];
+        // Opaque handles only: no native pointers are dereferenced by this test.
+        let handles: [u8; 7] = [0; 7];
+        let images = handles
+            .iter()
+            .map(|handle| (handle as *const u8).cast::<mtmd_bitmap>())
+            .collect::<Vec<_>>();
+        let parts = ordered_parts(&texts, images.iter().copied());
+        assert_eq!(parts.len(), 11);
+        for (index, image) in images.iter().enumerate() {
+            assert!(parts[index + 2].text.is_null());
+            assert_eq!(parts[index + 2].bitmap, *image);
+        }
+        for (part_index, text_index) in [(0, 0), (1, 1), (9, 2), (10, 3)] {
+            assert_eq!(parts[part_index].text, &texts[text_index] as *const _);
+            assert!(parts[part_index].bitmap.is_null());
+        }
+        let reordered = [images[6], images[0], images[6]];
+        let parts = ordered_parts(&texts, reordered.into_iter());
+        assert_eq!(
+            parts
+                .iter()
+                .filter(|part| !part.bitmap.is_null())
+                .map(|part| part.bitmap)
+                .collect::<Vec<_>>(),
+            reordered
+        );
+    }
+
+    #[test]
+    fn null_multi_image_abi_arguments_fail_without_dereferencing() {
+        unsafe {
+            let mut error = [0 as c_char; 128];
+            assert!(!sd_forward_vision_images(
+                ptr::null_mut(),
+                ptr::null(),
+                ptr::null(),
+                0,
+                ptr::null_mut(),
+                0,
+                ptr::null_mut(),
+                error.as_mut_ptr(),
+                error.len()
+            ));
+            assert!(
+                CStr::from_ptr(error.as_ptr())
+                    .to_bytes()
+                    .starts_with(b"null vision images input")
+            );
+            assert!(!sd_forward_vision_images_compact(
+                ptr::null_mut(),
+                ptr::null(),
+                ptr::null(),
+                0,
+                ptr::null(),
+                0,
+                ptr::null_mut(),
+                0,
+                ptr::null_mut(),
+                ptr::null_mut(),
+                error.as_mut_ptr(),
+                error.len()
+            ));
+            assert!(!sd_vision_images_metrics(ptr::null(), ptr::null_mut()));
+        }
+    }
 }
