@@ -64,7 +64,10 @@ fn candidate_mass_prevents_false_confidence() {
         &[0.0, 2.0, 20.0],
         &[0, 1],
         3,
-        &DecisionPolicy::default(),
+        &DecisionPolicy {
+            min_top_probability: 0.8,
+            min_candidate_mass: 0.05,
+        },
     )
     .unwrap();
     assert!(result.top_option_probability > 0.8);
@@ -112,7 +115,7 @@ fn extreme_logits_are_stable_and_keep_token_order() {
 }
 
 #[test]
-fn ordinal_uses_explicit_values_and_ties_abstain() {
+fn ordinal_uses_explicit_values_and_selective_ties_abstain() {
     let decision = Decision {
         id: "priority".into(),
         instruction: "Score".into(),
@@ -132,7 +135,7 @@ fn ordinal_uses_explicit_values_and_ties_abstain() {
         },
     };
     let policy = DecisionPolicy {
-        min_top_probability: 0.0,
+        min_top_probability: 0.1,
         min_candidate_mass: 0.0,
     };
     let result = score_logits(&decision, &[0.0, 0.0], &[0, 1], 1, &policy).unwrap();
@@ -232,4 +235,79 @@ fn legacy_prompt_and_saved_results_remain_compatible() {
     assert_eq!(response.backend.prompt_layout, PromptLayout::Legacy);
     assert_eq!(response.backend.execution_mode, ExecutionMode::Fresh);
     assert!(response.results.iter().all(|r| r.reused_prefix_tokens == 0));
+}
+
+#[test]
+fn default_policy_forces_all_types_with_weak_mass_and_exact_ties() {
+    let policy = DecisionPolicy::default();
+    assert!(policy.is_forced_classification());
+    let decisions = [
+        binary(),
+        Decision {
+            id: "choice".into(),
+            instruction: "Choose".into(),
+            kind: DecisionKind::Choice {
+                options: vec![
+                    OptionSpec {
+                        id: "first".into(),
+                        criterion: "First".into(),
+                    },
+                    OptionSpec {
+                        id: "second".into(),
+                        criterion: "Second".into(),
+                    },
+                ],
+            },
+        },
+        Decision::ordinal(
+            "ordinal",
+            "Rate",
+            [
+                Level {
+                    id: "low".into(),
+                    criterion: "Low".into(),
+                    value: 10.0,
+                },
+                Level {
+                    id: "high".into(),
+                    criterion: "High".into(),
+                    value: 30.0,
+                },
+            ],
+        ),
+    ];
+    for decision in decisions {
+        for (logits, expected_index) in [([0.0, 0.0, 30.0], 0), ([0.0, 0.1, 30.0], 1)] {
+            let result = score_logits(&decision, &logits, &[0, 1], 1, &policy).unwrap();
+            assert!(result.abstention_reasons.is_empty());
+            assert!(result.candidate_mass < 0.05);
+            assert!(result.top_option_probability < 0.8);
+            match result.value {
+                DecisionValue::Binary { value, .. } => assert_eq!(value, Some(expected_index == 1)),
+                DecisionValue::Choice { selected } | DecisionValue::Ordinal { selected, .. } => {
+                    assert_eq!(
+                        selected,
+                        Some(decision.options()[expected_index].id.clone())
+                    )
+                }
+            }
+            let selective = score_logits(
+                &decision,
+                &logits,
+                &[0, 1],
+                1,
+                &DecisionPolicy {
+                    min_top_probability: 0.8,
+                    min_candidate_mass: 0.05,
+                },
+            )
+            .unwrap();
+            assert!(!selective.abstention_reasons.is_empty());
+            assert_eq!(result.candidate_mass, selective.candidate_mass);
+            for (a, b) in result.scores.iter().zip(selective.scores.iter()) {
+                assert_eq!(a.option_probability, b.option_probability);
+                assert_eq!(a.raw_logit, b.raw_logit);
+            }
+        }
+    }
 }

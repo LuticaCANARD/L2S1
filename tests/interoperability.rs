@@ -286,6 +286,12 @@ fn held_out_policy_metrics_keep_mass_and_tie_gates() {
         )
         .unwrap();
     assert_eq!(none.accepted_accuracy, None);
+    let forced = artifact
+        .evaluate_policy(&observations, &DecisionPolicy::default())
+        .unwrap();
+    assert_eq!(forced.accepted, 3);
+    assert_eq!(forced.coverage, 1.0);
+    assert_eq!(forced.accepted_accuracy, Some(1.0 / 3.0));
     let mut invalid = observations;
     invalid[0].base_candidate_mass = f64::NAN;
     assert!(

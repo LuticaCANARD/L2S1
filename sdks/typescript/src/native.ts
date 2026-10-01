@@ -25,6 +25,7 @@ export interface LoadOptions {
   executionMode?: 'fresh' | 'prefix-reuse' | 'state-restore' | 'parallel';
   parallelWidth?: number;
   promptLayout?: 'legacy' | 'state-first';
+  promptProfile?: 'auto' | 'qwen3' | 'model' | 'gpt-oss-final' | 'winnow' | 'gemma4-decision';
   promptDetail?: 'minimal' | 'typed' | 'typed-examples';
   policy?: DecisionPolicy;
   /** Model startup timeout; defaults to 120 seconds. */
@@ -55,7 +56,7 @@ function argumentsFor(options: LoadOptions): string[] {
     ['device', options.device], ['mmproj', options.mmproj], ['lora', options.lora],
     ['context', options.context], ['batch', options.batch], ['ubatch', options.ubatch],
     ['threads', options.threads], ['gpu-layers', options.gpuLayers], ['execution-mode', options.executionMode],
-    ['parallel-width', options.parallelWidth], ['prompt-layout', options.promptLayout], ['prompt-detail', options.promptDetail],
+    ['parallel-width', options.parallelWidth], ['prompt-layout', options.promptLayout], ['prompt-profile', options.promptProfile], ['prompt-detail', options.promptDetail],
     ['min-top-probability', options.policy?.min_top_probability], ['min-candidate-mass', options.policy?.min_candidate_mass],
   ];
   for (const [key, value] of flags) if (value !== undefined) args.push(`--${key}`, String(value));

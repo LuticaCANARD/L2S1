@@ -167,6 +167,9 @@ impl DecisionRequest {
 }
 
 /// Thresholds are user policy, not guarantees of correctness.
+/// The default (both thresholds zero) forces an argmax selection for valid scores.
+/// Exact ties select the first candidate in request order. Set either threshold
+/// above zero to enable selective classification, including tie abstention.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct DecisionPolicy {
@@ -177,13 +180,18 @@ pub struct DecisionPolicy {
 impl Default for DecisionPolicy {
     fn default() -> Self {
         Self {
-            min_top_probability: 0.8,
-            min_candidate_mass: 0.05,
+            min_top_probability: 0.0,
+            min_candidate_mass: 0.0,
         }
     }
 }
 
 impl DecisionPolicy {
+    /// Whether valid evidence always produces a selection, including ties.
+    pub fn is_forced_classification(&self) -> bool {
+        self.min_top_probability == 0.0 && self.min_candidate_mass == 0.0
+    }
+
     pub fn validate(&self) -> Result<()> {
         for p in [self.min_top_probability, self.min_candidate_mass] {
             if !p.is_finite() || !(0.0..=1.0).contains(&p) {
@@ -519,7 +527,7 @@ pub(crate) fn score_candidate_logits(
         .iter()
         .map(|z| (z - candidate_lse).exp())
         .collect();
-    let best = (0..p.len()).max_by(|&a, &b| p[a].total_cmp(&p[b])).unwrap();
+    let best = (1..p.len()).fold(0, |best, i| if p[i] > p[best] { i } else { best });
     let mut reasons = Vec::new();
     if mass < policy.min_candidate_mass {
         reasons.push(AbstentionReason::LowCandidateMass);
@@ -527,7 +535,9 @@ pub(crate) fn score_candidate_logits(
     if p[best] < policy.min_top_probability {
         reasons.push(AbstentionReason::LowTopProbability);
     }
-    if p.iter().filter(|&&v| (v - p[best]).abs() < 1e-12).count() > 1 {
+    if !policy.is_forced_classification()
+        && p.iter().filter(|&&v| (v - p[best]).abs() < 1e-12).count() > 1
+    {
         reasons.push(AbstentionReason::TiedCandidates);
     }
     let accepted = reasons.is_empty();

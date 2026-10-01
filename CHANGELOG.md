@@ -19,6 +19,26 @@
   issues, `422 STATE_TRUNCATED` on context overflow, `503 QUEUE_FULL` with
   `Retry-After`, `x-typesafe-request-id`. Checked with the unmodified
   `typesafe-sdk` 0.7.1. `/v1/decisions` is unchanged.
+- Restore explicit `winnow` and experimental `gemma4-decision` text prompt
+  profiles on the current runtime, CLI and SDKs. The JSONL evaluator now accepts
+  `--prompt-profile`, allowing measured serving and evaluation prompts to match.
+  Profiles require Gemma 4, minimal detail, no shared evidence, and 2–26 options;
+  automatic profile selection is unchanged. See the paired small-model study.
+- Reconcile preserved changes with the current shared-input/native APIs and
+  update browser regression checks for the current release and explicit
+  selective-policy settings.
+
+- Breaking default-policy change: valid candidate evidence now always selects
+  its argmax. `DecisionPolicy::default()`, CLI, SDK launch defaults and live-demo
+  controls use zero probability/mass thresholds. Exact ties select the first
+  candidate in request order, including binary and ordinal results.
+- Set `min_top_probability: 0.8` and `min_candidate_mass: 0.05` explicitly to
+  restore the previous selective policy. A positive threshold retains tie
+  abstention. Request-level policy overrides remain scoped to that request.
+  Invalid inputs, invalid evidence and inference failures still return errors.
+- `evaluate_jsonl` accepts explicit probability and candidate-mass thresholds;
+  frozen intent/airline studies now specify their original thresholds instead
+  of relying on changing runtime defaults. Historical benchmark scores are unchanged.
 
 ## 0.2.2 (2026-09-30)
 

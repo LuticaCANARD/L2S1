@@ -523,6 +523,10 @@ fn evaluate(evaluator: &Path, model: &Path, input: &Path, output: &Path, log: &P
         "fresh".to_owned(),
         "--prompt-layout".to_owned(),
         "legacy".to_owned(),
+        "--min-top-probability".to_owned(),
+        "0.8".to_owned(),
+        "--min-candidate-mass".to_owned(),
+        "0.05".to_owned(),
         "--warmup".to_owned(),
         "--cuda".to_owned(),
     ];

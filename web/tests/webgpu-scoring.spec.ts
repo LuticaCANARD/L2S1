@@ -38,11 +38,15 @@ test('a policy change only changes acceptance and custom messages, preserving sc
   expect(scoreDecision(choice, logits, [1, 3], permissive)).toEqual(accepted);
 });
 
-test('exactly reaching a threshold is accepted, while a tie remains explicit abstention', () => {
+test('exactly reaching a threshold is accepted, while an explicit selective policy abstains on ties', () => {
   const result = scoreDecision(choice, [Math.log(1), Math.log(3)], [0, 1], permissive);
   const boundary = scoreDecision(choice, [Math.log(1), Math.log(3)], [0, 1], { min_top_probability: result.evidence.top_option_probability!, min_candidate_mass: result.evidence.candidate_mass! });
   expect(boundary.status).toBe('selected');
-  const tie = scoreDecision(choice, [0, 0], [0, 1], permissive);
+  const forced = scoreDecision(choice, [0, 0], [0, 1], permissive);
+  expect(forced.status).toBe('selected');
+  expect(forced.value.selected).toBe('glass');
+  expect(forced.abstention_reasons).toEqual([]);
+  const tie = scoreDecision(choice, [0, 0], [0, 1], { ...permissive, min_top_probability: 0.1 });
   expect(tie.status).toBe('abstained');
   expect(tie.value.selected).toBeNull();
   expect(tie.abstention_reasons).toEqual(['tied_candidates']);

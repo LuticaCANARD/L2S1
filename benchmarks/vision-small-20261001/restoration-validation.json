@@ -1,0 +1,111 @@
+{
+  "base": "eec111db6764b5f512b60c54e3dca15906ba984c",
+  "restored_commit": "f923ca281c6de7bcfaa0fa9658a60191387bd35c",
+  "branch": "restore/small-model-work-20261001",
+  "build_source_matches_worktree": true,
+  "checked_source_files": 61,
+  "native_binary_sha256": "690744f308699dd6206b85afcbebca805b4588acdfd278cf3f11486991d5edc7",
+  "integration_patch_sha256": "cd5fc5b1df42b3d2fbfcd5c57e72e9f58dd7e41d3e33be714f81b72a080e0d8b",
+  "validation": {
+    "rust": {
+      "passed": 116,
+      "failed": 0,
+      "ignored": 0
+    },
+    "native": {
+      "passed": 51,
+      "failed": 0,
+      "ignored": 10
+    },
+    "python_sdk": {
+      "passed": 2
+    },
+    "typescript_sdk": {
+      "passed": 24,
+      "typecheck": "passed"
+    },
+    "web": {
+      "passed": 8,
+      "lint_check_build": "passed"
+    },
+    "gemma4_actual_tokenizer_routing": {
+      "passed": 1
+    },
+    "winnow_cuda_http": {
+      "status": "passed",
+      "decisions": 5,
+      "model": "Winnow-E4B-Q8_0",
+      "profile": "winnow",
+      "max_probability_difference_from_native": 0.0,
+      "shared_status": 400,
+      "wide_status": 400,
+      "command": [
+        "/home/lutica/personal/skid/skid-desion/results/restore-small-model-20261001/runtime/l2s1",
+        "--model",
+        "/home/lutica/personal/skid/skid-desion/models/Winnow-E4B-Q8_0.gguf",
+        "--device",
+        "cuda",
+        "--prompt-profile",
+        "winnow",
+        "--execution-mode",
+        "fresh",
+        "--context",
+        "8192",
+        "--batch",
+        "256",
+        "--ubatch",
+        "256",
+        "--threads",
+        "4",
+        "--flash-attention",
+        "off",
+        "--preparation-cache-bytes",
+        "0",
+        "--listen",
+        "127.0.0.1:38225"
+      ],
+      "transport": "real loopback HTTP /v1/decisions; actual CUDA inference"
+    },
+    "qwen_cuda_thinking": {
+      "status": "passed",
+      "mode": "actual Qwen3 CUDA thinking plus candidate scoring",
+      "command": [
+        "/home/lutica/personal/skid/skid-desion/results/restore-small-model-20261001/runtime/l2s1",
+        "--model",
+        "/home/lutica/personal/skid/skid-desion/models/Qwen3-0.6B-Q8_0.gguf",
+        "--device",
+        "cuda",
+        "--stdio",
+        "--execution-mode",
+        "fresh",
+        "--reasoning-mode",
+        "thinking",
+        "--max-reasoning-tokens",
+        "1024",
+        "--context",
+        "8192",
+        "--batch",
+        "256",
+        "--ubatch",
+        "256",
+        "--threads",
+        "4",
+        "--flash-attention",
+        "off"
+      ],
+      "policy": {
+        "min_candidate_mass": 0.0,
+        "min_top_probability": 0.0
+      },
+      "scoring_method": "single_token_conditional_softmax_v1/thinking-greedy",
+      "binary_sha256": "690744f308699dd6206b85afcbebca805b4588acdfd278cf3f11486991d5edc7"
+    }
+  },
+  "preserved_stashes": [
+    "a246484a64943691403c287a04648cca49e5a07f On feat/trashnet-visual-detect: trashnet-visual-detect WIP before pulling main 2026-10-01",
+    "7f1674cd110e178564e66d22d59ce5286302dbd1 On main: preserved-before-main-trashnet-detect-20260927"
+  ],
+  "temporary_source_restored": true,
+  "result_commit": "a4d153c4f36c5ae1f4e258aea0d3bd6ac0f3c740",
+  "worktree_clean": true
+}

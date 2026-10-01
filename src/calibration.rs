@@ -494,7 +494,7 @@ pub struct CalibrationPolicyMetrics {
 }
 impl ScalarCalibration {
     /// A held-out policy curve can call this with several probability/mass thresholds.
-    /// Both the unchanged base mass gate and the calibrated probability/tie gate apply.
+    /// Zero thresholds force selection; positive thresholds enable the mass/probability/tie gates.
     pub fn evaluate_policy(
         &self,
         records: &[CalibrationPolicyRecord],
@@ -519,12 +519,13 @@ impl ScalarCalibration {
             let max = z.iter().copied().fold(f64::NEG_INFINITY, f64::max);
             let lse = max + z.iter().map(|z| (z - max).exp()).sum::<f64>().ln();
             let p: Vec<_> = z.iter().map(|z| (z - lse).exp()).collect();
-            let best = (0..p.len()).max_by(|&a, &b| p[a].total_cmp(&p[b])).unwrap();
+            let best = (1..p.len()).fold(0, |best, i| if p[i] > p[best] { i } else { best });
             let is_correct = best == r.observation.correct_option;
             correct += usize::from(is_correct);
             if r.base_candidate_mass >= policy.min_candidate_mass
                 && p[best] >= policy.min_top_probability
-                && p.iter().filter(|&&v| (v - p[best]).abs() < 1e-12).count() == 1
+                && (policy.is_forced_classification()
+                    || p.iter().filter(|&&v| (v - p[best]).abs() < 1e-12).count() == 1)
             {
                 accepted += 1;
                 accepted_correct += usize::from(is_correct);

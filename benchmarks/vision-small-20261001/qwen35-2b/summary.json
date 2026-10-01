@@ -1,0 +1,1784 @@
+{
+  "model": "Qwen3.5-2B-Q8_0.gguf",
+  "n": 120,
+  "correct": 85,
+  "raw_top1_accuracy": 0.7083333333333334,
+  "accepted": 120,
+  "abstained": 0,
+  "coverage": 1.0,
+  "accepted_accuracy": 0.7083333333333334,
+  "correct_over_all": 0.7083333333333334,
+  "wilson_95": [
+    0.6215576502025923,
+    0.7821843637896146
+  ],
+  "latency_ms": {
+    "p50": 99.5145289998618,
+    "p95": 108.39689700151212
+  },
+  "startup_seconds": 10.534427896000125,
+  "process_memory_kib": {
+    "VmHWM": 1103704,
+    "VmRSS": 1103704
+  },
+  "gpu_after": "NVIDIA GeForce RTX 3080, 596.21, 9359",
+  "per_class": {
+    "cardboard": {
+      "n": 20,
+      "correct": 20
+    },
+    "glass": {
+      "n": 20,
+      "correct": 20
+    },
+    "metal": {
+      "n": 20,
+      "correct": 18
+    },
+    "paper": {
+      "n": 20,
+      "correct": 13
+    },
+    "plastic": {
+      "n": 20,
+      "correct": 14
+    },
+    "trash": {
+      "n": 20,
+      "correct": 0
+    }
+  },
+  "confusion": {
+    "cardboard": {
+      "cardboard": 20,
+      "glass": 0,
+      "metal": 0,
+      "paper": 0,
+      "plastic": 0,
+      "trash": 0
+    },
+    "glass": {
+      "cardboard": 0,
+      "glass": 20,
+      "metal": 0,
+      "paper": 0,
+      "plastic": 0,
+      "trash": 0
+    },
+    "metal": {
+      "cardboard": 1,
+      "glass": 1,
+      "metal": 18,
+      "paper": 0,
+      "plastic": 0,
+      "trash": 0
+    },
+    "paper": {
+      "cardboard": 7,
+      "glass": 0,
+      "metal": 0,
+      "paper": 13,
+      "plastic": 0,
+      "trash": 0
+    },
+    "plastic": {
+      "cardboard": 0,
+      "glass": 5,
+      "metal": 1,
+      "paper": 0,
+      "plastic": 14,
+      "trash": 0
+    },
+    "trash": {
+      "cardboard": 6,
+      "glass": 0,
+      "metal": 1,
+      "paper": 10,
+      "plastic": 3,
+      "trash": 0
+    }
+  },
+  "raw_responses_sha256": "870962c4f150b8a5056309973eb2a44dce6a25606dbd13d91c8b4161b5c10805",
+  "observations": [
+    {
+      "name": "dataset-resized/glass/glass192.jpg",
+      "label": "glass",
+      "sha256": "a0251609850efa59b9ba88efd0c02178ce2901df8dc5cdf0c960d38aadfd6a2a",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 182.4454039997363,
+      "memory_kib": {
+        "VmHWM": 1099052,
+        "VmRSS": 1099052
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/glass/glass330.jpg",
+      "label": "glass",
+      "sha256": "b8462ea85337e9caaf3205245db37109c6070c5344cdd690ec865c91527c91b5",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 100.52430200084927,
+      "memory_kib": {
+        "VmHWM": 1101356,
+        "VmRSS": 1101356
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/glass/glass249.jpg",
+      "label": "glass",
+      "sha256": "c209a8ec595b3be49ed1994932afb6a10d7269a3d6941c2ac4ae90d331c8d2a3",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 101.26130600110628,
+      "memory_kib": {
+        "VmHWM": 1103660,
+        "VmRSS": 1103660
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/metal/metal406.jpg",
+      "label": "metal",
+      "sha256": "f17d023b7a7bdcc6ac2c7ea673fa97ee75e5e07906ded6c69e56250acc0cc633",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 102.83175200129335,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/trash/trash69.jpg",
+      "label": "trash",
+      "sha256": "7ad89f52d2ce2e906f53c4499c29790fb19db6ecf7e01d354fd4ac8112d9272e",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 101.35715100113885,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/metal/metal91.jpg",
+      "label": "metal",
+      "sha256": "81546d1362d75fc60718e5852593c58f66f813e8c1e9d1eae6871fedb02e2868",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": false,
+      "latency_ms": 93.93074699983117,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/glass/glass500.jpg",
+      "label": "glass",
+      "sha256": "701b0c07b8d804190393f323cf76527ca05c719a84d8064dec4021115c798d44",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 93.33634699942195,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic137.jpg",
+      "label": "plastic",
+      "sha256": "de59966908bd7f79f6a902350212ff69e473b34f3c60ad4c4c97dbdc90fd2e9a",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 91.38274600081786,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard153.jpg",
+      "label": "cardboard",
+      "sha256": "6e4b49547daf86f258ebc12aa2bbdd574e2d77837cfa36dbca0cfa2891520f14",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 91.74054600043746,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard90.jpg",
+      "label": "cardboard",
+      "sha256": "154aa49e8581d68981e2c0048c51b1ae448babc4cc08c03a91a815af12f66f80",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 93.62644700013334,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9370"
+    },
+    {
+      "name": "dataset-resized/trash/trash6.jpg",
+      "label": "trash",
+      "sha256": "20018f7c4b30f387edbca44d6b4b1233f65fb0e194992119609d0af807985057",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 101.88475100039796,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9370"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard102.jpg",
+      "label": "cardboard",
+      "sha256": "5a88bce0103f59145f02b7fc0f50aa6dc3fbf29a1ffcaeeea0ea6661a58e0278",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 97.90794899890898,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9370"
+    },
+    {
+      "name": "dataset-resized/metal/metal3.jpg",
+      "label": "metal",
+      "sha256": "a8c75d9475f6d0dd16a6f68c800d37d8910e74f23240d0510e47532239027714",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 93.33684699959122,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9370"
+    },
+    {
+      "name": "dataset-resized/trash/trash128.jpg",
+      "label": "trash",
+      "sha256": "c1b0f328e062e40b9badc5c514e1c95d9442076944b3485971605af1f3503366",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": false,
+      "latency_ms": 94.08554699984961,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9370"
+    },
+    {
+      "name": "dataset-resized/metal/metal328.jpg",
+      "label": "metal",
+      "sha256": "d476473e802901fc009eb708a3a41c5198fd3ed9ccef527c48de890bcbaa14cb",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 99.40794999965874,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/trash/trash98.jpg",
+      "label": "trash",
+      "sha256": "1c04329bd1a226bf2498f4b4693d97eeaa6531da1ea2f9ce46aca3703637e3c9",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 100.09294999872509,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/paper/paper210.jpg",
+      "label": "paper",
+      "sha256": "ed89314fe3902a917ca66fe0188bf80b7056394527b435679e727f51c79cafd1",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 100.6648500006122,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/trash/trash23.jpg",
+      "label": "trash",
+      "sha256": "2f466a12dbdaef59730ab9828548b8cc63801b688194f41dc078138f814583da",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 91.97054600008414,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard280.jpg",
+      "label": "cardboard",
+      "sha256": "c34dc0814f96979e3df5383522338a06d370d3cd60004ba1829bcd0e6f4d7417",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 100.37924999960524,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/glass/glass419.jpg",
+      "label": "glass",
+      "sha256": "5d772c50c048803766142cefc680593d41e81f576cec0b8c42854a0c1e89144f",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 92.78794700003345,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/trash/trash29.jpg",
+      "label": "trash",
+      "sha256": "352d82b8a19a0ee5e50fafa6fec2858b021ae0240f20c303a76a6fb051c59096",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 99.83975000068313,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/paper/paper424.jpg",
+      "label": "paper",
+      "sha256": "23e78e4678ddb10aa6d602d59c6bc6050bf66f6fcedd4c46265ada535706f265",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 100.78545100077463,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard382.jpg",
+      "label": "cardboard",
+      "sha256": "d4bcbe962c81694fe3862ea7c6fa72c0d7ad175d17e8e4b10349144267496068",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 91.80184599972563,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic47.jpg",
+      "label": "plastic",
+      "sha256": "8cfc88156e367be7e00baebc32cc97607794f2fb94892aff8beb28878c4d93c1",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 101.45445099988137,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/paper/paper144.jpg",
+      "label": "paper",
+      "sha256": "c1976fd353d41344f825d988703f63ece168e453f9630f4964d3952890a0559d",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 106.07315299967013,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/metal/metal229.jpg",
+      "label": "metal",
+      "sha256": "5540f798bad9aab9d38537434226414807d155ecf14ee6c05153e94b9392aa8a",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 104.17685199900006,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic317.jpg",
+      "label": "plastic",
+      "sha256": "eb326e1c218874929d693edd6d3555f34ae18a287253edcda9a89b3c04267b7c",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": false,
+      "latency_ms": 105.15575299905322,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/paper/paper434.jpg",
+      "label": "paper",
+      "sha256": "ad20da3d35c1d67dff131edbb2c6c06c0d17280243994a6354402626eaa2ae07",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 103.2236520004517,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/paper/paper296.jpg",
+      "label": "paper",
+      "sha256": "e48b4da337f9d86cfd8d93a19bf37fbdd5fa6f9152bd564b05d728f337dd8fce",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 101.02855100012675,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/paper/paper469.jpg",
+      "label": "paper",
+      "sha256": "8edeffd3d9dc0aefbb6d0669237476864f1abeb0b82aefa5c55d23a52fddc8e3",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 105.02995299975737,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9362"
+    },
+    {
+      "name": "dataset-resized/paper/paper572.jpg",
+      "label": "paper",
+      "sha256": "f68e3a0bf970b94f85658c50b07a0dc6076125d56a068f89bdeea5a7228b23c8",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 96.45454800011066,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/metal/metal266.jpg",
+      "label": "metal",
+      "sha256": "423df73e6a1bd921e9e7a1ffee26f7ab06f57bac182b063df421b5b728178f3b",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 107.64305399970908,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard220.jpg",
+      "label": "cardboard",
+      "sha256": "f7f3094a1df464b9ebad857980abc2556b755436a2da36380688e88b6e693689",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 92.6546460013924,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic179.jpg",
+      "label": "plastic",
+      "sha256": "ad299921a80a27a58d01757bd887dd9c255ecf55ff18ef6fc4d97e03aceee118",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 91.86654599943722,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/paper/paper575.jpg",
+      "label": "paper",
+      "sha256": "38119fcc2f80936b404ef9b72083cae5e9d8fc8d97ec28e771e3b7fd5c215680",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 98.65774900026736,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/metal/metal134.jpg",
+      "label": "metal",
+      "sha256": "17a57deae02dfa268f964fde93494e8504565bcf2de190663d621e9b4d9df439",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 92.4082460005593,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/metal/metal295.jpg",
+      "label": "metal",
+      "sha256": "9590b871a82a5514e73f9dcf7b7faf7e8ff3b56435ece9cf864e7a4c4a55f966",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 91.38944600090326,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic244.jpg",
+      "label": "plastic",
+      "sha256": "6455853ec978543d38b1e012685b9fc5f9fa4b3405d3c309bd9c0ccd804726f9",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 101.8119510008546,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic273.jpg",
+      "label": "plastic",
+      "sha256": "42b050a661efcd6435a8a4175dda15a46fa92c70230aea91514e75eefb375dbf",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 100.98595099952945,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/trash/trash126.jpg",
+      "label": "trash",
+      "sha256": "d47245d73413fc38cc2e7afb16af6e0ec32afa9ea1d9707c644a1606aae7d4ed",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": false,
+      "latency_ms": 101.1548499991477,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/metal/metal49.jpg",
+      "label": "metal",
+      "sha256": "0cbb9f87d347d1be4ecebb5988a8a450bd844cafafd79958f07fc933b28952e6",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 106.68595300012385,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic417.jpg",
+      "label": "plastic",
+      "sha256": "a9000094b5f3fd0ad35c9126cad270a62011c3135f6e55bcc68f19e9356946fc",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 101.16604999893752,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard250.jpg",
+      "label": "cardboard",
+      "sha256": "db13544f3b344b8f49b2c2da857ad0aabe503fbae3a08c7ac4526bd86ea27a1b",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 102.94445100043959,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard257.jpg",
+      "label": "cardboard",
+      "sha256": "6a9b724d039aefa9c1ff60ba61bb773cb30bbb79c230f133b0817627d07aee44",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 99.43534999911208,
+      "memory_kib": {
+        "VmHWM": 1103688,
+        "VmRSS": 1103688
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/paper/paper504.jpg",
+      "label": "paper",
+      "sha256": "a29f26705f053e3cbcb729c05e56f63543a3aa37dffa5b125419ed357d6dade3",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 92.50354600044375,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/trash/trash124.jpg",
+      "label": "trash",
+      "sha256": "39bb0a46e81cb3c6ea99737e63b8fdc1dfb6b48e5f40a210ebe2f722b50e0ea5",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 107.63685400161194,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9361"
+    },
+    {
+      "name": "dataset-resized/glass/glass381.jpg",
+      "label": "glass",
+      "sha256": "6b7a7d11f2fc67528af282827d789419e96cb788880f25f575a1480403bd2a81",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 105.53700000127719,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic134.jpg",
+      "label": "plastic",
+      "sha256": "f20f144f44908e67f1008cf6344d9fc12a72a6f9883a063722b4dbfe10bff064",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 112.48709699975734,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic98.jpg",
+      "label": "plastic",
+      "sha256": "5dcdd840b2ef4863a974153e836821955c0d8a179529fd9ae3dff29af628b8b8",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": false,
+      "latency_ms": 93.04389799945056,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic39.jpg",
+      "label": "plastic",
+      "sha256": "faf28d8f09c1075d3337ebf19bcafda1427053deb2ee9827926f9077f9ebdf1e",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": false,
+      "latency_ms": 92.60039800028608,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/glass/glass216.jpg",
+      "label": "glass",
+      "sha256": "279c81c430424acbf50186b7a25ba91c978a86a1d0e8bff699119b93f5fcc961",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 94.1496970008302,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/trash/trash70.jpg",
+      "label": "trash",
+      "sha256": "4c7cf78bc2da8f9c5a221c12dc17f5cec46075710ab28c8e9a6897660eb0a657",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": false,
+      "latency_ms": 96.65809800026182,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/glass/glass201.jpg",
+      "label": "glass",
+      "sha256": "f217722bf9bf5f719bb4fa12d8dd4d7b829ff92ed1827a8d3f798a41a0d35ba7",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 116.02259699975548,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/paper/paper70.jpg",
+      "label": "paper",
+      "sha256": "c005fec186cb09d3b489653a35b4ca0bb892a8d4ef62f0372937b29c9d6fd997",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 94.56679800132406,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/glass/glass368.jpg",
+      "label": "glass",
+      "sha256": "85ac6ccd301a01da12c0b2238d3a1a565604bf1a7ea839b2cd084d98bd7ef6a7",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 109.11219700028596,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/paper/paper364.jpg",
+      "label": "paper",
+      "sha256": "aac6c82882e77dd83779c02adb71dfac25c28b4e9a67e17c0914d0fa913bc12e",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 102.91509800117637,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/paper/paper386.jpg",
+      "label": "paper",
+      "sha256": "5a4eb22235a4eeed0170455067d4ce246adfac26a87679053bfc58f5f598e414",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 108.39689700151212,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/glass/glass47.jpg",
+      "label": "glass",
+      "sha256": "f6b1f3ecf04bff83360dee0390f9d2d7585b4a99d87be7d0573cfff278951d0c",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 102.45939699962037,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic64.jpg",
+      "label": "plastic",
+      "sha256": "daaba9da8e9b2d76aae5c21030392f8069bd053c9993b2b227f6df5ded49e03a",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 100.03089800011367,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard41.jpg",
+      "label": "cardboard",
+      "sha256": "0aaf69cb9229ac6d01d5e9d12c2e64018beb1fa0906c98b07004b4ebbaf748c3",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 92.11465199950908,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic332.jpg",
+      "label": "plastic",
+      "sha256": "e971f4f8f50e960e454ea724cec922fc2988bbf4027aa48b553e139bb5890968",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": false,
+      "latency_ms": 101.86575799889397,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/paper/paper253.jpg",
+      "label": "paper",
+      "sha256": "35110d355588aff72ce48cd838f1993a63b2f84c93f07724655b3a887b17cf50",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 99.53385699918726,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/paper/paper55.jpg",
+      "label": "paper",
+      "sha256": "61e4135a107681ed768c845a1c5944dff554041fce30e8ff2263be7f1f684b6b",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 101.23005800051033,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/glass/glass448.jpg",
+      "label": "glass",
+      "sha256": "412b46561dbf161c5f7882223d89c2b6fce78823a98d477947bb7e0372f573fa",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 99.62815699873317,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/glass/glass374.jpg",
+      "label": "glass",
+      "sha256": "432a5d3f5e82b75c82ee6b504329e27b3b55b34a0907d3faa6800f3bb2bd000e",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 100.19085699968855,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard137.jpg",
+      "label": "cardboard",
+      "sha256": "4d89fcb735ea15edca28d80bd5a288c97a2f169eed7ee8d3dfde62d7b22890bc",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 100.62815700075589,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/paper/paper134.jpg",
+      "label": "paper",
+      "sha256": "ed495f4f9c3439058d41999cf1eee407c0efdca55b6ee26dba92285712d7bd4b",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 109.12856199865928,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9360"
+    },
+    {
+      "name": "dataset-resized/trash/trash11.jpg",
+      "label": "trash",
+      "sha256": "3bde5980ea8d4947ec29e8efee5d361c353064c2f18aa27a86597f06ec5b7c2c",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 91.77335200001835,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard323.jpg",
+      "label": "cardboard",
+      "sha256": "c2d9ca1f7a33c086de846f04c9cc755c70dedd8ee44f92ab35ce4d3192cbf38a",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 99.85455700007151,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal17.jpg",
+      "label": "metal",
+      "sha256": "80a4427fa8828b37c2bcb969e941956a50ebd2f7578975dd2842b68d11f8741e",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 97.4510560008639,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal231.jpg",
+      "label": "metal",
+      "sha256": "59f6dde9204d9fd4c5916e95085650160f3371883da5b3f621ebfbe936860288",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 90.83445199939888,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash72.jpg",
+      "label": "trash",
+      "sha256": "917e956c1df7d71729b71069800b1c9b0b5c45f4be29901c4437781244db9a58",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 92.91105300144409,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/paper/paper66.jpg",
+      "label": "paper",
+      "sha256": "faf309df70053e5bbae3f245fda3ed630a9afb81f105ee278d238d43221fc7d0",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 91.14025199960452,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic323.jpg",
+      "label": "plastic",
+      "sha256": "e72709b0eeda0472fde0e10a685a95f678cc7d77df2290bab25a0a85e50f4c5c",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 91.57245200003672,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal296.jpg",
+      "label": "metal",
+      "sha256": "34bc4ee4ce56e91e3e0561067d5a05ad377b3dcd26175c6f732ae583d89683c3",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 96.6894550001598,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal112.jpg",
+      "label": "metal",
+      "sha256": "00cb113efab64e877fe763e04113e4d6cd0f7448fad899bac05164614edf779a",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 96.56255499976396,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard334.jpg",
+      "label": "cardboard",
+      "sha256": "e20217c46a83b281bcda09e3d2679e22292d3e3c25bc934969f8d9582f94a21a",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 103.02265800055466,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard337.jpg",
+      "label": "cardboard",
+      "sha256": "fc9b771a9b4ae60823fde39497a4facd82926d13b51c0c851aeb6bd26bec2f14",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 92.29345199855743,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/glass/glass187.jpg",
+      "label": "glass",
+      "sha256": "11d2459e02f00f7dddad98494065c8268f184c81ec84666e8529945cb67afd2f",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 90.69705100046122,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/paper/paper136.jpg",
+      "label": "paper",
+      "sha256": "8ed79d770dd19ae7516c711f60008d6fa2df835fa94f3541832d8a2767fbfb12",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 106.57286099922203,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal8.jpg",
+      "label": "metal",
+      "sha256": "27ba278703688aff66f44741d735886bbdbecfdc4d8749daa021004bc91c8cbb",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 96.0121549996984,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash42.jpg",
+      "label": "trash",
+      "sha256": "3f320a10309e62ad670ca4d6aaeab524f84c498a32012526e17b3715ec39de6c",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 92.05665200170188,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/glass/glass410.jpg",
+      "label": "glass",
+      "sha256": "569b966e1bcbfe5a07566b18a1456ff5eff849110327650f0f8f5e68f37fd182",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 99.52225699998962,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic206.jpg",
+      "label": "plastic",
+      "sha256": "7e8d8ca65e56e0eb598928c026907bd54109ac5533a6b8ce3771664c4212ea28",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": false,
+      "latency_ms": 100.62345700134756,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal205.jpg",
+      "label": "metal",
+      "sha256": "fd8f76d8e26f61856dcdb9a5cdc0725951f5d360ccd80541a3c55bfffd3a9998",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 92.2618530003092,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash57.jpg",
+      "label": "trash",
+      "sha256": "c7ee0e7c2884b87a5c453265ca11cb4bbf3e621eb0af36967a77d8ee74faf6d8",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 107.10066100000404,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic82.jpg",
+      "label": "plastic",
+      "sha256": "1a2af231f4f280680a67d841707a6b36d9438e816be6fdaf70e2e2609a2979bf",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 99.08015600012732,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard207.jpg",
+      "label": "cardboard",
+      "sha256": "0d19e7e6ef97e06bae787b9283eaa8f08df88b9b653e5be0e9ff75720d0239fb",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 90.45595200041134,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash76.jpg",
+      "label": "trash",
+      "sha256": "d7381dad5ada3fecdd4745dcb87190dc0cdb7b23331d0612e218bf695ec07531",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 99.81295699981274,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash2.jpg",
+      "label": "trash",
+      "sha256": "00d96cc08c730da1d1bd47cc303191dfe354f6fbc2d026e78634e3a7705ead70",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 104.36265899988939,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic357.jpg",
+      "label": "plastic",
+      "sha256": "33e291289b32fe975a1576aa28fdebcb24f94b5b28657ab1ac268adae14328bc",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": false,
+      "latency_ms": 91.24425100162625,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/paper/paper208.jpg",
+      "label": "paper",
+      "sha256": "0ffb51316baae31451594d9a305fe3ebc4f0ead80e790451ca476363c223528c",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 91.31535199958307,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard299.jpg",
+      "label": "cardboard",
+      "sha256": "66b0eb2c973b01fcd6a0853047d52f76cdb6f97428e1c10e8ef68b6df7414b12",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 100.07685699929425,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/glass/glass100.jpg",
+      "label": "glass",
+      "sha256": "4c7cff0c0f5dacff26bf871c6d5b96f29b26d536a637bf5fc4da7fcea87212c5",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 100.3590569998778,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/glass/glass364.jpg",
+      "label": "glass",
+      "sha256": "0ee7095b9a08e846175af981ca30cbd3d56d28fa7147eb48109ba5659b699a46",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 91.90915199906158,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash110.jpg",
+      "label": "trash",
+      "sha256": "87647d44e4efcae1c53244502fe889c68fc6b1247e878b818e45a6dcd0dc2ab7",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": false,
+      "latency_ms": 100.37635700064129,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard159.jpg",
+      "label": "cardboard",
+      "sha256": "087c11b5a5003eaabded9748b1ee459baaed56492c02cd1bcdf17587aac01233",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 92.31345300031535,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/paper/paper59.jpg",
+      "label": "paper",
+      "sha256": "868bba7189276887f4f84a656cdfcd0f0934cb0a0308e8eba7806f37e7317e66",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 92.77425300024333,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal305.jpg",
+      "label": "metal",
+      "sha256": "a6912d622b544a06d59817d8c956f9c3d03142fbfbb4161a56708fe95cb5e9c8",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 97.7281560008123,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/glass/glass31.jpg",
+      "label": "glass",
+      "sha256": "ce89bfee8b75b95af1f1dac7ed0daee2459e0f1b3fb68016b264d9e46f83be5e",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 91.99325299960037,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic232.jpg",
+      "label": "plastic",
+      "sha256": "a091e7139deabb255c353df965a0711759ddfd479cd2d691d67a30e14779742c",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 100.68375700029719,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/glass/glass291.jpg",
+      "label": "glass",
+      "sha256": "1bbf5456c82ebced8c1e322acbe71a886ddc9f6a615342cee3fcd177f9a585ce",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 134.96387700070045,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash134.jpg",
+      "label": "trash",
+      "sha256": "07da038cb14ed7919525319f0f6e6e60c4589864d5979f08c1d73693f345eda5",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": false,
+      "latency_ms": 90.59434400114696,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash96.jpg",
+      "label": "trash",
+      "sha256": "5bfe21d663958b01b145a4934d211f721beb68db99b0be6ccf65289fdb6a92f5",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 102.09209999993618,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/glass/glass15.jpg",
+      "label": "glass",
+      "sha256": "e55621b76d93ae7c1a769a8530a30d0120ed284c1d730db3b617c1e040e93a05",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 99.92349999993166,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash3.jpg",
+      "label": "trash",
+      "sha256": "d61760bc3764e4da7bb229fb76a8e16f39ebeaf5a4e04ad18b06446c506695c8",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 99.50680099973397,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/trash/trash92.jpg",
+      "label": "trash",
+      "sha256": "7eb5719dc7a61fa54d46e7f7ebe17933322c94d7b1913e0545f3b5362c684745",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": false,
+      "latency_ms": 102.89459999876271,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal14.jpg",
+      "label": "metal",
+      "sha256": "9fac16ae09af013cdd4273f8b81b811ccaffe3b1f064482e6001c366a757fe08",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 91.64120099922002,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/paper/paper84.jpg",
+      "label": "paper",
+      "sha256": "8a20c1abf8ba3aab3d9ee69629057437bbc9e86000e468acf74da37d5310fc2a",
+      "selected": "paper",
+      "raw_top1": "paper",
+      "correct": true,
+      "latency_ms": 91.50740000040969,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic20.jpg",
+      "label": "plastic",
+      "sha256": "7be5d6ed8c3910e9d59de6f6ef91d18c4f1c2a731409e368ff639debc32ac857",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 92.34679999826767,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard78.jpg",
+      "label": "cardboard",
+      "sha256": "922a4eebb8634424a2b96f8d649cb97ef38f98bd08148f973c010edcb8c31de6",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 93.15650000098685,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal310.jpg",
+      "label": "metal",
+      "sha256": "10bff8c5d8e0dc1bdd5785f57de5e4a0b69913813781b10cf5ecf09b42bbe6b9",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 99.60900000078254,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard36.jpg",
+      "label": "cardboard",
+      "sha256": "3e69c4338acd879596b5c97185f04de6d09725f6273485154db96173aecd54f2",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 98.79800099952263,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard235.jpg",
+      "label": "cardboard",
+      "sha256": "d550d9d6c2b831d3dee5bb985a259a4f872df22baaf2a1e04113350e54a2e264",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 98.81420000056096,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal185.jpg",
+      "label": "metal",
+      "sha256": "bdc699a908783ac33bc196c3583282057e192549a0727951f81636c6e79b534e",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 91.45920099945215,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic88.jpg",
+      "label": "plastic",
+      "sha256": "d330491aa03dbaa550fb4729c87c3a82082785918068e2de501c0ff2b30f1e25",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 99.23349900054745,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/metal/metal161.jpg",
+      "label": "metal",
+      "sha256": "a35b3d08ada679342504b59e4fd634e0d5c556e84b4688149dd39f4a8acf3162",
+      "selected": "metal",
+      "raw_top1": "metal",
+      "correct": true,
+      "latency_ms": 98.26679899924784,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard360.jpg",
+      "label": "cardboard",
+      "sha256": "e46438a35440cd67f9214df0232ac1534408ad69e6f164586aacd69d2f73963c",
+      "selected": "cardboard",
+      "raw_top1": "cardboard",
+      "correct": true,
+      "latency_ms": 91.00249900075141,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/glass/glass208.jpg",
+      "label": "glass",
+      "sha256": "dd76c1c191605769e14f839a32da8379c02fbcc6b63582dd6a78f9baf4d72583",
+      "selected": "glass",
+      "raw_top1": "glass",
+      "correct": true,
+      "latency_ms": 105.70499899949937,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic301.jpg",
+      "label": "plastic",
+      "sha256": "163c1534d5cb13b304af123c5961f60ac3dd1773148675e96fdb7e468c155c9a",
+      "selected": "plastic",
+      "raw_top1": "plastic",
+      "correct": true,
+      "latency_ms": 103.10379899965483,
+      "memory_kib": {
+        "VmHWM": 1103704,
+        "VmRSS": 1103704
+      },
+      "gpu": "NVIDIA GeForce RTX 3080, 596.21, 9359"
+    }
+  ]
+}

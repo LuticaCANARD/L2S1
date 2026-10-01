@@ -20,9 +20,9 @@
   let textDirectRecording = $state<Recording | null>(null);
   let textThinkingRecording = $state<Recording | null>(null);
   let inputMode = $state<'photo' | 'text'>('photo');
-  let targetErrorRate = $state(20);
-  let minTopProbability = $state(0.8);
-  let minCandidateMass = $state(0.05);
+  let targetErrorRate = $state(100);
+  let minTopProbability = $state(0.0);
+  let minCandidateMass = $state(0.0);
   let failureReasonsText = $state(lastDefaultReasons);
   $effect(() => { const next = defaultReasons(); if (failureReasonsText === lastDefaultReasons) failureReasonsText = next; lastDefaultReasons = next; });
   let recordingError = $state<MessageKey | null>(null);
@@ -49,7 +49,7 @@
     if (recording.image_url) replaceImage(recording.image_url); else replaceImage('');
     imageAlt = recording.image_alt ?? ''; imageName = recording.title; imageFile = null;
     reasoningMode = recording.request.reasoning?.mode ?? 'direct'; reasoningTokens = recording.request.reasoning?.max_tokens ?? 128;
-    minTopProbability = recording.response.policy?.min_top_probability ?? 0.8; minCandidateMass = recording.response.policy?.min_candidate_mass ?? 0.05; targetErrorRate = Number(((1-minTopProbability)*100).toFixed(2));
+    minTopProbability = recording.response.policy?.min_top_probability ?? 0.0; minCandidateMass = recording.response.policy?.min_candidate_mass ?? 0.0; targetErrorRate = Number(((1-minTopProbability)*100).toFixed(2));
     if (uploadInput) uploadInput.value = '';
     stateText = JSON.stringify(recording.request.state, null, 2); decisionsText = JSON.stringify(recording.request.decisions, null, 2);
     evaluatedDecisions = recording.request.decisions; response = recording.response; elapsedMs = recording.elapsed_ms; mode = 'recorded'; errorKey = null;

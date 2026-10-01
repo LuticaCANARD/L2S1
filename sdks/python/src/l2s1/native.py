@@ -44,6 +44,7 @@ class LoadOptions:
     execution_mode: ExecutionMode | None = None
     parallel_width: int | None = None
     prompt_layout: Literal["legacy", "state-first"] | None = None
+    prompt_profile: Literal["auto", "qwen3", "model", "gpt-oss-final", "winnow", "gemma4-decision"] | None = None
     prompt_detail: Literal["minimal", "typed", "typed-examples"] | None = None
     policy: DecisionPolicy | None = None
     startup_timeout_ms: int = 120_000
@@ -75,7 +76,7 @@ def _arguments(options: LoadOptions) -> list[str]:
     if options.device != "cpu":
         args.extend(["--device", options.device])
     for name in ("mmproj", "lora", "context", "batch", "ubatch", "threads", "gpu_layers", "execution_mode",
-                 "parallel_width", "prompt_layout", "prompt_detail"):
+                 "parallel_width", "prompt_layout", "prompt_profile", "prompt_detail"):
         value = getattr(options, name)
         if value is not None:
             args.extend(["--" + name.replace("_", "-"), str(value)])

@@ -1,0 +1,41 @@
+{
+  "n": 231,
+  "correct": 159,
+  "raw_accuracy": 0.6883116883116883,
+  "returned": 213,
+  "coverage": 0.922077922077922,
+  "accepted_correct": 153,
+  "accepted_accuracy": 0.7183098591549296,
+  "accepted_correct_all": 0.6623376623376623,
+  "abstained": 18,
+  "nll": 2.1373711689167747,
+  "ece15": 0.27686001775279967,
+  "historical_gate": {
+    "accepted": 213,
+    "correct": 153
+  },
+  "by_type": {
+    "choice": {
+      "n": 139,
+      "correct": 94,
+      "accuracy": 0.6762589928057554
+    },
+    "binary": {
+      "n": 74,
+      "correct": 53,
+      "accuracy": 0.7162162162162162
+    },
+    "ordinal": {
+      "n": 18,
+      "correct": 12,
+      "accuracy": 0.6666666666666666
+    }
+  },
+  "latency": {
+    "p50_ms": 40.0471,
+    "p95_ms": 431.141401,
+    "total_ms": 26528.775659
+  },
+  "input_tokens": 154166,
+  "reused_prefix_tokens": 0
+}

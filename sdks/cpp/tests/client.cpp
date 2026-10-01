@@ -8,6 +8,7 @@ template<class F> void fails(const std::string& code,F&& f) { try { f(); } catch
 int main(int argc,char** argv) {
     if(argc!=2) return 2;
     try {
+        check(Policy{}.min_top_probability == 0.0 && Policy{}.min_candidate_mass == 0.0);
         LoadOptions options; options.binary_path=argv[1]; options.model="model with spaces;$(not-a-shell)";
         auto launch=[&]() { auto e=Engine::load(options); return e.capabilities()["launch_args"].get<std::vector<std::string>>(); };
         auto mode=[&](const std::string& expected, bool fixed) {

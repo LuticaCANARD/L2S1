@@ -1,0 +1,46 @@
+{
+  "base_commit": "b59239e",
+  "models": [
+    "gemma-4-E2B-it-Q8_0.gguf",
+    "Winnow-E4B-Q8_0.gguf"
+  ],
+  "dev_states": 128,
+  "holdout_states": 200,
+  "holdout_questions": 1000,
+  "selection": "Maximize dev raw correct independently per model; tie prefers baseline. Freeze before holdout inference. No holdout tuning.",
+  "candidates": {
+    "e2b": [
+      "model",
+      "winnow",
+      "gemma4-decision",
+      "model-typed",
+      "model-typed-examples"
+    ],
+    "e4b": [
+      "model",
+      "winnow"
+    ]
+  },
+  "holdout_scope": "200 unused training-split states (50/workflow), excluded by exact state from previous dev, calibration and official test. Not source/workflow-held-out; pretraining exposure and previous training use unknown; synthetic teacher labels.",
+  "split": "SHA256(small-accuracy-20261001/+id) then first50 per workflow after exclusions",
+  "policy": "forced classification (0,0); report actual acceptance and historical 0.8/0.05 score-gated diagnostics separately",
+  "compute": "CUDA RTX3080; fresh; minimal; context8192; batch256; ubatch256; threads4; flash attention off; warmup1; native latency per5-decision request. Baseline model uses legacy (current fresh default), specialized profiles mandate state-first. Profile comparison includes layout, formatting, semantic IDs and answer boundary; no isolated attribution to one component.",
+  "files": {
+    "dev-requests.jsonl": "f74b5c11c908d13267a373c15755fb3b3a60901ae4a84ae56bff2a7aa819f628",
+    "holdout-gold.jsonl": "198f2bb451dc00940bde01785c09e2de51ca6c98b46833322014f990b98d6c6e",
+    "dev-gold.jsonl": "8ab7695146334d97c7c2771bfe56693487796970aa7773e6b15d385f3b678b54",
+    "holdout-requests.jsonl": "dfc8006ee9c73e1547ba86a583672e59e23c3693cdf3006f64d67f8947f7546b",
+    "typed-test-requests.jsonl": "a1c31702b40c3265871e1d6673858c33d94cc01a711967c0a0db0448fb166a34",
+    "regression-requests.jsonl": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+    "regression-gold.jsonl": "7e9d4ad79336a38176d29bbfb2b507da0d3aa7c6817df6e95cf47cc71b2cdd47",
+    "typed-test-gold.jsonl": "e63122899dfa5b93c4663a4cf074e387b4237ec3f71361217ec07e7cd23c0751"
+  },
+  "train_sha256": "46a58d63edfd86e23229c78afe8b72307bb4ca9fb0e8df180cabb3c67ec9dcd5",
+  "secondary_evaluation": "Official typed-decisions test400 states/2000 decisions, previously observed benchmark; development-frozen configurations only. Public JevBench231 regression reports transfer separately, no configuration tuning.",
+  "dev_only_extension": {
+    "time": 1790852693.8131611,
+    "reason": "E2B Winnow lost35/640 development decisions; compare existing typed and typed-examples detail before selecting any profile or running holdout",
+    "test_outputs_consulted": false
+  },
+  "protocol_note": "Initial protocol preceded inference; two E2B detail candidates were added using development evidence only. Final selection.json is the frozen record before all holdout/test runs."
+}

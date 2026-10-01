@@ -21,9 +21,9 @@
   let dtype = $state<Dtype>('q4f16');
   let reasoningMode = $state<'direct' | 'thinking'>('direct');
   let reasoningTokens = $state(128);
-  let minTop = $state(0.8);
-  let minMass = $state(0.05);
-  let targetErrorRate = $state(20);
+  let minTop = $state(0.0);
+  let minMass = $state(0.0);
+  let targetErrorRate = $state(100);
   function initialFailureMessages() { return JSON.stringify({ low_top_probability: t('failureLowTop'), low_candidate_mass: t('failureLowMass'), tied_candidates: t('failureTied'), reasoning_limit: t('failureLimit'), reasoning_incomplete: t('failureIncomplete'), unsupported_thinking: t('failureUnsupported'), native_failure: t(execution === 'local' ? 'localFailureNative' : 'failureNative') }, null, 2); }
   let failureText = $state(initialFailureMessages());
   let lastDefaultReasons = initialFailureMessages();

@@ -1,5 +1,8 @@
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { installMessages } from '../src/lib/i18n/install';
+
+const version: string = JSON.parse(readFileSync(new URL('../../sdks/typescript/package.json', import.meta.url), 'utf8')).version;
 
 for (const lang of ['en', 'ko', 'ja'] as const) {
   test(`${lang}: installation guides provide copyable commands and matching Python runtimes`, async ({ page, context }) => {
@@ -10,9 +13,9 @@ for (const lang of ['en', 'ko', 'ja'] as const) {
     const text = installMessages[lang];
     await expect(guide.getByRole('heading', { name: text.title })).toBeVisible();
     for (const [language, command] of [
-      ['TypeScript', 'npm install @l2s1/node@0.1.4'],
-      ['Python', 'python -m pip install l2s1-sdk==0.1.4'],
-      ['Rust', 'cargo add l2s1@0.1.4 --features llama'],
+      ['TypeScript', `npm install @l2s1/node@${version}`],
+      ['Python', `python -m pip install l2s1-sdk==${version}`],
+      ['Rust', `cargo add l2s1@${version} --features llama`],
     ]) {
       await guide.getByRole('button', { name: language, exact: true }).click();
       await expect(guide.getByRole('button', { name: language, exact: true })).toHaveAttribute('aria-pressed', 'true');
@@ -25,8 +28,8 @@ for (const lang of ['en', 'ko', 'ja'] as const) {
     await guide.getByRole('button', { name: 'Python', exact: true }).click();
     for (const platform of ['linux-x64', 'linux-arm64', 'darwin-arm64', 'darwin-x64', 'win32-x64']) {
       await guide.getByLabel(text.platform).selectOption(platform);
-      const archive = `l2s1-runtime-${platform}-0.1.4.tgz`;
-      await expect(guide.getByRole('link', { name: text.download, exact: false })).toHaveAttribute('href', `https://github.com/LuticaCANARD/L2S1/releases/download/v0.1.4/${archive}`);
+      const archive = `l2s1-runtime-${platform}-${version}.tgz`;
+      await expect(guide.getByRole('link', { name: text.download, exact: false })).toHaveAttribute('href', `https://github.com/LuticaCANARD/L2S1/releases/download/v${version}/${archive}`);
       await guide.getByRole('button', { name: `${text.copy}: ${text.extract}`, exact: true }).click();
       await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(`tar -xzf ${archive}`);
     }
@@ -46,6 +49,6 @@ test('mobile installation handles clipboard denial and keyboard selection withou
   await expect(python).toHaveAttribute('aria-pressed', 'true');
   await guide.getByRole('button', { name: '복사: 패키지 설치', exact: true }).click();
   await expect(guide.getByRole('status')).toHaveText(installMessages.ko.copyError);
-  await expect(guide.locator('pre').first()).toHaveText('python -m pip install l2s1-sdk==0.1.4');
+  await expect(guide.locator('pre').first()).toHaveText(`python -m pip install l2s1-sdk==${version}`);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });

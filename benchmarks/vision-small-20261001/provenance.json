@@ -1,0 +1,44 @@
+{
+  "llama_cpp_source_revision": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "native_libraries": {
+    "libggml-cuda.so.0": "3c6deffed84709020cad5c1c2eebe7c6900f362443bd321cb117dee8afebfa24",
+    "libggml.so.0": "f1f1289d74169ce3be4e4665ae36c4c6f40dfbe32ddcaf6e9eb0fa860bf3cb60",
+    "libggml-cpu.so.0": "1db853651096438e458c68ddca0d3d90de5ff42cf12474be05062f1d8ca3471d",
+    "libggml-base.so.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514",
+    "libmtmd.so.0": "b00b6d2c772346bc0f72ce3f3227cb7b7ac6060af776dcf5bd45822a5dd017d8",
+    "libllama.so.0": "296f1d42d298098b9528433fd20f1f37dc3deef7abe6233d69cabfa6c4547aa9"
+  },
+  "projector_downloads": [
+    {
+      "file": "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3.5-2B-F16.gguf",
+      "sha256": "7035e9cb8d7c6a9681d07eef9a364783e86ea4cd73faab2eabb4f43a101830c7",
+      "bytes": 668227264,
+      "revision": "f6d5376be1edb4d416d56da11e5397a961aca8ae",
+      "repo": "unsloth/Qwen3.5-2B-GGUF",
+      "seconds": 26.480645507999725
+    },
+    {
+      "file": "/home/lutica/personal/skid/skid-desion/models/mmproj-Qwen3.5-4B-F16.gguf",
+      "sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864",
+      "bytes": 672423616,
+      "revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+      "repo": "unsloth/Qwen3.5-4B-GGUF",
+      "seconds": 30.177294383000117
+    }
+  ],
+  "stored_tensor_elements": {
+    "Qwen3-VL-2B-Instruct-Q8_0.gguf": 1720574976,
+    "mmproj-Qwen3-VL-2B-Instruct-Q8_0.gguf": 406957056,
+    "Qwen3.5-2B-Q8_0.gguf": 1881825088,
+    "mmproj-Qwen3.5-2B-F16.gguf": 331416576,
+    "Qwen3.5-4B-Q8_0.gguf": 4205751296,
+    "mmproj-Qwen3.5-4B-F16.gguf": 333514240
+  },
+  "hardware": {
+    "gpu": "NVIDIA RTX 3080 10 GiB",
+    "driver": "596.21",
+    "cpu": "Intel i9-9900K",
+    "exposed_logical_cpus": 4,
+    "environment": "WSL2; clocks not fixed; desktop GPU memory included"
+  }
+}

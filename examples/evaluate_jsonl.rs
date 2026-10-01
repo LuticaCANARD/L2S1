@@ -66,6 +66,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     struct Args {
         #[arg(long)]
         model: PathBuf,
+        /// Zero thresholds force selection; positive thresholds enable abstention.
+        #[arg(long, default_value_t = 0.0)]
+        min_top_probability: f64,
+        #[arg(long, default_value_t = 0.0)]
+        min_candidate_mass: f64,
         /// Keep a scoped native KV session across measured calls. First call is cold.
         #[arg(long, value_enum, default_value_t = Resident::None)]
         resident: Resident,
@@ -115,6 +120,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         prompt_layout: PromptLayout,
         #[arg(long, value_enum, default_value_t = PromptDetail::Minimal)]
         prompt_detail: PromptDetail,
+        #[arg(long, value_enum, default_value_t = PromptProfile::Auto)]
+        prompt_profile: PromptProfile,
         #[arg(long, default_value_t = 0)]
         code_rotation: u32,
         #[arg(long, default_value_t = 4, value_parser = clap::value_parser!(u32).range(1..=32))]
@@ -218,16 +225,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         LlamaBackend::load_with_metal_options(
             &args.model,
             compute,
-            DecisionPolicy::default(),
-            PromptProfile::Auto,
+            DecisionPolicy {
+                min_top_probability: args.min_top_probability,
+                min_candidate_mass: args.min_candidate_mass,
+            },
+            args.prompt_profile,
         )?
     } else {
         LlamaBackend::load_with_options(
             &args.model,
             compute,
             args.cuda,
-            DecisionPolicy::default(),
-            PromptProfile::Auto,
+            DecisionPolicy {
+                min_top_probability: args.min_top_probability,
+                min_candidate_mass: args.min_candidate_mass,
+            },
+            args.prompt_profile,
         )?
     };
     if let Some(path) = &args.lora {

@@ -80,7 +80,7 @@ The complete CLI response includes backend information, policy, candidate scores
 
 - **Typed outputs.** Binary checks, categorical choices, and ordered levels share one request format. Semantic option IDs stay consistent across compatible models.
 - **Direct local scoring.** Read scores at the model's assistant answer boundary. Larger candidate sets use complete answer-code likelihoods when codes span multiple tokens.
-- **Explicit abstention.** Keep the scores and explain why a selection was withheld. The default policy checks both relative option probability and full-vocabulary candidate mass.
+- **Forced selection by default, optional abstention.** Return the top candidate by default. Explicit thresholds can withhold a selection while preserving scores and reasons.
 - **Text and images.** Use a supported vision model with its matching `mmproj` GGUF for still-image decisions.
 - **Rust, TypeScript, CLI, and HTTP.** Keep a backend resident in your application, use the [TypeScript package](docs/en/typescript/README.md) from Node.js, run JSON from a file or stdin, or serve the versioned decision API.
 - **Inspectable execution.** Inspect model identity, preflight requests, and record diagnostics. Optional caching, state restoration, parallel execution, LoRA, and task-scoped calibration have explicit contracts.
@@ -95,12 +95,12 @@ The complete CLI response includes backend information, policy, candidate scores
 
 Each decision is evaluated independently. All kinds return candidate scores and abstention reasons. Up to 26 candidates use `A`–`Z`; larger sets use fixed-width codes such as `AA`–`ZZ`. Tokenization and context limits are checked against the selected model.
 
-Two scores determine default acceptance:
+Two scores are available for an optional acceptance policy:
 
 - `option_probability`: the candidate's probability relative to the supplied candidates.
 - `candidate_mass`: the probability assigned to the candidates within the complete vocabulary or answer-code paths.
 
-The default policy requires top-option probability **≥ 0.8**, candidate mass **≥ 0.05**, and no tied top candidates. Otherwise, the selected value is `null`. These are model scores; they are not calibrated probabilities of correctness. Optional calibration is bound to a specific model, configuration, and task.
+The default policy forces the highest-scoring candidate: both thresholds are **0**, and exact ties select the first candidate in request order. To restore selective classification, set `--min-top-probability 0.8 --min-candidate-mass 0.05` (or the equivalent request `policy`). With either threshold above zero, low scores and tied top candidates can return `null`. Scores, candidate mass and ordinal expected values are still returned; they are not guarantees of correctness. Invalid evidence and inference failures remain errors.
 
 See the [decision contract](docs/en/GUIDE.md#the-decision-contract) for formulas, answer codes, and validation rules.
 

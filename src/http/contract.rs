@@ -905,11 +905,12 @@ fn apply_request_policy(
         if best.option_probability < policy.min_top_probability {
             reasons.push("low_top_probability");
         }
-        if scores
-            .iter()
-            .filter(|s| (s.option_probability - best.option_probability).abs() < 1e-12)
-            .count()
-            > 1
+        if !policy.is_forced_classification()
+            && scores
+                .iter()
+                .filter(|s| (s.option_probability - best.option_probability).abs() < 1e-12)
+                .count()
+                > 1
         {
             reasons.push("tied_candidates");
         }
@@ -1356,6 +1357,31 @@ mod tests {
         );
         assert_eq!(envelopes[2]["result"]["status"], "ok");
     }
+    #[test]
+    fn explicit_zero_policy_forces_ties_without_modifying_evidence() {
+        let (mut backend, mut body) = policy_fixture();
+        let evidence = &mut backend.output["results"][0]["evidence"];
+        evidence["candidate_mass"] = json!(0.0);
+        evidence["top_option_probability"] = json!(0.5);
+        for score in evidence["scores"].as_array_mut().unwrap() {
+            score["option_probability"] = json!(0.5);
+        }
+        let original = evidence.clone();
+        body["policy"] = json!(crate::DecisionPolicy::default());
+        let output = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap();
+        assert_eq!(output["results"][0]["status"], "selected");
+        assert_eq!(output["results"][0]["value"]["value"], false);
+        assert_eq!(output["results"][0]["abstention_reasons"], json!([]));
+        assert_eq!(output["results"][0]["evidence"], original);
+        body["policy"]["min_top_probability"] = json!(0.1);
+        let output = run_request(&mut backend, &serde_json::to_vec(&body).unwrap()).unwrap();
+        assert_eq!(output["results"][0]["status"], "abstained");
+        assert_eq!(
+            output["results"][0]["abstention_reasons"],
+            json!(["tied_candidates"])
+        );
+    }
+
     #[test]
     fn request_thresholds_preserve_raw_evidence_and_do_not_persist() {
         let (mut backend, mut body) = policy_fixture();

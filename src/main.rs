@@ -151,9 +151,9 @@ struct Args {
     model_load_mode: l2s1::ModelLoadMode,
     #[arg(long, default_value_t = 4)]
     threads: i32,
-    #[arg(long, default_value_t = 0.8)]
+    #[arg(long, default_value_t = 0.0)]
     min_top_probability: f64,
-    #[arg(long, default_value_t = 0.05)]
+    #[arg(long, default_value_t = 0.0)]
     min_candidate_mass: f64,
 }
 
@@ -420,6 +420,22 @@ mod tests {
             assert_eq!(args.selected_execution_mode(), ExecutionMode::PrefixReuse);
         }
         let cli = parse(&[]);
+        assert_eq!(
+            cli.min_top_probability,
+            DecisionPolicy::default().min_top_probability
+        );
+        assert_eq!(
+            cli.min_candidate_mass,
+            DecisionPolicy::default().min_candidate_mass
+        );
+        let selective = parse(&[
+            "--min-top-probability",
+            "0.8",
+            "--min-candidate-mass",
+            "0.05",
+        ]);
+        assert_eq!(selective.min_top_probability, 0.8);
+        assert_eq!(selective.min_candidate_mass, 0.05);
         assert!(!cli.automatic_fixed_schema());
         assert_eq!(cli.selected_execution_mode(), ExecutionMode::Fresh);
         for (name, expected) in [

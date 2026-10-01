@@ -22,6 +22,10 @@ test('local inference works without WebGPU and preserves input and acceptance po
     }
   });
   await page.goto('/webgpu');
+  await expect(page.locator('#min-top')).toHaveValue('0');
+  await expect(page.locator('#min-mass')).toHaveValue('0');
+  await page.locator('#min-top').fill('0.8');
+  await page.locator('#min-mass').fill('0.05');
   await page.getByRole('button', { name: messages.ko.warehouseExample }).click();
   expect(calls).toEqual([]);
   await page.locator('#execution').selectOption('local');
@@ -60,6 +64,10 @@ test('results are rejected if the server lowers the requested acceptance policy'
     ? { api_version: 1, backend: { model: 'large.gguf', runtime: 'local-libllama' }, evidence: 'model_scored' }
     : { backend: { model: 'large.gguf', runtime: 'local-libllama' }, policy: { min_top_probability: 0, min_candidate_mass: 0 }, results: [] } }));
   await page.goto('/webgpu');
+  await expect(page.locator('#min-top')).toHaveValue('0');
+  await expect(page.locator('#min-mass')).toHaveValue('0');
+  await page.locator('#min-top').fill('0.8');
+  await page.locator('#min-mass').fill('0.05');
   await page.locator('#execution').selectOption('local');
   await page.getByRole('button', { name: messages.ko.localConnect }).click();
   await expect(page.getByRole('button', { name: messages.ko.localAnalyze })).toBeEnabled();
@@ -80,6 +88,10 @@ test('current native HTTP contract accepts only state and decisions and retains 
     }
   });
   await page.goto('/webgpu');
+  await expect(page.locator('#min-top')).toHaveValue('0');
+  await expect(page.locator('#min-mass')).toHaveValue('0');
+  await page.locator('#min-top').fill('0.8');
+  await page.locator('#min-mass').fill('0.05');
   await page.locator('#execution').selectOption('local');
   await page.getByRole('button', { name: messages.ko.localConnect }).click();
   await page.getByRole('button', { name: messages.ko.localAnalyze }).click();

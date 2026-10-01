@@ -58,17 +58,17 @@ fn selected(result: &DecisionResult) -> Option<String> {
 }
 
 fn top1(result: &DecisionResult) -> Option<&str> {
-    let best = result
+    result
         .scores
         .iter()
-        .max_by(|a, b| a.option_probability.total_cmp(&b.option_probability))?;
-    (result
-        .scores
-        .iter()
-        .filter(|s| (s.option_probability - best.option_probability).abs() < 1e-12)
-        .count()
-        == 1)
-        .then_some(best.id.as_str())
+        .reduce(|best, score| {
+            if score.option_probability > best.option_probability {
+                score
+            } else {
+                best
+            }
+        })
+        .map(|score| score.id.as_str())
 }
 
 impl Counts {
@@ -181,9 +181,27 @@ fn benchmark_metrics_distinguish_wrong_and_abstained_answers() {
     let expected = &decision.options()[0].id;
     let mut counts = Counts::default();
     for (logits, policy) in [
-        ([8.0, 0.0, 0.0, 0.0], DecisionPolicy::default()),
-        ([0.0, 8.0, 0.0, 0.0], DecisionPolicy::default()),
-        ([8.0, 0.0, 0.0, 20.0], DecisionPolicy::default()),
+        (
+            [8.0, 0.0, 0.0, 0.0],
+            DecisionPolicy {
+                min_top_probability: 0.8,
+                min_candidate_mass: 0.05,
+            },
+        ),
+        (
+            [0.0, 8.0, 0.0, 0.0],
+            DecisionPolicy {
+                min_top_probability: 0.8,
+                min_candidate_mass: 0.05,
+            },
+        ),
+        (
+            [8.0, 0.0, 0.0, 20.0],
+            DecisionPolicy {
+                min_top_probability: 0.8,
+                min_candidate_mass: 0.05,
+            },
+        ),
     ] {
         counts.add(
             &score_logits(decision, &logits, &[0, 1, 2], 10, &policy).unwrap(),
@@ -207,13 +225,28 @@ fn benchmark_metrics_distinguish_wrong_and_abstained_answers() {
         &[0.0, 0.0, 0.0],
         &[0, 1, 2],
         10,
-        &DecisionPolicy::default(),
+        &DecisionPolicy {
+            min_top_probability: 0.8,
+            min_candidate_mass: 0.05,
+        },
     )
     .unwrap();
     let mut all_abstained = Counts::default();
     all_abstained.add(&tied, expected);
     assert!(all_abstained.report()["accepted_accuracy"].is_null());
-    assert_eq!(all_abstained.top1_correct, 0);
+    assert_eq!(all_abstained.top1_correct, 1);
+    let forced = score_logits(
+        decision,
+        &[0.0, 0.0, 0.0],
+        &[0, 1, 2],
+        10,
+        &DecisionPolicy::default(),
+    )
+    .unwrap();
+    let mut forced_counts = Counts::default();
+    forced_counts.add(&forced, expected);
+    assert_eq!(forced_counts.accepted_correct, forced_counts.top1_correct);
+    assert_eq!(forced_counts.abstained, 0);
     assert_eq!(percentile(&[1.0, 2.0, 3.0, 4.0], 50), 2.0);
     assert_eq!(percentile(&[1.0, 2.0, 3.0, 4.0], 95), 4.0);
 }
@@ -272,8 +305,8 @@ mod native {
         let batch = setting("SKID_BATCH", 256, 1);
         let threads = i32::try_from(setting("SKID_THREADS", 4, 1)).unwrap();
         let policy = DecisionPolicy {
-            min_top_probability: threshold("SKID_MIN_TOP_PROBABILITY", 0.8),
-            min_candidate_mass: threshold("SKID_MIN_CANDIDATE_MASS", 0.05),
+            min_top_probability: threshold("SKID_MIN_TOP_PROBABILITY", 0.0),
+            min_candidate_mass: threshold("SKID_MIN_CANDIDATE_MASS", 0.0),
         };
         policy.validate().unwrap();
         let started = Instant::now();

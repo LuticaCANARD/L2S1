@@ -26,7 +26,7 @@ struct Decision {
     std::optional<std::vector<std::string>> media_ids;
 };
 Json to_json(const Decision& decision);
-struct Policy { double min_top_probability = 0.8, min_candidate_mass = 0.05; };
+struct Policy { double min_top_probability = 0.0, min_candidate_mass = 0.0; };
 struct Request {
     Json state;
     std::vector<Decision> decisions;

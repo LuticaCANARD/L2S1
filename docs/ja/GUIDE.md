@@ -101,7 +101,7 @@ candidate_mass        = exp(logsumexp(candidate logits) - logsumexp(all vocabula
 
 `option_probability` は、提供されたオプションを比較します。 `candidate_mass` は、モデルの次のトークンの確率がそれらのオプションにどの程度属するかを測定します。 候補間の相対 の確率が高いだけでは、信頼できる答えは確立されません。
 
-デフォルトの `DecisionPolicy` は最上位候補確率 **0.8 以上**、候補質量 **0.05 以上**、最上位候補間で同点なしを要求します。満たさなければ選択は `null` となり、`abstention_reasons` が理由を示します。スコアは返します。順序付きの期待値は確率で重み付けしたレベル値で、選択を保留しても利用できます。
+デフォルトは両方のしきい値を **0** とし、最高スコアの候補を強制選択します。完全な同点ではリクエスト順の最初の候補を選びます。保留を有効にするには `--min-top-probability 0.8 --min-candidate-mass 0.05` または同じリクエスト `policy` を指定してください。いずれかのしきい値が 0 より大きい場合、低いスコアや最上位候補の同点で `null` を返すことがあります。スコア・候補質量・順序付き期待値は引き続き返し、正解を保証しません。不正な証拠や推論失敗はエラーになります。
 
 これらはモデルのスコアであり、普遍的な正しさの確率ではありません。部分的な上位 k 応答またはモデルによって生成された数値推定は、正確な ネイティブ 証拠契約を満たしていません。
 
@@ -516,3 +516,11 @@ flowchart TD
 | プレフィックスの再利用と並列実行 | [プレフィックスアルゴリズム](SEMIF_ALGORITHM.md)、[並列実行](PARALLEL_EXECUTION.md) |
 | 評価方法 | [合成ベンチマーク](BENCHMARK.md)、[AG ニュース](KAGGLE_BENCHMARK.md)、[JevBench](JEVBENCH.md)、[Laya/Jev タスクとCPU キャッシュ](LAYA_BENCHMARK.md) |
 | オプションのモデル/タスク適応 | [意思判断微調整](DECISION_FINETUNE.md)、[出力ヘッド](OUTPUT_HEAD.md) |
+
+## 小型 Gemma 4 分類プロファイル
+
+`--prompt-profile winnow` は Winnow 分類形式を使います。明示指定の実験用 `--prompt-profile gemma4-decision` は選択問題に Winnow 形式、二値問題にモデルテンプレート、順序問題に型と段階情報を使います。両者とも Gemma 4 GGUF、テキスト入力、minimal detail、shared なし、選択肢2–26件が必要です。実際のレイアウトは state-first に固定され、非対応の入力は preflight で拒否されます。`auto` は従来のモデルテンプレートを維持します。
+
+Python は `LoadOptions(prompt_profile="winnow", ...)`、TypeScript は `promptProfile: 'winnow'` で指定します。ネイティブ JSONL 評価器もサーバーと同じ `--prompt-profile` を受け付けます。モデル識別情報には実際のプロファイルとプロンプトバージョンが含まれます。変更時は既存の確率補正を再評価してください。
+
+適用範囲は [2B/4B の同一モデル比較](../../benchmarks/small-model-accuracy-20261001/README.md) を確認してください。候補確率の上昇や棄権の解除は raw 正解率の改善を意味しません。どのプロファイルも全タスクの精度を保証しません。

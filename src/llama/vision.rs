@@ -73,6 +73,14 @@ impl LlamaBackend {
                 "thinking does not support image input or vision projectors".into(),
             ));
         }
+        if matches!(
+            self.profile,
+            PromptProfile::Winnow | PromptProfile::Gemma4Decision
+        ) {
+            return Err(Error::Invalid(
+                "winnow/gemma4-decision profiles support text only".into(),
+            ));
+        }
         let path_text = path.to_string_lossy().into_owned();
         let path_c = CString::new(path_text.as_bytes())
             .map_err(|_| Error::Invalid("vision projector path contains NUL".into()))?;

@@ -437,6 +437,10 @@ fn run_models(
                 "1".to_owned(),
                 "--request-batch-size".to_owned(),
                 "1".to_owned(),
+                "--min-top-probability".to_owned(),
+                "0.8".to_owned(),
+                "--min-candidate-mass".to_owned(),
+                "0.05".to_owned(),
                 "--warmup".to_owned(),
             ];
             let log = File::create(dest.join(format!("{split}.log")))?;

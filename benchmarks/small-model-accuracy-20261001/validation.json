@@ -1,0 +1,98 @@
+{
+  "rust_default": {
+    "passed": 109,
+    "failed": 0,
+    "ignored": 0,
+    "scope": "l2s1 and l2s1-tools; native-feature tests run separately"
+  },
+  "training": {
+    "run": 24,
+    "skipped": 2,
+    "failed": 0,
+    "scope": "22 passed; two optional native export tests skipped"
+  },
+  "python_sdk": {
+    "run": 21,
+    "passed": 19,
+    "skipped": 2,
+    "failed": 0,
+    "scope": "includes compiled Rust fixture stdio/HTTP boundary; two environment-dependent tests skipped"
+  },
+  "typescript_sdk": {
+    "passed": 24,
+    "failed": 0
+  },
+  "web": {
+    "initial_passed": 71,
+    "initial_failed": 7,
+    "skipped": 1,
+    "retest_passed": 8,
+    "retest_failed": 0,
+    "total_unique_passed": 78,
+    "fixes": [
+      "derive installation test version from SDK package metadata",
+      "set explicit score gates in selective-policy tests; assert forced defaults"
+    ],
+    "scope": "browser tests include fixtures/mocked inference; no remote deployment or browser GPU performance claim",
+    "lint_check_build": "passed after source, test and evidence-export changes"
+  },
+  "native_cuda": {
+    "passed": 42,
+    "failed": 0,
+    "ignored": 10
+  },
+  "native_gemma4_prompt_routing": {
+    "passed": 1,
+    "mode": "vocab-only E2B tokenizer; no inference"
+  },
+  "native_shared_cuda": {
+    "passed": 1,
+    "failed": 0,
+    "scope": "actual E2B inference; fresh/prefix equivalence and previous-state isolation"
+  },
+  "http_cuda": {
+    "status": "passed",
+    "decisions": 5,
+    "model": "Winnow-E4B-Q8_0",
+    "profile": "winnow",
+    "max_probability_difference_from_native": 0.0,
+    "shared_status": 400,
+    "wide_status": 400,
+    "command": [
+      "/home/lutica/personal/skid/skid-desion/results/jevbench-v0.2.2-20260930/build/release/l2s1",
+      "--model",
+      "/home/lutica/personal/skid/skid-desion/models/Winnow-E4B-Q8_0.gguf",
+      "--device",
+      "cuda",
+      "--prompt-profile",
+      "winnow",
+      "--execution-mode",
+      "fresh",
+      "--context",
+      "8192",
+      "--batch",
+      "256",
+      "--ubatch",
+      "256",
+      "--threads",
+      "4",
+      "--flash-attention",
+      "off",
+      "--preparation-cache-bytes",
+      "0",
+      "--listen",
+      "127.0.0.1:57941"
+    ],
+    "transport": "real loopback HTTP /v1/decisions; actual CUDA inference"
+  },
+  "typescript_rust_integration": {
+    "passed": 2,
+    "failed": 0,
+    "scope": "compiled Rust fixture stdio/HTTP boundary"
+  },
+  "output_audit": {
+    "runs": 16,
+    "scored_decisions": 14173,
+    "all_metrics_and_output_hashes_match": true
+  }
+}

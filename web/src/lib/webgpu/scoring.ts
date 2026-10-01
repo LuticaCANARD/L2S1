@@ -30,7 +30,7 @@ export function scoreDecision(decision: Decision, logits: ArrayLike<number>, tok
   const reasons: string[] = [];
   if (mass < policy.min_candidate_mass) reasons.push('low_candidate_mass');
   if (top < policy.min_top_probability) reasons.push('low_top_probability');
-  if (probabilities.filter((value) => Math.abs(value - top) < 1e-12).length > 1) reasons.push('tied_candidates');
+  if ((policy.min_top_probability > 0 || policy.min_candidate_mass > 0) && probabilities.filter((value) => Math.abs(value - top) < 1e-12).length > 1) reasons.push('tied_candidates');
   const accepted = reasons.length === 0;
   const value = decision.kind.type === 'binary' ? { type: 'binary', value: accepted ? best === 1 : null } : { type: decision.kind.type, selected: accepted ? options[best].id : null };
   const estimate = decision.kind.type === 'binary' ? { p_true: probabilities[1] } : decision.kind.type === 'ordinal' ? { expected_value: probabilities.reduce((sum, probability, index) => sum + probability * (options[index].numericValue ?? 0), 0) } : {};

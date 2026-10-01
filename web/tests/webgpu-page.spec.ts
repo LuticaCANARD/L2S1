@@ -26,6 +26,9 @@ test('capability probe does not load models and policy inputs stay synchronized'
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/webgpu');
   await expect(page.getByRole('heading', { name: '01 · 모델 준비' })).toBeVisible();
+  await expect(page.locator('#error-rate')).toHaveValue('100');
+  await expect(page.locator('#min-top')).toHaveValue('0');
+  await expect(page.locator('#min-mass')).toHaveValue('0');
   await page.locator('#error-rate').fill('15');
   await expect(page.locator('#min-top')).toHaveValue('0.85');
   await page.locator('#min-top').fill('0.9');

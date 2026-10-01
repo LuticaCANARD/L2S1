@@ -36,9 +36,9 @@ struct Args {
     execution_mode: ExecutionMode,
     #[arg(long, default_value_t = 268_435_456)]
     snapshot_limit_bytes: usize,
-    #[arg(long, default_value_t = 0.8)]
+    #[arg(long, default_value_t = 0.0)]
     min_top_probability: f64,
-    #[arg(long, default_value_t = 0.05)]
+    #[arg(long, default_value_t = 0.0)]
     min_candidate_mass: f64,
 }
 
