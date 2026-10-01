@@ -1,7 +1,7 @@
 <script lang="ts">
   import { locale, translate } from '$lib/i18n';
   import { installMessages } from '$lib/i18n/install';
-  const version = '0.2.2';
+  const version = '0.2.3';
   const release = `https://github.com/LuticaCANARD/L2S1/releases/tag/v${version}`;
   const t = (key: keyof typeof installMessages.en) => translate($locale, installMessages, key, { version });
   const languages = ['TypeScript', 'Python', 'Rust'] as const;
