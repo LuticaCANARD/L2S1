@@ -32,7 +32,7 @@ let response = backend.decide(&request)?;
 backend.set_reasoning(l2s1::ReasoningOptions::default())?;
 ```
 
-JSON HTTP リクエストは `"reasoning":{"mode":"thinking","max_tokens":128}` を受け付けます。アダプターは失敗時も含め、各リクエストの後に以前の推論モードを復元します。対応モデル情報は capability エンドポイントで確認できます。ビジョンリクエストで thinking を選ぶと明示的なエラーになります。
+JSON HTTP リクエストは `"reasoning":{"mode":"thinking","max_tokens":128}` を受け付けます。アダプターは失敗時も含め、各リクエストの後に以前の推論モードを復元します。対応モデル情報は capability エンドポイントで確認できます。ビジョンリクエストで thinking を選ぶと明示的なエラーになります。`--listen` と `--stdio` は既定で固定スキーマのプレフィックス再利用を使うため thinking できません。サーバーを `--execution-mode fresh` で起動してください(capability が `thinking_supported: true` を報告します)。そうでない場合、thinking リクエストはその案内付きの HTTP 400 を返します。サーバーに `--reasoning-mode thinking` を指定すると fresh 実行が自動選択されます。
 
 成功した CLI・ライブラリの結果には `reasoning` が含まれます。HTTP の結果では `usage.reasoning` に配置します。例は次のとおりです。
 

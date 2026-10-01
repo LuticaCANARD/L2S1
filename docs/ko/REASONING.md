@@ -32,7 +32,7 @@ let response = backend.decide(&request)?;
 backend.set_reasoning(l2s1::ReasoningOptions::default())?;
 ```
 
-JSON HTTP 요청은 `"reasoning":{"mode":"thinking","max_tokens":128}`을 받습니다. 어댑터는 실패를 포함해 각 요청 뒤에 이전 추론 모드를 복원합니다. 지원 모델 정보는 capability 엔드포인트에서 확인할 수 있습니다. 비전 요청에 thinking을 선택하면 명시적인 오류가 발생합니다.
+JSON HTTP 요청은 `"reasoning":{"mode":"thinking","max_tokens":128}`을 받습니다. 어댑터는 실패를 포함해 각 요청 뒤에 이전 추론 모드를 복원합니다. 지원 모델 정보는 capability 엔드포인트에서 확인할 수 있습니다. 비전 요청에 thinking을 선택하면 명시적인 오류가 발생합니다. `--listen`과 `--stdio`는 기본적으로 고정 스키마 프리픽스 재사용을 쓰므로 thinking을 할 수 없습니다. 서버를 `--execution-mode fresh`로 시작하세요(그러면 capability가 `thinking_supported: true`를 보고합니다). 그렇지 않으면 thinking 요청은 그 안내와 함께 HTTP 400을 반환합니다. 서버에 `--reasoning-mode thinking`을 주면 fresh 실행이 자동 선택됩니다.
 
 성공한 CLI·라이브러리 결과에는 `reasoning`이 포함됩니다. HTTP 결과에서는 `usage.reasoning`에 배치합니다. 예시는 다음과 같습니다.
 

@@ -54,6 +54,11 @@ The JSON HTTP request accepts `"reasoning":{"mode":"thinking","max_tokens":128}`
 The adapter restores the previous reasoning mode after each request, including
 failures. Supported model information is available through the capability
 endpoint; selecting thinking on a vision request is an explicit error.
+`--listen` and `--stdio` default to fixed-schema prefix reuse, which cannot
+think: start the server with `--execution-mode fresh` (capabilities then
+report `thinking_supported: true`). Otherwise a thinking request returns
+HTTP 400 with that instruction. `--reasoning-mode thinking` on the server
+selects fresh execution automatically.
 
 Successful CLI/library results contain `reasoning`; HTTP results place it under
 `usage.reasoning`. For example:
