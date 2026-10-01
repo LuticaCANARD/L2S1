@@ -9,8 +9,9 @@ pub enum ReasoningMode {
     Thinking,
 }
 
-/// Request reasoning contract. Native batching supports direct scoring only;
-/// unsupported reasoning modes must fail explicitly.
+/// Bounded greedy Qwen3 thinking followed by the existing typed option scorer.
+/// Direct preserves the historical prompt and performs no generated-token decode.
+/// Native batching supports direct scoring only; unsupported modes fail explicitly.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct ReasoningOptions {
@@ -37,6 +38,15 @@ impl ReasoningOptions {
     pub fn is_thinking(self) -> bool {
         self.mode == ReasoningMode::Thinking
     }
+}
+
+/// Includes the generated closing </think> token, excludes the trusted final
+/// separator and the scored (ungenerated) answer. No hidden trace is returned.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ReasoningUsage {
+    pub mode: ReasoningMode,
+    pub generated_tokens: usize,
+    pub completed: bool,
 }
 
 #[cfg(test)]

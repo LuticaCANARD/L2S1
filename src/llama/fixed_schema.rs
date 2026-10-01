@@ -164,6 +164,22 @@ impl crate::http::HttpDecisionBackend for FixedSchemaBackend {
             "isolation":"dedicated server instance per trust domain","schema_change":"clear_all","answers_cached":false});
         caps
     }
+    fn decide_json_batch_with_reasoning(
+        &mut self,
+        requests: &[DecisionRequest],
+        images: &[Vec<&[u8]>],
+        reasoning: Option<&crate::ReasoningOptions>,
+    ) -> Result<Vec<serde_json::Value>> {
+        if let Some(options) = reasoning {
+            options.validate()?;
+            if options.is_thinking() {
+                return Err(Error::Invalid(
+                    "thinking requires fresh execution; start the listener with --execution-mode fresh".into(),
+                ));
+            }
+        }
+        self.decide_json_batch(requests, images)
+    }
     fn decide_json(
         &mut self,
         request: &DecisionRequest,

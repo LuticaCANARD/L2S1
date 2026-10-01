@@ -245,6 +245,8 @@ pub struct DecisionResult {
     pub scoring_method: String,
     pub calibration_id: Option<String>,
     pub input_tokens: usize,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reasoning: Option<crate::ReasoningUsage>,
     /// Exact prefix tokens reused in this forward pass; evaluated = input - reused.
     #[serde(default)]
     pub reused_prefix_tokens: usize,
@@ -548,6 +550,7 @@ pub(crate) fn score_candidate_logits(
         .map(|v| v * v.ln())
         .sum::<f64>();
     Ok(DecisionResult {
+        reasoning: None,
         id: decision.id.clone(),
         value,
         scores: options

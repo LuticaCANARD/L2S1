@@ -57,6 +57,9 @@ impl LlamaBackend {
         if self.evidence_transfer == EvidenceTransfer::Compact {
             modes.retain(|mode| matches!(mode, ExecutionMode::Fresh | ExecutionMode::PrefixReuse));
         }
+        if self.reasoning.is_thinking() {
+            modes.retain(|mode| *mode == ExecutionMode::Fresh);
+        }
         ModelInspection {
             identity: self.identity(),
             capabilities: ModelCapabilities {
@@ -85,6 +88,11 @@ impl LlamaBackend {
         self.register_calibration(artifact)
     }
     pub fn register_calibration(&mut self, artifact: ScalarCalibration) -> Result<()> {
+        if self.reasoning.is_thinking() {
+            return Err(Error::Invalid(
+                "thinking does not support learned calibration".into(),
+            ));
+        }
         if self.output_head.is_some() {
             return Err(Error::Invalid(
                 "scalar calibration and output head cannot be combined".into(),
@@ -112,6 +120,11 @@ impl LlamaBackend {
     /// Register a fallback calibration for tasks without a task-specific one.
     /// At most one family per decision kind and option count is allowed.
     pub fn register_family_calibration(&mut self, artifact: FamilyCalibration) -> Result<()> {
+        if self.reasoning.is_thinking() {
+            return Err(Error::Invalid(
+                "thinking does not support learned calibration".into(),
+            ));
+        }
         if self.output_head.is_some() {
             return Err(Error::Invalid(
                 "family calibration and output head cannot be combined".into(),
@@ -154,6 +167,13 @@ impl LlamaBackend {
         unsafe { sd_clear(self.engine.as_ptr()) };
     }
     pub(super) fn check_artifacts(&self, request: &DecisionRequest) -> Result<()> {
+        self.check_reasoning_config()?;
+        if self.reasoning.is_thinking() && request.decisions.iter().any(|d| d.options().len() > 26)
+        {
+            return Err(Error::Invalid(
+                "thinking currently supports at most 26 single-token answer codes".into(),
+            ));
+        }
         self.check_evidence_transfer()?;
         if request.decisions.iter().any(|d| d.options().len() > 26) {
             self.check_sequence_config()?;

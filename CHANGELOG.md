@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Native Qwen3 thinking is wired back in: `--reasoning-mode thinking`,
+  `--max-reasoning-tokens` (1-1024), `LlamaBackend::set_reasoning`, and the
+  HTTP `reasoning` field, as `docs/REASONING.md` describes. Bounded greedy
+  thinking then scores the typed candidates; `reasoning_limit` and
+  `reasoning_incomplete` fail explicitly. Requires fresh execution, so
+  servers need `--execution-mode fresh`; the fixed-schema default refuses
+  thinking with that instruction.
+
 ## 0.2.2 (2026-09-30)
 
 - Release the SDK/native runtimes at 0.2.2 and the source-installable training

@@ -17,7 +17,7 @@ pub use prompt::{
     STATE_FIRST_MODEL_PROMPT_VERSION, STATE_FIRST_PROMPT_VERSION, compile_prompt,
     compile_prompt_with_detail, compile_prompt_with_layout,
 };
-pub use reasoning::{ReasoningMode, ReasoningOptions};
+pub use reasoning::{ReasoningMode, ReasoningOptions, ReasoningUsage};
 pub mod http;
 #[cfg(feature = "llama")]
 pub mod llama;

@@ -2,7 +2,8 @@ use clap::Parser;
 use l2s1::{
     ComputeOptions, DecisionBackend, DecisionPolicy, DecisionRequest, EvidenceTransfer,
     ExecutionMode, FlashAttention, ParallelPrefixAlignment, ParallelWaveOrder,
-    PreparationCacheConfig, PromptDetail, PromptLayout, PromptProfile, llama::LlamaBackend,
+    PreparationCacheConfig, PromptDetail, PromptLayout, PromptProfile, ReasoningMode,
+    ReasoningOptions, llama::LlamaBackend,
 };
 use std::{
     io::{self, Read},
@@ -15,6 +16,13 @@ use std::{
     about = "L2S1 (LLM to System 1). Typed decisions from GGUF chat models. Read JSON from a file or standard input."
 )]
 struct Args {
+    /// Direct option scoring, or bounded Qwen3 text thinking followed by scoring.
+    /// Thinking needs fresh execution, so it disables automatic prefix reuse.
+    #[arg(long, value_enum, default_value_t = ReasoningMode::Direct)]
+    reasoning_mode: ReasoningMode,
+    /// Thinking token budget; incomplete thinking fails rather than forcing an answer.
+    #[arg(long, default_value_t = 128, value_parser = clap::value_parser!(u32).range(1..=1024))]
+    max_reasoning_tokens: u32,
     #[arg(long)]
     model: PathBuf,
     /// Matching multimodal projector GGUF for direct image input.
@@ -162,6 +170,7 @@ impl Args {
             && self.calibration.is_empty()
             && self.family_calibration.is_empty()
             && self.evidence_transfer == EvidenceTransfer::Full
+            && self.reasoning_mode == ReasoningMode::Direct
     }
 
     fn selected_execution_mode(&self) -> ExecutionMode {
@@ -283,6 +292,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             );
         }
     }
+    backend.set_reasoning(ReasoningOptions {
+        mode: args.reasoning_mode,
+        max_tokens: args.max_reasoning_tokens as usize,
+    })?;
     if args.inspect {
         serde_json::to_writer_pretty(io::stdout().lock(), &backend.inspect())?;
         println!();
@@ -358,6 +371,35 @@ mod tests {
     use super::*;
 
     #[test]
+    fn reasoning_cli_is_explicit_and_bounded() {
+        let direct = Args::try_parse_from(["l2s1", "--model", "m.gguf"]).unwrap();
+        assert_eq!(direct.reasoning_mode, ReasoningMode::Direct);
+        assert_eq!(direct.max_reasoning_tokens, 128);
+        let thinking = Args::try_parse_from([
+            "l2s1",
+            "--model",
+            "m.gguf",
+            "--reasoning-mode",
+            "thinking",
+            "--max-reasoning-tokens",
+            "512",
+        ])
+        .unwrap();
+        assert_eq!(thinking.reasoning_mode, ReasoningMode::Thinking);
+        assert_eq!(thinking.max_reasoning_tokens, 512);
+        for budget in ["0", "1025"] {
+            let argv = [
+                "l2s1",
+                "--model",
+                "m.gguf",
+                "--max-reasoning-tokens",
+                budget,
+            ];
+            assert!(Args::try_parse_from(argv).is_err());
+        }
+    }
+
+    #[test]
     fn resident_defaults_and_explicit_execution_contracts() {
         let parse = |flags: &[&str]| {
             let mut argv = vec!["l2s1", "--model", "m.gguf"];
@@ -383,6 +425,7 @@ mod tests {
             assert_eq!(args.selected_execution_mode(), expected);
         }
         for flags in [
+            vec!["--stdio", "--reasoning-mode", "thinking"],
             vec!["--stdio", "--mmproj", "projector.gguf"],
             vec!["--stdio", "--calibration", "calibration.json"],
             vec!["--stdio", "--family-calibration", "family.json"],
