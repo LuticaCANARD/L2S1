@@ -1,0 +1,244 @@
+{
+  "schema": "l2s1-caltech101-30class-vision-http-v1",
+  "dataset": "https://www.kaggle.com/datasets/imbikramsaha/caltech-101",
+  "source_archive_sha256": "c29bfcb9f72b1b03bdfb6b871907ba08ec436bd4049870c9e0424a6f489d4855",
+  "sample_archive_sha256": "421e1a1ad05a288a57ad5e837a4f22d1941854ca561fe67a2b1be0131de4b1de",
+  "seed": 20260924,
+  "classes": [
+    "Faces_easy",
+    "accordion",
+    "ant",
+    "bass",
+    "binocular",
+    "cannon",
+    "crab",
+    "dalmatian",
+    "dolphin",
+    "dragonfly",
+    "electric_guitar",
+    "flamingo",
+    "flamingo_head",
+    "gerenuk",
+    "hawksbill",
+    "kangaroo",
+    "lamp",
+    "lotus",
+    "okapi",
+    "pagoda",
+    "pigeon",
+    "pizza",
+    "scissors",
+    "snoopy",
+    "soccer_ball",
+    "stegosaurus",
+    "strawberry",
+    "trilobite",
+    "wheelchair",
+    "windsor_chair"
+  ],
+  "images_per_class": 5,
+  "rows": 150,
+  "protocol": "Balanced 30-class subset sampled before inference; original JPEG bytes; one serial local HTTP request per image; no image name or label in prompt; fixed class order; default policy; no warmup; loaded-model latency includes first request and excludes startup",
+  "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+  "mmproj_sha256": "9406f99c16d68cda4f1f0552192dcc99021ea1fc6d2fd50b1dc3ccf30d04b292",
+  "binary_sha256": "b99f8f1e40d6ae542ed780eb3868e72a1c93f735ff488663b073c2335578af62",
+  "backend": {
+    "compute": {
+      "batch": 256,
+      "context": 4096,
+      "flash_attention": "off",
+      "model_load_mode": "read",
+      "threads": 4,
+      "ubatch": 256
+    },
+    "execution_mode": "fresh",
+    "model_architecture": "gemma4",
+    "model_description": "gemma4 E2B Q8_0",
+    "model_path": "/home/lutica/personal/skid/skid-desion/models/gemma-4-E2B-it-Q8_0.gguf",
+    "offload_device": "NVIDIA GeForce RTX 3060",
+    "offload_requested": true,
+    "parallel_width": 1,
+    "prompt_layout": "legacy",
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-decision-v1/fixed-width-code-sequences-v1/vision-image-v1",
+    "runtime": "local-libllama-mtmd",
+    "vision_projector_path": "/home/lutica/l2s1-cuda-vision-20260924/mmproj-gemma-4-E2B-it-Q8_0.gguf",
+    "vision_projector_sha256": "9406f99c16d68cda4f1f0552192dcc99021ea1fc6d2fd50b1dc3ccf30d04b292"
+  },
+  "policy": {
+    "min_candidate_mass": 0.05,
+    "min_top_probability": 0.8
+  },
+  "startup_to_health_ms": 5013.837,
+  "gpu_during_run": "NVIDIA GeForce RTX 3060, 3855, 74",
+  "accepted": 148,
+  "abstained": 2,
+  "accepted_correct": 122,
+  "correct_over_all": 0.8133333333333334,
+  "accepted_accuracy": 0.8243243243243243,
+  "coverage": 0.9866666666666667,
+  "raw_top1_correct": 122,
+  "raw_top1_accuracy": 0.8133333333333334,
+  "per_class": {
+    "Faces_easy": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "accordion": {
+      "accepted_correct": 4,
+      "accepted": 5,
+      "raw_top1_correct": 4
+    },
+    "ant": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "bass": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "binocular": {
+      "accepted_correct": 1,
+      "accepted": 5,
+      "raw_top1_correct": 1
+    },
+    "cannon": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "crab": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "dalmatian": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "dolphin": {
+      "accepted_correct": 4,
+      "accepted": 5,
+      "raw_top1_correct": 4
+    },
+    "dragonfly": {
+      "accepted_correct": 3,
+      "accepted": 5,
+      "raw_top1_correct": 3
+    },
+    "electric_guitar": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "flamingo": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "flamingo_head": {
+      "accepted_correct": 0,
+      "accepted": 5,
+      "raw_top1_correct": 0
+    },
+    "gerenuk": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "hawksbill": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "kangaroo": {
+      "accepted_correct": 0,
+      "accepted": 5,
+      "raw_top1_correct": 0
+    },
+    "lamp": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "lotus": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "okapi": {
+      "accepted_correct": 0,
+      "accepted": 5,
+      "raw_top1_correct": 0
+    },
+    "pagoda": {
+      "accepted_correct": 3,
+      "accepted": 3,
+      "raw_top1_correct": 3
+    },
+    "pigeon": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "pizza": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "scissors": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "snoopy": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "soccer_ball": {
+      "accepted_correct": 4,
+      "accepted": 5,
+      "raw_top1_correct": 4
+    },
+    "stegosaurus": {
+      "accepted_correct": 4,
+      "accepted": 5,
+      "raw_top1_correct": 4
+    },
+    "strawberry": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "trilobite": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    },
+    "wheelchair": {
+      "accepted_correct": 4,
+      "accepted": 5,
+      "raw_top1_correct": 4
+    },
+    "windsor_chair": {
+      "accepted_correct": 5,
+      "accepted": 5,
+      "raw_top1_correct": 5
+    }
+  },
+  "latency_ms": {
+    "mean": 196.609,
+    "p50": 195.282,
+    "p95_nearest_rank": 200.662,
+    "min": 189.751,
+    "max": 308.351
+  },
+  "prefix_evaluations": {
+    "1": 150
+  }
+}

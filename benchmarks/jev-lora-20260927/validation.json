@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "unit_tests": 14,
+  "all_passed": true,
+  "ollaya_synthetic_answer_parity": {
+    "passed": 300,
+    "total": 300
+  },
+  "models": {
+    "smollm2": {
+      "tiny_cpu_gradient": "passed",
+      "real_weight_training": "not_run",
+      "gguf_adapter_evaluation": "not_run"
+    },
+    "qwen3": {
+      "tiny_cpu_gradient": "passed",
+      "real_weight_training": "not_run",
+      "gguf_adapter_evaluation": "not_run"
+    },
+    "gemma3": {
+      "tiny_cpu_gradient": "passed",
+      "real_weight_training": "not_run",
+      "gguf_adapter_evaluation": "not_run"
+    },
+    "tinyllama": {
+      "tiny_cpu_gradient": "passed",
+      "real_weight_training": "not_run",
+      "gguf_adapter_evaluation": "not_run"
+    },
+    "gemma4": {
+      "tiny_cpu_gradient": "passed",
+      "real_weight_training": "completed",
+      "gguf_adapter_evaluation": "completed"
+    }
+  },
+  "adapter_sha256": "d1fb65a3fdf68f547fc3ce0391d5b155152fb5d9a9c6c8c5f4b9459229ca3d30",
+  "adapter_bytes": 2686272,
+  "converter_sha256": "3c5f109f3d7a5ef530ea388d8e994512df6f544ce1aa8b2e39be446223637b93",
+  "scope": "Only Gemma4 has real-weight training/conversion/native evaluation evidence. Other profiles have tiny random CPU architecture tests, not pretrained or quantized-model proof."
+}

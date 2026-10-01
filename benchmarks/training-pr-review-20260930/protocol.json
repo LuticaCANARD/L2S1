@@ -1,0 +1,33 @@
+{
+  "seed": 20260930091,
+  "selection": "No search or tuning: restore shared evidence with the same state-first/typed prompt in both arms.",
+  "scope": "Synthetic directory lookup with three decisions per case. This tests evidence preservation, not JevBench or general accuracy. Train split is preparation-only; no adapter is trained.",
+  "execution": "fresh, CUDA, 4 threads, context4096, batch256, ubatch256, flash_attention off, one warmup, one measured pass",
+  "models": [
+    "Gemma 4 E2B Q8_0",
+    "Gemma 4 12B QAT Q4_0"
+  ],
+  "denominators": {
+    "development_cases": 16,
+    "development_decisions": 48,
+    "test_cases": 64,
+    "test_decisions": 192
+  },
+  "files": {
+    "data/development-requests.jsonl": "8e57e2a9ee6ade3bc6079b82f7b2c632b07b8b2a8d8ec693ec28aabe26d05d2f",
+    "data/development.jsonl": "b37bbcd1be38691b40001827a692bc6e01f66a163025df18937bd6f68ee61af7",
+    "data/manifest.json": "659ac0d8f2e21d0c1465d0e1a1cca23b7ed2635b312cc8cf2bd6c33907bbf7d0",
+    "data/test-requests.jsonl": "d1c5bde8290a4bd4c349be6746569851c19ac4be4c595a5db71f0d8b8aa903c6",
+    "data/test.jsonl": "dbe83c9978cc5cc01c52f0f97dabba71d64a92d099162b71c9dfdc303ed1a237",
+    "data/train-requests.jsonl": "258ebdf826a6c2f62d71301fa23f19a1bb893018234e6d2eb6e6826a85e55140",
+    "data/train-token-requests.jsonl": "f69261bdf4c690e3328270c37c6abeeb138c05deffe877891f816f61b2d99c5d",
+    "data/train.jsonl": "a4b7b702f2090e1b7434d0d2a9b722f3f71558ef52920156a7b2f2e619cfe724",
+    "development-before.jsonl": "ea1dc34e2eeb500282253ce938bbb24b28a84f4b7f99850cf43a5aa0fe201a8c",
+    "development-gold.json": "5e268e67467188780e74c5602db80ff25c8969906579df8f4cfd6fc01f5ccfd7",
+    "development.jsonl": "3dd5cf676aaba8cc4849c2145740492826f5819686db6e7157e72ed286cdd501",
+    "test-before.jsonl": "4a5dd0f25fcf16f004ddac49342a8e3ee7d4663e5a663b7ffecccf960e0cdde8",
+    "test-gold.json": "b85de5710c51e12bc5debf5b46c55173d979d8e2cb4f1a631317ee35f4db9a0a",
+    "test.jsonl": "a11bf298509a994bee55839b835de33506c2dee83dfa302d7e539a1c63ca908e",
+    "train.jsonl": "9d5bea228a8ead812578483f9577c3d297e0ae518ff7afedb770c62721c146c9"
+  }
+}

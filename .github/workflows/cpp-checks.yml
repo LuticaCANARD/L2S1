@@ -1,0 +1,27 @@
+name: C++ SDK checks
+on:
+  push:
+    paths: ['sdks/cpp/**', '.github/workflows/cpp-checks.yml']
+  pull_request:
+    paths: ['sdks/cpp/**', '.github/workflows/cpp-checks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sdk:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: nlohmann/json
+          ref: v3.12.0
+          path: .cpp-deps/json
+      - run: cmake -S sdks/cpp -B build/cpp -DL2S1_JSON_INCLUDE_DIR=${{ github.workspace }}/.cpp-deps/json/single_include
+      - run: cmake --build build/cpp --config Release --parallel 2
+      - run: ctest --test-dir build/cpp -C Release --output-on-failure
+      - run: cmake --install build/cpp --config Release --prefix build/install

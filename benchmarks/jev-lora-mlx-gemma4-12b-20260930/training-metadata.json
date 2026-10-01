@@ -1,0 +1,23 @@
+{
+  "smoke": false,
+  "seed": 20260927,
+  "device": "Device(gpu, 0)",
+  "mlx": "0.32.3",
+  "mlx_lm": "0.31.4.dev132+g94cdcae13",
+  "training_examples": 600,
+  "trainable_parameters": 5193728,
+  "protocol": {
+    "epochs": 1,
+    "rank": 8,
+    "alpha": 16,
+    "dropout": 0,
+    "learning_rate": 0.0001,
+    "gradient_accumulation": 12,
+    "mass_loss_weight": 0.1,
+    "objective": "soft-target candidate cross entropy + candidate mass loss",
+    "rotation": "one SHA256-selected code rotation per decision, independent of labels",
+    "selection": "fixed final epoch; no development/test selection or calibration",
+    "prompt_layout": "legacy",
+    "prompt_detail": "minimal"
+  }
+}

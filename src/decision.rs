@@ -7,12 +7,23 @@ pub enum Error {
     Invalid(String),
     #[error("inference failed: {0}")]
     Backend(String),
+    #[error("model load failed: {0}")]
+    ModelLoad(String),
+    #[error("upstream provider failed: {0}")]
+    Upstream(String),
 }
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct DecisionRequest {
+    /// Optional evidence common to many requests or questions (for example a
+    /// knowledge base or examples). It is always rendered first in the data
+    /// segment, before `state` and the question, in every prompt layout, so
+    /// callers do not need key-name ordering tricks to obtain a reusable exact
+    /// token prefix. Absent or `null` leaves the prompt unchanged.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shared: Option<serde_json::Value>,
     pub state: serde_json::Value,
     pub decisions: Vec<Decision>,
 }
@@ -56,6 +67,22 @@ pub struct Level {
 }
 
 impl Decision {
+    /// Construct an ordinal decision from typed levels. Request validation still
+    /// checks IDs, criteria, and strictly increasing finite values.
+    pub fn ordinal(
+        id: impl Into<String>,
+        instruction: impl Into<String>,
+        levels: impl IntoIterator<Item = Level>,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            instruction: instruction.into(),
+            kind: DecisionKind::Ordinal {
+                levels: levels.into_iter().collect(),
+            },
+        }
+    }
+
     pub fn options(&self) -> Vec<OptionSpec> {
         match &self.kind {
             DecisionKind::Binary {
@@ -84,6 +111,20 @@ impl Decision {
 }
 
 impl DecisionRequest {
+    /// A request without shared evidence.
+    pub fn new(state: serde_json::Value, decisions: Vec<Decision>) -> Self {
+        Self {
+            shared: None,
+            state,
+            decisions,
+        }
+    }
+
+    /// Prompt evidence for this request: `shared` (if any) followed by `state`.
+    pub fn input(&self) -> crate::PromptInput<'_> {
+        self.into()
+    }
+
     pub fn validate(&self) -> Result<()> {
         if self.decisions.is_empty() {
             return Err(Error::Invalid("decisions must not be empty".into()));
@@ -204,6 +245,8 @@ pub struct DecisionResult {
     pub scoring_method: String,
     pub calibration_id: Option<String>,
     pub input_tokens: usize,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reasoning: Option<crate::ReasoningUsage>,
     /// Exact prefix tokens reused in this forward pass; evaluated = input - reused.
     #[serde(default)]
     pub reused_prefix_tokens: usize,
@@ -230,6 +273,9 @@ pub struct BackendInfo {
     pub vision_projector_path: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vision_projector_sha256: Option<String>,
+    /// Request-local sharing of exact duplicate image projector embeddings.
+    #[serde(default, skip_serializing_if = "bool_is_false")]
+    pub vision_projector_reuse: bool,
     /// Explicit adapter at scale 1; absent for the unchanged base model.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lora_path: Option<String>,
@@ -250,6 +296,24 @@ pub struct BackendInfo {
     /// Configured maximum questions per parallel wave; one for serial modes.
     #[serde(default = "serial_width")]
     pub parallel_width: usize,
+    /// Opt-in context reservation based on the current parallel wave's token counts.
+    #[serde(default, skip_serializing_if = "bool_is_false")]
+    pub parallel_context_dynamic: bool,
+    /// Currently allocated padded KV context capacity in dynamic parallel mode.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parallel_context_tokens: Option<u32>,
+    /// Shared-prefix rounding in parallel mode; absent means `batch`.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::ParallelPrefixAlignment::is_batch"
+    )]
+    pub parallel_prefix_alignment: crate::ParallelPrefixAlignment,
+    /// Parallel wave membership; absent means request order.
+    #[serde(default, skip_serializing_if = "crate::ParallelWaveOrder::is_request")]
+    pub parallel_wave_order: crate::ParallelWaveOrder,
+    /// A parallel prefix session kept shared-prefix KV across calls.
+    #[serde(default, skip_serializing_if = "bool_is_false")]
+    pub parallel_prefix_retained: bool,
     /// Requested compute settings; absent in historical responses.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub compute: Option<ComputeOptions>,
@@ -274,6 +338,10 @@ pub trait DecisionBackend {
 
 fn serial_width() -> usize {
     1
+}
+
+pub(crate) fn bool_is_false(value: &bool) -> bool {
+    !*value
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
@@ -311,10 +379,10 @@ pub struct ComputeOptions {
     pub ubatch: u32,
     pub threads: i32,
     pub flash_attention: FlashAttention,
-    /// None preserves the device default; Some(n) puts at most n layers on CUDA.
+    /// None preserves the device default; Some(n) puts at most n layers on the GPU.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gpu_layers: Option<u32>,
-    /// Keep expert weights of the first n MoE layers in CPU RAM (CUDA only).
+    /// Keep expert weights of the first n MoE layers in CPU RAM for GPU loading.
     #[serde(default, skip_serializing_if = "zero_u32")]
     pub cpu_moe_layers: u32,
     #[serde(default, skip_serializing_if = "ModelLoadMode::is_auto")]
@@ -325,7 +393,36 @@ fn zero_u32(value: &u32) -> bool {
     *value == 0
 }
 
+impl Default for ComputeOptions {
+    fn default() -> Self {
+        Self {
+            context: 2048,
+            batch: 256,
+            ubatch: 256,
+            threads: 4,
+            flash_attention: FlashAttention::Off,
+            gpu_layers: None,
+            cpu_moe_layers: 0,
+            model_load_mode: ModelLoadMode::Auto,
+        }
+    }
+}
+
 impl ComputeOptions {
+    /// GPU vision throughput profile. Pair with
+    /// `LlamaBackend::enable_vision_optimizations` after loading a projector.
+    /// Different token batches/attention kernels can change model scores.
+    pub fn vision_optimized() -> Self {
+        Self {
+            context: 4096,
+            batch: 1024,
+            ubatch: 1024,
+            flash_attention: FlashAttention::On,
+            model_load_mode: ModelLoadMode::Read,
+            ..Self::default()
+        }
+    }
+
     pub fn validate(&self) -> Result<()> {
         if self.context == 0
             || self.context > i32::MAX as u32
@@ -343,27 +440,30 @@ impl ComputeOptions {
         }
         Ok(())
     }
-    pub fn validate_device(&self, cuda: bool) -> Result<()> {
+    pub fn validate_device(&self, gpu: bool) -> Result<()> {
         self.validate()?;
-        if !cuda && (self.gpu_layers.is_some_and(|n| n > 0) || self.cpu_moe_layers > 0) {
+        if !gpu && (self.gpu_layers.is_some_and(|n| n > 0) || self.cpu_moe_layers > 0) {
             return Err(Error::Invalid(
-                "GPU layer placement and CPU MoE splitting require the CUDA device".into(),
+                "GPU layer placement and CPU MoE splitting require a GPU device".into(),
             ));
         }
         Ok(())
     }
 }
 
-/// Optimized modes are opt-in because batch shapes can affect model scores.
+/// Low-level execution plan. Rust backends and one-shot CLI calls default to Fresh.
+/// Compatible resident CLI/SDK servers select fixed-schema prefix reuse automatically.
+/// Explicit plans and their calibration identities are preserved; batch shapes can affect scores.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, clap::ValueEnum)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutionMode {
     #[default]
     Fresh,
     PrefixReuse,
-    /// Experimental independent sequence batching with shared-prefix prefill.
+    /// Independent sequence batching with shared-prefix prefill.
     Parallel,
-    /// Experimental request-local whole-sequence snapshot restoration.
+    /// Request-local whole-sequence snapshot restoration for a shared prefix.
+    /// Supports recurrent and hybrid models when their sequence state can be saved.
     StateRestore,
 }
 
@@ -450,6 +550,7 @@ pub(crate) fn score_candidate_logits(
         .map(|v| v * v.ln())
         .sum::<f64>();
     Ok(DecisionResult {
+        reasoning: None,
         id: decision.id.clone(),
         value,
         scores: options

@@ -1,0 +1,345 @@
+{
+  "model": "Xenova/detr-resnet-50",
+  "revision": "8be7ab59ff663484ee9ba2e8d8f267330d5ad03e",
+  "dtype": "q8",
+  "minimum_score": 0.05,
+  "recorded_at": "2026-09-27T03:59:00.756Z",
+  "runtime": "Transformers.js 4.3.0 / ONNX Runtime / CPU",
+  "coordinates": "normalized_xyxy",
+  "samples": [
+    {
+      "name": "dataset-resized/cardboard/cardboard153.jpg",
+      "label": "cardboard",
+      "sha256": "6e4b49547daf86f258ebc12aa2bbdd574e2d77837cfa36dbca0cfa2891520f14",
+      "image_url": "/trashnet/images/cardboard153.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 3650.7062450000003,
+      "detections": [
+        {
+          "score": 0.9239853620529175,
+          "label": "teddy bear",
+          "box": {
+            "xmin": 0.22167420387268066,
+            "ymin": 0.11379167437553406,
+            "xmax": 0.799386739730835,
+            "ymax": 0.8813119828701019
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard90.jpg",
+      "label": "cardboard",
+      "sha256": "154aa49e8581d68981e2c0048c51b1ae448babc4cc08c03a91a815af12f66f80",
+      "image_url": "/trashnet/images/cardboard90.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 3401.4942199999996,
+      "detections": [
+        {
+          "score": 0.6035065650939941,
+          "label": "clock",
+          "box": {
+            "xmin": -0.004407674074172974,
+            "ymin": -0.0021886825561523438,
+            "xmax": 0.9955414235591888,
+            "ymax": 0.9977474212646484
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/glass/glass192.jpg",
+      "label": "glass",
+      "sha256": "a0251609850efa59b9ba88efd0c02178ce2901df8dc5cdf0c960d38aadfd6a2a",
+      "image_url": "/trashnet/images/glass192.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 3283.2878889999993,
+      "detections": [
+        {
+          "score": 0.4981345534324646,
+          "label": "cat",
+          "box": {
+            "xmin": 0.4828178882598877,
+            "ymin": 0.16837936639785767,
+            "xmax": 1.0100735425949097,
+            "ymax": 0.6444032788276672
+          }
+        },
+        {
+          "score": 0.8979598879814148,
+          "label": "vase",
+          "box": {
+            "xmin": -0.005938321352005005,
+            "ymin": 0.003125101327896118,
+            "xmax": 0.9938338696956635,
+            "ymax": 0.8992209732532501
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/glass/glass330.jpg",
+      "label": "glass",
+      "sha256": "b8462ea85337e9caaf3205245db37109c6070c5344cdd690ec865c91527c91b5",
+      "image_url": "/trashnet/images/glass330.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 3372.9637209999983,
+      "detections": [
+        {
+          "score": 0.9907073378562927,
+          "label": "bottle",
+          "box": {
+            "xmin": 0.3120028227567673,
+            "ymin": 0.25413668155670166,
+            "xmax": 0.6623468548059464,
+            "ymax": 0.9872533082962036
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/metal/metal406.jpg",
+      "label": "metal",
+      "sha256": "f17d023b7a7bdcc6ac2c7ea673fa97ee75e5e07906ded6c69e56250acc0cc633",
+      "image_url": "/trashnet/images/metal406.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 2625.175192999999,
+      "detections": [
+        {
+          "score": 0.5050219893455505,
+          "label": "backpack",
+          "box": {
+            "xmin": 0.19970309734344482,
+            "ymin": 0.39654308557510376,
+            "xmax": 0.42541617155075073,
+            "ymax": 0.6704335808753967
+          }
+        },
+        {
+          "score": 0.5140452980995178,
+          "label": "backpack",
+          "box": {
+            "xmin": 0.8570117354393005,
+            "ymin": 0.370490625500679,
+            "xmax": 1.0107623934745789,
+            "ymax": 0.7437490671873093
+          }
+        },
+        {
+          "score": 0.7300115823745728,
+          "label": "backpack",
+          "box": {
+            "xmin": 0.08593951165676117,
+            "ymin": 0.0651666522026062,
+            "xmax": 0.43063123524188995,
+            "ymax": 0.6588790416717529
+          }
+        },
+        {
+          "score": 0.6672295331954956,
+          "label": "backpack",
+          "box": {
+            "xmin": 0.6546117067337036,
+            "ymin": 0.30523598194122314,
+            "xmax": 0.8983153104782104,
+            "ymax": 0.5043882727622986
+          }
+        },
+        {
+          "score": 0.8103161454200745,
+          "label": "backpack",
+          "box": {
+            "xmin": 0.09144201874732971,
+            "ymin": 0.052657753229141235,
+            "xmax": 0.42264923453330994,
+            "ymax": 0.48313888907432556
+          }
+        },
+        {
+          "score": 0.6031957268714905,
+          "label": "backpack",
+          "box": {
+            "xmin": 0.0885353684425354,
+            "ymin": 0.018892943859100342,
+            "xmax": 0.5448642373085022,
+            "ymax": 0.7194086313247681
+          }
+        },
+        {
+          "score": 0.5633236169815063,
+          "label": "backpack",
+          "box": {
+            "xmin": 0.09654849767684937,
+            "ymin": 0.06285658478736877,
+            "xmax": 0.3424227237701416,
+            "ymax": 0.34393659234046936
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/metal/metal91.jpg",
+      "label": "metal",
+      "sha256": "81546d1362d75fc60718e5852593c58f66f813e8c1e9d1eae6871fedb02e2868",
+      "image_url": "/trashnet/images/metal91.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 2731.7919519999996,
+      "detections": [
+        {
+          "score": 0.31444644927978516,
+          "label": "parking meter",
+          "box": {
+            "xmin": 0.3840364068746567,
+            "ymin": 0.2940661609172821,
+            "xmax": 0.595836952328682,
+            "ymax": 0.594609946012497
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/paper/paper210.jpg",
+      "label": "paper",
+      "sha256": "ed89314fe3902a917ca66fe0188bf80b7056394527b435679e727f51c79cafd1",
+      "image_url": "/trashnet/images/paper210.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 2626.8572619999977,
+      "detections": [
+        {
+          "score": 0.878407895565033,
+          "label": "refrigerator",
+          "box": {
+            "xmin": -0.006712675094604492,
+            "ymin": 0.0021918416023254395,
+            "xmax": 0.9932317733764648,
+            "ymax": 0.9906812310218811
+          }
+        },
+        {
+          "score": 0.9006811380386353,
+          "label": "banana",
+          "box": {
+            "xmin": 0.24158693850040436,
+            "ymin": -0.009072363376617432,
+            "xmax": 0.3608914464712143,
+            "ymax": 0.11340904235839844
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/paper/paper424.jpg",
+      "label": "paper",
+      "sha256": "23e78e4678ddb10aa6d602d59c6bc6050bf66f6fcedd4c46265ada535706f265",
+      "image_url": "/trashnet/images/paper424.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 2654.452358999999,
+      "detections": [
+        {
+          "score": 0.9028885364532471,
+          "label": "refrigerator",
+          "box": {
+            "xmin": 0.11654549837112427,
+            "ymin": 0.002275705337524414,
+            "xmax": 0.8619325160980225,
+            "ymax": 0.8771524429321289
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/plastic/plastic137.jpg",
+      "label": "plastic",
+      "sha256": "de59966908bd7f79f6a902350212ff69e473b34f3c60ad4c4c97dbdc90fd2e9a",
+      "image_url": "/trashnet/images/plastic137.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 2621.9691520000015,
+      "detections": [
+        {
+          "score": 0.7111138105392456,
+          "label": "vase",
+          "box": {
+            "xmin": 0.14446401596069336,
+            "ymin": 0.05210232734680176,
+            "xmax": 0.9989521503448486,
+            "ymax": 0.8662244081497192
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/plastic/plastic47.jpg",
+      "label": "plastic",
+      "sha256": "8cfc88156e367be7e00baebc32cc97607794f2fb94892aff8beb28878c4d93c1",
+      "image_url": "/trashnet/images/plastic47.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 2538.819164999997,
+      "detections": [
+        {
+          "score": 0.9518470764160156,
+          "label": "bottle",
+          "box": {
+            "xmin": 0.1995338797569275,
+            "ymin": 0.32757440209388733,
+            "xmax": 0.757267951965332,
+            "ymax": 0.583605021238327
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/trash/trash69.jpg",
+      "label": "trash",
+      "sha256": "7ad89f52d2ce2e906f53c4499c29790fb19db6ecf7e01d354fd4ac8112d9272e",
+      "image_url": "/trashnet/images/trash69.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 2648.08971,
+      "detections": [
+        {
+          "score": 0.9941158890724182,
+          "label": "bowl",
+          "box": {
+            "xmin": 0.15778589248657227,
+            "ymin": 0.09832572937011719,
+            "xmax": 0.6987310647964478,
+            "ymax": 0.8164314031600952
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/trash/trash6.jpg",
+      "label": "trash",
+      "sha256": "20018f7c4b30f387edbca44d6b4b1233f65fb0e194992119609d0af807985057",
+      "image_url": "/trashnet/images/trash6.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 2674.1325760000036,
+      "detections": [
+        {
+          "score": 0.6449527740478516,
+          "label": "cake",
+          "box": {
+            "xmin": 0.28682005405426025,
+            "ymin": 0.20003551244735718,
+            "xmax": 0.8071480989456177,
+            "ymax": 0.8270588517189026
+          }
+        }
+      ]
+    }
+  ],
+  "model_sha256": "cae09a307ed9247da7e2ce8bcf81522a6817f1ea2e82b9c4dde59f5964b62b4f",
+  "model_bytes": 43102531
+}

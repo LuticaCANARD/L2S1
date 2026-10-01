@@ -1,0 +1,38 @@
+{
+  "schema-0": {
+    "storage_zone": "ambient"
+  },
+  "schema-1": {
+    "storage_zone": "chilled"
+  },
+  "schema-2": {
+    "storage_zone": "frozen"
+  },
+  "schema-3": {
+    "storage_zone": "ambient"
+  },
+  "schema-4": {
+    "storage_zone": "chilled"
+  },
+  "schema-5": {
+    "storage_zone": "frozen"
+  },
+  "schema-6": {
+    "storage_zone": "ambient"
+  },
+  "schema-7": {
+    "storage_zone": "chilled"
+  },
+  "schema-8": {
+    "storage_zone": "frozen"
+  },
+  "schema-9": {
+    "storage_zone": "ambient"
+  },
+  "schema-10": {
+    "storage_zone": "chilled"
+  },
+  "schema-11": {
+    "storage_zone": "frozen"
+  }
+}

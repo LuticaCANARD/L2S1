@@ -154,7 +154,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         decision
                     })
                     .collect();
-                let request = DecisionRequest { state, decisions };
+                let request = DecisionRequest::new(state, decisions);
                 request.validate()?;
                 for round in 0..args.repeats {
                     let mut measured = Vec::new();

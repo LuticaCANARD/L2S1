@@ -1,0 +1,17 @@
+test_all_models_failure_summary_is_durable (test_package.PackageTests.test_all_models_failure_summary_is_durable) ... ok
+test_custom_prepare_rejects_overlap_and_does_not_overwrite (test_package.PackageTests.test_custom_prepare_rejects_overlap_and_does_not_overwrite) ... ok
+test_custom_score_without_explicit_expectation_renders_all_types (test_package.PackageTests.test_custom_score_without_explicit_expectation_renders_all_types) ... ok
+test_custom_state_can_be_plain_text (test_package.PackageTests.test_custom_state_can_be_plain_text) ... ok
+test_failed_child_and_missing_executable_are_recorded (test_package.PackageTests.test_failed_child_and_missing_executable_are_recorded) ... ok
+test_installed_cli_and_bundled_registry (test_package.PackageTests.test_installed_cli_and_bundled_registry) ... ok
+test_matrix_cancellation_persists_status_and_stops_child (test_package.PackageTests.test_matrix_cancellation_persists_status_and_stops_child) ... ok
+test_report_failure_exits_nonzero_and_preserves_denominator (test_package.PackageTests.test_report_failure_exits_nonzero_and_preserves_denominator) ... ok
+test_request_tampering_rejected_even_if_hash_is_updated (test_package.PackageTests.test_request_tampering_rejected_even_if_hash_is_updated) ... ok
+test_timeout_kills_child_and_retains_live_record (test_package.PackageTests.test_timeout_kills_child_and_retains_live_record) ... ok
+test_unsafe_profile_path_rejected (test_package.PackageTests.test_unsafe_profile_path_rejected) ... ok
+test_unsupported_protocol_rejected_before_training (test_package.PackageTests.test_unsupported_protocol_rejected_before_training) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.899s
+
+OK

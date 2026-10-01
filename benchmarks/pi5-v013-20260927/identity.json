@@ -1,0 +1,105 @@
+{
+  "sdk_version": "0.1.3",
+  "model": "gemma-3-1b-it-Q8_0.gguf",
+  "model_sha256": "b205840c5dcef55078e37d344677869a714ffd42a4ae448c48dcfb52e4bb10d5",
+  "suite_sha256": "f9d5380fdafe1bb686c9f4f1d44003a9f71c6f47fddd59063c62d3301b7d6c04",
+  "runtime": {
+    "platform": "linux-arm64",
+    "version": "0.1.3",
+    "devices": [
+      "cpu"
+    ],
+    "files": [
+      {
+        "path": "bin/l2s1",
+        "bytes": 3960504,
+        "sha256": "2159a1be0ff4041cb3665e543f6e733046fece79cdf2aab98040910cb342114c"
+      },
+      {
+        "path": "bin/libggml-base.so",
+        "bytes": 856920,
+        "sha256": "e43518aa808787977527cb655beb49aa1f56e417371ee0b3b2ff04ccefb59ab0"
+      },
+      {
+        "path": "bin/libggml-base.so.0",
+        "bytes": 856920,
+        "sha256": "e43518aa808787977527cb655beb49aa1f56e417371ee0b3b2ff04ccefb59ab0"
+      },
+      {
+        "path": "bin/libggml-base.so.0.24.0",
+        "bytes": 856920,
+        "sha256": "e43518aa808787977527cb655beb49aa1f56e417371ee0b3b2ff04ccefb59ab0"
+      },
+      {
+        "path": "bin/libggml-cpu.so",
+        "bytes": 1001672,
+        "sha256": "23f4f453e49ec9a081763f6963012ab0d0bb450a09eed9956b2cee6a0305b196"
+      },
+      {
+        "path": "bin/libggml-cpu.so.0",
+        "bytes": 1001672,
+        "sha256": "23f4f453e49ec9a081763f6963012ab0d0bb450a09eed9956b2cee6a0305b196"
+      },
+      {
+        "path": "bin/libggml-cpu.so.0.24.0",
+        "bytes": 1001672,
+        "sha256": "23f4f453e49ec9a081763f6963012ab0d0bb450a09eed9956b2cee6a0305b196"
+      },
+      {
+        "path": "bin/libggml.so",
+        "bytes": 49504,
+        "sha256": "2c2e83ca6fd8dd93b0e0a6abdbc20640066524be5fd1aeb5d330d45a8013cd1e"
+      },
+      {
+        "path": "bin/libggml.so.0",
+        "bytes": 49504,
+        "sha256": "2c2e83ca6fd8dd93b0e0a6abdbc20640066524be5fd1aeb5d330d45a8013cd1e"
+      },
+      {
+        "path": "bin/libggml.so.0.24.0",
+        "bytes": 49504,
+        "sha256": "2c2e83ca6fd8dd93b0e0a6abdbc20640066524be5fd1aeb5d330d45a8013cd1e"
+      },
+      {
+        "path": "bin/libllama.so",
+        "bytes": 4317264,
+        "sha256": "20c863d911658897242dfd21723707b2c9efd6fb03c8dd120948696a12ffb4f5"
+      },
+      {
+        "path": "bin/libllama.so.0",
+        "bytes": 4317264,
+        "sha256": "20c863d911658897242dfd21723707b2c9efd6fb03c8dd120948696a12ffb4f5"
+      },
+      {
+        "path": "bin/libllama.so.0.4.1",
+        "bytes": 4317264,
+        "sha256": "20c863d911658897242dfd21723707b2c9efd6fb03c8dd120948696a12ffb4f5"
+      },
+      {
+        "path": "bin/libmtmd.so",
+        "bytes": 1727320,
+        "sha256": "6e37edc68a0ae68a2065dd15cb21bfb9407dc570760920be9758dec7ffdc9c17"
+      },
+      {
+        "path": "bin/libmtmd.so.0",
+        "bytes": 1727320,
+        "sha256": "6e37edc68a0ae68a2065dd15cb21bfb9407dc570760920be9758dec7ffdc9c17"
+      },
+      {
+        "path": "bin/libmtmd.so.0.4.1",
+        "bytes": 1727320,
+        "sha256": "6e37edc68a0ae68a2065dd15cb21bfb9407dc570760920be9758dec7ffdc9c17"
+      }
+    ]
+  },
+  "host": {
+    "system": "Linux",
+    "node": "hilbert-no-1",
+    "release": "6.18.50+rpt-rpi-2712",
+    "version": "#1 SMP PREEMPT Debian 1:6.18.50-1+rpt1 (2026-09-11)",
+    "machine": "aarch64",
+    "processor": ""
+  },
+  "device": "Raspberry Pi 5 Model B Rev 1.0",
+  "scope": "Physical Pi, official published binary, 3 warehouse cases x 2 passes per mode; repeated passes are not independent quality evidence. Latency includes local Python stdio round trip; loading and one warmup request excluded. Mode order fresh then fixed; not a randomized comparison. SIMD enabled in both modes; no isolated SIMD speedup claim."
+}

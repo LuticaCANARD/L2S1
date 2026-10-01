@@ -1,0 +1,674 @@
+{
+  "model": "Xenova/owlvit-base-patch32",
+  "revision": "b75f4e52949639c3bb0b96546ea4149482f6e7ef",
+  "dtype": "q8",
+  "minimum_score": 0.03,
+  "display_score": 0.1,
+  "iou_threshold": 0.4,
+  "labels": [
+    "a cardboard box",
+    "a piece of cardboard",
+    "a glass bottle",
+    "a glass jar",
+    "a metal can",
+    "aluminum foil",
+    "a sheet of paper",
+    "crumpled paper",
+    "a plastic bottle",
+    "a plastic container",
+    "a plastic bag",
+    "a disposable cup",
+    "a food wrapper",
+    "a paper tissue",
+    "a piece of garbage"
+  ],
+  "model_sha256": "06af49bd5db977936bcddad2b45d0031072673517579d15b8cb42bf015a94156",
+  "model_bytes": 155431700,
+  "recorded_at": "2026-09-27T04:33:52.823Z",
+  "runtime": "Transformers.js 4.3.0 / ONNX Runtime / CPU / Q8",
+  "coordinates": "normalized_xyxy",
+  "samples": [
+    {
+      "name": "dataset-resized/cardboard/cardboard153.jpg",
+      "label": "cardboard",
+      "sha256": "6e4b49547daf86f258ebc12aa2bbdd574e2d77837cfa36dbca0cfa2891520f14",
+      "image_url": "/trashnet/images/cardboard153.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 638.3438130000004,
+      "detections": [
+        {
+          "score": 0.2705400884151459,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.5129672586917877,
+            "ymin": 0.12740230560302734,
+            "xmax": 0.7861017882823944,
+            "ymax": 0.539996325969696
+          }
+        },
+        {
+          "score": 0.22774048149585724,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.005408942699432373,
+            "ymin": -0.012189865112304688,
+            "xmax": 0.9945488572120667,
+            "ymax": 0.9808350205421448
+          }
+        },
+        {
+          "score": 0.16999711096286774,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.15991373360157013,
+            "ymin": 0.23101431131362915,
+            "xmax": 0.5684547871351242,
+            "ymax": 0.870379626750946
+          }
+        },
+        {
+          "score": 0.16574221849441528,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.34282150864601135,
+            "ymin": 0.11736421287059784,
+            "xmax": 0.7683893144130707,
+            "ymax": 0.3613822013139725
+          }
+        },
+        {
+          "score": 0.14969022572040558,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.1445271074771881,
+            "ymin": 0.2306811660528183,
+            "xmax": 0.32037386298179626,
+            "ymax": 0.6550963670015335
+          }
+        },
+        {
+          "score": 0.07555337995290756,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.3389550596475601,
+            "ymin": 0.16770747303962708,
+            "xmax": 0.5624874085187912,
+            "ymax": 0.3276676833629608
+          }
+        },
+        {
+          "score": 0.06224462762475014,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.44763126969337463,
+            "ymin": 0.2330026775598526,
+            "xmax": 0.6404151618480682,
+            "ymax": 0.46621839702129364
+          }
+        },
+        {
+          "score": 0.04128532111644745,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.5895472764968872,
+            "ymin": 0.12155944108963013,
+            "xmax": 0.7449362277984619,
+            "ymax": 0.27200883626937866
+          }
+        },
+        {
+          "score": 0.039043426513671875,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.2258014678955078,
+            "ymin": 0.3419550806283951,
+            "xmax": 0.5150209665298462,
+            "ymax": 0.669955238699913
+          }
+        },
+        {
+          "score": 0.036876071244478226,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.25474411249160767,
+            "ymin": 0.5698957145214081,
+            "xmax": 0.510739803314209,
+            "ymax": 0.8670990765094757
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard90.jpg",
+      "label": "cardboard",
+      "sha256": "154aa49e8581d68981e2c0048c51b1ae448babc4cc08c03a91a815af12f66f80",
+      "image_url": "/trashnet/images/cardboard90.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 638.9522129999996,
+      "detections": [
+        {
+          "score": 0.06345304101705551,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.02239164710044861,
+            "ymin": 0.24720364809036255,
+            "xmax": 0.7764168083667755,
+            "ymax": 1.016868531703949
+          }
+        },
+        {
+          "score": 0.036743197590112686,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.7023006677627563,
+            "ymin": -0.004498183727264404,
+            "xmax": 0.9981086254119873,
+            "ymax": 0.9903709292411804
+          }
+        },
+        {
+          "score": 0.03428036719560623,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.046383947134017944,
+            "ymin": 0.0063370466232299805,
+            "xmax": 0.7533962428569794,
+            "ymax": 0.35544711351394653
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/glass/glass192.jpg",
+      "label": "glass",
+      "sha256": "a0251609850efa59b9ba88efd0c02178ce2901df8dc5cdf0c960d38aadfd6a2a",
+      "image_url": "/trashnet/images/glass192.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 698.5770150000008,
+      "detections": [
+        {
+          "score": 0.34737029671669006,
+          "label": "a glass jar",
+          "box": {
+            "xmin": -0.004160553216934204,
+            "ymin": -0.004977524280548096,
+            "xmax": 0.9897545874118805,
+            "ymax": 0.9009144902229309
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/glass/glass330.jpg",
+      "label": "glass",
+      "sha256": "b8462ea85337e9caaf3205245db37109c6070c5344cdd690ec865c91527c91b5",
+      "image_url": "/trashnet/images/glass330.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 842.6303179999995,
+      "detections": [
+        {
+          "score": 0.7133288383483887,
+          "label": "a plastic bottle",
+          "box": {
+            "xmin": 0.2938085198402405,
+            "ymin": 0.23809444904327393,
+            "xmax": 0.7070772051811218,
+            "ymax": 1.0062721967697144
+          }
+        },
+        {
+          "score": 0.12421450018882751,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": -0.0030919313430786133,
+            "ymin": -0.00046756863594055176,
+            "xmax": 0.9849360585212708,
+            "ymax": 0.9894494712352753
+          }
+        },
+        {
+          "score": 0.04756037890911102,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.459393247961998,
+            "ymin": 0.47894740104675293,
+            "xmax": 0.6751198917627335,
+            "ymax": 0.9897338151931763
+          }
+        },
+        {
+          "score": 0.03724503517150879,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.5841344445943832,
+            "ymin": 0.5422558933496475,
+            "xmax": 0.6822662502527237,
+            "ymax": 0.9902369827032089
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/metal/metal406.jpg",
+      "label": "metal",
+      "sha256": "f17d023b7a7bdcc6ac2c7ea673fa97ee75e5e07906ded6c69e56250acc0cc633",
+      "image_url": "/trashnet/images/metal406.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 804.0864169999986,
+      "detections": [
+        {
+          "score": 0.7082921266555786,
+          "label": "a plastic bag",
+          "box": {
+            "xmin": 0.1219668984413147,
+            "ymin": -0.007415086030960083,
+            "xmax": 0.9942113757133484,
+            "ymax": 0.9281657636165619
+          }
+        },
+        {
+          "score": 0.03608594089746475,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.22393527626991272,
+            "ymin": 0.25105422735214233,
+            "xmax": 0.540403813123703,
+            "ymax": 0.775534451007843
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/metal/metal91.jpg",
+      "label": "metal",
+      "sha256": "81546d1362d75fc60718e5852593c58f66f813e8c1e9d1eae6871fedb02e2868",
+      "image_url": "/trashnet/images/metal91.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 655.4371150000006,
+      "detections": [
+        {
+          "score": 0.09291800856590271,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.0019735991954803467,
+            "ymin": 0.005269467830657959,
+            "xmax": 0.992804080247879,
+            "ymax": 0.9996790289878845
+          }
+        },
+        {
+          "score": 0.08224132657051086,
+          "label": "a metal can",
+          "box": {
+            "xmin": 0.3902380168437958,
+            "ymin": 0.2716428190469742,
+            "xmax": 0.5940110385417938,
+            "ymax": 0.5609178990125656
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/paper/paper210.jpg",
+      "label": "paper",
+      "sha256": "ed89314fe3902a917ca66fe0188bf80b7056394527b435679e727f51c79cafd1",
+      "image_url": "/trashnet/images/paper210.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 699.0445150000014,
+      "detections": [
+        {
+          "score": 0.35102543234825134,
+          "label": "a cardboard box",
+          "box": {
+            "xmin": 0.0048417747020721436,
+            "ymin": 0.009244382381439209,
+            "xmax": 0.8274957835674286,
+            "ymax": 0.7707198262214661
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/paper/paper424.jpg",
+      "label": "paper",
+      "sha256": "23e78e4678ddb10aa6d602d59c6bc6050bf66f6fcedd4c46265ada535706f265",
+      "image_url": "/trashnet/images/paper424.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 669.0642150000003,
+      "detections": [
+        {
+          "score": 0.18355020880699158,
+          "label": "a cardboard box",
+          "box": {
+            "xmin": 0.13921192288398743,
+            "ymin": 0.0008716881275177002,
+            "xmax": 0.8657213151454926,
+            "ymax": 0.8868887722492218
+          }
+        },
+        {
+          "score": 0.04602314159274101,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.6789758056402206,
+            "ymin": 0.004591435194015503,
+            "xmax": 0.8359217792749405,
+            "ymax": 0.6734435260295868
+          }
+        },
+        {
+          "score": 0.03845866024494171,
+          "label": "a cardboard box",
+          "box": {
+            "xmin": 0.7345389276742935,
+            "ymin": 0.5769661664962769,
+            "xmax": 0.8266488164663315,
+            "ymax": 0.6714129447937012
+          }
+        },
+        {
+          "score": 0.03769319877028465,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.14994239807128906,
+            "ymin": 0.17186570167541504,
+            "xmax": 0.3472568392753601,
+            "ymax": 0.4589124321937561
+          }
+        },
+        {
+          "score": 0.036452516913414,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.6067112982273102,
+            "ymin": 0.5314463526010513,
+            "xmax": 0.7106073796749115,
+            "ymax": 0.6303229182958603
+          }
+        },
+        {
+          "score": 0.03456128388643265,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.5784417241811752,
+            "ymin": 0.4660245031118393,
+            "xmax": 0.7091009765863419,
+            "ymax": 0.5522533804178238
+          }
+        },
+        {
+          "score": 0.03307126834988594,
+          "label": "a cardboard box",
+          "box": {
+            "xmin": 0.4466613680124283,
+            "ymin": 0.5073182582855225,
+            "xmax": 0.5870317071676254,
+            "ymax": 0.6408569812774658
+          }
+        },
+        {
+          "score": 0.03132600709795952,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.30320607125759125,
+            "ymin": 0.41937294602394104,
+            "xmax": 0.3841508775949478,
+            "ymax": 0.5435768067836761
+          }
+        },
+        {
+          "score": 0.030849475413560867,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.4375695437192917,
+            "ymin": 0.4350339323282242,
+            "xmax": 0.545396164059639,
+            "ymax": 0.5421103090047836
+          }
+        },
+        {
+          "score": 0.03017842024564743,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.6287837475538254,
+            "ymin": 0.4679217040538788,
+            "xmax": 0.8073790818452835,
+            "ymax": 0.6256777346134186
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/plastic/plastic137.jpg",
+      "label": "plastic",
+      "sha256": "de59966908bd7f79f6a902350212ff69e473b34f3c60ad4c4c97dbdc90fd2e9a",
+      "image_url": "/trashnet/images/plastic137.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 660.742314000001,
+      "detections": [
+        {
+          "score": 0.283282607793808,
+          "label": "a glass jar",
+          "box": {
+            "xmin": 0.04859679937362671,
+            "ymin": 0.04960349202156067,
+            "xmax": 1.0027952790260315,
+            "ymax": 0.9495629370212555
+          }
+        },
+        {
+          "score": 0.058820467442274094,
+          "label": "a disposable cup",
+          "box": {
+            "xmin": 0.11793956160545349,
+            "ymin": 0.5565490871667862,
+            "xmax": 0.9996367990970612,
+            "ymax": 1.0007698386907578
+          }
+        },
+        {
+          "score": 0.03578060492873192,
+          "label": "a disposable cup",
+          "box": {
+            "xmin": 0.039814189076423645,
+            "ymin": 0.29883232712745667,
+            "xmax": 0.22416995465755463,
+            "ymax": 0.7245937287807465
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/plastic/plastic47.jpg",
+      "label": "plastic",
+      "sha256": "8cfc88156e367be7e00baebc32cc97607794f2fb94892aff8beb28878c4d93c1",
+      "image_url": "/trashnet/images/plastic47.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 656.3591140000008,
+      "detections": [
+        {
+          "score": 0.1643650233745575,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": 0.002644568681716919,
+            "ymin": -0.002578049898147583,
+            "xmax": 0.9963389933109283,
+            "ymax": 0.9919343888759613
+          }
+        },
+        {
+          "score": 0.12750734388828278,
+          "label": "a plastic bottle",
+          "box": {
+            "xmin": 0.20121276378631592,
+            "ymin": 0.32435332238674164,
+            "xmax": 0.7489327788352966,
+            "ymax": 0.5826270133256912
+          }
+        },
+        {
+          "score": 0.04141395539045334,
+          "label": "a plastic bottle",
+          "box": {
+            "xmin": 0.22098025679588318,
+            "ymin": 0.34492288529872894,
+            "xmax": 0.40912023186683655,
+            "ymax": 0.5554826408624649
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/trash/trash69.jpg",
+      "label": "trash",
+      "sha256": "7ad89f52d2ce2e906f53c4499c29790fb19db6ecf7e01d354fd4ac8112d9272e",
+      "image_url": "/trashnet/images/trash69.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 685.0245130000003,
+      "detections": [
+        {
+          "score": 0.4932490289211273,
+          "label": "a disposable cup",
+          "box": {
+            "xmin": 0.16209504008293152,
+            "ymin": 0.08355504274368286,
+            "xmax": 0.7142773568630219,
+            "ymax": 0.807600200176239
+          }
+        }
+      ]
+    },
+    {
+      "name": "dataset-resized/trash/trash6.jpg",
+      "label": "trash",
+      "sha256": "20018f7c4b30f387edbca44d6b4b1233f65fb0e194992119609d0af807985057",
+      "image_url": "/trashnet/images/trash6.jpg",
+      "width": 512,
+      "height": 384,
+      "elapsed_ms": 657.3164049999996,
+      "detections": [
+        {
+          "score": 0.6515398621559143,
+          "label": "a plastic bag",
+          "box": {
+            "xmin": 0.28437158465385437,
+            "ymin": 0.21559759974479675,
+            "xmax": 0.8005262911319733,
+            "ymax": 0.8246473371982574
+          }
+        },
+        {
+          "score": 0.247446671128273,
+          "label": "a piece of cardboard",
+          "box": {
+            "xmin": -0.0035203397274017334,
+            "ymin": 0.01845833659172058,
+            "xmax": 0.9930197894573212,
+            "ymax": 1.011685162782669
+          }
+        },
+        {
+          "score": 0.18180835247039795,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.3409150242805481,
+            "ymin": 0.21378198266029358,
+            "xmax": 0.6633804440498352,
+            "ymax": 0.5406458675861359
+          }
+        },
+        {
+          "score": 0.16611096262931824,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.3781368136405945,
+            "ymin": 0.21078935265541077,
+            "xmax": 0.5826810598373413,
+            "ymax": 0.38865551352500916
+          }
+        },
+        {
+          "score": 0.1615365445613861,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.5828773230314255,
+            "ymin": 0.2955830544233322,
+            "xmax": 0.7941344529390335,
+            "ymax": 0.7308266907930374
+          }
+        },
+        {
+          "score": 0.08202837407588959,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.2906022071838379,
+            "ymin": 0.4228210896253586,
+            "xmax": 0.3699628710746765,
+            "ymax": 0.5479703694581985
+          }
+        },
+        {
+          "score": 0.06558772176504135,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.30259114503860474,
+            "ymin": 0.4340811222791672,
+            "xmax": 0.5525515079498291,
+            "ymax": 0.817833736538887
+          }
+        },
+        {
+          "score": 0.06086764484643936,
+          "label": "a plastic bag",
+          "box": {
+            "xmin": 0.33981895446777344,
+            "ymin": 0.3984711468219757,
+            "xmax": 0.7000634670257568,
+            "ymax": 0.6272067725658417
+          }
+        },
+        {
+          "score": 0.05672185868024826,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.34005600214004517,
+            "ymin": 0.39128121733665466,
+            "xmax": 0.6578331589698792,
+            "ymax": 0.4996547996997833
+          }
+        },
+        {
+          "score": 0.0565173365175724,
+          "label": "a paper tissue",
+          "box": {
+            "xmin": 0.5943719446659088,
+            "ymin": 0.3156910687685013,
+            "xmax": 0.7643609941005707,
+            "ymax": 0.4762231558561325
+          }
+        },
+        {
+          "score": 0.03214114159345627,
+          "label": "a plastic bag",
+          "box": {
+            "xmin": 0.44382455945014954,
+            "ymin": 0.4997682422399521,
+            "xmax": 0.6463973224163055,
+            "ymax": 0.620634451508522
+          }
+        }
+      ]
+    }
+  ]
+}

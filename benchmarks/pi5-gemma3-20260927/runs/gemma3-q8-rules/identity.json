@@ -1,0 +1,16 @@
+{
+  "repository_revision": "7b071fd9c8c5c06e9a567c59ac587ee74166be64",
+  "llama_cpp_revision": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "model": "gemma-3-1b-it-Q8_0.gguf",
+  "model_bytes": 1069306368,
+  "model_sha256": "b205840c5dcef55078e37d344677869a714ffd42a4ae448c48dcfb52e4bb10d5",
+  "device_model": "Raspberry Pi 5 Model B Rev 1.0",
+  "os": "PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"13\"\nVERSION=\"13 (trixie)\"\nVERSION_CODENAME=trixie\nDEBIAN_VERSION_FULL=13.7\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"",
+  "architecture": "aarch64",
+  "kernel": "6.18.50+rpt-rpi-2712",
+  "adapter": null,
+  "quantization": "Q8_0",
+  "scope": "Base model on physical Pi 5. Synthetic rule suite; no fine-tuning or general quality claim.",
+  "benchmark_executable_sha256": "68e3ca71fa3afb9f6861539a45328946ac9e681b3ded41e4f63f20e848a8cf05",
+  "suite_sha256": "f9d5380fdafe1bb686c9f4f1d44003a9f71c6f47fddd59063c62d3301b7d6c04"
+}

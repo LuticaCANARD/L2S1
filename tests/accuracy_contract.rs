@@ -282,7 +282,7 @@ mod native {
                     Some("no_aligned_common_prefix")
                 );
                 if detailed.state_restore.fallback_reason.is_none() {
-                    assert_eq!(detailed.state_restore.restores, request.decisions.len());
+                    assert_eq!(detailed.state_restore.restores, request.decisions.len() - 1);
                     assert!(detailed.state_restore.snapshot_bytes > 0);
                     assert!(detailed.response.results[1].reused_prefix_tokens > 0);
                 }

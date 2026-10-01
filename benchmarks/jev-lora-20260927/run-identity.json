@@ -1,0 +1,32 @@
+{
+  "repository_revision": "fb3ad4e0d2a98aa57aae0b84736591cccd92ee43",
+  "dirty_source": true,
+  "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+  "evaluator_sha256": "7fb6e5237188de8161a3025f6b0ce7e16e7b2e3274520a19879e95a115d221ba",
+  "runtime_files": {
+    "libggml.so.0.24.0": "16275aff5db94066e229ece7357487d9f85b3a1d0238697c6c4315115d94ce86",
+    "libggml-cuda.so.0.24.0": "2b156e7dc861045e80507d56d1414cb7ecfb69a5fcee2a09d25f435b5e857e2b",
+    "libggml-cpu.so.0.24.0": "9751e101cee0451318eef463e7b2993eea66ef5d556209c078534c1e731f64a0",
+    "libmtmd.so.0.4.1": "59d73f0ce49bc99a91d5d57e5588c9e61928d3bee7a0acd841ca4aa8dc8f4d6d",
+    "libllama.so.0.4.1": "abae00d30d7e06497c7717b39600011d2573e7caa75a58fdcdbca2b6abe26e56",
+    "libggml-base.so.0.24.0": "2ce202cc895591d76bbec2089de0a92e9fa6359e20e919362bc62a75624aa514"
+  },
+  "ollaya_reference_sha256": "e8c6b89a19aebcf149711d90e0af0d243ab46cdff29008727e85d63fb6d4eda0",
+  "inference": {
+    "cuda": true,
+    "device": "NVIDIA GeForce RTX 3080",
+    "context": 8192,
+    "batch": 256,
+    "threads": 4,
+    "prompt_layout": "legacy",
+    "prompt_detail": "minimal",
+    "execution_mode": "fresh",
+    "warmup": 1,
+    "request_batch_size": 1
+  },
+  "policy": {
+    "min_top_probability": 0.8,
+    "min_candidate_mass": 0.05
+  },
+  "scope": "New local Linux RTX 3080 run; distinct GGUF hash and hardware from user-supplied Windows RTX 5090 benchmark. Weights are not redistributed."
+}

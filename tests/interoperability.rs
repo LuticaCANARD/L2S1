@@ -26,7 +26,22 @@ fn identity() -> ModelIdentity {
         },
         execution_mode: ExecutionMode::Fresh,
         parallel_width: 1,
+        parallel_context_dynamic: false,
+        parallel_prefix_alignment: ParallelPrefixAlignment::Batch,
+        parallel_wave_order: ParallelWaveOrder::Request,
     }
+}
+
+#[test]
+fn dynamic_parallel_context_has_separate_artifact_identity() {
+    let legacy = identity();
+    let serialized = serde_json::to_value(&legacy).unwrap();
+    assert!(serialized.get("parallel_context_dynamic").is_none());
+    let historical: ModelIdentity = serde_json::from_value(serialized).unwrap();
+    assert_eq!(legacy.fingerprint(), historical.fingerprint());
+    let mut dynamic = legacy.clone();
+    dynamic.parallel_context_dynamic = true;
+    assert_ne!(dynamic.fingerprint(), legacy.fingerprint());
 }
 #[test]
 fn exact_evidence_matches_independent_full_softmax_for_all_kinds() {
@@ -278,4 +293,143 @@ fn held_out_policy_metrics_keep_mass_and_tie_gates() {
             .evaluate_policy(&invalid, &DecisionPolicy::default())
             .is_err()
     );
+}
+
+fn overconfident(group: &str, n: usize, count: usize) -> Vec<CalibrationRecord> {
+    // Always 8 logits in favour of option 0, correct only 1/n of the time.
+    (0..count)
+        .map(|i| CalibrationRecord {
+            group: format!("{group}-{i}"),
+            raw_logits: (0..n).map(|j| if j == 0 { 8.0 } else { 0.0 }).collect(),
+            correct_option: i % n,
+        })
+        .collect()
+}
+
+#[test]
+fn calibration_metrics_report_top_label_ece() {
+    // Confidence ~1.0 with accuracy 1/3: ECE close to 2/3.
+    let metrics = calibration_metrics(&overconfident("s", 3, 30), 1.0).unwrap();
+    assert!((metrics.ece.unwrap() - (1.0 - 1.0 / 3.0)).abs() < 1e-3);
+    // Uniform scores that are right exactly 1/3 of the time are calibrated.
+    let uniform: Vec<_> = (0..30)
+        .map(|i| CalibrationRecord {
+            group: format!("u-{i}"),
+            raw_logits: vec![0.0; 3],
+            correct_option: i % 3,
+        })
+        .collect();
+    assert!(calibration_metrics(&uniform, 1.0).unwrap().ece.unwrap() < 1e-9);
+    // Artifacts written before ECE was reported still deserialize.
+    let old: CalibrationMetrics =
+        serde_json::from_value(serde_json::json!({"examples": 1, "nll": 0.5, "brier": 0.1}))
+            .unwrap();
+    assert!(old.ece.is_none());
+}
+
+#[test]
+fn family_calibration_generalizes_by_kind_and_reports_leave_one_task_out() {
+    let decisions = request().decisions;
+    let binary: Vec<_> = decisions
+        .iter()
+        .filter(|d| decision_kind_name(d) == "binary")
+        .cloned()
+        .collect();
+    let base = binary[0].clone();
+    let tasks: Vec<_> = (0..3)
+        .map(|t| {
+            let mut decision = base.clone();
+            decision.id = format!("task-{t}");
+            decision.instruction = format!("Question {t}?");
+            FamilyCalibrationTask {
+                decision,
+                records: overconfident(&format!("task-{t}"), 2, 12),
+            }
+        })
+        .collect();
+    let family = FamilyCalibration::fit("binary-family".into(), &identity(), &tasks).unwrap();
+    assert_eq!(
+        (family.decision_kind.as_str(), family.option_count),
+        ("binary", 2)
+    );
+    assert!(family.temperature > 1.0);
+    assert!(family.calibrated_fit_metrics.nll < family.uncalibrated_fit_metrics.nll);
+    assert_eq!(family.leave_one_task_out.len(), 3);
+    for held in &family.leave_one_task_out {
+        assert!(held.calibrated.nll < held.uncalibrated.nll);
+        assert!(held.calibrated.ece.unwrap() < held.uncalibrated.ece.unwrap());
+    }
+    family.validate(&identity()).unwrap();
+    let mut wrong = identity();
+    wrong.parallel_prefix_alignment = ParallelPrefixAlignment::Token;
+    assert!(
+        family.validate(&wrong).is_err(),
+        "alignment is part of the identity"
+    );
+    wrong = identity();
+    wrong.parallel_wave_order = ParallelWaveOrder::Prefix;
+    assert!(
+        family.validate(&wrong).is_err(),
+        "wave order is part of the identity"
+    );
+
+    // Applies to an unseen task of the same kind and width, not to others.
+    let mut unseen = base.clone();
+    unseen.id = "unseen".into();
+    unseen.instruction = "A new question?".into();
+    assert!(family.applies_to(&unseen));
+    let three = decisions.iter().find(|d| d.options().len() == 3);
+    if let Some(three) = three {
+        assert!(!family.applies_to(three));
+    }
+    let policy = DecisionPolicy {
+        min_top_probability: 0.8,
+        min_candidate_mass: 0.0,
+    };
+    let logits = [8.0f32, 0.0, 0.0];
+    let fresh = || score_logits(&unseen, &logits, &[0, 1], 20, &policy).unwrap();
+    let base_result = fresh();
+    let calibrated = family.apply(&unseen, fresh(), &policy).unwrap();
+    assert_eq!(calibrated.calibration_id.as_deref(), Some("binary-family"));
+    assert_eq!(
+        calibrated.scoring_method,
+        "family_temperature_softmax_with_base_mass_v1"
+    );
+    assert_eq!(calibrated.scores[0].raw_logit, 8.0);
+    assert_eq!(calibrated.candidate_mass, base_result.candidate_mass);
+    let top = |r: &DecisionResult| r.scores[0].option_probability;
+    assert!(top(&calibrated) < top(&base_result));
+    // A result a task-specific calibration already handled stays unchanged.
+    let task_artifact = ScalarCalibration::fit(
+        "task".into(),
+        &identity(),
+        &unseen,
+        &overconfident("x", 2, 8),
+    )
+    .unwrap();
+    let specific = || task_artifact.apply(&unseen, fresh(), &policy).unwrap();
+    let after = family.apply(&unseen, specific(), &policy).unwrap();
+    assert_eq!(after.calibration_id.as_deref(), Some("task"));
+    assert_eq!(top(&after), top(&specific()));
+
+    // Held-out evaluation rejects source-group leakage.
+    assert!(family.evaluate_held_out(&tasks[0].records).is_err());
+    family
+        .evaluate_held_out(&overconfident("independent", 2, 6))
+        .unwrap();
+
+    // Fitting needs two distinct tasks of one kind and width.
+    assert!(FamilyCalibration::fit("one".into(), &identity(), &tasks[..1]).is_err());
+    let duplicate = vec![tasks[0].clone(), tasks[0].clone()];
+    assert!(FamilyCalibration::fit("dup".into(), &identity(), &duplicate).is_err());
+    if let Some(three) = three {
+        let mixed = vec![
+            tasks[0].clone(),
+            FamilyCalibrationTask {
+                decision: three.clone(),
+                records: overconfident("three", 3, 6),
+            },
+        ];
+        assert!(FamilyCalibration::fit("mixed".into(), &identity(), &mixed).is_err());
+    }
 }

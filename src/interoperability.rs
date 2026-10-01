@@ -5,7 +5,7 @@ use sha2::{Digest, Sha256};
 pub(crate) fn digest(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
-#[cfg(feature = "llama")]
+#[cfg(any(feature = "llama", feature = "wgpu"))]
 pub(crate) fn file_digest(path: &std::path::Path) -> Result<String> {
     use std::io::Read;
     let mut file = std::fs::File::open(path).map_err(|e| Error::Backend(e.to_string()))?;
@@ -41,6 +41,17 @@ pub struct ModelIdentity {
     pub compute: ComputeOptions,
     pub execution_mode: ExecutionMode,
     pub parallel_width: usize,
+    #[serde(default, skip_serializing_if = "crate::decision::bool_is_false")]
+    pub parallel_context_dynamic: bool,
+    /// Shared-prefix rounding changes parallel scores; absent means `batch`.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::ParallelPrefixAlignment::is_batch"
+    )]
+    pub parallel_prefix_alignment: crate::ParallelPrefixAlignment,
+    /// Wave membership changes parallel decode batches; absent means request order.
+    #[serde(default, skip_serializing_if = "crate::ParallelWaveOrder::is_request")]
+    pub parallel_wave_order: crate::ParallelWaveOrder,
 }
 impl ModelIdentity {
     pub fn fingerprint(&self) -> String {
@@ -128,6 +139,7 @@ pub struct StateRestoreMetrics {
     pub restore_ms: f64,
     pub prefill_ms: f64,
     pub suffix_ms: f64,
+    /// Successful state loads; a normal N-decision request needs N-1 loads.
     pub restores: usize,
     pub fallback_reason: Option<String>,
 }
@@ -157,7 +169,9 @@ impl From<Error> for DecisionFailure {
         Self::new(
             match error {
                 Error::Invalid(_) => FailureKind::InvalidRequest,
-                Error::Backend(_) => FailureKind::BackendFailure,
+                Error::Backend(_) | Error::ModelLoad(_) | Error::Upstream(_) => {
+                    FailureKind::BackendFailure
+                }
             },
             "prepare",
             None,

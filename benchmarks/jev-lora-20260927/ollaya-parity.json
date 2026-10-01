@@ -1,0 +1,7 @@
+{
+  "reference_revision": "f9e2d11fee1d01235878bfa6cfa1eb1e42bbbaea",
+  "reference_answer_sha256": "daccd0985e13de57176676792f171110e2ad94611b9b7701443d69e072de33cb",
+  "cases": 300,
+  "passed": 300,
+  "scope": "Exact synthetic answer JSON parity only; no HTTP or model equivalence claim"
+}

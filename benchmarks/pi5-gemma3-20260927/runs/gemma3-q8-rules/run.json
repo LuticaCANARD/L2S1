@@ -1,0 +1,20 @@
+{
+  "status": "ok",
+  "started_utc": "2026-09-27T03:50:11.245609+00:00",
+  "exit_code": 0,
+  "peak_process_rss_kib": 2202032,
+  "user_cpu_s": 939.270353,
+  "system_cpu_s": 0.815404,
+  "wall_seconds_including_load_warmup": 245.73989610800004,
+  "finished_utc": "2026-09-27T03:54:16.987119+00:00",
+  "temperature_max_c": 72.15,
+  "available_memory_min_kib": 2382080,
+  "swap_used_max_kib": 0,
+  "throttled_values": [
+    "throttled=0x50000",
+    "throttled=0x50005"
+  ],
+  "current_throttle_flags_observed": true,
+  "telemetry_samples": 245,
+  "telemetry_scope": "One-second samples including loading/warmup; brief events between samples may be missed. Historical throttle bits were already set before this run."
+}

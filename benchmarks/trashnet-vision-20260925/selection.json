@@ -1,0 +1,617 @@
+{
+  "dataset": "garythung/trashnet dataset-resized",
+  "source_commit": "6fa2b878c6c1b4304b91109070ce0edf9279bb31",
+  "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+  "seed": 20260925,
+  "images_per_class": 20,
+  "classes": [
+    "cardboard",
+    "glass",
+    "metal",
+    "paper",
+    "plastic",
+    "trash"
+  ],
+  "records": [
+    {
+      "name": "dataset-resized/glass/glass192.jpg",
+      "label": "glass",
+      "sha256": "a0251609850efa59b9ba88efd0c02178ce2901df8dc5cdf0c960d38aadfd6a2a"
+    },
+    {
+      "name": "dataset-resized/glass/glass330.jpg",
+      "label": "glass",
+      "sha256": "b8462ea85337e9caaf3205245db37109c6070c5344cdd690ec865c91527c91b5"
+    },
+    {
+      "name": "dataset-resized/glass/glass249.jpg",
+      "label": "glass",
+      "sha256": "c209a8ec595b3be49ed1994932afb6a10d7269a3d6941c2ac4ae90d331c8d2a3"
+    },
+    {
+      "name": "dataset-resized/metal/metal406.jpg",
+      "label": "metal",
+      "sha256": "f17d023b7a7bdcc6ac2c7ea673fa97ee75e5e07906ded6c69e56250acc0cc633"
+    },
+    {
+      "name": "dataset-resized/trash/trash69.jpg",
+      "label": "trash",
+      "sha256": "7ad89f52d2ce2e906f53c4499c29790fb19db6ecf7e01d354fd4ac8112d9272e"
+    },
+    {
+      "name": "dataset-resized/metal/metal91.jpg",
+      "label": "metal",
+      "sha256": "81546d1362d75fc60718e5852593c58f66f813e8c1e9d1eae6871fedb02e2868"
+    },
+    {
+      "name": "dataset-resized/glass/glass500.jpg",
+      "label": "glass",
+      "sha256": "701b0c07b8d804190393f323cf76527ca05c719a84d8064dec4021115c798d44"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic137.jpg",
+      "label": "plastic",
+      "sha256": "de59966908bd7f79f6a902350212ff69e473b34f3c60ad4c4c97dbdc90fd2e9a"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard153.jpg",
+      "label": "cardboard",
+      "sha256": "6e4b49547daf86f258ebc12aa2bbdd574e2d77837cfa36dbca0cfa2891520f14"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard90.jpg",
+      "label": "cardboard",
+      "sha256": "154aa49e8581d68981e2c0048c51b1ae448babc4cc08c03a91a815af12f66f80"
+    },
+    {
+      "name": "dataset-resized/trash/trash6.jpg",
+      "label": "trash",
+      "sha256": "20018f7c4b30f387edbca44d6b4b1233f65fb0e194992119609d0af807985057"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard102.jpg",
+      "label": "cardboard",
+      "sha256": "5a88bce0103f59145f02b7fc0f50aa6dc3fbf29a1ffcaeeea0ea6661a58e0278"
+    },
+    {
+      "name": "dataset-resized/metal/metal3.jpg",
+      "label": "metal",
+      "sha256": "a8c75d9475f6d0dd16a6f68c800d37d8910e74f23240d0510e47532239027714"
+    },
+    {
+      "name": "dataset-resized/trash/trash128.jpg",
+      "label": "trash",
+      "sha256": "c1b0f328e062e40b9badc5c514e1c95d9442076944b3485971605af1f3503366"
+    },
+    {
+      "name": "dataset-resized/metal/metal328.jpg",
+      "label": "metal",
+      "sha256": "d476473e802901fc009eb708a3a41c5198fd3ed9ccef527c48de890bcbaa14cb"
+    },
+    {
+      "name": "dataset-resized/trash/trash98.jpg",
+      "label": "trash",
+      "sha256": "1c04329bd1a226bf2498f4b4693d97eeaa6531da1ea2f9ce46aca3703637e3c9"
+    },
+    {
+      "name": "dataset-resized/paper/paper210.jpg",
+      "label": "paper",
+      "sha256": "ed89314fe3902a917ca66fe0188bf80b7056394527b435679e727f51c79cafd1"
+    },
+    {
+      "name": "dataset-resized/trash/trash23.jpg",
+      "label": "trash",
+      "sha256": "2f466a12dbdaef59730ab9828548b8cc63801b688194f41dc078138f814583da"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard280.jpg",
+      "label": "cardboard",
+      "sha256": "c34dc0814f96979e3df5383522338a06d370d3cd60004ba1829bcd0e6f4d7417"
+    },
+    {
+      "name": "dataset-resized/glass/glass419.jpg",
+      "label": "glass",
+      "sha256": "5d772c50c048803766142cefc680593d41e81f576cec0b8c42854a0c1e89144f"
+    },
+    {
+      "name": "dataset-resized/trash/trash29.jpg",
+      "label": "trash",
+      "sha256": "352d82b8a19a0ee5e50fafa6fec2858b021ae0240f20c303a76a6fb051c59096"
+    },
+    {
+      "name": "dataset-resized/paper/paper424.jpg",
+      "label": "paper",
+      "sha256": "23e78e4678ddb10aa6d602d59c6bc6050bf66f6fcedd4c46265ada535706f265"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard382.jpg",
+      "label": "cardboard",
+      "sha256": "d4bcbe962c81694fe3862ea7c6fa72c0d7ad175d17e8e4b10349144267496068"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic47.jpg",
+      "label": "plastic",
+      "sha256": "8cfc88156e367be7e00baebc32cc97607794f2fb94892aff8beb28878c4d93c1"
+    },
+    {
+      "name": "dataset-resized/paper/paper144.jpg",
+      "label": "paper",
+      "sha256": "c1976fd353d41344f825d988703f63ece168e453f9630f4964d3952890a0559d"
+    },
+    {
+      "name": "dataset-resized/metal/metal229.jpg",
+      "label": "metal",
+      "sha256": "5540f798bad9aab9d38537434226414807d155ecf14ee6c05153e94b9392aa8a"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic317.jpg",
+      "label": "plastic",
+      "sha256": "eb326e1c218874929d693edd6d3555f34ae18a287253edcda9a89b3c04267b7c"
+    },
+    {
+      "name": "dataset-resized/paper/paper434.jpg",
+      "label": "paper",
+      "sha256": "ad20da3d35c1d67dff131edbb2c6c06c0d17280243994a6354402626eaa2ae07"
+    },
+    {
+      "name": "dataset-resized/paper/paper296.jpg",
+      "label": "paper",
+      "sha256": "e48b4da337f9d86cfd8d93a19bf37fbdd5fa6f9152bd564b05d728f337dd8fce"
+    },
+    {
+      "name": "dataset-resized/paper/paper469.jpg",
+      "label": "paper",
+      "sha256": "8edeffd3d9dc0aefbb6d0669237476864f1abeb0b82aefa5c55d23a52fddc8e3"
+    },
+    {
+      "name": "dataset-resized/paper/paper572.jpg",
+      "label": "paper",
+      "sha256": "f68e3a0bf970b94f85658c50b07a0dc6076125d56a068f89bdeea5a7228b23c8"
+    },
+    {
+      "name": "dataset-resized/metal/metal266.jpg",
+      "label": "metal",
+      "sha256": "423df73e6a1bd921e9e7a1ffee26f7ab06f57bac182b063df421b5b728178f3b"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard220.jpg",
+      "label": "cardboard",
+      "sha256": "f7f3094a1df464b9ebad857980abc2556b755436a2da36380688e88b6e693689"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic179.jpg",
+      "label": "plastic",
+      "sha256": "ad299921a80a27a58d01757bd887dd9c255ecf55ff18ef6fc4d97e03aceee118"
+    },
+    {
+      "name": "dataset-resized/paper/paper575.jpg",
+      "label": "paper",
+      "sha256": "38119fcc2f80936b404ef9b72083cae5e9d8fc8d97ec28e771e3b7fd5c215680"
+    },
+    {
+      "name": "dataset-resized/metal/metal134.jpg",
+      "label": "metal",
+      "sha256": "17a57deae02dfa268f964fde93494e8504565bcf2de190663d621e9b4d9df439"
+    },
+    {
+      "name": "dataset-resized/metal/metal295.jpg",
+      "label": "metal",
+      "sha256": "9590b871a82a5514e73f9dcf7b7faf7e8ff3b56435ece9cf864e7a4c4a55f966"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic244.jpg",
+      "label": "plastic",
+      "sha256": "6455853ec978543d38b1e012685b9fc5f9fa4b3405d3c309bd9c0ccd804726f9"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic273.jpg",
+      "label": "plastic",
+      "sha256": "42b050a661efcd6435a8a4175dda15a46fa92c70230aea91514e75eefb375dbf"
+    },
+    {
+      "name": "dataset-resized/trash/trash126.jpg",
+      "label": "trash",
+      "sha256": "d47245d73413fc38cc2e7afb16af6e0ec32afa9ea1d9707c644a1606aae7d4ed"
+    },
+    {
+      "name": "dataset-resized/metal/metal49.jpg",
+      "label": "metal",
+      "sha256": "0cbb9f87d347d1be4ecebb5988a8a450bd844cafafd79958f07fc933b28952e6"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic417.jpg",
+      "label": "plastic",
+      "sha256": "a9000094b5f3fd0ad35c9126cad270a62011c3135f6e55bcc68f19e9356946fc"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard250.jpg",
+      "label": "cardboard",
+      "sha256": "db13544f3b344b8f49b2c2da857ad0aabe503fbae3a08c7ac4526bd86ea27a1b"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard257.jpg",
+      "label": "cardboard",
+      "sha256": "6a9b724d039aefa9c1ff60ba61bb773cb30bbb79c230f133b0817627d07aee44"
+    },
+    {
+      "name": "dataset-resized/paper/paper504.jpg",
+      "label": "paper",
+      "sha256": "a29f26705f053e3cbcb729c05e56f63543a3aa37dffa5b125419ed357d6dade3"
+    },
+    {
+      "name": "dataset-resized/trash/trash124.jpg",
+      "label": "trash",
+      "sha256": "39bb0a46e81cb3c6ea99737e63b8fdc1dfb6b48e5f40a210ebe2f722b50e0ea5"
+    },
+    {
+      "name": "dataset-resized/glass/glass381.jpg",
+      "label": "glass",
+      "sha256": "6b7a7d11f2fc67528af282827d789419e96cb788880f25f575a1480403bd2a81"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic134.jpg",
+      "label": "plastic",
+      "sha256": "f20f144f44908e67f1008cf6344d9fc12a72a6f9883a063722b4dbfe10bff064"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic98.jpg",
+      "label": "plastic",
+      "sha256": "5dcdd840b2ef4863a974153e836821955c0d8a179529fd9ae3dff29af628b8b8"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic39.jpg",
+      "label": "plastic",
+      "sha256": "faf28d8f09c1075d3337ebf19bcafda1427053deb2ee9827926f9077f9ebdf1e"
+    },
+    {
+      "name": "dataset-resized/glass/glass216.jpg",
+      "label": "glass",
+      "sha256": "279c81c430424acbf50186b7a25ba91c978a86a1d0e8bff699119b93f5fcc961"
+    },
+    {
+      "name": "dataset-resized/trash/trash70.jpg",
+      "label": "trash",
+      "sha256": "4c7cf78bc2da8f9c5a221c12dc17f5cec46075710ab28c8e9a6897660eb0a657"
+    },
+    {
+      "name": "dataset-resized/glass/glass201.jpg",
+      "label": "glass",
+      "sha256": "f217722bf9bf5f719bb4fa12d8dd4d7b829ff92ed1827a8d3f798a41a0d35ba7"
+    },
+    {
+      "name": "dataset-resized/paper/paper70.jpg",
+      "label": "paper",
+      "sha256": "c005fec186cb09d3b489653a35b4ca0bb892a8d4ef62f0372937b29c9d6fd997"
+    },
+    {
+      "name": "dataset-resized/glass/glass368.jpg",
+      "label": "glass",
+      "sha256": "85ac6ccd301a01da12c0b2238d3a1a565604bf1a7ea839b2cd084d98bd7ef6a7"
+    },
+    {
+      "name": "dataset-resized/paper/paper364.jpg",
+      "label": "paper",
+      "sha256": "aac6c82882e77dd83779c02adb71dfac25c28b4e9a67e17c0914d0fa913bc12e"
+    },
+    {
+      "name": "dataset-resized/paper/paper386.jpg",
+      "label": "paper",
+      "sha256": "5a4eb22235a4eeed0170455067d4ce246adfac26a87679053bfc58f5f598e414"
+    },
+    {
+      "name": "dataset-resized/glass/glass47.jpg",
+      "label": "glass",
+      "sha256": "f6b1f3ecf04bff83360dee0390f9d2d7585b4a99d87be7d0573cfff278951d0c"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic64.jpg",
+      "label": "plastic",
+      "sha256": "daaba9da8e9b2d76aae5c21030392f8069bd053c9993b2b227f6df5ded49e03a"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard41.jpg",
+      "label": "cardboard",
+      "sha256": "0aaf69cb9229ac6d01d5e9d12c2e64018beb1fa0906c98b07004b4ebbaf748c3"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic332.jpg",
+      "label": "plastic",
+      "sha256": "e971f4f8f50e960e454ea724cec922fc2988bbf4027aa48b553e139bb5890968"
+    },
+    {
+      "name": "dataset-resized/paper/paper253.jpg",
+      "label": "paper",
+      "sha256": "35110d355588aff72ce48cd838f1993a63b2f84c93f07724655b3a887b17cf50"
+    },
+    {
+      "name": "dataset-resized/paper/paper55.jpg",
+      "label": "paper",
+      "sha256": "61e4135a107681ed768c845a1c5944dff554041fce30e8ff2263be7f1f684b6b"
+    },
+    {
+      "name": "dataset-resized/glass/glass448.jpg",
+      "label": "glass",
+      "sha256": "412b46561dbf161c5f7882223d89c2b6fce78823a98d477947bb7e0372f573fa"
+    },
+    {
+      "name": "dataset-resized/glass/glass374.jpg",
+      "label": "glass",
+      "sha256": "432a5d3f5e82b75c82ee6b504329e27b3b55b34a0907d3faa6800f3bb2bd000e"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard137.jpg",
+      "label": "cardboard",
+      "sha256": "4d89fcb735ea15edca28d80bd5a288c97a2f169eed7ee8d3dfde62d7b22890bc"
+    },
+    {
+      "name": "dataset-resized/paper/paper134.jpg",
+      "label": "paper",
+      "sha256": "ed495f4f9c3439058d41999cf1eee407c0efdca55b6ee26dba92285712d7bd4b"
+    },
+    {
+      "name": "dataset-resized/trash/trash11.jpg",
+      "label": "trash",
+      "sha256": "3bde5980ea8d4947ec29e8efee5d361c353064c2f18aa27a86597f06ec5b7c2c"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard323.jpg",
+      "label": "cardboard",
+      "sha256": "c2d9ca1f7a33c086de846f04c9cc755c70dedd8ee44f92ab35ce4d3192cbf38a"
+    },
+    {
+      "name": "dataset-resized/metal/metal17.jpg",
+      "label": "metal",
+      "sha256": "80a4427fa8828b37c2bcb969e941956a50ebd2f7578975dd2842b68d11f8741e"
+    },
+    {
+      "name": "dataset-resized/metal/metal231.jpg",
+      "label": "metal",
+      "sha256": "59f6dde9204d9fd4c5916e95085650160f3371883da5b3f621ebfbe936860288"
+    },
+    {
+      "name": "dataset-resized/trash/trash72.jpg",
+      "label": "trash",
+      "sha256": "917e956c1df7d71729b71069800b1c9b0b5c45f4be29901c4437781244db9a58"
+    },
+    {
+      "name": "dataset-resized/paper/paper66.jpg",
+      "label": "paper",
+      "sha256": "faf309df70053e5bbae3f245fda3ed630a9afb81f105ee278d238d43221fc7d0"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic323.jpg",
+      "label": "plastic",
+      "sha256": "e72709b0eeda0472fde0e10a685a95f678cc7d77df2290bab25a0a85e50f4c5c"
+    },
+    {
+      "name": "dataset-resized/metal/metal296.jpg",
+      "label": "metal",
+      "sha256": "34bc4ee4ce56e91e3e0561067d5a05ad377b3dcd26175c6f732ae583d89683c3"
+    },
+    {
+      "name": "dataset-resized/metal/metal112.jpg",
+      "label": "metal",
+      "sha256": "00cb113efab64e877fe763e04113e4d6cd0f7448fad899bac05164614edf779a"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard334.jpg",
+      "label": "cardboard",
+      "sha256": "e20217c46a83b281bcda09e3d2679e22292d3e3c25bc934969f8d9582f94a21a"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard337.jpg",
+      "label": "cardboard",
+      "sha256": "fc9b771a9b4ae60823fde39497a4facd82926d13b51c0c851aeb6bd26bec2f14"
+    },
+    {
+      "name": "dataset-resized/glass/glass187.jpg",
+      "label": "glass",
+      "sha256": "11d2459e02f00f7dddad98494065c8268f184c81ec84666e8529945cb67afd2f"
+    },
+    {
+      "name": "dataset-resized/paper/paper136.jpg",
+      "label": "paper",
+      "sha256": "8ed79d770dd19ae7516c711f60008d6fa2df835fa94f3541832d8a2767fbfb12"
+    },
+    {
+      "name": "dataset-resized/metal/metal8.jpg",
+      "label": "metal",
+      "sha256": "27ba278703688aff66f44741d735886bbdbecfdc4d8749daa021004bc91c8cbb"
+    },
+    {
+      "name": "dataset-resized/trash/trash42.jpg",
+      "label": "trash",
+      "sha256": "3f320a10309e62ad670ca4d6aaeab524f84c498a32012526e17b3715ec39de6c"
+    },
+    {
+      "name": "dataset-resized/glass/glass410.jpg",
+      "label": "glass",
+      "sha256": "569b966e1bcbfe5a07566b18a1456ff5eff849110327650f0f8f5e68f37fd182"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic206.jpg",
+      "label": "plastic",
+      "sha256": "7e8d8ca65e56e0eb598928c026907bd54109ac5533a6b8ce3771664c4212ea28"
+    },
+    {
+      "name": "dataset-resized/metal/metal205.jpg",
+      "label": "metal",
+      "sha256": "fd8f76d8e26f61856dcdb9a5cdc0725951f5d360ccd80541a3c55bfffd3a9998"
+    },
+    {
+      "name": "dataset-resized/trash/trash57.jpg",
+      "label": "trash",
+      "sha256": "c7ee0e7c2884b87a5c453265ca11cb4bbf3e621eb0af36967a77d8ee74faf6d8"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic82.jpg",
+      "label": "plastic",
+      "sha256": "1a2af231f4f280680a67d841707a6b36d9438e816be6fdaf70e2e2609a2979bf"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard207.jpg",
+      "label": "cardboard",
+      "sha256": "0d19e7e6ef97e06bae787b9283eaa8f08df88b9b653e5be0e9ff75720d0239fb"
+    },
+    {
+      "name": "dataset-resized/trash/trash76.jpg",
+      "label": "trash",
+      "sha256": "d7381dad5ada3fecdd4745dcb87190dc0cdb7b23331d0612e218bf695ec07531"
+    },
+    {
+      "name": "dataset-resized/trash/trash2.jpg",
+      "label": "trash",
+      "sha256": "00d96cc08c730da1d1bd47cc303191dfe354f6fbc2d026e78634e3a7705ead70"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic357.jpg",
+      "label": "plastic",
+      "sha256": "33e291289b32fe975a1576aa28fdebcb24f94b5b28657ab1ac268adae14328bc"
+    },
+    {
+      "name": "dataset-resized/paper/paper208.jpg",
+      "label": "paper",
+      "sha256": "0ffb51316baae31451594d9a305fe3ebc4f0ead80e790451ca476363c223528c"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard299.jpg",
+      "label": "cardboard",
+      "sha256": "66b0eb2c973b01fcd6a0853047d52f76cdb6f97428e1c10e8ef68b6df7414b12"
+    },
+    {
+      "name": "dataset-resized/glass/glass100.jpg",
+      "label": "glass",
+      "sha256": "4c7cff0c0f5dacff26bf871c6d5b96f29b26d536a637bf5fc4da7fcea87212c5"
+    },
+    {
+      "name": "dataset-resized/glass/glass364.jpg",
+      "label": "glass",
+      "sha256": "0ee7095b9a08e846175af981ca30cbd3d56d28fa7147eb48109ba5659b699a46"
+    },
+    {
+      "name": "dataset-resized/trash/trash110.jpg",
+      "label": "trash",
+      "sha256": "87647d44e4efcae1c53244502fe889c68fc6b1247e878b818e45a6dcd0dc2ab7"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard159.jpg",
+      "label": "cardboard",
+      "sha256": "087c11b5a5003eaabded9748b1ee459baaed56492c02cd1bcdf17587aac01233"
+    },
+    {
+      "name": "dataset-resized/paper/paper59.jpg",
+      "label": "paper",
+      "sha256": "868bba7189276887f4f84a656cdfcd0f0934cb0a0308e8eba7806f37e7317e66"
+    },
+    {
+      "name": "dataset-resized/metal/metal305.jpg",
+      "label": "metal",
+      "sha256": "a6912d622b544a06d59817d8c956f9c3d03142fbfbb4161a56708fe95cb5e9c8"
+    },
+    {
+      "name": "dataset-resized/glass/glass31.jpg",
+      "label": "glass",
+      "sha256": "ce89bfee8b75b95af1f1dac7ed0daee2459e0f1b3fb68016b264d9e46f83be5e"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic232.jpg",
+      "label": "plastic",
+      "sha256": "a091e7139deabb255c353df965a0711759ddfd479cd2d691d67a30e14779742c"
+    },
+    {
+      "name": "dataset-resized/glass/glass291.jpg",
+      "label": "glass",
+      "sha256": "1bbf5456c82ebced8c1e322acbe71a886ddc9f6a615342cee3fcd177f9a585ce"
+    },
+    {
+      "name": "dataset-resized/trash/trash134.jpg",
+      "label": "trash",
+      "sha256": "07da038cb14ed7919525319f0f6e6e60c4589864d5979f08c1d73693f345eda5"
+    },
+    {
+      "name": "dataset-resized/trash/trash96.jpg",
+      "label": "trash",
+      "sha256": "5bfe21d663958b01b145a4934d211f721beb68db99b0be6ccf65289fdb6a92f5"
+    },
+    {
+      "name": "dataset-resized/glass/glass15.jpg",
+      "label": "glass",
+      "sha256": "e55621b76d93ae7c1a769a8530a30d0120ed284c1d730db3b617c1e040e93a05"
+    },
+    {
+      "name": "dataset-resized/trash/trash3.jpg",
+      "label": "trash",
+      "sha256": "d61760bc3764e4da7bb229fb76a8e16f39ebeaf5a4e04ad18b06446c506695c8"
+    },
+    {
+      "name": "dataset-resized/trash/trash92.jpg",
+      "label": "trash",
+      "sha256": "7eb5719dc7a61fa54d46e7f7ebe17933322c94d7b1913e0545f3b5362c684745"
+    },
+    {
+      "name": "dataset-resized/metal/metal14.jpg",
+      "label": "metal",
+      "sha256": "9fac16ae09af013cdd4273f8b81b811ccaffe3b1f064482e6001c366a757fe08"
+    },
+    {
+      "name": "dataset-resized/paper/paper84.jpg",
+      "label": "paper",
+      "sha256": "8a20c1abf8ba3aab3d9ee69629057437bbc9e86000e468acf74da37d5310fc2a"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic20.jpg",
+      "label": "plastic",
+      "sha256": "7be5d6ed8c3910e9d59de6f6ef91d18c4f1c2a731409e368ff639debc32ac857"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard78.jpg",
+      "label": "cardboard",
+      "sha256": "922a4eebb8634424a2b96f8d649cb97ef38f98bd08148f973c010edcb8c31de6"
+    },
+    {
+      "name": "dataset-resized/metal/metal310.jpg",
+      "label": "metal",
+      "sha256": "10bff8c5d8e0dc1bdd5785f57de5e4a0b69913813781b10cf5ecf09b42bbe6b9"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard36.jpg",
+      "label": "cardboard",
+      "sha256": "3e69c4338acd879596b5c97185f04de6d09725f6273485154db96173aecd54f2"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard235.jpg",
+      "label": "cardboard",
+      "sha256": "d550d9d6c2b831d3dee5bb985a259a4f872df22baaf2a1e04113350e54a2e264"
+    },
+    {
+      "name": "dataset-resized/metal/metal185.jpg",
+      "label": "metal",
+      "sha256": "bdc699a908783ac33bc196c3583282057e192549a0727951f81636c6e79b534e"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic88.jpg",
+      "label": "plastic",
+      "sha256": "d330491aa03dbaa550fb4729c87c3a82082785918068e2de501c0ff2b30f1e25"
+    },
+    {
+      "name": "dataset-resized/metal/metal161.jpg",
+      "label": "metal",
+      "sha256": "a35b3d08ada679342504b59e4fd634e0d5c556e84b4688149dd39f4a8acf3162"
+    },
+    {
+      "name": "dataset-resized/cardboard/cardboard360.jpg",
+      "label": "cardboard",
+      "sha256": "e46438a35440cd67f9214df0232ac1534408ad69e6f164586aacd69d2f73963c"
+    },
+    {
+      "name": "dataset-resized/glass/glass208.jpg",
+      "label": "glass",
+      "sha256": "dd76c1c191605769e14f839a32da8379c02fbcc6b63582dd6a78f9baf4d72583"
+    },
+    {
+      "name": "dataset-resized/plastic/plastic301.jpg",
+      "label": "plastic",
+      "sha256": "163c1534d5cb13b304af123c5961f60ac3dd1773148675e96fdb7e468c155c9a"
+    }
+  ]
+}

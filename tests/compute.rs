@@ -185,6 +185,9 @@ fn real_model_tuned_context_survives_width_changes() {
         PromptProfile::Auto,
     )
     .unwrap();
+    // Keep prompt bytes fixed while comparing compute modes. Parallel otherwise
+    // defaults to StateFirst while Fresh defaults to Legacy.
+    backend.set_prompt_layout(PromptLayout::Legacy);
     let request: DecisionRequest =
         serde_json::from_str(include_str!("../examples/warehouse.json")).unwrap();
     let fresh = backend.decide(&request).unwrap();

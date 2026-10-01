@@ -1,0 +1,5 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(Threads)
+find_dependency(nlohmann_json 3.11)
+include("${CMAKE_CURRENT_LIST_DIR}/l2s1_cppTargets.cmake")

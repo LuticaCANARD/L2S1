@@ -1,0 +1,33 @@
+{
+  "prompts": {
+    "baseline": "Choose the primary material of the main waste item in the photo. Use the image only.",
+    "traits_v1": "Choose the primary material of the main waste item in the photo. Use visible material cues, not the background, printed words, or presumed recyclability. Cardboard: thick, fairly stiff layered paperboard, often a carton or box panel; corrugation may be visible at an edge. Glass: hard, rigid material with a smooth reflective surface, often transparent or translucent with thick edges, as in a bottle or jar. Metal: opaque metallic material, often a can, lid, or foil; it may be rigid or crumpled and show a metallic sheen or formed rim. Paper: thin, flexible fibrous sheets, pages, leaflets, or paper wrapping, even when printed or folded; distinguish it from thick box board. Plastic: molded polymer containers or flexible film and wrappers; it may be clear or opaque, rigid or bendable, so transparency alone does not prove glass. Trash: residual, visibly soiled, mixed-material, or other waste when none of the five named materials is clearly the primary material. For composite objects choose the dominant visible material; use trash if none dominates."
+  },
+  "options": [
+    {
+      "id": "cardboard",
+      "criterion": "A piece of corrugated cardboard or cardboard packaging."
+    },
+    {
+      "id": "glass",
+      "criterion": "A glass object, such as a bottle or jar."
+    },
+    {
+      "id": "metal",
+      "criterion": "A metal object, such as a can or metal container."
+    },
+    {
+      "id": "paper",
+      "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+    },
+    {
+      "id": "plastic",
+      "criterion": "A plastic object, such as a bottle or plastic container."
+    },
+    {
+      "id": "trash",
+      "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+    }
+  ],
+  "traits_v1_sha256": "2f295757f010e5e6a18bdba7d26a79f802e2315a0a17b280cd75df08f341dbc1"
+}

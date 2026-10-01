@@ -1,0 +1,4 @@
+interface:
+  display_name: "L2S1 typed decisions"
+  short_description: "Build typed model decisions and handle abstention"
+  default_prompt: "Use $l2s1 to integrate typed decisions into this project and validate the request and result handling."

@@ -21,3 +21,8 @@ __pycache__/
 /web/test-results/
 /web/playwright-report/
 /web/static/docs/
+
+# Python training package build products
+training/build/
+training/dist/
+training/src/*.egg-info/

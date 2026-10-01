@@ -3,6 +3,7 @@ use l2s1::{llama::LlamaBackend, *};
 
 fn request(count: usize) -> DecisionRequest {
     DecisionRequest {
+        shared: None,
         state: serde_json::json!({"wanted": "intent_39"}),
         decisions: vec![Decision {
             id: "wide".into(),

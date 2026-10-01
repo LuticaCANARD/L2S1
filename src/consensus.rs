@@ -25,6 +25,7 @@ pub fn score_semantic_mixture(
     policy: &DecisionPolicy,
 ) -> Result<DecisionResult> {
     DecisionRequest {
+        shared: None,
         state: serde_json::Value::Null,
         decisions: vec![decision.clone()],
     }

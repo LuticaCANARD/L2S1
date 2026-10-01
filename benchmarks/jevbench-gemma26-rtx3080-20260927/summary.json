@@ -1,0 +1,258 @@
+{
+  "date": "2026-09-27",
+  "device": "NVIDIA GeForce RTX 3080 10 GiB",
+  "runs": [
+    {
+      "model": "gemma26",
+      "checkpoint": "gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+      "total": 231,
+      "correct": 193,
+      "accuracy": 0.8354978354978355,
+      "accepted": 223,
+      "accepted_correct": 192,
+      "wrong_accepted": 31,
+      "abstained": 8,
+      "coverage": 0.9653679653679653,
+      "accepted_accuracy": 0.8609865470852018,
+      "p50_ms": 1213.763605,
+      "p95_ms": 12498.787162,
+      "total_ms": 797972.463817,
+      "brier": 0.29253768177241185,
+      "ece": 0.1451044181867465,
+      "tiers": {
+        "easy": {
+          "correct": 48,
+          "total": 48
+        },
+        "original": {
+          "correct": 70,
+          "total": 72
+        },
+        "hard": {
+          "correct": 75,
+          "total": 111
+        }
+      },
+      "backend": {
+        "compute": {
+          "batch": 256,
+          "context": 8192,
+          "cpu_moe_layers": 22,
+          "flash_attention": "off",
+          "threads": 4,
+          "ubatch": 256
+        },
+        "execution_mode": "fresh",
+        "model_architecture": "gemma4",
+        "model_description": "gemma4 26B.A4B Q4_K - Medium",
+        "model_path": "/home/lutica/personal/skid/skid-desion/models/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+        "offload_device": "NVIDIA GeForce RTX 3080",
+        "offload_requested": true,
+        "parallel_width": 1,
+        "prompt_layout": "legacy",
+        "prompt_profile": "model",
+        "prompt_version": "gguf-jinja-decision-v1",
+        "runtime": "local-libllama"
+      },
+      "input_tokens": 155090,
+      "reused_prefix_tokens": 0,
+      "risk_coverage_at_error_budget": [
+        {
+          "accepted": 139,
+          "coverage": 0.6017316017316018,
+          "error_budget": 0.01,
+          "errors": 1,
+          "min_confidence": 0.9999998436377326,
+          "risk": 0.007194244604316547
+        },
+        {
+          "accepted": 175,
+          "coverage": 0.7575757575757576,
+          "error_budget": 0.05,
+          "errors": 8,
+          "min_confidence": 0.9998864113374377,
+          "risk": 0.045714285714285714
+        },
+        {
+          "accepted": 202,
+          "coverage": 0.8744588744588745,
+          "error_budget": 0.1,
+          "errors": 20,
+          "min_confidence": 0.989405671961035,
+          "risk": 0.09900990099009901
+        }
+      ],
+      "gpu_memory": {
+        "peak_board_used_mib": 9774.0,
+        "sampling_ms": 200,
+        "scope": "whole GPU, includes baseline and other processes"
+      },
+      "identity": {
+        "model_sha256": "f2c28b3dc4776931ac6f879e11f203dec637ea0f14267a86ec8f6165f63f293f",
+        "evaluator_sha256": "768d914e6441ca61f163f074f767584ed9e0f611c6902c2789a164209451dcc2",
+        "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+        "adapter_sha256": "28b0736077c5d87a54b0df4cdd656f3086922bee483deddac0a9635568ce3468"
+      },
+      "predictions_sha256": "c00e20e6364f38b9ec20b861f99366f2341bef4c479dbf50f1f8aacfa40f000c",
+      "summary_sha256": "55af611bca206c4fe980cf26113ecf95348dab5adf9a7db9f4dbec6fe5338c92"
+    }
+  ],
+  "schema_diagnostics": [
+    {
+      "model": "gemma26",
+      "batch": 64,
+      "rounds": 1,
+      "schemas": 21,
+      "decisions": 135,
+      "fresh_ms": 311675.534195,
+      "reused_ms": 196768.63801,
+      "speed_ratio": 1.58396956622305,
+      "input_tokens": 22444,
+      "reused_prefix_tokens": 9984,
+      "probability_delta": 0.0,
+      "mass_delta": 0.0,
+      "changed": {
+        "predicted": 0,
+        "selected": 0
+      },
+      "equivalence_passed": true,
+      "correct_fresh": 129,
+      "correct_reuse": 129,
+      "vs_standard256_changed_top1": 2,
+      "vs_standard256_changed_selection": 3,
+      "vs_standard256_probability_delta": 0.9937255572063202,
+      "vs_standard256_changed_cases": [
+        {
+          "id": "hard-sol-b-judge_hard-10",
+          "expected": "no",
+          "predicted": "yes",
+          "standard_predicted": "yes",
+          "selected": null,
+          "standard_selected": "yes"
+        },
+        {
+          "id": "hard-sol-c-judge_hard-15",
+          "expected": "yes",
+          "predicted": "no",
+          "standard_predicted": "yes",
+          "selected": "no",
+          "standard_selected": "yes"
+        },
+        {
+          "id": "original-routing-06-1",
+          "expected": "general",
+          "predicted": "general",
+          "standard_predicted": "coding",
+          "selected": "general",
+          "standard_selected": "coding"
+        }
+      ],
+      "raw_report_sha256": "7588331e901ee3a08eaa97f96878ad3360debcfc108450d6f8030376cf4a1db7"
+    },
+    {
+      "model": "gemma26",
+      "batch": 256,
+      "rounds": 1,
+      "schemas": 21,
+      "decisions": 135,
+      "fresh_ms": 170765.53639,
+      "reused_ms": 174188.17062599998,
+      "speed_ratio": 0.9803509375883582,
+      "input_tokens": 22444,
+      "reused_prefix_tokens": 0,
+      "probability_delta": 0.0,
+      "mass_delta": 0.0,
+      "changed": {
+        "predicted": 0,
+        "selected": 0
+      },
+      "equivalence_passed": true,
+      "correct_fresh": 129,
+      "correct_reuse": 129,
+      "vs_standard256_changed_top1": 0,
+      "vs_standard256_changed_selection": 0,
+      "vs_standard256_probability_delta": 0.00015609432400944846,
+      "vs_standard256_changed_cases": [],
+      "raw_report_sha256": "e28e747ae3b705a23f2195828ac56f4bfbc98e985b7ce2bac7c43990cf2520e8"
+    }
+  ],
+  "input_manifest": {
+    "dataset_hash": "dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51",
+    "jevbench_revision": "f79a1cab94ab9a5879383b7ef9ee1805b9dc2d84",
+    "label_order": "canonical task.labels; binary false/true mapped to no/yes",
+    "planned": 231,
+    "probability_origin": "native candidate-token softmax, not learned calibration",
+    "requests_sha256": "6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa",
+    "scope": "Public 231 items only; no official full-suite score or rank; no training or tuning",
+    "source_sha256": {
+      "easy.jsonl": "231df3c2c8e88a1a8c137ebe85de96ba70fabd330849098ac7b3c52c70b7172b",
+      "hard.jsonl": "89e9e6becb33ed88c1de7d42dcc87531b2fb64cfaef4e1986faf7c37b3f80ebb",
+      "original.jsonl": "5c2414edb3006b8bfcb70fda433f0f9ca015759433849f8d3104328a1f7c4180"
+    },
+    "tier_counts": {
+      "easy": 48,
+      "hard": 111,
+      "original": 72
+    }
+  },
+  "source": {
+    "git_revision": "03d5bc052154b3dbe6d4cfb4842dd5291a7eae9f",
+    "working_tree_dirty": true,
+    "scoped_source_sha256": {
+      "Cargo.toml": "d32a85fe2b93fe95f13d56679249ae1f72c06bef9f4c7231e595fe754212a5af",
+      "Cargo.lock": "2f113353691faa90d22e97712393a06b27b88a18b64d35bf885063fdc2961ac7",
+      "examples/evaluate_jsonl.rs": "37985f900ee7daddeab6d2a40f5efe0e66b859a117e5b8679f3b68a2f5778f84",
+      "examples/benchmark_schema_reuse.rs": "473d97f6e5f4d6f13c3f91a4762369a81445df147c8f091a87e958906e833501",
+      "src/llama.rs": "6bc9e32dd123c8f4cdde3282652f1d6cbafb8cd002f10b5490e0012b22f5861b",
+      "src/llama/shared_decision.rs": "be7dbb3e14429be945c0007e8169b474f99301764503b882e03c41f37c750bcf",
+      "crates/l2s1-tools/src/jevbench_public.rs": "28b0736077c5d87a54b0df4cdd656f3086922bee483deddac0a9635568ce3468",
+      "crates/l2s1-tools/src/selective_metrics.rs": "48542fbd4513e558c75e5cb00ec1f6d2bc9e3513637eacc475630713a7bca283",
+      "build.rs": "e376029a1a2d52972e52d057a1cfeaa514034045487b109b52aeb46a53ccfa16"
+    },
+    "tools_sha256": "ac66bf4a7cfac71f0b3e5a26f29982a2590aef74403b4c5588f9affac26a4586",
+    "scope": "26B extension: fresh inference uses the same frozen evaluator and scorer as the five-model RTX 3080 rerun. The schema harness adds placement CLI controls; runtime sources are unchanged. Original dirty v0.1.1 checkout; PR is based on v0.1.2 main, not a final-PR-binary timing claim.",
+    "binaries_sha256": {
+      "/tmp/l2s1-jev-current-evaluate": "768d914e6441ca61f163f074f767584ed9e0f611c6902c2789a164209451dcc2",
+      "/tmp/l2s1-gemma26-schema-reuse": "abc01e932d37092b70020d027a263e24c3c5406a517308bfae96e6594f7d27e0",
+      "/tmp/l2s1-jev-measured-tools": "ac66bf4a7cfac71f0b3e5a26f29982a2590aef74403b4c5588f9affac26a4586"
+    },
+    "native_source_commit": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+    "cuda_architecture": "86",
+    "context": 8192,
+    "threads": 4,
+    "cpu_moe_layers": 22,
+    "download": {
+      "repository": "unsloth/gemma-4-26B-A4B-it-GGUF",
+      "revision": "c099eb48e663fd284577b04978a94ffccb261841",
+      "file": {
+        "type": "file",
+        "oid": "f5c4a0fda98ac1b2d4a4d0133995b50fc871e5a3",
+        "size": 16947541728,
+        "lfs": {
+          "oid": "f2c28b3dc4776931ac6f879e11f203dec637ea0f14267a86ec8f6165f63f293f",
+          "size": 16947541728,
+          "pointerSize": 136
+        },
+        "xetHash": "1b880a852a0f450f721827f7471ef710bc8c21d24e6e46d743f8ef0a16060f9d",
+        "path": "gemma-4-26B-A4B-it-UD-Q4_K_M.gguf"
+      },
+      "url": "https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF/resolve/c099eb48e663fd284577b04978a94ffccb261841/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf"
+    },
+    "diagnostic_scope": "135 of 231 public items belonging to 21 repeated schemas; 96 singleton schemas are excluded only from paired schema diagnostics.",
+    "environment": {
+      "os": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "logical_cpus": 4,
+      "cpu_reported": "Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz",
+      "physical_ram_kib": 16378476
+    }
+  },
+  "audit_sha256": "e1c80648d63cf62a77da33941c951316fdfd7f6faacd389cc097bf4e8e7ef32d",
+  "diagnostic_requests_sha256": "924ccf72dee17e318f378e88c0abe9a115d822c5a5658e8bc9df7187da2fe180",
+  "schema_counts": {
+    "total": 117,
+    "singletons": 96,
+    "repeated": 21,
+    "post_first_calls": 114
+  },
+  "scope": "Public 231 items per model, not full 534 or official scores. One fresh 26B run with CPU expert offload. Schema diagnostics cover only the 135 items in 21 repeated schemas (96 singleton schemas excluded), with one paired grouped pass after per-path warmups; not stable percentiles or an accuracy gain. Latency comparisons across previous hardware/builds are uncontrolled. Full native responses and logs remain local ignored artifacts."
+}

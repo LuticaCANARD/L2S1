@@ -29,24 +29,6 @@
       "cudaAbstentionRate": 0.0,
       "nativeCpu": true,
       "nativeCuda": true
-    },
-    {
-      "model": "SmolLM2 135M Q8_0",
-      "cpuP50": 720.385726,
-      "cudaP50": 52.201905,
-      "cudaDecisionsPerSecond": 56.81999596873493,
-      "cudaAbstentionRate": 1.0,
-      "nativeCpu": true,
-      "nativeCuda": true
-    },
-    {
-      "model": "TinyLlama 1.1B Q4_K_M",
-      "cpuP50": 3797.045148,
-      "cudaP50": 49.398651,
-      "cudaDecisionsPerSecond": 60.94845226545457,
-      "cudaAbstentionRate": 1.0,
-      "nativeCpu": true,
-      "nativeCuda": false
     }
   ]
 }

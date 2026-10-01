@@ -1,0 +1,7 @@
+{
+  "images": 120,
+  "matching_predictions": 120,
+  "p50_ms": 13.802400000031412,
+  "p95_ms": 25.422598999966795,
+  "includes": "HTTP + decoding + preprocessing + two image views + classifier; model load excluded; first request included"
+}

@@ -1,0 +1,50 @@
+export const messages = {
+  "en": {
+    "preferences": "Display preferences",
+    "language": "Language",
+    "theme": "Appearance",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "home": "L2S1 home",
+    "mainNavigation": "Main navigation",
+    "howItWorks": "How it works",
+    "models": "Models",
+    "performance": "Performance",
+    "webgpuDemo": "WebGPU demo",
+    "imageDemo": "Image demo",
+    "startBuilding": "Start building"
+  },
+  "ko": {
+    "preferences": "화면 설정",
+    "language": "언어",
+    "theme": "화면 모드",
+    "system": "시스템 설정",
+    "light": "라이트",
+    "dark": "다크",
+    "home": "L2S1 홈",
+    "mainNavigation": "주요 메뉴",
+    "howItWorks": "작동 방식",
+    "models": "모델",
+    "performance": "성능",
+    "webgpuDemo": "WebGPU 데모",
+    "imageDemo": "이미지 데모",
+    "startBuilding": "개발 시작하기"
+  },
+  "ja": {
+    "preferences": "表示設定",
+    "language": "言語",
+    "theme": "表示モード",
+    "system": "システム設定",
+    "light": "ライト",
+    "dark": "ダーク",
+    "home": "L2S1 ホーム",
+    "mainNavigation": "メインナビゲーション",
+    "howItWorks": "仕組み",
+    "models": "モデル",
+    "performance": "性能",
+    "webgpuDemo": "WebGPU デモ",
+    "imageDemo": "画像デモ",
+    "startBuilding": "開発を始める"
+  }
+};

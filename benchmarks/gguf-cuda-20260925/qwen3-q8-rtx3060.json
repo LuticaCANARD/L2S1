@@ -1,0 +1,209 @@
+{
+  "decisions": [
+    {
+      "calibration_id": null,
+      "decision_id": "storage_zone",
+      "effective_mode": "fresh",
+      "evidence_kind": "native_full_vocabulary_logits_v1",
+      "fallback_reason": null,
+      "prompt_tokens_sha256": "d62dd12c0cf0c0a432134ad87d1986a87fcd6432500b87c5188032510deedeb8",
+      "requested_mode": "fresh",
+      "reused_prefix_tokens": 0
+    },
+    {
+      "calibration_id": null,
+      "decision_id": "cold_chain_required",
+      "effective_mode": "fresh",
+      "evidence_kind": "native_full_vocabulary_logits_v1",
+      "fallback_reason": null,
+      "prompt_tokens_sha256": "4c8d9ab78cc56c357415657106dd545efb1513233faebae0e1510f492d281948",
+      "requested_mode": "fresh",
+      "reused_prefix_tokens": 0
+    },
+    {
+      "calibration_id": null,
+      "decision_id": "dispatch_priority",
+      "effective_mode": "fresh",
+      "evidence_kind": "native_full_vocabulary_logits_v1",
+      "fallback_reason": null,
+      "prompt_tokens_sha256": "4b584b760e70e250bce726c9baa27a18aefc96d0605bf6a79bb7daab661bc010",
+      "requested_mode": "fresh",
+      "reused_prefix_tokens": 0
+    }
+  ],
+  "model": {
+    "adapter_sha256": null,
+    "compute": {
+      "batch": 256,
+      "context": 2048,
+      "flash_attention": "off",
+      "threads": 4,
+      "ubatch": 256
+    },
+    "device": "NVIDIA GeForce RTX 3060",
+    "execution_mode": "fresh",
+    "head_sha256": null,
+    "loaded_runtime_sha256": "ae19e1bb27af03e2057408582ca17f35a748b7fec5aab75db5bef03763a026d8",
+    "parallel_width": 1,
+    "prompt_profile": "qwen3",
+    "prompt_version": "qwen3-no-thinking-decision-v1",
+    "runtime_build_sha256": "771abedbe730b88af57cc1bc35543c4353b30382de7bf9c475a78e9814e66043",
+    "template_sha256": "57f1fd00f0013a2be96aa79b857391f27e23df5b5f847072b524c897e24d0361",
+    "weights_sha256": "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
+  },
+  "response": {
+    "backend": {
+      "compute": {
+        "batch": 256,
+        "context": 2048,
+        "flash_attention": "off",
+        "threads": 4,
+        "ubatch": 256
+      },
+      "execution_mode": "fresh",
+      "model_architecture": "qwen3",
+      "model_description": "qwen3 0.6B Q8_0",
+      "model_path": "/home/lutica/personal/skid/skid-desion/models/Qwen3-0.6B-Q8_0.gguf",
+      "offload_device": "NVIDIA GeForce RTX 3060",
+      "offload_requested": true,
+      "parallel_width": 1,
+      "prompt_layout": "legacy",
+      "prompt_profile": "qwen3",
+      "prompt_version": "qwen3-no-thinking-decision-v1",
+      "runtime": "local-libllama"
+    },
+    "policy": {
+      "min_candidate_mass": 0.05,
+      "min_top_probability": 0.8
+    },
+    "results": [
+      {
+        "abstention_reasons": [],
+        "calibration_id": null,
+        "candidate_mass": 0.997611910005615,
+        "entropy_confidence": 0.9369721226608222,
+        "id": "storage_zone",
+        "input_tokens": 139,
+        "reused_prefix_tokens": 0,
+        "scores": [
+          {
+            "code": "A",
+            "id": "ambient",
+            "option_probability": 0.9886985461382675,
+            "raw_logit": 25.694496154785156,
+            "token_id": 32
+          },
+          {
+            "code": "B",
+            "id": "chilled",
+            "option_probability": 0.003998632656097861,
+            "raw_logit": 20.184059143066406,
+            "token_id": 33
+          },
+          {
+            "code": "C",
+            "id": "frozen",
+            "option_probability": 0.00730282120563365,
+            "raw_logit": 20.786367416381836,
+            "token_id": 34
+          }
+        ],
+        "scoring_method": "single_token_conditional_softmax_v1",
+        "top_option_probability": 0.9886985461382675,
+        "truncated": false,
+        "value": {
+          "selected": "ambient",
+          "type": "choice"
+        }
+      },
+      {
+        "abstention_reasons": [],
+        "calibration_id": null,
+        "candidate_mass": 0.9872605972809904,
+        "entropy_confidence": 0.4501026913791025,
+        "id": "cold_chain_required",
+        "input_tokens": 131,
+        "reused_prefix_tokens": 0,
+        "scores": [
+          {
+            "code": "A",
+            "id": "false",
+            "option_probability": 0.8727321675356752,
+            "raw_logit": 24.989681243896484,
+            "token_id": 32
+          },
+          {
+            "code": "B",
+            "id": "true",
+            "option_probability": 0.12726783246432558,
+            "raw_logit": 23.064346313476562,
+            "token_id": 33
+          }
+        ],
+        "scoring_method": "single_token_conditional_softmax_v1",
+        "top_option_probability": 0.8727321675356752,
+        "truncated": false,
+        "value": {
+          "p_true": 0.12726783246432558,
+          "type": "binary",
+          "value": false
+        }
+      },
+      {
+        "abstention_reasons": [],
+        "calibration_id": null,
+        "candidate_mass": 0.9992930321286674,
+        "entropy_confidence": 0.9804642663428902,
+        "id": "dispatch_priority",
+        "input_tokens": 158,
+        "reused_prefix_tokens": 0,
+        "scores": [
+          {
+            "code": "A",
+            "id": "low",
+            "option_probability": 0.9970655359494224,
+            "raw_logit": 26.903879165649414,
+            "token_id": 32
+          },
+          {
+            "code": "B",
+            "id": "medium",
+            "option_probability": 0.0005532196638490482,
+            "raw_logit": 19.407062530517578,
+            "token_id": 33
+          },
+          {
+            "code": "C",
+            "id": "high",
+            "option_probability": 0.0023812443867280457,
+            "raw_logit": 20.86668586730957,
+            "token_id": 34
+          }
+        ],
+        "scoring_method": "single_token_conditional_softmax_v1",
+        "top_option_probability": 0.9970655359494224,
+        "truncated": false,
+        "value": {
+          "expected_value": 0.00531570843730514,
+          "selected": "low",
+          "type": "ordinal"
+        }
+      }
+    ]
+  },
+  "state_restore": {
+    "fallback_reason": null,
+    "prefill_ms": 0.0,
+    "restore_ms": 0.0,
+    "restores": 0,
+    "save_ms": 0.0,
+    "snapshot_bytes": 0,
+    "suffix_ms": 0.0
+  },
+  "timings": {
+    "decisions": 3,
+    "native_ms": 130.731835,
+    "prepare_ms": 1.489506,
+    "score_ms": 1.841912
+  }
+}

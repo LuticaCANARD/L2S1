@@ -1,0 +1,91 @@
+Building CUDA sm_86 in target/cuda-architectures/sm_86
+   Compiling version_check v0.9.5
+   Compiling typenum v1.20.1
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling generic-array v0.14.7
+   Compiling find-msvc-tools v0.1.12
+   Compiling cpufeatures v0.2.17
+   Compiling cfg-if v1.0.4
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.5
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling digest v0.10.7
+   Compiling syn v3.0.4
+   Compiling sha2 v0.10.9
+   Compiling cmake v0.1.58
+   Compiling serde_core v1.0.229
+   Compiling utf8parse v0.2.2
+   Compiling anstyle-parse v1.0.0
+   Compiling l2s1-llama-sys v0.1.0 (/home/lutica/personal/skid/skid-desion/crates/l2s1-llama-sys)
+   Compiling zmij v1.0.23
+   Compiling anstyle-query v1.1.5
+   Compiling colorchoice v1.0.5
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle v1.0.14
+   Compiling anstream v1.0.0
+   Compiling clap_lex v1.1.0
+   Compiling serde_json v1.0.151
+   Compiling strsim v0.11.1
+   Compiling heck v0.5.0
+   Compiling thiserror v2.0.20
+   Compiling serde v1.0.229
+   Compiling thiserror-impl v2.0.20
+   Compiling clap_derive v4.6.4
+   Compiling serde_derive v1.0.229
+   Compiling clap_builder v4.6.6
+   Compiling l2s1 v0.1.0 (/home/lutica/personal/skid/skid-desion)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling clap v4.6.6
+   Compiling base64 v0.22.1
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/parser.h:4,
+warning: l2s1-llama-sys@0.1.0:                  from /home/lutica/personal/skid/skid-desion/crates/l2s1-llama-sys/native/chat.cpp:2:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/crates/l2s1-llama-sys/native/chat.cpp:1:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/lexer.cpp:2:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/lexer.cpp:1:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/parser.cpp:2:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/parser.cpp:1:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/runtime.cpp:2:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/runtime.cpp:1:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/string.h:7,
+warning: l2s1-llama-sys@0.1.0:                  from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/string.cpp:1:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/utils.h:44:20: warning: 'std::string jinja::fmt_error_with_source(const std::string&, const std::string&, const std::string&, size_t)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:    44 | static std::string fmt_error_with_source(const std::string & tag, const std::string & msg, const std::string & source, size_t pos) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/value.cpp:1:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.0: In file included from /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/runtime.h:3:
+warning: l2s1-llama-sys@0.1.0: /home/lutica/personal/skid/skid-desion/target/release/build/l2s1-llama-sys-3b7e3a0078c50a70/out/llama/868fd2e619456926/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.0:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.0:       |                    ^~~~~~~~~~~~~~
+    Finished `release` profile [optimized] target(s) in 14m 01s
+Built target/cuda-architectures/sm_86/release/run-l2s1

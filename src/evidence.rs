@@ -2,6 +2,7 @@
 use crate::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+mod simd;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -30,6 +31,7 @@ impl ExactEvidence {
         normalizer: f64,
     ) -> Result<Self> {
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![decision.clone()],
         }
@@ -79,17 +81,18 @@ impl ExactEvidence {
     }
     pub fn from_logits(decision: &Decision, logits: &[f32], tokens: &[i32]) -> Result<Self> {
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![decision.clone()],
         }
         .validate()?;
         let options = decision.options();
-        if logits.is_empty()
-            || tokens.len() != options.len()
-            || logits.iter().any(|v| v.is_nan() || *v == f32::INFINITY)
-        {
+        if logits.is_empty() || tokens.len() != options.len() {
             return Err(Error::Backend("invalid logits or candidate count".into()));
         }
+        let max = simd::maximum(logits)
+            .ok_or_else(|| Error::Backend("invalid logits or candidate count".into()))?
+            as f64;
         let mut seen = HashSet::new();
         let mut candidates = Vec::new();
         for (option, &token_id) in options.iter().zip(tokens) {
@@ -109,10 +112,6 @@ impl ExactEvidence {
             });
         }
         // Same order and f64 arithmetic as the original full-logit scorer.
-        let max = logits
-            .iter()
-            .map(|&x| x as f64)
-            .fold(f64::NEG_INFINITY, f64::max);
         let full_vocabulary_log_normalizer = max
             + logits
                 .iter()
@@ -147,6 +146,7 @@ impl ExactEvidence {
             ));
         }
         DecisionRequest {
+            shared: None,
             state: serde_json::Value::Null,
             decisions: vec![decision.clone()],
         }

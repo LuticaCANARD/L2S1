@@ -10,8 +10,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     use clap::Parser;
     use l2s1::{
         ComputeOptions, DecisionPolicy, DecisionRequest, EvidenceTransfer, ExecutionMode,
-        FlashAttention, PreparationCacheConfig, PromptDetail, PromptLayout, PromptProfile,
-        llama::LlamaBackend,
+        FlashAttention, ParallelPrefixAlignment, PreparationCacheConfig, PromptDetail,
+        PromptLayout, PromptProfile, llama::LlamaBackend,
     };
     use serde::Deserialize;
     use std::{
@@ -21,10 +21,57 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         time::Instant,
     };
 
+    #[derive(Clone, Copy, Default, clap::ValueEnum, PartialEq, Eq, serde::Serialize)]
+    #[serde(rename_all = "snake_case")]
+    enum Resident {
+        #[default]
+        None,
+        FixedSchema,
+        SharedPrefix,
+    }
+
+    enum Runner<'a> {
+        Ordinary(&'a mut LlamaBackend),
+        Fixed(l2s1::llama::SharedDecisionSession<'a>),
+        Shared(l2s1::llama::ParallelPrefixSession<'a>),
+    }
+    impl Runner<'_> {
+        fn decide_batch(
+            &mut self,
+            requests: &[DecisionRequest],
+        ) -> l2s1::Result<Vec<l2s1::DecisionResponse>> {
+            match self {
+                Self::Ordinary(b) => b.decide_batch(requests),
+                Self::Fixed(s) => requests.iter().map(|r| s.decide(r.state.clone())).collect(),
+                Self::Shared(s) => s.decide_batch(requests),
+            }
+        }
+        fn stats(&self) -> l2s1::llama::PreparationCacheStats {
+            match self {
+                Self::Ordinary(b) => b.preparation_cache_stats(),
+                Self::Fixed(s) => s.preparation_cache_stats(),
+                Self::Shared(s) => s.preparation_cache_stats(),
+            }
+        }
+        fn timings(&mut self) -> l2s1::llama::InferenceTimings {
+            match self {
+                Self::Ordinary(b) => b.take_timings(),
+                Self::Fixed(s) => s.take_timings(),
+                Self::Shared(s) => s.take_timings(),
+            }
+        }
+    }
+
     #[derive(Parser)]
     struct Args {
         #[arg(long)]
         model: PathBuf,
+        /// Keep a scoped native KV session across measured calls. First call is cold.
+        #[arg(long, value_enum, default_value_t = Resident::None)]
+        resident: Resident,
+        /// Evaluate explicit per-row fact specs; labels are never read by this process.
+        #[arg(long)]
+        derive_facts: bool,
         #[arg(long, value_enum, default_value_t = EvidenceTransfer::Full)]
         evidence_transfer: EvidenceTransfer,
         #[arg(long, default_value_t = 0)]
@@ -41,6 +88,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         output: PathBuf,
         #[arg(long)]
         cuda: bool,
+        #[arg(long, conflicts_with = "cuda")]
+        metal: bool,
         #[arg(long, default_value_t = 2048)]
         context: u32,
         #[arg(long, default_value_t = 256)]
@@ -70,6 +119,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         code_rotation: u32,
         #[arg(long, default_value_t = 4, value_parser = clap::value_parser!(u32).range(1..=32))]
         parallel_width: u32,
+        /// Size parallel KV memory from actual input tokens plus one batch.
+        #[arg(long)]
+        parallel_context_dynamic: bool,
+        /// `token` shares every common prefix token; scores can change slightly.
+        #[arg(long, value_enum, default_value_t = ParallelPrefixAlignment::Batch)]
+        parallel_prefix_alignment: ParallelPrefixAlignment,
         /// Independent article requests per call; prompts/states are never merged.
         #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u32).range(1..=32))]
         request_batch_size: u32,
@@ -83,6 +138,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     struct Case {
         id: String,
         request: DecisionRequest,
+        #[serde(default)]
+        facts: Vec<l2s1::FactSpec>,
     }
 
     let args = Args::parse();
@@ -100,6 +157,46 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if cases.is_empty() {
         return Err("Dataset must not be empty".into());
     }
+    if args.resident == Resident::FixedSchema {
+        if args.execution_mode != ExecutionMode::PrefixReuse || args.request_batch_size != 1 {
+            return Err(
+                "fixed-schema requires --execution-mode prefix-reuse and --request-batch-size 1"
+                    .into(),
+            );
+        }
+        if args.output_head.is_some() {
+            return Err("fixed-schema does not support output heads".into());
+        }
+        let schema = serde_json::to_value(&cases[0].request.decisions)?;
+        for case in &cases {
+            if case.request.shared.is_some()
+                || case.request.decisions.len() != 1
+                || serde_json::to_value(&case.request.decisions)? != schema
+            {
+                return Err("fixed-schema requires one identical decision and no shared evidence in every row".into());
+            }
+        }
+    }
+    if args.resident == Resident::SharedPrefix && args.execution_mode != ExecutionMode::Parallel {
+        return Err("shared-prefix requires --execution-mode parallel".into());
+    }
+    let mut fact_hashes = Vec::with_capacity(cases.len());
+    for case in &cases {
+        use sha2::{Digest, Sha256};
+        // Fail before loading a model or creating output. Recompute inside each
+        // timed call so reported latency includes request-side preprocessing.
+        if args.derive_facts {
+            l2s1::derive_facts(&case.request.state, &case.facts)?;
+        }
+        fact_hashes.push(if args.derive_facts {
+            Some(format!(
+                "{:x}",
+                Sha256::digest(serde_json::to_vec(&case.facts)?)
+            ))
+        } else {
+            None
+        });
+    }
     let mut output = BufWriter::new(
         OpenOptions::new()
             .write(true)
@@ -107,22 +204,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .open(&args.output)?,
     );
     let started = Instant::now();
-    let mut backend = LlamaBackend::load_with_options(
-        &args.model,
-        ComputeOptions {
-            context: args.context,
-            batch: args.batch,
-            ubatch: args.ubatch.unwrap_or(args.batch),
-            threads: args.threads,
-            flash_attention: args.flash_attention,
-            gpu_layers: args.gpu_layers,
-            cpu_moe_layers: args.cpu_moe_layers,
-            model_load_mode: args.model_load_mode,
-        },
-        args.cuda,
-        DecisionPolicy::default(),
-        PromptProfile::Auto,
-    )?;
+    let compute = ComputeOptions {
+        context: args.context,
+        batch: args.batch,
+        ubatch: args.ubatch.unwrap_or(args.batch),
+        threads: args.threads,
+        flash_attention: args.flash_attention,
+        gpu_layers: args.gpu_layers,
+        cpu_moe_layers: args.cpu_moe_layers,
+        model_load_mode: args.model_load_mode,
+    };
+    let mut backend = if args.metal {
+        LlamaBackend::load_with_metal_options(
+            &args.model,
+            compute,
+            DecisionPolicy::default(),
+            PromptProfile::Auto,
+        )?
+    } else {
+        LlamaBackend::load_with_options(
+            &args.model,
+            compute,
+            args.cuda,
+            DecisionPolicy::default(),
+            PromptProfile::Auto,
+        )?
+    };
     if let Some(path) = &args.lora {
         backend.load_lora(path)?;
     }
@@ -139,27 +246,56 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         backend.load_output_head(path)?;
     }
     backend.set_parallel_width(args.parallel_width as usize)?;
+    backend.set_parallel_context_dynamic(args.parallel_context_dynamic);
+    backend.set_parallel_prefix_alignment(args.parallel_prefix_alignment);
     let load_ms = started.elapsed().as_secs_f64() * 1000.0;
     let batch_size = args.request_batch_size as usize;
     if args.warmup {
         let requests: Vec<_> = cases
             .iter()
             .take(batch_size)
-            .map(|c| c.request.clone())
-            .collect();
+            .map(|c| {
+                let mut request = c.request.clone();
+                if args.derive_facts {
+                    request.state = l2s1::derive_facts(&request.state, &c.facts)?;
+                }
+                Ok(request)
+            })
+            .collect::<l2s1::Result<_>>()?;
         backend.decide_batch(&requests)?;
     }
     // Warmup must not populate the measured preparation-cache hit counts.
     backend.clear_preparation_cache();
     backend.take_timings(); // Exclude warmup profiling.
+    // Create after ordinary warmup: no warmup KV leaks into the first measured call.
+    let mut runner = match args.resident {
+        Resident::None => Runner::Ordinary(&mut backend),
+        Resident::FixedSchema => {
+            Runner::Fixed(backend.shared_decision(cases[0].request.decisions[0].clone())?)
+        }
+        Resident::SharedPrefix => Runner::Shared(backend.parallel_prefix_session()?),
+    };
     for (batch_index, batch) in cases.chunks(batch_size).enumerate() {
-        let requests: Vec<_> = batch.iter().map(|case| case.request.clone()).collect();
-        let cache_before = serde_json::to_value(backend.preparation_cache_stats())?;
+        let cache_before = serde_json::to_value(runner.stats())?;
         let started = Instant::now();
-        let response = backend.decide_batch(&requests);
+        let requests: Vec<_> = batch
+            .iter()
+            .map(|case| {
+                let mut request = case.request.clone();
+                if args.derive_facts {
+                    request.state = l2s1::derive_facts(&request.state, &case.facts)?;
+                }
+                Ok(request)
+            })
+            .collect::<l2s1::Result<_>>()?;
+        let preprocess_ms = started.elapsed().as_secs_f64() * 1000.0;
+        let inference_started = Instant::now();
+        let response = runner.decide_batch(&requests);
+        let inference_ms = inference_started.elapsed().as_secs_f64() * 1000.0;
         let elapsed_ms = started.elapsed().as_secs_f64() * 1000.0;
-        let timings = serde_json::to_value(backend.take_timings())?;
-        let cache_after = serde_json::to_value(backend.preparation_cache_stats())?;
+        let offset = batch_index * batch_size;
+        let timings = serde_json::to_value(runner.timings())?;
+        let cache_after = serde_json::to_value(runner.stats())?;
         let records: Vec<_> = match response {
             Ok(responses) => batch
                 .iter()
@@ -179,7 +315,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 })
                 .collect(),
         };
-        for (mut record, case) in records.into_iter().zip(batch) {
+        for (index, (mut record, case)) in records.into_iter().zip(batch).enumerate() {
+            record["resident"] = serde_json::to_value(args.resident)?;
+            record["facts_sha256"] = serde_json::to_value(&fact_hashes[offset + index])?;
+            record["preprocess_ms"] = preprocess_ms.into();
+            record["inference_ms"] = inference_ms.into();
             // elapsed_ms is the article's full batch completion latency, not
             // latency divided by batch size. Throughput uses unique batch times.
             record["batch_profile"] = timings.clone();

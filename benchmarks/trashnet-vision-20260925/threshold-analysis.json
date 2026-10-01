@@ -1,0 +1,365 @@
+{
+  "experiment": {
+    "prompt_mode": "traits_v2",
+    "instruction": "Classify the primary visible material of the main discarded object. First identify the foreground object; ignore the white background, shadows, printed text, brand, presumed contents, and whether an item is recyclable. Compare several visible physical cues rather than one color, shape, or highlight. The six category guides are: CARDBOARD is thick, relatively stiff paper fiber formed into a box, carton, or packaging panel. A cut edge may reveal layers or corrugation; a printed surface can still be cardboard. Distinguish it from a thin sheet that bends or folds easily. GLASS is hard and rigid, often with thick transparent or colored translucent walls, sharp specular reflections, and a solid bottle or jar rim. A bottle silhouette or transparency by itself does not establish glass. METAL includes cans, lids, sheet metal, and foil. Look for a metallic surface, formed rims or seams, or crumpled reflective foil; paint and printing can hide the sheen. PAPER is a relatively thin, flexible fibrous sheet such as a page, leaflet, newspaper, or paper wrapper. Printing, gloss, and folding do not turn a thin sheet into cardboard. PLASTIC includes molded bottles, tubs, caps, and thin film or wrappers. It can be clear or opaque, stiff or flexible; thin walls, molded seams, and film folds can distinguish it from rigid glass. TRASH is residual waste, visibly soiled material, a mixed or composite item with no clear primary material among the five above, or an object made mainly from another material. Do not use trash merely because a clearly identifiable paper, plastic, metal, glass, or cardboard item is broken or discarded. If several materials appear, choose the material occupying most of the main object; choose trash when none clearly dominates. Return one of the six named classes.",
+    "instruction_sha256": "beb2a5980ae5ec92cdaec1e073f17905871597cac61f5349fd70d32d81880662",
+    "options": [
+      {
+        "id": "cardboard",
+        "criterion": "A piece of corrugated cardboard or cardboard packaging."
+      },
+      {
+        "id": "glass",
+        "criterion": "A glass object, such as a bottle or jar."
+      },
+      {
+        "id": "metal",
+        "criterion": "A metal object, such as a can or metal container."
+      },
+      {
+        "id": "paper",
+        "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+      },
+      {
+        "id": "plastic",
+        "criterion": "A plastic object, such as a bottle or plastic container."
+      },
+      {
+        "id": "trash",
+        "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+      }
+    ],
+    "min_top_probability": 0.5,
+    "min_candidate_mass": 0.05,
+    "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+    "models": [
+      "qwen3vl",
+      "gemma4",
+      "smolvlm"
+    ]
+  },
+  "counterfactual_policy": "Apply stored top_option_probability and candidate_mass to the same logged option scores; tie if another top option differs by <1e-12. Threshold changes only acceptance, not ranking.",
+  "models": {
+    "qwen3vl": {
+      "baseline": {
+        "raw_top1_correct": 95,
+        "thresholds": {
+          "0.8": {
+            "accepted": 115,
+            "correct": 91,
+            "coverage": 0.9583333333333334,
+            "correct_over_all": 0.7583333333333333,
+            "accepted_accuracy": 0.7913043478260869,
+            "by_class_correct": {
+              "cardboard": 19,
+              "glass": 19,
+              "metal": 19,
+              "paper": 18,
+              "plastic": 16,
+              "trash": 0
+            }
+          },
+          "0.5": {
+            "accepted": 120,
+            "correct": 95,
+            "coverage": 1.0,
+            "correct_over_all": 0.7916666666666666,
+            "accepted_accuracy": 0.7916666666666666,
+            "by_class_correct": {
+              "cardboard": 19,
+              "glass": 20,
+              "metal": 19,
+              "paper": 20,
+              "plastic": 17,
+              "trash": 0
+            }
+          }
+        }
+      },
+      "traits_v1": {
+        "raw_top1_correct": 93,
+        "thresholds": {
+          "0.8": {
+            "accepted": 107,
+            "correct": 89,
+            "coverage": 0.8916666666666667,
+            "correct_over_all": 0.7416666666666667,
+            "accepted_accuracy": 0.8317757009345794,
+            "by_class_correct": {
+              "cardboard": 19,
+              "glass": 20,
+              "metal": 19,
+              "paper": 15,
+              "plastic": 15,
+              "trash": 1
+            }
+          },
+          "0.5": {
+            "accepted": 118,
+            "correct": 93,
+            "coverage": 0.9833333333333333,
+            "correct_over_all": 0.775,
+            "accepted_accuracy": 0.788135593220339,
+            "by_class_correct": {
+              "cardboard": 20,
+              "glass": 20,
+              "metal": 19,
+              "paper": 17,
+              "plastic": 15,
+              "trash": 2
+            }
+          }
+        }
+      },
+      "traits_v2": {
+        "raw_top1_correct": 96,
+        "thresholds": {
+          "0.8": {
+            "accepted": 97,
+            "correct": 85,
+            "coverage": 0.8083333333333333,
+            "correct_over_all": 0.7083333333333334,
+            "accepted_accuracy": 0.8762886597938144,
+            "by_class_correct": {
+              "cardboard": 15,
+              "glass": 19,
+              "metal": 14,
+              "paper": 11,
+              "plastic": 15,
+              "trash": 11
+            }
+          },
+          "0.5": {
+            "accepted": 117,
+            "correct": 95,
+            "coverage": 0.975,
+            "correct_over_all": 0.7916666666666666,
+            "accepted_accuracy": 0.811965811965812,
+            "by_class_correct": {
+              "cardboard": 16,
+              "glass": 19,
+              "metal": 15,
+              "paper": 15,
+              "plastic": 17,
+              "trash": 13
+            }
+          }
+        }
+      }
+    },
+    "gemma4": {
+      "baseline": {
+        "raw_top1_correct": 64,
+        "thresholds": {
+          "0.8": {
+            "accepted": 113,
+            "correct": 64,
+            "coverage": 0.9416666666666667,
+            "correct_over_all": 0.5333333333333333,
+            "accepted_accuracy": 0.5663716814159292,
+            "by_class_correct": {
+              "cardboard": 19,
+              "glass": 14,
+              "metal": 14,
+              "paper": 7,
+              "plastic": 9,
+              "trash": 1
+            }
+          },
+          "0.5": {
+            "accepted": 120,
+            "correct": 64,
+            "coverage": 1.0,
+            "correct_over_all": 0.5333333333333333,
+            "accepted_accuracy": 0.5333333333333333,
+            "by_class_correct": {
+              "cardboard": 19,
+              "glass": 14,
+              "metal": 14,
+              "paper": 7,
+              "plastic": 9,
+              "trash": 1
+            }
+          }
+        }
+      },
+      "traits_v1": {
+        "raw_top1_correct": 65,
+        "thresholds": {
+          "0.8": {
+            "accepted": 115,
+            "correct": 65,
+            "coverage": 0.9583333333333334,
+            "correct_over_all": 0.5416666666666666,
+            "accepted_accuracy": 0.5652173913043478,
+            "by_class_correct": {
+              "cardboard": 12,
+              "glass": 17,
+              "metal": 14,
+              "paper": 4,
+              "plastic": 10,
+              "trash": 8
+            }
+          },
+          "0.5": {
+            "accepted": 120,
+            "correct": 65,
+            "coverage": 1.0,
+            "correct_over_all": 0.5416666666666666,
+            "accepted_accuracy": 0.5416666666666666,
+            "by_class_correct": {
+              "cardboard": 12,
+              "glass": 17,
+              "metal": 14,
+              "paper": 4,
+              "plastic": 10,
+              "trash": 8
+            }
+          }
+        }
+      },
+      "traits_v2": {
+        "raw_top1_correct": 69,
+        "thresholds": {
+          "0.8": {
+            "accepted": 117,
+            "correct": 69,
+            "coverage": 0.975,
+            "correct_over_all": 0.575,
+            "accepted_accuracy": 0.5897435897435898,
+            "by_class_correct": {
+              "cardboard": 18,
+              "glass": 12,
+              "metal": 14,
+              "paper": 7,
+              "plastic": 15,
+              "trash": 3
+            }
+          },
+          "0.5": {
+            "accepted": 119,
+            "correct": 69,
+            "coverage": 0.9916666666666667,
+            "correct_over_all": 0.575,
+            "accepted_accuracy": 0.5798319327731093,
+            "by_class_correct": {
+              "cardboard": 18,
+              "glass": 12,
+              "metal": 14,
+              "paper": 7,
+              "plastic": 15,
+              "trash": 3
+            }
+          }
+        }
+      }
+    },
+    "smolvlm": {
+      "baseline": {
+        "raw_top1_correct": 13,
+        "thresholds": {
+          "0.8": {
+            "accepted": 0,
+            "correct": 0,
+            "coverage": 0.0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "by_class_correct": {
+              "cardboard": 0,
+              "glass": 0,
+              "metal": 0,
+              "paper": 0,
+              "plastic": 0,
+              "trash": 0
+            }
+          },
+          "0.5": {
+            "accepted": 0,
+            "correct": 0,
+            "coverage": 0.0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "by_class_correct": {
+              "cardboard": 0,
+              "glass": 0,
+              "metal": 0,
+              "paper": 0,
+              "plastic": 0,
+              "trash": 0
+            }
+          }
+        }
+      },
+      "traits_v1": {
+        "raw_top1_correct": 19,
+        "thresholds": {
+          "0.8": {
+            "accepted": 0,
+            "correct": 0,
+            "coverage": 0.0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "by_class_correct": {
+              "cardboard": 0,
+              "glass": 0,
+              "metal": 0,
+              "paper": 0,
+              "plastic": 0,
+              "trash": 0
+            }
+          },
+          "0.5": {
+            "accepted": 0,
+            "correct": 0,
+            "coverage": 0.0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "by_class_correct": {
+              "cardboard": 0,
+              "glass": 0,
+              "metal": 0,
+              "paper": 0,
+              "plastic": 0,
+              "trash": 0
+            }
+          }
+        }
+      },
+      "traits_v2": {
+        "raw_top1_correct": 21,
+        "thresholds": {
+          "0.8": {
+            "accepted": 0,
+            "correct": 0,
+            "coverage": 0.0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "by_class_correct": {
+              "cardboard": 0,
+              "glass": 0,
+              "metal": 0,
+              "paper": 0,
+              "plastic": 0,
+              "trash": 0
+            }
+          },
+          "0.5": {
+            "accepted": 0,
+            "correct": 0,
+            "coverage": 0.0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "by_class_correct": {
+              "cardboard": 0,
+              "glass": 0,
+              "metal": 0,
+              "paper": 0,
+              "plastic": 0,
+              "trash": 0
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -436,7 +436,7 @@ fn run_models(root: &Path, folder: &Path, names: &[String]) -> Result<()> {
 fn report(folder: &Path, root: &Path) -> Result<()> {
     let summary = read_json(&folder.join("summary.json"))?;
     let mut lines = vec!["# Kaggle AG News results".to_owned(), String::new(),
-        "Same frozen stratified sample and policy for every run; see KAGGLE_BENCHMARK.md for the protocol.".to_owned(), String::new(),
+        "Same frozen stratified sample and policy for every run; see docs/KAGGLE_BENCHMARK.md for the protocol.".to_owned(), String::new(),
         "| Model | Correct | Wrong | Abstained | Errors / missing | Correct / all | Accepted accuracy | Coverage | Raw top-1 |".to_owned(),
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |".to_owned()];
     let runs = summary["runs"].as_array().context("summary.runs")?;

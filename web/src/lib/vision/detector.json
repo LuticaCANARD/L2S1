@@ -1,0 +1,6 @@
+{
+  "model": "Xenova/detr-resnet-50",
+  "revision": "8be7ab59ff663484ee9ba2e8d8f267330d5ad03e",
+  "dtype": "q8",
+  "minimum_score": 0.05
+}

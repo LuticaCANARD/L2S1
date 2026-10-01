@@ -1,0 +1,21 @@
+{
+  "source_commit": "0260180a5c950981cb642a3235b750529b7e4c3a",
+  "built_on": "2026-09-25",
+  "cuda_architecture": "sm_86",
+  "cuda_flags": "CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 \"--generate-code=arch=compute_86,code=[compute_86,sm_86]\" -Xcompiler=-fPIC -use_fast_math -extended-lambda -Xcompiler \"-Wmissing-declarations -Wmissing-noreturn -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wno-array-bounds -Wextra-semi -Wno-pedantic\"",
+  "cargo_release_result": "Finished release profile in 17m 00s; build script exited 0",
+  "binary_sha256": "268b2d26ed9c889cbbda6423e7542faeeb3ac86e8793b864bdb69dba270aa1d5",
+  "native_libllama_sha256": "be805175e6a476dd96a72df9e49ff0c904e27d37274d6775b573b9fec57f675a",
+  "smoke_response_sha256": "b4eeb2f62eda028ba031da8759ab435e9b48e657e3af8bd07e20869c3c27cbc6",
+  "build_log_sha256": "c8013ef0d25b7e15f9164c865c1ca2afaac5037fee8f35a31173da76b1d5a227",
+  "smoke_log_sha256": "618ac68499b1f011e0fcf737d4c0b1a041aee29bf5095353a82bc3696c6c735f",
+  "smoke_model": "Qwen3-0.6B-Q8_0.gguf",
+  "offload_device": "NVIDIA GeForce RTX 3080",
+  "offloaded_layers": "29/29",
+  "smoke_result_ids": [
+    "storage_zone",
+    "cold_chain_required",
+    "dispatch_priority"
+  ],
+  "scope": "One clean PR-branch sm_86 CUDA build and one RTX 3080 text-decision smoke; no other architectures tested."
+}

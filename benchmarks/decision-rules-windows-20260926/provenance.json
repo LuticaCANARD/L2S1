@@ -1,0 +1,10 @@
+{
+  "source": "User-supplied summary JSON and follow-up hardware identification, 2026-09-27",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "gpu_evidence": "User confirmed: 5090임. No device log supplied.",
+  "cpu": null,
+  "original_reports_available": false,
+  "original_logs_available": false,
+  "native_consistency_suite_verified": false,
+  "inference_rerun": false
+}

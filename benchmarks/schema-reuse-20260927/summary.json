@@ -1,0 +1,2153 @@
+{
+  "suite": "decision-rules-v1",
+  "scope": "Same 36 labeled decisions, grouped by immutable schema with changing states. One decision per call in both paths; full group execution includes session creation/drop, preparation and scoring. This is not latency for the original three-decision requests. One resident model, untimed warmup before each path, alternating path order; preparation cache disabled. Repeats are not independent quality samples. Exact prefix matching and original batch alignment retained.",
+  "rows": [
+    {
+      "batch": 64,
+      "mode": "fresh",
+      "elapsed_ms": [
+        33311.111124999996,
+        32380.009418999998,
+        35981.714992999994
+      ],
+      "median_elapsed_ms": 33311.111124999996,
+      "input_tokens_per_pass": 4983,
+      "reused_prefix_tokens_per_pass": 0,
+      "timings": [
+        {
+          "decisions": 36,
+          "native_ms": 32806.219822,
+          "prepare_ms": 39.0725,
+          "score_ms": 39.3446
+        },
+        {
+          "decisions": 36,
+          "native_ms": 31889.38641900001,
+          "prepare_ms": 40.012699999999995,
+          "score_ms": 36.933699999999995
+        },
+        {
+          "decisions": 36,
+          "native_ms": 35509.78499199999,
+          "prepare_ms": 35.795100000000005,
+          "score_ms": 36.8062
+        }
+      ],
+      "unique_quality": {
+        "total": 36,
+        "raw_top1_correct": 13,
+        "accepted": 30,
+        "accepted_correct": 10
+      },
+      "first_pass_evidence": [
+        {
+          "case": "access-01",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5476941910914024,
+            "true": 0.45230580890859673
+          },
+          "selected": null,
+          "candidate_mass": 0.991722847992358,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.4958053619295879,
+            "true": 0.5041946380704122
+          },
+          "selected": null,
+          "candidate_mass": 0.9946966429095091,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "can_edit",
+          "expected": "true",
+          "scores": {
+            "false": 0.5629289072650883,
+            "true": 0.43707109273491307
+          },
+          "selected": null,
+          "candidate_mass": 0.9937314780816643,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5723110525100882,
+            "true": 0.4276889474899133
+          },
+          "selected": null,
+          "candidate_mass": 0.9897391430535895,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "can_edit",
+          "expected": "true",
+          "scores": {
+            "false": 0.5442450816842033,
+            "true": 0.4557549183157969
+          },
+          "selected": null,
+          "candidate_mass": 0.9937221410705849,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5323320646745052,
+            "true": 0.4676679353254941
+          },
+          "selected": null,
+          "candidate_mass": 0.9912314720516111,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "cold_chain_required",
+          "expected": "false",
+          "scores": {
+            "false": 0.9490938409191129,
+            "true": 0.050906159080888386
+          },
+          "selected": "false",
+          "candidate_mass": 0.987597134989059,
+          "input_tokens": 121,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.9051075866911084,
+            "true": 0.09489241330889121
+          },
+          "selected": "false",
+          "candidate_mass": 0.9796675533508219,
+          "input_tokens": 137,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.8941669252269496,
+            "true": 0.10583307477305183
+          },
+          "selected": "false",
+          "candidate_mass": 0.9848350396237734,
+          "input_tokens": 122,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "cold_chain_required",
+          "expected": "false",
+          "scores": {
+            "false": 0.9086788510342025,
+            "true": 0.09132114896579731
+          },
+          "selected": "false",
+          "candidate_mass": 0.984590486204788,
+          "input_tokens": 137,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.908763018335863,
+            "true": 0.09123698166413763
+          },
+          "selected": "false",
+          "candidate_mass": 0.9879893012042972,
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.8535612128425616,
+            "true": 0.14643878715743663
+          },
+          "selected": "false",
+          "candidate_mass": 0.9800239701490507,
+          "input_tokens": 138,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "dispatch_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9966286304930861,
+            "medium": 0.0006413363753704271,
+            "high": 0.002730033131543453
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988303663673276,
+          "input_tokens": 148,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "dispatch_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9960312500763606,
+            "medium": 0.0006975951197947052,
+            "high": 0.0032711548038452834
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988242018051144,
+          "input_tokens": 164,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "dispatch_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9942915649018526,
+            "medium": 0.0011073842843899388,
+            "high": 0.00460105081375886
+          },
+          "selected": "low",
+          "candidate_mass": 0.9980994823129032,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "dispatch_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9970825045289524,
+            "medium": 0.000511552749047162,
+            "high": 0.0024059427219993586
+          },
+          "selected": "low",
+          "candidate_mass": 0.9989852363839606,
+          "input_tokens": 164,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "dispatch_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9940517511946106,
+            "medium": 0.0010537099505107763,
+            "high": 0.004894538854878749
+          },
+          "selected": "low",
+          "candidate_mass": 0.9981797529000462,
+          "input_tokens": 150,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "dispatch_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9961362639609879,
+            "medium": 0.0007341619465673706,
+            "high": 0.0031295740924441725
+          },
+          "selected": "low",
+          "candidate_mass": 0.998882070432364,
+          "input_tokens": 165,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-01",
+          "decision": "review_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9958554367807698,
+            "medium": 0.000583846629175368,
+            "high": 0.0035607165900547154
+          },
+          "selected": "low",
+          "candidate_mass": 0.9986772962057309,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "review_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.995975001893982,
+            "medium": 0.0009506056518281874,
+            "high": 0.0030743924541891017
+          },
+          "selected": "low",
+          "candidate_mass": 0.9989847481859543,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "review_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9940242107181293,
+            "medium": 0.0007016242945339203,
+            "high": 0.005274164987335711
+          },
+          "selected": "low",
+          "candidate_mass": 0.9987468026003543,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "review_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9948424997349006,
+            "medium": 0.0011127673573373313,
+            "high": 0.004044732907760633
+          },
+          "selected": "low",
+          "candidate_mass": 0.9984641888680275,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "review_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9959832711095942,
+            "medium": 0.0006029642004673664,
+            "high": 0.003413764689939835
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988607703428106,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "review_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.995170024322293,
+            "medium": 0.0010119165392763502,
+            "high": 0.003818059138429984
+          },
+          "selected": "low",
+          "candidate_mass": 0.998810365382006,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "role_scope",
+          "expected": "edit",
+          "scores": {
+            "administer": 0.9845763288787333,
+            "read": 0.0018886383884241856,
+            "edit": 0.013535032732841835
+          },
+          "selected": "administer",
+          "candidate_mass": 0.9938897606503548,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "role_scope",
+          "expected": "administer",
+          "scores": {
+            "administer": 0.9840393406305794,
+            "read": 0.002237553645375216,
+            "edit": 0.01372310572404687
+          },
+          "selected": "administer",
+          "candidate_mass": 0.9936288181828189,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "role_scope",
+          "expected": "administer",
+          "scores": {
+            "edit": 0.9876419319401892,
+            "administer": 0.0016857207739322654,
+            "read": 0.010672347285878698
+          },
+          "selected": "edit",
+          "candidate_mass": 0.996574027979336,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "role_scope",
+          "expected": "read",
+          "scores": {
+            "edit": 0.9720661560281995,
+            "administer": 0.004245196685885291,
+            "read": 0.02368864728591686
+          },
+          "selected": "edit",
+          "candidate_mass": 0.9890653564326635,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-01",
+          "decision": "role_scope",
+          "expected": "read",
+          "scores": {
+            "read": 0.9826107607000248,
+            "edit": 0.0023208827610829656,
+            "administer": 0.015068356538891988
+          },
+          "selected": "read",
+          "candidate_mass": 0.9959902945720965,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "role_scope",
+          "expected": "edit",
+          "scores": {
+            "read": 0.9546986036567512,
+            "edit": 0.006043016584547046,
+            "administer": 0.03925837975870169
+          },
+          "selected": "read",
+          "candidate_mass": 0.9885381633920588,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "storage_zone",
+          "expected": "ambient",
+          "scores": {
+            "ambient": 0.9838029813655481,
+            "chilled": 0.0028590106619983085,
+            "frozen": 0.013338007972453861
+          },
+          "selected": "ambient",
+          "candidate_mass": 0.9964855495303391,
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "storage_zone",
+          "expected": "chilled",
+          "scores": {
+            "ambient": 0.9768214084620886,
+            "chilled": 0.005422243116688124,
+            "frozen": 0.017756348421221726
+          },
+          "selected": "ambient",
+          "candidate_mass": 0.9952254616468509,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "storage_zone",
+          "expected": "frozen",
+          "scores": {
+            "chilled": 0.969029702350335,
+            "frozen": 0.003627666673098079,
+            "ambient": 0.027342630976566664
+          },
+          "selected": "chilled",
+          "candidate_mass": 0.9948832861658127,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "storage_zone",
+          "expected": "ambient",
+          "scores": {
+            "chilled": 0.9841874090964244,
+            "frozen": 0.0039087944201396385,
+            "ambient": 0.011903796483436965
+          },
+          "selected": "chilled",
+          "candidate_mass": 0.9967453335390946,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "storage_zone",
+          "expected": "chilled",
+          "scores": {
+            "frozen": 0.9731497649705348,
+            "ambient": 0.002757817448154614,
+            "chilled": 0.024092417581309596
+          },
+          "selected": "frozen",
+          "candidate_mass": 0.9959512172902899,
+          "input_tokens": 131,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "storage_zone",
+          "expected": "frozen",
+          "scores": {
+            "frozen": 0.9780083630985663,
+            "ambient": 0.005141012753340839,
+            "chilled": 0.01685062414809195
+          },
+          "selected": "frozen",
+          "candidate_mass": 0.9951420535593211,
+          "input_tokens": 146,
+          "reused_prefix_tokens": 0
+        }
+      ],
+      "raw_report": "results/schema-reuse-20260927/qwen-b64.json",
+      "raw_report_sha256": "0fb2993c1dcd702b8fe290728df3107d4dd1b20367d5a38e78cdb687f6aec4be"
+    },
+    {
+      "batch": 64,
+      "mode": "shared_decision",
+      "elapsed_ms": [
+        22462.329428,
+        19691.805558,
+        22067.65659
+      ],
+      "median_elapsed_ms": 22067.65659,
+      "input_tokens_per_pass": 4983,
+      "reused_prefix_tokens_per_pass": 1984,
+      "timings": [
+        {
+          "decisions": 36,
+          "native_ms": 22254.792828,
+          "prepare_ms": 46.8471,
+          "score_ms": 42.5651
+        },
+        {
+          "decisions": 36,
+          "native_ms": 19490.140758000005,
+          "prepare_ms": 42.355999999999995,
+          "score_ms": 41.8474
+        },
+        {
+          "decisions": 36,
+          "native_ms": 21868.919882000006,
+          "prepare_ms": 43.735903,
+          "score_ms": 42.927001
+        }
+      ],
+      "unique_quality": {
+        "total": 36,
+        "raw_top1_correct": 13,
+        "accepted": 30,
+        "accepted_correct": 10
+      },
+      "first_pass_evidence": [
+        {
+          "case": "access-01",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5476941910914024,
+            "true": 0.45230580890859673
+          },
+          "selected": null,
+          "candidate_mass": 0.991722847992358,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.4958053619295879,
+            "true": 0.5041946380704122
+          },
+          "selected": null,
+          "candidate_mass": 0.9946966429095091,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-03",
+          "decision": "can_edit",
+          "expected": "true",
+          "scores": {
+            "false": 0.5629289072650883,
+            "true": 0.43707109273491307
+          },
+          "selected": null,
+          "candidate_mass": 0.9937314780816643,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-04",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5723110525100882,
+            "true": 0.4276889474899133
+          },
+          "selected": null,
+          "candidate_mass": 0.9897391430535895,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-05",
+          "decision": "can_edit",
+          "expected": "true",
+          "scores": {
+            "false": 0.5442450816842033,
+            "true": 0.4557549183157969
+          },
+          "selected": null,
+          "candidate_mass": 0.9937221410705849,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-06",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5323320646745052,
+            "true": 0.4676679353254941
+          },
+          "selected": null,
+          "candidate_mass": 0.9912314720516111,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "cold_chain_required",
+          "expected": "false",
+          "scores": {
+            "false": 0.9490938409191129,
+            "true": 0.050906159080888386
+          },
+          "selected": "false",
+          "candidate_mass": 0.987597134989059,
+          "input_tokens": 121,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.9051075866911084,
+            "true": 0.09489241330889121
+          },
+          "selected": "false",
+          "candidate_mass": 0.9796675533508219,
+          "input_tokens": 137,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.8941669252269496,
+            "true": 0.10583307477305183
+          },
+          "selected": "false",
+          "candidate_mass": 0.9848350396237734,
+          "input_tokens": 122,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "cold_chain_required",
+          "expected": "false",
+          "scores": {
+            "false": 0.9086788510342025,
+            "true": 0.09132114896579731
+          },
+          "selected": "false",
+          "candidate_mass": 0.984590486204788,
+          "input_tokens": 137,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.908763018335863,
+            "true": 0.09123698166413763
+          },
+          "selected": "false",
+          "candidate_mass": 0.9879893012042972,
+          "input_tokens": 123,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.8535612128425616,
+            "true": 0.14643878715743663
+          },
+          "selected": "false",
+          "candidate_mass": 0.9800239701490507,
+          "input_tokens": 138,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "dispatch_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9966286304930861,
+            "medium": 0.0006413363753704271,
+            "high": 0.002730033131543453
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988303663673276,
+          "input_tokens": 148,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "dispatch_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9960312500763606,
+            "medium": 0.0006975951197947052,
+            "high": 0.0032711548038452834
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988242018051144,
+          "input_tokens": 164,
+          "reused_prefix_tokens": 128
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "dispatch_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9942915649018526,
+            "medium": 0.0011073842843899388,
+            "high": 0.00460105081375886
+          },
+          "selected": "low",
+          "candidate_mass": 0.9980994823129032,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 128
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "dispatch_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9970825045289524,
+            "medium": 0.000511552749047162,
+            "high": 0.0024059427219993586
+          },
+          "selected": "low",
+          "candidate_mass": 0.9989852363839606,
+          "input_tokens": 164,
+          "reused_prefix_tokens": 128
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "dispatch_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9940517511946106,
+            "medium": 0.0010537099505107763,
+            "high": 0.004894538854878749
+          },
+          "selected": "low",
+          "candidate_mass": 0.9981797529000462,
+          "input_tokens": 150,
+          "reused_prefix_tokens": 128
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "dispatch_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9961362639609879,
+            "medium": 0.0007341619465673706,
+            "high": 0.0031295740924441725
+          },
+          "selected": "low",
+          "candidate_mass": 0.998882070432364,
+          "input_tokens": 165,
+          "reused_prefix_tokens": 128
+        },
+        {
+          "case": "access-01",
+          "decision": "review_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9958554367807698,
+            "medium": 0.000583846629175368,
+            "high": 0.0035607165900547154
+          },
+          "selected": "low",
+          "candidate_mass": 0.9986772962057309,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "review_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.995975001893982,
+            "medium": 0.0009506056518281874,
+            "high": 0.0030743924541891017
+          },
+          "selected": "low",
+          "candidate_mass": 0.9989847481859543,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-03",
+          "decision": "review_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9940242107181293,
+            "medium": 0.0007016242945339203,
+            "high": 0.005274164987335711
+          },
+          "selected": "low",
+          "candidate_mass": 0.9987468026003543,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-04",
+          "decision": "review_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9948424997349006,
+            "medium": 0.0011127673573373313,
+            "high": 0.004044732907760633
+          },
+          "selected": "low",
+          "candidate_mass": 0.9984641888680275,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-05",
+          "decision": "review_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9959832711095942,
+            "medium": 0.0006029642004673664,
+            "high": 0.003413764689939835
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988607703428106,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-06",
+          "decision": "review_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.995170024322293,
+            "medium": 0.0010119165392763502,
+            "high": 0.003818059138429984
+          },
+          "selected": "low",
+          "candidate_mass": 0.998810365382006,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-05",
+          "decision": "role_scope",
+          "expected": "edit",
+          "scores": {
+            "administer": 0.9845763288787333,
+            "read": 0.0018886383884241856,
+            "edit": 0.013535032732841835
+          },
+          "selected": "administer",
+          "candidate_mass": 0.9938897606503548,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "role_scope",
+          "expected": "administer",
+          "scores": {
+            "administer": 0.9840393406305794,
+            "read": 0.002237553645375216,
+            "edit": 0.01372310572404687
+          },
+          "selected": "administer",
+          "candidate_mass": 0.9936288181828189,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-03",
+          "decision": "role_scope",
+          "expected": "administer",
+          "scores": {
+            "edit": 0.9876419319401892,
+            "administer": 0.0016857207739322654,
+            "read": 0.010672347285878698
+          },
+          "selected": "edit",
+          "candidate_mass": 0.996574027979336,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "role_scope",
+          "expected": "read",
+          "scores": {
+            "edit": 0.9720661560281995,
+            "administer": 0.004245196685885291,
+            "read": 0.02368864728591686
+          },
+          "selected": "edit",
+          "candidate_mass": 0.9890653564326635,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "access-01",
+          "decision": "role_scope",
+          "expected": "read",
+          "scores": {
+            "read": 0.9826107607000248,
+            "edit": 0.0023208827610829656,
+            "administer": 0.015068356538891988
+          },
+          "selected": "read",
+          "candidate_mass": 0.9959902945720965,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "role_scope",
+          "expected": "edit",
+          "scores": {
+            "read": 0.9546986036567512,
+            "edit": 0.006043016584547046,
+            "administer": 0.03925837975870169
+          },
+          "selected": "read",
+          "candidate_mass": 0.9885381633920588,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "storage_zone",
+          "expected": "ambient",
+          "scores": {
+            "ambient": 0.9838029813655481,
+            "chilled": 0.0028590106619983085,
+            "frozen": 0.013338007972453861
+          },
+          "selected": "ambient",
+          "candidate_mass": 0.9964855495303391,
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "storage_zone",
+          "expected": "chilled",
+          "scores": {
+            "ambient": 0.9768214084620886,
+            "chilled": 0.005422243116688124,
+            "frozen": 0.017756348421221726
+          },
+          "selected": "ambient",
+          "candidate_mass": 0.9952254616468509,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "storage_zone",
+          "expected": "frozen",
+          "scores": {
+            "chilled": 0.969029702350335,
+            "frozen": 0.003627666673098079,
+            "ambient": 0.027342630976566664
+          },
+          "selected": "chilled",
+          "candidate_mass": 0.9948832861658127,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "storage_zone",
+          "expected": "ambient",
+          "scores": {
+            "chilled": 0.9841874090964244,
+            "frozen": 0.0039087944201396385,
+            "ambient": 0.011903796483436965
+          },
+          "selected": "chilled",
+          "candidate_mass": 0.9967453335390946,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 64
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "storage_zone",
+          "expected": "chilled",
+          "scores": {
+            "frozen": 0.9731497649705348,
+            "ambient": 0.002757817448154614,
+            "chilled": 0.024092417581309596
+          },
+          "selected": "frozen",
+          "candidate_mass": 0.9959512172902899,
+          "input_tokens": 131,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "storage_zone",
+          "expected": "frozen",
+          "scores": {
+            "frozen": 0.9780083630985663,
+            "ambient": 0.005141012753340839,
+            "chilled": 0.01685062414809195
+          },
+          "selected": "frozen",
+          "candidate_mass": 0.9951420535593211,
+          "input_tokens": 146,
+          "reused_prefix_tokens": 64
+        }
+      ],
+      "raw_report": "results/schema-reuse-20260927/qwen-b64.json",
+      "raw_report_sha256": "0fb2993c1dcd702b8fe290728df3107d4dd1b20367d5a38e78cdb687f6aec4be"
+    },
+    {
+      "batch": 256,
+      "mode": "fresh",
+      "elapsed_ms": [
+        31690.565168999998,
+        30760.670480999997,
+        33140.214703
+      ],
+      "median_elapsed_ms": 31690.565168999998,
+      "input_tokens_per_pass": 4983,
+      "reused_prefix_tokens_per_pass": 0,
+      "timings": [
+        {
+          "decisions": 36,
+          "native_ms": 31176.369667999996,
+          "prepare_ms": 40.602900000000005,
+          "score_ms": 39.772800000000004
+        },
+        {
+          "decisions": 36,
+          "native_ms": 30249.975379999996,
+          "prepare_ms": 39.563501,
+          "score_ms": 39.98870000000001
+        },
+        {
+          "decisions": 36,
+          "native_ms": 32650.277903000002,
+          "prepare_ms": 38.2605,
+          "score_ms": 37.95520000000001
+        }
+      ],
+      "unique_quality": {
+        "total": 36,
+        "raw_top1_correct": 13,
+        "accepted": 30,
+        "accepted_correct": 10
+      },
+      "first_pass_evidence": [
+        {
+          "case": "access-01",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5476941910914024,
+            "true": 0.45230580890859673
+          },
+          "selected": null,
+          "candidate_mass": 0.991722847992358,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.4958053619295879,
+            "true": 0.5041946380704122
+          },
+          "selected": null,
+          "candidate_mass": 0.9946966429095091,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "can_edit",
+          "expected": "true",
+          "scores": {
+            "false": 0.5629289072650883,
+            "true": 0.43707109273491307
+          },
+          "selected": null,
+          "candidate_mass": 0.9937314780816643,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5723110525100882,
+            "true": 0.4276889474899133
+          },
+          "selected": null,
+          "candidate_mass": 0.9897391430535895,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "can_edit",
+          "expected": "true",
+          "scores": {
+            "false": 0.5442450816842033,
+            "true": 0.4557549183157969
+          },
+          "selected": null,
+          "candidate_mass": 0.9937221410705849,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5323320646745052,
+            "true": 0.4676679353254941
+          },
+          "selected": null,
+          "candidate_mass": 0.9912314720516111,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "cold_chain_required",
+          "expected": "false",
+          "scores": {
+            "false": 0.9490938409191129,
+            "true": 0.050906159080888386
+          },
+          "selected": "false",
+          "candidate_mass": 0.987597134989059,
+          "input_tokens": 121,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.9051075866911084,
+            "true": 0.09489241330889121
+          },
+          "selected": "false",
+          "candidate_mass": 0.9796675533508219,
+          "input_tokens": 137,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.8941669252269496,
+            "true": 0.10583307477305183
+          },
+          "selected": "false",
+          "candidate_mass": 0.9848350396237734,
+          "input_tokens": 122,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "cold_chain_required",
+          "expected": "false",
+          "scores": {
+            "false": 0.9086788510342025,
+            "true": 0.09132114896579731
+          },
+          "selected": "false",
+          "candidate_mass": 0.984590486204788,
+          "input_tokens": 137,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.908763018335863,
+            "true": 0.09123698166413763
+          },
+          "selected": "false",
+          "candidate_mass": 0.9879893012042972,
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.8535612128425616,
+            "true": 0.14643878715743663
+          },
+          "selected": "false",
+          "candidate_mass": 0.9800239701490507,
+          "input_tokens": 138,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "dispatch_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9966286304930861,
+            "medium": 0.0006413363753704271,
+            "high": 0.002730033131543453
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988303663673276,
+          "input_tokens": 148,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "dispatch_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9960312500763606,
+            "medium": 0.0006975951197947052,
+            "high": 0.0032711548038452834
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988242018051144,
+          "input_tokens": 164,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "dispatch_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9942915649018526,
+            "medium": 0.0011073842843899388,
+            "high": 0.00460105081375886
+          },
+          "selected": "low",
+          "candidate_mass": 0.9980994823129032,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "dispatch_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9970825045289524,
+            "medium": 0.000511552749047162,
+            "high": 0.0024059427219993586
+          },
+          "selected": "low",
+          "candidate_mass": 0.9989852363839606,
+          "input_tokens": 164,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "dispatch_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9940517511946106,
+            "medium": 0.0010537099505107763,
+            "high": 0.004894538854878749
+          },
+          "selected": "low",
+          "candidate_mass": 0.9981797529000462,
+          "input_tokens": 150,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "dispatch_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9961362639609879,
+            "medium": 0.0007341619465673706,
+            "high": 0.0031295740924441725
+          },
+          "selected": "low",
+          "candidate_mass": 0.998882070432364,
+          "input_tokens": 165,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-01",
+          "decision": "review_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9958554367807698,
+            "medium": 0.000583846629175368,
+            "high": 0.0035607165900547154
+          },
+          "selected": "low",
+          "candidate_mass": 0.9986772962057309,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "review_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.995975001893982,
+            "medium": 0.0009506056518281874,
+            "high": 0.0030743924541891017
+          },
+          "selected": "low",
+          "candidate_mass": 0.9989847481859543,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "review_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9940242107181293,
+            "medium": 0.0007016242945339203,
+            "high": 0.005274164987335711
+          },
+          "selected": "low",
+          "candidate_mass": 0.9987468026003543,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "review_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9948424997349006,
+            "medium": 0.0011127673573373313,
+            "high": 0.004044732907760633
+          },
+          "selected": "low",
+          "candidate_mass": 0.9984641888680275,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "review_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9959832711095942,
+            "medium": 0.0006029642004673664,
+            "high": 0.003413764689939835
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988607703428106,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "review_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.995170024322293,
+            "medium": 0.0010119165392763502,
+            "high": 0.003818059138429984
+          },
+          "selected": "low",
+          "candidate_mass": 0.998810365382006,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "role_scope",
+          "expected": "edit",
+          "scores": {
+            "administer": 0.9845763288787333,
+            "read": 0.0018886383884241856,
+            "edit": 0.013535032732841835
+          },
+          "selected": "administer",
+          "candidate_mass": 0.9938897606503548,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "role_scope",
+          "expected": "administer",
+          "scores": {
+            "administer": 0.9840393406305794,
+            "read": 0.002237553645375216,
+            "edit": 0.01372310572404687
+          },
+          "selected": "administer",
+          "candidate_mass": 0.9936288181828189,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "role_scope",
+          "expected": "administer",
+          "scores": {
+            "edit": 0.9876419319401892,
+            "administer": 0.0016857207739322654,
+            "read": 0.010672347285878698
+          },
+          "selected": "edit",
+          "candidate_mass": 0.996574027979336,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "role_scope",
+          "expected": "read",
+          "scores": {
+            "edit": 0.9720661560281995,
+            "administer": 0.004245196685885291,
+            "read": 0.02368864728591686
+          },
+          "selected": "edit",
+          "candidate_mass": 0.9890653564326635,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-01",
+          "decision": "role_scope",
+          "expected": "read",
+          "scores": {
+            "read": 0.9826107607000248,
+            "edit": 0.0023208827610829656,
+            "administer": 0.015068356538891988
+          },
+          "selected": "read",
+          "candidate_mass": 0.9959902945720965,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "role_scope",
+          "expected": "edit",
+          "scores": {
+            "read": 0.9546986036567512,
+            "edit": 0.006043016584547046,
+            "administer": 0.03925837975870169
+          },
+          "selected": "read",
+          "candidate_mass": 0.9885381633920588,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "storage_zone",
+          "expected": "ambient",
+          "scores": {
+            "ambient": 0.9838029813655481,
+            "chilled": 0.0028590106619983085,
+            "frozen": 0.013338007972453861
+          },
+          "selected": "ambient",
+          "candidate_mass": 0.9964855495303391,
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "storage_zone",
+          "expected": "chilled",
+          "scores": {
+            "ambient": 0.9768214084620886,
+            "chilled": 0.005422243116688124,
+            "frozen": 0.017756348421221726
+          },
+          "selected": "ambient",
+          "candidate_mass": 0.9952254616468509,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "storage_zone",
+          "expected": "frozen",
+          "scores": {
+            "chilled": 0.969029702350335,
+            "frozen": 0.003627666673098079,
+            "ambient": 0.027342630976566664
+          },
+          "selected": "chilled",
+          "candidate_mass": 0.9948832861658127,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "storage_zone",
+          "expected": "ambient",
+          "scores": {
+            "chilled": 0.9841874090964244,
+            "frozen": 0.0039087944201396385,
+            "ambient": 0.011903796483436965
+          },
+          "selected": "chilled",
+          "candidate_mass": 0.9967453335390946,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "storage_zone",
+          "expected": "chilled",
+          "scores": {
+            "frozen": 0.9731497649705348,
+            "ambient": 0.002757817448154614,
+            "chilled": 0.024092417581309596
+          },
+          "selected": "frozen",
+          "candidate_mass": 0.9959512172902899,
+          "input_tokens": 131,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "storage_zone",
+          "expected": "frozen",
+          "scores": {
+            "frozen": 0.9780083630985663,
+            "ambient": 0.005141012753340839,
+            "chilled": 0.01685062414809195
+          },
+          "selected": "frozen",
+          "candidate_mass": 0.9951420535593211,
+          "input_tokens": 146,
+          "reused_prefix_tokens": 0
+        }
+      ],
+      "raw_report": "results/schema-reuse-20260927/qwen-b256.json",
+      "raw_report_sha256": "119c158bd28a40ee964f19d6a2ba61017ecc2cb5343681c9d3dd24ae9a44071b"
+    },
+    {
+      "batch": 256,
+      "mode": "shared_decision",
+      "elapsed_ms": [
+        31588.606711,
+        30775.816464000003,
+        34475.538049999996
+      ],
+      "median_elapsed_ms": 31588.606711,
+      "input_tokens_per_pass": 4983,
+      "reused_prefix_tokens_per_pass": 0,
+      "timings": [
+        {
+          "decisions": 36,
+          "native_ms": 31379.066312000003,
+          "prepare_ms": 43.003699999999995,
+          "score_ms": 38.843
+        },
+        {
+          "decisions": 36,
+          "native_ms": 30569.113264000003,
+          "prepare_ms": 45.0959,
+          "score_ms": 41.8519
+        },
+        {
+          "decisions": 36,
+          "native_ms": 34265.353351,
+          "prepare_ms": 46.758500000000005,
+          "score_ms": 41.09109999999998
+        }
+      ],
+      "unique_quality": {
+        "total": 36,
+        "raw_top1_correct": 13,
+        "accepted": 30,
+        "accepted_correct": 10
+      },
+      "first_pass_evidence": [
+        {
+          "case": "access-01",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5476941910914024,
+            "true": 0.45230580890859673
+          },
+          "selected": null,
+          "candidate_mass": 0.991722847992358,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.4958053619295879,
+            "true": 0.5041946380704122
+          },
+          "selected": null,
+          "candidate_mass": 0.9946966429095091,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "can_edit",
+          "expected": "true",
+          "scores": {
+            "false": 0.5629289072650883,
+            "true": 0.43707109273491307
+          },
+          "selected": null,
+          "candidate_mass": 0.9937314780816643,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5723110525100882,
+            "true": 0.4276889474899133
+          },
+          "selected": null,
+          "candidate_mass": 0.9897391430535895,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "can_edit",
+          "expected": "true",
+          "scores": {
+            "false": 0.5442450816842033,
+            "true": 0.4557549183157969
+          },
+          "selected": null,
+          "candidate_mass": 0.9937221410705849,
+          "input_tokens": 120,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "can_edit",
+          "expected": "false",
+          "scores": {
+            "false": 0.5323320646745052,
+            "true": 0.4676679353254941
+          },
+          "selected": null,
+          "candidate_mass": 0.9912314720516111,
+          "input_tokens": 135,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "cold_chain_required",
+          "expected": "false",
+          "scores": {
+            "false": 0.9490938409191129,
+            "true": 0.050906159080888386
+          },
+          "selected": "false",
+          "candidate_mass": 0.987597134989059,
+          "input_tokens": 121,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.9051075866911084,
+            "true": 0.09489241330889121
+          },
+          "selected": "false",
+          "candidate_mass": 0.9796675533508219,
+          "input_tokens": 137,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.8941669252269496,
+            "true": 0.10583307477305183
+          },
+          "selected": "false",
+          "candidate_mass": 0.9848350396237734,
+          "input_tokens": 122,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "cold_chain_required",
+          "expected": "false",
+          "scores": {
+            "false": 0.9086788510342025,
+            "true": 0.09132114896579731
+          },
+          "selected": "false",
+          "candidate_mass": 0.984590486204788,
+          "input_tokens": 137,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.908763018335863,
+            "true": 0.09123698166413763
+          },
+          "selected": "false",
+          "candidate_mass": 0.9879893012042972,
+          "input_tokens": 123,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "cold_chain_required",
+          "expected": "true",
+          "scores": {
+            "false": 0.8535612128425616,
+            "true": 0.14643878715743663
+          },
+          "selected": "false",
+          "candidate_mass": 0.9800239701490507,
+          "input_tokens": 138,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "dispatch_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9966286304930861,
+            "medium": 0.0006413363753704271,
+            "high": 0.002730033131543453
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988303663673276,
+          "input_tokens": 148,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "dispatch_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9960312500763606,
+            "medium": 0.0006975951197947052,
+            "high": 0.0032711548038452834
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988242018051144,
+          "input_tokens": 164,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "dispatch_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9942915649018526,
+            "medium": 0.0011073842843899388,
+            "high": 0.00460105081375886
+          },
+          "selected": "low",
+          "candidate_mass": 0.9980994823129032,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "dispatch_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9970825045289524,
+            "medium": 0.000511552749047162,
+            "high": 0.0024059427219993586
+          },
+          "selected": "low",
+          "candidate_mass": 0.9989852363839606,
+          "input_tokens": 164,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "dispatch_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9940517511946106,
+            "medium": 0.0010537099505107763,
+            "high": 0.004894538854878749
+          },
+          "selected": "low",
+          "candidate_mass": 0.9981797529000462,
+          "input_tokens": 150,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "dispatch_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9961362639609879,
+            "medium": 0.0007341619465673706,
+            "high": 0.0031295740924441725
+          },
+          "selected": "low",
+          "candidate_mass": 0.998882070432364,
+          "input_tokens": 165,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-01",
+          "decision": "review_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.9958554367807698,
+            "medium": 0.000583846629175368,
+            "high": 0.0035607165900547154
+          },
+          "selected": "low",
+          "candidate_mass": 0.9986772962057309,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "review_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.995975001893982,
+            "medium": 0.0009506056518281874,
+            "high": 0.0030743924541891017
+          },
+          "selected": "low",
+          "candidate_mass": 0.9989847481859543,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "review_priority",
+          "expected": "medium",
+          "scores": {
+            "low": 0.9940242107181293,
+            "medium": 0.0007016242945339203,
+            "high": 0.005274164987335711
+          },
+          "selected": "low",
+          "candidate_mass": 0.9987468026003543,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "review_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9948424997349006,
+            "medium": 0.0011127673573373313,
+            "high": 0.004044732907760633
+          },
+          "selected": "low",
+          "candidate_mass": 0.9984641888680275,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "review_priority",
+          "expected": "high",
+          "scores": {
+            "low": 0.9959832711095942,
+            "medium": 0.0006029642004673664,
+            "high": 0.003413764689939835
+          },
+          "selected": "low",
+          "candidate_mass": 0.9988607703428106,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "review_priority",
+          "expected": "low",
+          "scores": {
+            "low": 0.995170024322293,
+            "medium": 0.0010119165392763502,
+            "high": 0.003818059138429984
+          },
+          "selected": "low",
+          "candidate_mass": 0.998810365382006,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-05",
+          "decision": "role_scope",
+          "expected": "edit",
+          "scores": {
+            "administer": 0.9845763288787333,
+            "read": 0.0018886383884241856,
+            "edit": 0.013535032732841835
+          },
+          "selected": "administer",
+          "candidate_mass": 0.9938897606503548,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-06",
+          "decision": "role_scope",
+          "expected": "administer",
+          "scores": {
+            "administer": 0.9840393406305794,
+            "read": 0.002237553645375216,
+            "edit": 0.01372310572404687
+          },
+          "selected": "administer",
+          "candidate_mass": 0.9936288181828189,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-03",
+          "decision": "role_scope",
+          "expected": "administer",
+          "scores": {
+            "edit": 0.9876419319401892,
+            "administer": 0.0016857207739322654,
+            "read": 0.010672347285878698
+          },
+          "selected": "edit",
+          "candidate_mass": 0.996574027979336,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-04",
+          "decision": "role_scope",
+          "expected": "read",
+          "scores": {
+            "edit": 0.9720661560281995,
+            "administer": 0.004245196685885291,
+            "read": 0.02368864728591686
+          },
+          "selected": "edit",
+          "candidate_mass": 0.9890653564326635,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-01",
+          "decision": "role_scope",
+          "expected": "read",
+          "scores": {
+            "read": 0.9826107607000248,
+            "edit": 0.0023208827610829656,
+            "administer": 0.015068356538891988
+          },
+          "selected": "read",
+          "candidate_mass": 0.9959902945720965,
+          "input_tokens": 134,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "access-02",
+          "decision": "role_scope",
+          "expected": "edit",
+          "scores": {
+            "read": 0.9546986036567512,
+            "edit": 0.006043016584547046,
+            "administer": 0.03925837975870169
+          },
+          "selected": "read",
+          "candidate_mass": 0.9885381633920588,
+          "input_tokens": 149,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-01",
+          "decision": "storage_zone",
+          "expected": "ambient",
+          "scores": {
+            "ambient": 0.9838029813655481,
+            "chilled": 0.0028590106619983085,
+            "frozen": 0.013338007972453861
+          },
+          "selected": "ambient",
+          "candidate_mass": 0.9964855495303391,
+          "input_tokens": 129,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-02",
+          "decision": "storage_zone",
+          "expected": "chilled",
+          "scores": {
+            "ambient": 0.9768214084620886,
+            "chilled": 0.005422243116688124,
+            "frozen": 0.017756348421221726
+          },
+          "selected": "ambient",
+          "candidate_mass": 0.9952254616468509,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-03",
+          "decision": "storage_zone",
+          "expected": "frozen",
+          "scores": {
+            "chilled": 0.969029702350335,
+            "frozen": 0.003627666673098079,
+            "ambient": 0.027342630976566664
+          },
+          "selected": "chilled",
+          "candidate_mass": 0.9948832861658127,
+          "input_tokens": 130,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-04",
+          "decision": "storage_zone",
+          "expected": "ambient",
+          "scores": {
+            "chilled": 0.9841874090964244,
+            "frozen": 0.0039087944201396385,
+            "ambient": 0.011903796483436965
+          },
+          "selected": "chilled",
+          "candidate_mass": 0.9967453335390946,
+          "input_tokens": 145,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-05",
+          "decision": "storage_zone",
+          "expected": "chilled",
+          "scores": {
+            "frozen": 0.9731497649705348,
+            "ambient": 0.002757817448154614,
+            "chilled": 0.024092417581309596
+          },
+          "selected": "frozen",
+          "candidate_mass": 0.9959512172902899,
+          "input_tokens": 131,
+          "reused_prefix_tokens": 0
+        },
+        {
+          "case": "warehouse-06",
+          "decision": "storage_zone",
+          "expected": "frozen",
+          "scores": {
+            "frozen": 0.9780083630985663,
+            "ambient": 0.005141012753340839,
+            "chilled": 0.01685062414809195
+          },
+          "selected": "frozen",
+          "candidate_mass": 0.9951420535593211,
+          "input_tokens": 146,
+          "reused_prefix_tokens": 0
+        }
+      ],
+      "raw_report": "results/schema-reuse-20260927/qwen-b256.json",
+      "raw_report_sha256": "119c158bd28a40ee964f19d6a2ba61017ecc2cb5343681c9d3dd24ae9a44071b"
+    }
+  ],
+  "within_batch_comparison": "All 3 pairs and repeats have exactly zero probability/mass/selection/argmax/abstention differences.",
+  "cross_batch_difference": {
+    "probability": 0.0,
+    "candidate_mass": 0.0,
+    "selections": 0,
+    "top1": 0,
+    "abstentions": 0
+  },
+  "fastest_measured_fresh_batch": 256,
+  "fastest_measured_fresh_over_reuse_b64": 1.4360639082701985,
+  "limits": "Grouped one-decision calls, not original three-decision request p50. Two batch sizes, one model on a virtualized Linux CPU. No Mac/Metal/jv rerun, memory measurement or independent quality gain. Full reports remain local ignored artifacts."
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "utc": "2026-09-27T15:37:16.244188+00:00",
+    "monotonic": 9168.017568692,
+    "temperature_c": 68.85,
+    "throttled": 327680,
+    "arm_clock_hz": 2400020480,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 10224
+  },
+  {
+    "utc": "2026-09-27T15:37:18.257436+00:00",
+    "monotonic": 9170.030822915,
+    "temperature_c": 63.35,
+    "throttled": 327680,
+    "arm_clock_hz": 2400020480,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 10224
+  },
+  {
+    "utc": "2026-09-27T15:37:20.270703+00:00",
+    "monotonic": 9172.044083742,
+    "temperature_c": 61.7,
+    "throttled": 327680,
+    "arm_clock_hz": 2400023808,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 10224
+  },
+  {
+    "utc": "2026-09-27T15:37:22.283738+00:00",
+    "monotonic": 9174.057121434,
+    "temperature_c": 58.95,
+    "throttled": 327680,
+    "arm_clock_hz": 2400023808,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 10224
+  },
+  {
+    "utc": "2026-09-27T15:37:24.296933+00:00",
+    "monotonic": 9176.070329081,
+    "temperature_c": 56.75,
+    "throttled": 327680,
+    "arm_clock_hz": 1500012800,
+    "scaling_cur_freq_khz": 1500000,
+    "swap_kib": 10224
+  },
+  {
+    "utc": "2026-09-27T15:37:26.311148+00:00",
+    "monotonic": 9178.084533903,
+    "temperature_c": 54.55,
+    "throttled": 327680,
+    "arm_clock_hz": 1500019456,
+    "scaling_cur_freq_khz": 1500000,
+    "swap_kib": 10224
+  }
+]

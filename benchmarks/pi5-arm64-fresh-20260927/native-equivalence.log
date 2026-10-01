@@ -1,0 +1,67 @@
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/parser.h:4,
+warning: l2s1-llama-sys@0.1.3:                  from /home/lutica/l2s1-arm64-fresh-20260927/source/crates/l2s1-llama-sys/native/chat.cpp:2:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/crates/l2s1-llama-sys/native/chat.cpp:1:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/lexer.cpp:2:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/lexer.cpp:1:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/parser.cpp:2:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/parser.cpp:1:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/runtime.cpp:2:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/runtime.cpp:1:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/string.h:7,
+warning: l2s1-llama-sys@0.1.3:                  from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/string.cpp:1:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/utils.h:44:20: warning: 'std::string jinja::fmt_error_with_source(const std::string&, const std::string&, const std::string&, size_t)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:    44 | static std::string fmt_error_with_source(const std::string & tag, const std::string & msg, const std::string & source, size_t pos) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/value.cpp:1:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/runtime.h:740:20: warning: 'std::string jinja::render_string_parts(const value_string&)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:   740 | static std::string render_string_parts(const value_string & parts) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~~~~~~
+warning: l2s1-llama-sys@0.1.3: In file included from /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/runtime.h:3:
+warning: l2s1-llama-sys@0.1.3: /home/lutica/l2s1-arm64-fresh-20260927/source/target/release/build/l2s1-llama-sys-06b2336b1a04249b/out/llama/8ae0ea2b4442c335/build/_deps/llama_cpp-src/common/jinja/lexer.h:49:20: warning: 'std::string jinja::type_to_string(token::type)' defined but not used [-Wunused-function]
+warning: l2s1-llama-sys@0.1.3:    49 | static std::string type_to_string(token::type t) {
+warning: l2s1-llama-sys@0.1.3:       |                    ^~~~~~~~~~~~~~
+    Finished `release` profile [optimized] target(s) in 0.20s
+     Running tests/fixed_schema.rs (target/release/deps/fixed_schema-b191918e8054f8b5)
+
+running 1 test
+load: control-looking token:    212 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+llama_kv_cache_iswa: using full-size SWA cache (ref: https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+test explicit_split_keeps_batch_256_and_reuses_across_schemas ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 18.70s
+
+     Running tests/prefix_reuse.rs (target/release/deps/prefix_reuse-f7dca3f27157bd3e)
+
+running 1 test
+load: control-looking token:    212 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+llama_kv_cache_iswa: using full-size SWA cache (ref: https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+test real_model_prefix_reuse has been running for over 60 seconds
+comparisons=45 changed_top1=0 changed_selected=0 max_probability_delta=0 reused_tokens=6272
+test real_model_prefix_reuse ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 256.35s
+

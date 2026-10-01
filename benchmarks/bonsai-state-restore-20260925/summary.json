@@ -1,0 +1,108 @@
+{
+  "source_commit": "a12a99b",
+  "binary_sha256": "edeb9b1e61afb72a0db94d71201f6d0baf63e4cfd3eb3c60bb7cf3c1e4edbdde",
+  "model_sha256": "17ef842e47450caeb8eaa3ebfbbab5d2f2278b62b79be107985fb69a2f819aa0",
+  "gpu_info": "NVIDIA GeForce RTX 3060, 595.71.05, 12288 MiB",
+  "warmups": 1,
+  "measured_repeats": 3,
+  "modes": {
+    "fresh_full": {
+      "startup_ms": 3017.5388180068694,
+      "peak_gpu_memory_mib": 4309.0,
+      "counts": {
+        "1": {
+          "elapsed_ms": [
+            775.526022,
+            756.963024,
+            756.628132
+          ],
+          "median_ms": 756.963024,
+          "accepted": [
+            1,
+            1,
+            1
+          ],
+          "reused_prefix_tokens": [
+            0,
+            0,
+            0
+          ]
+        },
+        "16": {
+          "elapsed_ms": [
+            12155.988482,
+            12207.89222,
+            12226.31047
+          ],
+          "median_ms": 12207.89222,
+          "accepted": [
+            15,
+            15,
+            15
+          ],
+          "reused_prefix_tokens": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "state_restore_full": {
+      "startup_ms": 2908.946889976505,
+      "peak_gpu_memory_mib": 4309.0,
+      "counts": {
+        "1": {
+          "elapsed_ms": [
+            788.217838,
+            766.050326,
+            765.837099
+          ],
+          "median_ms": 766.050326,
+          "accepted": [
+            1,
+            1,
+            1
+          ],
+          "reused_prefix_tokens": [
+            0,
+            0,
+            0
+          ]
+        },
+        "16": {
+          "elapsed_ms": [
+            6973.404898,
+            6976.411883,
+            6981.487108
+          ],
+          "median_ms": 6976.411883,
+          "accepted": [
+            15,
+            15,
+            15
+          ],
+          "reused_prefix_tokens": [
+            3840,
+            3840,
+            3840
+          ]
+        }
+      }
+    }
+  },
+  "parity_vs_fresh": {
+    "1": {
+      "max_option_probability_delta": 0.0,
+      "max_candidate_mass_delta": 0.0,
+      "changed_selected": 0,
+      "changed_raw_top1": 0
+    },
+    "16": {
+      "max_option_probability_delta": 0.0,
+      "max_candidate_mass_delta": 0.0,
+      "changed_selected": 0,
+      "changed_raw_top1": 0
+    }
+  }
+}

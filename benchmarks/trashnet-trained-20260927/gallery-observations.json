@@ -1,0 +1,4442 @@
+[
+  {
+    "image": "dataset-resized/cardboard/cardboard102.jpg",
+    "image_sha256": "5a88bce0103f59145f02b7fc0f50aa6dc3fbf29a1ffcaeeea0ea6661a58e0278",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9995620846748352,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9995620846748352
+      },
+      {
+        "id": "glass",
+        "option_probability": 5.162159595784033e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00011941100092371926
+      },
+      {
+        "id": "paper",
+        "option_probability": 3.723282861756161e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 9.579893958289176e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00018043493037112057
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard137.jpg",
+    "image_sha256": "4d89fcb735ea15edca28d80bd5a288c97a2f169eed7ee8d3dfde62d7b22890bc",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9714213609695435,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9714213609695435
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0010000199545174837
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00027452726499177516
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0237797349691391
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0006650765426456928
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.002859284169971943
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard153.jpg",
+    "image_sha256": "6e4b49547daf86f258ebc12aa2bbdd574e2d77837cfa36dbca0cfa2891520f14",
+    "ground_truth": "cardboard",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.44830775260925293,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.25847944617271423
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0020556445233523846
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.002510704565793276
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.44830775260925293
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0004474543093238026
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.2881990075111389
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard159.jpg",
+    "image_sha256": "087c11b5a5003eaabded9748b1ee459baaed56492c02cd1bcdf17587aac01233",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9989307522773743,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9989307522773743
+      },
+      {
+        "id": "glass",
+        "option_probability": 3.549600933183683e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0003383577859494835
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0005181368323974311
+      },
+      {
+        "id": "plastic",
+        "option_probability": 3.235632539144717e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00017679294978734106
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard207.jpg",
+    "image_sha256": "0d19e7e6ef97e06bae787b9283eaa8f08df88b9b653e5be0e9ff75720d0239fb",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9978233575820923,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9978233575820923
+      },
+      {
+        "id": "glass",
+        "option_probability": 2.0063749616383575e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 4.261591311660595e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0014288639649748802
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0003999412583652884
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0002851977769751102
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard220.jpg",
+    "image_sha256": "f7f3094a1df464b9ebad857980abc2556b755436a2da36380688e88b6e693689",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9924752116203308,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9924752116203308
+      },
+      {
+        "id": "glass",
+        "option_probability": 9.904734179144725e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0001850539556471631
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.004132675938308239
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.002372140297666192
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0007359102019108832
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard235.jpg",
+    "image_sha256": "d550d9d6c2b831d3dee5bb985a259a4f872df22baaf2a1e04113350e54a2e264",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.991472065448761,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.991472065448761
+      },
+      {
+        "id": "glass",
+        "option_probability": 4.7544082917738706e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0002609150833450258
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.004449166357517242
+      },
+      {
+        "id": "plastic",
+        "option_probability": 7.873592403484508e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0036915745586156845
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard250.jpg",
+    "image_sha256": "db13544f3b344b8f49b2c2da857ad0aabe503fbae3a08c7ac4526bd86ea27a1b",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.999365508556366,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.999365508556366
+      },
+      {
+        "id": "glass",
+        "option_probability": 1.8286009435541928e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 2.3950913600856438e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0002885613648686558
+      },
+      {
+        "id": "plastic",
+        "option_probability": 4.480500138015486e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00027548454818315804
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard257.jpg",
+    "image_sha256": "6a9b724d039aefa9c1ff60ba61bb773cb30bbb79c230f133b0817627d07aee44",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9931660294532776,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9931660294532776
+      },
+      {
+        "id": "glass",
+        "option_probability": 1.3773180853604572e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00016226731531787664
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00655437633395195
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00010412299889139831
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.1894356248376425e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard280.jpg",
+    "image_sha256": "c34dc0814f96979e3df5383522338a06d370d3cd60004ba1829bcd0e6f4d7417",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.8845959901809692,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.8845959901809692
+      },
+      {
+        "id": "glass",
+        "option_probability": 8.290102414321154e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0006544518400914967
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.11390557140111923
+      },
+      {
+        "id": "plastic",
+        "option_probability": 3.23407439282164e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0007287511834874749
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard299.jpg",
+    "image_sha256": "66b0eb2c973b01fcd6a0853047d52f76cdb6f97428e1c10e8ef68b6df7414b12",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9972087740898132,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9972087740898132
+      },
+      {
+        "id": "glass",
+        "option_probability": 5.614117526420159e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00014590933278668672
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0015317094512283802
+      },
+      {
+        "id": "plastic",
+        "option_probability": 1.4770762390980963e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0010932732839137316
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard323.jpg",
+    "image_sha256": "c2d9ca1f7a33c086de846f04c9cc755c70dedd8ee44f92ab35ce4d3192cbf38a",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9956772923469543,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9956772923469543
+      },
+      {
+        "id": "glass",
+        "option_probability": 6.105809006839991e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00038275044062174857
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0025976665783673525
+      },
+      {
+        "id": "plastic",
+        "option_probability": 4.866543167736381e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0012876273831352592
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard334.jpg",
+    "image_sha256": "e20217c46a83b281bcda09e3d2679e22292d3e3c25bc934969f8d9582f94a21a",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9681880474090576,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9681880474090576
+      },
+      {
+        "id": "glass",
+        "option_probability": 5.815363238070859e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.005024030804634094
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.02665906399488449
+      },
+      {
+        "id": "plastic",
+        "option_probability": 4.380249265523162e-06
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00011873691255459562
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard337.jpg",
+    "image_sha256": "fc9b771a9b4ae60823fde39497a4facd82926d13b51c0c851aeb6bd26bec2f14",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9995818734169006,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9995818734169006
+      },
+      {
+        "id": "glass",
+        "option_probability": 1.8525624909671023e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 2.9900125809945166e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 9.93977882899344e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 7.330856988119194e-06
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00027949767536483705
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard36.jpg",
+    "image_sha256": "3e69c4338acd879596b5c97185f04de6d09725f6273485154db96173aecd54f2",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9997758269309998,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9997758269309998
+      },
+      {
+        "id": "glass",
+        "option_probability": 3.4794775274349377e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 3.199194907210767e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 7.471637945855036e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 3.4451004466973245e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 7.959421054692939e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard360.jpg",
+    "image_sha256": "e46438a35440cd67f9214df0232ac1534408ad69e6f164586aacd69d2f73963c",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9988172650337219,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9988172650337219
+      },
+      {
+        "id": "glass",
+        "option_probability": 3.843106242129579e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00018210752750746906
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0008176139090210199
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00012111036630813032
+      },
+      {
+        "id": "trash",
+        "option_probability": 5.810950096929446e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard382.jpg",
+    "image_sha256": "d4bcbe962c81694fe3862ea7c6fa72c0d7ad175d17e8e4b10349144267496068",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9999182224273682,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9999182224273682
+      },
+      {
+        "id": "glass",
+        "option_probability": 9.513308327768755e-07
+      },
+      {
+        "id": "metal",
+        "option_probability": 2.793586281768512e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 9.81351149675902e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 4.541593625617679e-06
+      },
+      {
+        "id": "trash",
+        "option_probability": 3.863650999846868e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard41.jpg",
+    "image_sha256": "0aaf69cb9229ac6d01d5e9d12c2e64018beb1fa0906c98b07004b4ebbaf748c3",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.6403355002403259,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.6403355002403259
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.013442267663776875
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.03575849160552025
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.3060548007488251
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0002640211896505207
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.004144821781665087
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard78.jpg",
+    "image_sha256": "922a4eebb8634424a2b96f8d649cb97ef38f98bd08148f973c010edcb8c31de6",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9945321083068848,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9945321083068848
+      },
+      {
+        "id": "glass",
+        "option_probability": 7.637666385562625e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 7.062350050546229e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.005183963570743799
+      },
+      {
+        "id": "plastic",
+        "option_probability": 5.40066284884233e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00015165626246016473
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/cardboard/cardboard90.jpg",
+    "image_sha256": "154aa49e8581d68981e2c0048c51b1ae448babc4cc08c03a91a815af12f66f80",
+    "ground_truth": "cardboard",
+    "selected": "cardboard",
+    "raw_top1": "cardboard",
+    "candidate_mass": null,
+    "top_option_probability": 0.9995656609535217,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.9995656609535217
+      },
+      {
+        "id": "glass",
+        "option_probability": 2.4325522645085584e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 1.8667353288037702e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 3.967364682466723e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0001710739452391863
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0002024901332333684
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass100.jpg",
+    "image_sha256": "4c7cff0c0f5dacff26bf871c6d5b96f29b26d536a637bf5fc4da7fcea87212c5",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9816926717758179,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 2.5527098841848783e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9816926717758179
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00046957595623098314
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.5143805285333656e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.01778487302362919
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.2135696124460083e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass15.jpg",
+    "image_sha256": "e55621b76d93ae7c1a769a8530a30d0120ed284c1d730db3b617c1e040e93a05",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9945911765098572,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.9333247109898366e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9945911765098572
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0026644296012818813
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00012926393537782133
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.002436467446386814
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0001593003107700497
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass187.jpg",
+    "image_sha256": "11d2459e02f00f7dddad98494065c8268f184c81ec84666e8529945cb67afd2f",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9946697354316711,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 4.292577796149999e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9946697354316711
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0015127182705327868
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0011225525522604585
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0023802644573152065
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0002717866445891559
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass192.jpg",
+    "image_sha256": "a0251609850efa59b9ba88efd0c02178ce2901df8dc5cdf0c960d38aadfd6a2a",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.8236822485923767,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0014644124312326312
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.8236822485923767
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.13143332302570343
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0003757430240511894
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.04050236567854881
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0025419548619538546
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass201.jpg",
+    "image_sha256": "f217722bf9bf5f719bb4fa12d8dd4d7b829ff92ed1827a8d3f798a41a0d35ba7",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9966884255409241,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.3977125490782782e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9966884255409241
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0006940079038031399
+      },
+      {
+        "id": "paper",
+        "option_probability": 2.9727334549534135e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0025755357928574085
+      },
+      {
+        "id": "trash",
+        "option_probability": 2.5115916287177242e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass208.jpg",
+    "image_sha256": "dd76c1c191605769e14f839a32da8379c02fbcc6b63582dd6a78f9baf4d72583",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9904941916465759,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.5729891629234771e-06
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9904941916465759
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00018646229000296444
+      },
+      {
+        "id": "paper",
+        "option_probability": 4.366171560832299e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.009262182749807835
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.2099678315280471e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass216.jpg",
+    "image_sha256": "279c81c430424acbf50186b7a25ba91c978a86a1d0e8bff699119b93f5fcc961",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9965726137161255,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 3.5464129268802935e-06
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9965726137161255
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0001477947662351653
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.588479608471971e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0032569672912359238
+      },
+      {
+        "id": "trash",
+        "option_probability": 3.1872618819761556e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass249.jpg",
+    "image_sha256": "c209a8ec595b3be49ed1994932afb6a10d7269a3d6941c2ac4ae90d331c8d2a3",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9991191029548645,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 5.522751962416805e-06
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9991191029548645
+      },
+      {
+        "id": "metal",
+        "option_probability": 4.063701271661557e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.1651967497527949e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0008255839347839355
+      },
+      {
+        "id": "trash",
+        "option_probability": 7.961034498293884e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass291.jpg",
+    "image_sha256": "1bbf5456c82ebced8c1e322acbe71a886ddc9f6a615342cee3fcd177f9a585ce",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9890651702880859,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 9.869619680102915e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9890651702880859
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0033931834623217583
+      },
+      {
+        "id": "paper",
+        "option_probability": 3.709262819029391e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.007399723865091801
+      },
+      {
+        "id": "trash",
+        "option_probability": 6.050125648471294e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass31.jpg",
+    "image_sha256": "ce89bfee8b75b95af1f1dac7ed0daee2459e0f1b3fb68016b264d9e46f83be5e",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9976962208747864,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 4.92473081976641e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9976962208747864
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0006322289118543267
+      },
+      {
+        "id": "paper",
+        "option_probability": 5.868039806955494e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.001308957813307643
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00025464603095315397
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass330.jpg",
+    "image_sha256": "b8462ea85337e9caaf3205245db37109c6070c5344cdd690ec865c91527c91b5",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9962414503097534,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0007213008939288557
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9962414503097534
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0024243390653282404
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.5349269233411178e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00044827122474089265
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00014917833323124796
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass364.jpg",
+    "image_sha256": "0ee7095b9a08e846175af981ca30cbd3d56d28fa7147eb48109ba5659b699a46",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.962147057056427,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 7.63836142141372e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.962147057056427
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00010947740520350635
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.1975784218520857e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.037642840296030045
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.2352507837931626e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass368.jpg",
+    "image_sha256": "85ac6ccd301a01da12c0b2238d3a1a565604bf1a7ea839b2cd084d98bd7ef6a7",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9975186586380005,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0005253856652416289
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9975186586380005
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0008894097991287708
+      },
+      {
+        "id": "paper",
+        "option_probability": 3.828333774436032e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0010432616109028459
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.9608167349360883e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass374.jpg",
+    "image_sha256": "432a5d3f5e82b75c82ee6b504329e27b3b55b34a0907d3faa6800f3bb2bd000e",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.8905751705169678,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0003373065555933863
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.8905751705169678
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.011779618449509144
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0007936666952446103
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.09544798731803894
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.001066195429302752
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass381.jpg",
+    "image_sha256": "6b7a7d11f2fc67528af282827d789419e96cb788880f25f575a1480403bd2a81",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9974053502082825,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00014647952048107982
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9974053502082825
+      },
+      {
+        "id": "metal",
+        "option_probability": 7.470946729881689e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 2.5171593733830377e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0023445687256753445
+      },
+      {
+        "id": "trash",
+        "option_probability": 3.6505314255919075e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass410.jpg",
+    "image_sha256": "569b966e1bcbfe5a07566b18a1456ff5eff849110327650f0f8f5e68f37fd182",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9685333967208862,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 7.496917532989755e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9685333967208862
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.013479351997375488
+      },
+      {
+        "id": "paper",
+        "option_probability": 2.1625733097607736e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.01790517196059227
+      },
+      {
+        "id": "trash",
+        "option_probability": 4.929765964334365e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass419.jpg",
+    "image_sha256": "5d772c50c048803766142cefc680593d41e81f576cec0b8c42854a0c1e89144f",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9978887438774109,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 3.560899131116457e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9978887438774109
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00142355274874717
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.0390069292043336e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00045114094973541796
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00019074822193942964
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass448.jpg",
+    "image_sha256": "412b46561dbf161c5f7882223d89c2b6fce78823a98d477947bb7e0372f573fa",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9906491637229919,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.4473646842816379e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9906491637229919
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.006260822992771864
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00020631625375244766
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.002304299268871546
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0005650060484185815
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass47.jpg",
+    "image_sha256": "f6b1f3ecf04bff83360dee0390f9d2d7585b4a99d87be7d0573cfff278951d0c",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9971444010734558,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 4.5185912313172594e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9971444010734558
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0007357738213613629
+      },
+      {
+        "id": "paper",
+        "option_probability": 4.643461943487637e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0019712725188583136
+      },
+      {
+        "id": "trash",
+        "option_probability": 5.676666114595719e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/glass/glass500.jpg",
+    "image_sha256": "701b0c07b8d804190393f323cf76527ca05c719a84d8064dec4021115c798d44",
+    "ground_truth": "glass",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9995273351669312,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.3812928045808803e-06
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9995273351669312
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00025754442322067916
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.3390358617471065e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00012743442493956536
+      },
+      {
+        "id": "trash",
+        "option_probability": 7.291304791579023e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal112.jpg",
+    "image_sha256": "00cb113efab64e877fe763e04113e4d6cd0f7448fad899bac05164614edf779a",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9876663684844971,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.002093065995723009
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.003792916890233755
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9876663684844971
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00015392174827866256
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.005941131617873907
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00035264031612314284
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal134.jpg",
+    "image_sha256": "17a57deae02dfa268f964fde93494e8504565bcf2de190663d621e9b4d9df439",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.45313549041748047,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.04404126852750778
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.002038550330325961
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.45313549041748047
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0795886293053627
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.2383182942867279
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.18287776410579681
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal14.jpg",
+    "image_sha256": "9fac16ae09af013cdd4273f8b81b811ccaffe3b1f064482e6001c366a757fe08",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9844169020652771,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00042823306284844875
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.003843402024358511
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9844169020652771
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0022942740470170975
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00900515727698803
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.2140914805058856e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal161.jpg",
+    "image_sha256": "a35b3d08ada679342504b59e4fd634e0d5c556e84b4688149dd39f4a8acf3162",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9851873517036438,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00035001611104235053
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.000800723151769489
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9851873517036438
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0012462505837902427
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00367151852697134
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00874423049390316
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal17.jpg",
+    "image_sha256": "80a4427fa8828b37c2bcb969e941956a50ebd2f7578975dd2842b68d11f8741e",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9975336790084839,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 9.454514656681567e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0008414820185862482
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9975336790084839
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.8877424736274406e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00043878669384866953
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.001072591869160533
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal185.jpg",
+    "image_sha256": "bdc699a908783ac33bc196c3583282057e192549a0727951f81636c6e79b534e",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9992238283157349,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 2.0127792595303617e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0004013372235931456
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9992238283157349
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00021007053146604449
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00014035224739927799
+      },
+      {
+        "id": "trash",
+        "option_probability": 4.262339643901214e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal205.jpg",
+    "image_sha256": "fd8f76d8e26f61856dcdb9a5cdc0725951f5d360ccd80541a3c55bfffd3a9998",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9995829463005066,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 4.9132802814710885e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 7.786756759742275e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9995829463005066
+      },
+      {
+        "id": "paper",
+        "option_probability": 4.539042856777087e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0002277704479638487
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.6865562429302372e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal229.jpg",
+    "image_sha256": "5540f798bad9aab9d38537434226414807d155ecf14ee6c05153e94b9392aa8a",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9995726943016052,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00010158665827475488
+      },
+      {
+        "id": "glass",
+        "option_probability": 4.023198016511742e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9995726943016052
+      },
+      {
+        "id": "paper",
+        "option_probability": 2.0599343315552687e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0003189223352819681
+      },
+      {
+        "id": "trash",
+        "option_probability": 8.764343419898069e-07
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal231.jpg",
+    "image_sha256": "59f6dde9204d9fd4c5916e95085650160f3371883da5b3f621ebfbe936860288",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9950262904167175,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.002485758624970913
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00022433548292610794
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9950262904167175
+      },
+      {
+        "id": "paper",
+        "option_probability": 3.076552820857614e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0019682515412569046
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00026466225972399116
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal266.jpg",
+    "image_sha256": "423df73e6a1bd921e9e7a1ffee26f7ab06f57bac182b063df421b5b728178f3b",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9044119715690613,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00013374476111494005
+      },
+      {
+        "id": "glass",
+        "option_probability": 9.628993575461209e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9044119715690613
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0026041558012366295
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00211595487780869
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.09063782542943954
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal295.jpg",
+    "image_sha256": "9590b871a82a5514e73f9dcf7b7faf7e8ff3b56435ece9cf864e7a4c4a55f966",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9989089965820312,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 7.33078268240206e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00031186340493150055
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9989089965820312
+      },
+      {
+        "id": "paper",
+        "option_probability": 3.0686082027386874e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0001879906194517389
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00048705964582040906
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal296.jpg",
+    "image_sha256": "34bc4ee4ce56e91e3e0561067d5a05ad377b3dcd26175c6f732ae583d89683c3",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9700389504432678,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0026517680380493402
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.010997401550412178
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9700389504432678
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00012003310257568955
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0161253921687603
+      },
+      {
+        "id": "trash",
+        "option_probability": 6.637757905991748e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal3.jpg",
+    "image_sha256": "a8c75d9475f6d0dd16a6f68c800d37d8910e74f23240d0510e47532239027714",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9984473586082458,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0004287638876121491
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0003993246064055711
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9984473586082458
+      },
+      {
+        "id": "paper",
+        "option_probability": 5.310430424287915e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.000665011175442487
+      },
+      {
+        "id": "trash",
+        "option_probability": 6.5468993852846324e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal305.jpg",
+    "image_sha256": "a6912d622b544a06d59817d8c956f9c3d03142fbfbb4161a56708fe95cb5e9c8",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.999061644077301,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0005319108022376895
+      },
+      {
+        "id": "glass",
+        "option_probability": 2.0594161469489336e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.999061644077301
+      },
+      {
+        "id": "paper",
+        "option_probability": 6.528860922117019e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00034635901101864874
+      },
+      {
+        "id": "trash",
+        "option_probability": 3.295890928711742e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal310.jpg",
+    "image_sha256": "10bff8c5d8e0dc1bdd5785f57de5e4a0b69913813781b10cf5ecf09b42bbe6b9",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9303986430168152,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00032438637572340667
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0006950353272259235
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9303986430168152
+      },
+      {
+        "id": "paper",
+        "option_probability": 9.197791223414242e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.06842338293790817
+      },
+      {
+        "id": "trash",
+        "option_probability": 6.661457155132666e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal328.jpg",
+    "image_sha256": "d476473e802901fc009eb708a3a41c5198fd3ed9ccef527c48de890bcbaa14cb",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.8547883033752441,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 5.459964813780971e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0002176006673835218
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.8547883033752441
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0008169547654688358
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0014408453134819865
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.14268168807029724
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal406.jpg",
+    "image_sha256": "f17d023b7a7bdcc6ac2c7ea673fa97ee75e5e07906ded6c69e56250acc0cc633",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9922323226928711,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.000243925373069942
+      },
+      {
+        "id": "glass",
+        "option_probability": 2.7419921025284566e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9922323226928711
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00057091104099527
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.003888204460963607
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.003037165617570281
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal49.jpg",
+    "image_sha256": "0cbb9f87d347d1be4ecebb5988a8a450bd844cafafd79958f07fc933b28952e6",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9996048808097839,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.5641684512957e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.000260254048043862
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9996048808097839
+      },
+      {
+        "id": "paper",
+        "option_probability": 2.0269408196327277e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 9.500193118583411e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 4.09642098020413e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal8.jpg",
+    "image_sha256": "27ba278703688aff66f44741d735886bbdbecfdc4d8749daa021004bc91c8cbb",
+    "ground_truth": "metal",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.8894509673118591,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0001993405312532559
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.001612829277291894
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.8894509673118591
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00254047941416502
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.023128218948841095
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0830681249499321
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/metal/metal91.jpg",
+    "image_sha256": "81546d1362d75fc60718e5852593c58f66f813e8c1e9d1eae6871fedb02e2868",
+    "ground_truth": "metal",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9970998764038086,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 3.2754418498370796e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9970998764038086
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00016299443086609244
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.7712671251501888e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.002528136596083641
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00015860548592172563
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper134.jpg",
+    "image_sha256": "ed495f4f9c3439058d41999cf1eee407c0efdca55b6ee26dba92285712d7bd4b",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.7197504639625549,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.14416515827178955
+      },
+      {
+        "id": "glass",
+        "option_probability": 9.205799869960174e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0006551773985847831
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.7197504639625549
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.020022843033075333
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.11531434208154678
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper136.jpg",
+    "image_sha256": "8ed79d770dd19ae7516c711f60008d6fa2df835fa94f3541832d8a2767fbfb12",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9990769624710083,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0004399956378620118
+      },
+      {
+        "id": "glass",
+        "option_probability": 1.3405210665951017e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 3.511353497742675e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9990769624710083
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0004329025687184185
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.5334604768213467e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper144.jpg",
+    "image_sha256": "c1976fd353d41344f825d988703f63ece168e453f9630f4964d3952890a0559d",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9993312358856201,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0005707296077162027
+      },
+      {
+        "id": "glass",
+        "option_probability": 2.8288357498240657e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 6.840585410827771e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9993312358856201
+      },
+      {
+        "id": "plastic",
+        "option_probability": 1.2195231420264463e-06
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.5021971933038003e-07
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper208.jpg",
+    "image_sha256": "0ffb51316baae31451594d9a305fe3ebc4f0ead80e790451ca476363c223528c",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9785298705101013,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0027116963174194098
+      },
+      {
+        "id": "glass",
+        "option_probability": 8.54632307891734e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0001009011102723889
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9785298705101013
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.018464576452970505
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00010748452041298151
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper210.jpg",
+    "image_sha256": "ed89314fe3902a917ca66fe0188bf80b7056394527b435679e727f51c79cafd1",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9948070645332336,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.003685514209792018
+      },
+      {
+        "id": "glass",
+        "option_probability": 8.519748917024117e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00012111642718082294
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9948070645332336
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0012122777989134192
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00016558950301259756
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper253.jpg",
+    "image_sha256": "35110d355588aff72ce48cd838f1993a63b2f84c93f07724655b3a887b17cf50",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9906554818153381,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.007479249965399504
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00017525599105283618
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0011665199417620897
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9906554818153381
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.000501049857120961
+      },
+      {
+        "id": "trash",
+        "option_probability": 2.2461470507550985e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper296.jpg",
+    "image_sha256": "e48b4da337f9d86cfd8d93a19bf37fbdd5fa6f9152bd564b05d728f337dd8fce",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9743991494178772,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.022023608908057213
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0002522389986552298
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0013319402933120728
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9743991494178772
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.000751262647099793
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0012417314574122429
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper364.jpg",
+    "image_sha256": "aac6c82882e77dd83779c02adb71dfac25c28b4e9a67e17c0914d0fa913bc12e",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9237743020057678,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.005226519424468279
+      },
+      {
+        "id": "glass",
+        "option_probability": 3.3379055821569636e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.006073514465242624
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9237743020057678
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.03058234043419361
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.03430994972586632
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper386.jpg",
+    "image_sha256": "5a4eb22235a4eeed0170455067d4ce246adfac26a87679053bfc58f5f598e414",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9945107698440552,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0036077320110052824
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00010005630610976368
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00034123880323022604
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9945107698440552
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0006469044601544738
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0007932428270578384
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper424.jpg",
+    "image_sha256": "23e78e4678ddb10aa6d602d59c6bc6050bf66f6fcedd4c46265ada535706f265",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9932311773300171,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 9.326067083748057e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0003959911991842091
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.001409498625434935
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9932311773300171
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0004290719225537032
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.004441059660166502
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper434.jpg",
+    "image_sha256": "ad20da3d35c1d67dff131edbb2c6c06c0d17280243994a6354402626eaa2ae07",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9967285394668579,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00260466942563653
+      },
+      {
+        "id": "glass",
+        "option_probability": 7.640207331860438e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 8.151788642862812e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9967285394668579
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0005054941866546869
+      },
+      {
+        "id": "trash",
+        "option_probability": 3.4566633075883146e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper469.jpg",
+    "image_sha256": "8edeffd3d9dc0aefbb6d0669237476864f1abeb0b82aefa5c55d23a52fddc8e3",
+    "ground_truth": "paper",
+    "selected": "metal",
+    "raw_top1": "metal",
+    "candidate_mass": null,
+    "top_option_probability": 0.9605079889297485,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.004122825805097818
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0024903002195060253
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.9605079889297485
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0012921164743602276
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0026685951743274927
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.028918148949742317
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper504.jpg",
+    "image_sha256": "a29f26705f053e3cbcb729c05e56f63543a3aa37dffa5b125419ed357d6dade3",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.993643045425415,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.005968721583485603
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0002826522395480424
+      },
+      {
+        "id": "metal",
+        "option_probability": 3.778182144742459e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.993643045425415
+      },
+      {
+        "id": "plastic",
+        "option_probability": 6.721368845319375e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 5.752271476922033e-07
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper55.jpg",
+    "image_sha256": "61e4135a107681ed768c845a1c5944dff554041fce30e8ff2263be7f1f684b6b",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9978176355361938,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0018444536253809929
+      },
+      {
+        "id": "glass",
+        "option_probability": 1.5822766727069393e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 7.489440031349659e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9978176355361938
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00011192122474312782
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00013523689995054156
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper572.jpg",
+    "image_sha256": "f68e3a0bf970b94f85658c50b07a0dc6076125d56a068f89bdeea5a7228b23c8",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9996596574783325,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 5.982016591588035e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 5.9074987802887335e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00013528682757169008
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9996596574783325
+      },
+      {
+        "id": "plastic",
+        "option_probability": 7.108279532985762e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.5172870007518213e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper575.jpg",
+    "image_sha256": "38119fcc2f80936b404ef9b72083cae5e9d8fc8d97ec28e771e3b7fd5c215680",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9962779879570007,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0009264539694413543
+      },
+      {
+        "id": "glass",
+        "option_probability": 1.523678656667471e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 5.480973413796164e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9962779879570007
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0026719726156443357
+      },
+      {
+        "id": "trash",
+        "option_probability": 5.359795250114985e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper59.jpg",
+    "image_sha256": "868bba7189276887f4f84a656cdfcd0f0934cb0a0308e8eba7806f37e7317e66",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9964064955711365,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0008859788067638874
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0004907572874799371
+      },
+      {
+        "id": "metal",
+        "option_probability": 2.668188972165808e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9964064955711365
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0006514010019600391
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0015387323219329119
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper66.jpg",
+    "image_sha256": "faf309df70053e5bbae3f245fda3ed630a9afb81f105ee278d238d43221fc7d0",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.9992315769195557,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 7.756645209155977e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 1.6251231500064023e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 6.154433322080877e-06
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.9992315769195557
+      },
+      {
+        "id": "plastic",
+        "option_probability": 1.782648905646056e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0006506697973236442
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper70.jpg",
+    "image_sha256": "c005fec186cb09d3b489653a35b4ca0bb892a8d4ef62f0372937b29c9d6fd997",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.782477855682373,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0037630621809512377
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.001592789078131318
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.004787766374647617
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.782477855682373
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0011144301388412714
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.2062641680240631
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/paper/paper84.jpg",
+    "image_sha256": "8a20c1abf8ba3aab3d9ee69629057437bbc9e86000e468acf74da37d5310fc2a",
+    "ground_truth": "paper",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.7008106708526611,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.2923376262187958
+      },
+      {
+        "id": "glass",
+        "option_probability": 6.316749204415828e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.001845520338974893
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.7008106708526611
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.003944889642298222
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.000998103292658925
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic134.jpg",
+    "image_sha256": "f20f144f44908e67f1008cf6344d9fc12a72a6f9883a063722b4dbfe10bff064",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9997443556785583,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.0102906344400253e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00014949713659007102
+      },
+      {
+        "id": "metal",
+        "option_probability": 2.4394637875957415e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.8262679759573075e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9997443556785583
+      },
+      {
+        "id": "trash",
+        "option_probability": 6.987150845816359e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic137.jpg",
+    "image_sha256": "de59966908bd7f79f6a902350212ff69e473b34f3c60ad4c4c97dbdc90fd2e9a",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9758102893829346,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0006044036708772182
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.015405137091875076
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0002628566580824554
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00016265032172668725
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9758102893829346
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.007754637859761715
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic179.jpg",
+    "image_sha256": "ad299921a80a27a58d01757bd887dd9c255ecf55ff18ef6fc4d97e03aceee118",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9739043116569519,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.000236384104937315
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.002976787742227316
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0010426975786685944
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0001306567864958197
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9739043116569519
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.021709078922867775
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic20.jpg",
+    "image_sha256": "7be5d6ed8c3910e9d59de6f6ef91d18c4f1c2a731409e368ff639debc32ac857",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9997569918632507,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.2074047845089808e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 7.271648428286426e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00019406316278036684
+      },
+      {
+        "id": "paper",
+        "option_probability": 5.62396735404036e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9997569918632507
+      },
+      {
+        "id": "trash",
+        "option_probability": 2.3982862330740318e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic206.jpg",
+    "image_sha256": "7e8d8ca65e56e0eb598928c026907bd54109ac5533a6b8ce3771664c4212ea28",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9949195981025696,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0035819541662931442
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0006766649312339723
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0004516358021646738
+      },
+      {
+        "id": "paper",
+        "option_probability": 4.54927358077839e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9949195981025696
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0003245616389904171
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic232.jpg",
+    "image_sha256": "a091e7139deabb255c353df965a0711759ddfd479cd2d691d67a30e14779742c",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9983238577842712,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 9.226480324286968e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00021647530957125127
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0010387940565124154
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00011204242764506489
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9983238577842712
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0002166231715818867
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic244.jpg",
+    "image_sha256": "6455853ec978543d38b1e012685b9fc5f9fa4b3405d3c309bd9c0ccd804726f9",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9977115392684937,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 5.972186409053393e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00017848181596491486
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0016995298210531473
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00017125875456258655
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9977115392684937
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00017949558969121426
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic273.jpg",
+    "image_sha256": "42b050a661efcd6435a8a4175dda15a46fa92c70230aea91514e75eefb375dbf",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9978433847427368,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00038341962499544024
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0004810524405911565
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00027492595836520195
+      },
+      {
+        "id": "paper",
+        "option_probability": 5.1901883125538006e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9978433847427368
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0009653068846091628
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic301.jpg",
+    "image_sha256": "163c1534d5cb13b304af123c5961f60ac3dd1773148675e96fdb7e468c155c9a",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9997381567955017,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 2.3383467123494484e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 3.435855614952743e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00015458838606718928
+      },
+      {
+        "id": "paper",
+        "option_probability": 9.136903827311471e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9997381567955017
+      },
+      {
+        "id": "trash",
+        "option_probability": 4.039152918267064e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic317.jpg",
+    "image_sha256": "eb326e1c218874929d693edd6d3555f34ae18a287253edcda9a89b3c04267b7c",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.849331259727478,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00025941047351807356
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.14332744479179382
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0058139474131166935
+      },
+      {
+        "id": "paper",
+        "option_probability": 6.802137795602903e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.849331259727478
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0011998473200947046
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic323.jpg",
+    "image_sha256": "e72709b0eeda0472fde0e10a685a95f678cc7d77df2290bab25a0a85e50f4c5c",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9997528195381165,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 7.083296623022761e-06
+      },
+      {
+        "id": "glass",
+        "option_probability": 4.481828000280075e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 4.67905465484364e-06
+      },
+      {
+        "id": "paper",
+        "option_probability": 3.3542462915647775e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9997528195381165
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.000197361980099231
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic332.jpg",
+    "image_sha256": "e971f4f8f50e960e454ea724cec922fc2988bbf4027aa48b553e139bb5890968",
+    "ground_truth": "plastic",
+    "selected": "glass",
+    "raw_top1": "glass",
+    "candidate_mass": null,
+    "top_option_probability": 0.9983680844306946,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 2.786384357023053e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.9983680844306946
+      },
+      {
+        "id": "metal",
+        "option_probability": 2.0850950022577308e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 4.981702659279108e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00153112574480474
+      },
+      {
+        "id": "trash",
+        "option_probability": 2.316584414074896e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic357.jpg",
+    "image_sha256": "33e291289b32fe975a1576aa28fdebcb24f94b5b28657ab1ac268adae14328bc",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9950494170188904,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.3443533134704921e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0044004344381392
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0004786902863997966
+      },
+      {
+        "id": "paper",
+        "option_probability": 2.6437486667418852e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9950494170188904
+      },
+      {
+        "id": "trash",
+        "option_probability": 3.160057895001955e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic39.jpg",
+    "image_sha256": "faf28d8f09c1075d3337ebf19bcafda1427053deb2ee9827926f9077f9ebdf1e",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9992526173591614,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00012806830636691302
+      },
+      {
+        "id": "glass",
+        "option_probability": 3.840822955680778e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0005528099136427045
+      },
+      {
+        "id": "paper",
+        "option_probability": 5.312640860211104e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9992526173591614
+      },
+      {
+        "id": "trash",
+        "option_probability": 9.47181433730293e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic417.jpg",
+    "image_sha256": "a9000094b5f3fd0ad35c9126cad270a62011c3135f6e55bcc68f19e9356946fc",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9995577931404114,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0003495504497550428
+      },
+      {
+        "id": "glass",
+        "option_probability": 4.712459940492408e-06
+      },
+      {
+        "id": "metal",
+        "option_probability": 2.842763024091255e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 4.188038292340934e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9995577931404114
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.768717629602179e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic47.jpg",
+    "image_sha256": "8cfc88156e367be7e00baebc32cc97607794f2fb94892aff8beb28878c4d93c1",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9880616664886475,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.000114388698420953
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.007765027694404125
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.001993767684325576
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00024724812828935683
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9880616664886475
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.001817918848246336
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic64.jpg",
+    "image_sha256": "daaba9da8e9b2d76aae5c21030392f8069bd053c9993b2b227f6df5ded49e03a",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9992721676826477,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 1.3154425460015773e-06
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0006593642174266279
+      },
+      {
+        "id": "metal",
+        "option_probability": 6.260504596866667e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 2.9118311886122683e-06
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9992721676826477
+      },
+      {
+        "id": "trash",
+        "option_probability": 1.7001510741465609e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic82.jpg",
+    "image_sha256": "1a2af231f4f280680a67d841707a6b36d9438e816be6fdaf70e2e2609a2979bf",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9997360110282898,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 2.79176420008298e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0001422097411705181
+      },
+      {
+        "id": "metal",
+        "option_probability": 3.808749170275405e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.0223694516753312e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9997360110282898
+      },
+      {
+        "id": "trash",
+        "option_probability": 4.553595863399096e-05
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic88.jpg",
+    "image_sha256": "d330491aa03dbaa550fb4729c87c3a82082785918068e2de501c0ff2b30f1e25",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9953210949897766,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 5.644773864332819e-06
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.004547538701444864
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00010890475095948204
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.4266093785408884e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9953210949897766
+      },
+      {
+        "id": "trash",
+        "option_probability": 2.477087718943949e-06
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/plastic/plastic98.jpg",
+    "image_sha256": "5dcdd840b2ef4863a974153e836821955c0d8a179529fd9ae3dff29af628b8b8",
+    "ground_truth": "plastic",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9944155216217041,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 3.5735203709919006e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0017324943328276277
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0034669802989810705
+      },
+      {
+        "id": "paper",
+        "option_probability": 1.6062354916357435e-05
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9944155216217041
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.00033326109405606985
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash11.jpg",
+    "image_sha256": "3bde5980ea8d4947ec29e8efee5d361c353064c2f18aa27a86597f06ec5b7c2c",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.8713861703872681,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.038213618099689484
+      },
+      {
+        "id": "glass",
+        "option_probability": 9.241729276254773e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.026355110108852386
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0013191901380196214
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.06263350695371628
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.8713861703872681
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash110.jpg",
+    "image_sha256": "87647d44e4efcae1c53244502fe889c68fc6b1247e878b818e45a6dcd0dc2ab7",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.7982476949691772,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00014559790724888444
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0004052913864143193
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0009198184707202017
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0003767403541132808
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.19990485906600952
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.7982476949691772
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash124.jpg",
+    "image_sha256": "39bb0a46e81cb3c6ea99737e63b8fdc1dfb6b48e5f40a210ebe2f722b50e0ea5",
+    "ground_truth": "trash",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.8272477984428406,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0013470940757542849
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.001250331406481564
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0010690664639696479
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.8272477984428406
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.16530174016952515
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.003783901920542121
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash126.jpg",
+    "image_sha256": "d47245d73413fc38cc2e7afb16af6e0ec32afa9ea1d9707c644a1606aae7d4ed",
+    "ground_truth": "trash",
+    "selected": "plastic",
+    "raw_top1": "plastic",
+    "candidate_mass": null,
+    "top_option_probability": 0.9586185216903687,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00030942336888983846
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.02700541913509369
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.009079085662961006
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0018738657236099243
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.9586185216903687
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.0031137194018810987
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash128.jpg",
+    "image_sha256": "c1b0f328e062e40b9badc5c514e1c95d9442076944b3485971605af1f3503366",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.8741053342819214,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00042617780854925513
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.061209868639707565
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.009655402041971684
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.006512823514640331
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.048090361058712006
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.8741053342819214
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash134.jpg",
+    "image_sha256": "07da038cb14ed7919525319f0f6e6e60c4589864d5979f08c1d73693f345eda5",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9671617746353149,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00023882549430709332
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.021635690703988075
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0008126012398861349
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0043721068650484085
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.005779034923762083
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9671617746353149
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash2.jpg",
+    "image_sha256": "00d96cc08c730da1d1bd47cc303191dfe354f6fbc2d026e78634e3a7705ead70",
+    "ground_truth": "trash",
+    "selected": "paper",
+    "raw_top1": "paper",
+    "candidate_mass": null,
+    "top_option_probability": 0.6579784154891968,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.009429843164980412
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.035560864955186844
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.06250277906656265
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.6579784154891968
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0008242455660365522
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.23370392620563507
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash23.jpg",
+    "image_sha256": "2f466a12dbdaef59730ab9828548b8cc63801b688194f41dc078138f814583da",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9702010750770569,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.00017612827650737017
+      },
+      {
+        "id": "glass",
+        "option_probability": 8.365681424038485e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0004345682682469487
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.02867431566119194
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0004301988228689879
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9702010750770569
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash29.jpg",
+    "image_sha256": "352d82b8a19a0ee5e50fafa6fec2858b021ae0240f20c303a76a6fb051c59096",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9821894764900208,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 7.176344661274925e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 2.716826020332519e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 4.812858605873771e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.01750064641237259
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.00016288059123326093
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9821894764900208
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash3.jpg",
+    "image_sha256": "d61760bc3764e4da7bb229fb76a8e16f39ebeaf5a4e04ad18b06446c506695c8",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9066764116287231,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.017786739394068718
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0012371616903692484
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.014987414702773094
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.021802617236971855
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.03750965744256973
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9066764116287231
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash42.jpg",
+    "image_sha256": "3f320a10309e62ad670ca4d6aaeab524f84c498a32012526e17b3715ec39de6c",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9439427852630615,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.008750895038247108
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.000739162031095475
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0030218178872019053
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.04351023584604263
+      },
+      {
+        "id": "plastic",
+        "option_probability": 3.512824696372263e-05
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9439427852630615
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash57.jpg",
+    "image_sha256": "c7ee0e7c2884b87a5c453265ca11cb4bbf3e621eb0af36967a77d8ee74faf6d8",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.7443207502365112,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 7.889035623520613e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.001467004418373108
+      },
+      {
+        "id": "metal",
+        "option_probability": 8.304067887365818e-05
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.005612669978290796
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.24843762814998627
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.7443207502365112
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash6.jpg",
+    "image_sha256": "20018f7c4b30f387edbca44d6b4b1233f65fb0e194992119609d0af807985057",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.96428382396698,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0001827437081374228
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00019354592950548977
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00015722631360404193
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.015256508253514767
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.019926145672798157
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.96428382396698
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash69.jpg",
+    "image_sha256": "7ad89f52d2ce2e906f53c4499c29790fb19db6ecf7e01d354fd4ac8112d9272e",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9951553344726562,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 4.684029772761278e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00020431491429917514
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.002315698191523552
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.00020747046801261604
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0020703652407974005
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9951553344726562
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash70.jpg",
+    "image_sha256": "4c7cf78bc2da8f9c5a221c12dc17f5cec46075710ab28c8e9a6897660eb0a657",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9896905422210693,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0001997981162276119
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.00015963891928549856
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0008742408244870603
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.000311065639834851
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.008764689788222313
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9896905422210693
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash72.jpg",
+    "image_sha256": "917e956c1df7d71729b71069800b1c9b0b5c45f4be29901c4437781244db9a58",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.44161567091941833,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.06604061275720596
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.014828061684966087
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.06924377381801605
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.016222134232521057
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.39204978942871094
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.44161567091941833
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash76.jpg",
+    "image_sha256": "d7381dad5ada3fecdd4745dcb87190dc0cdb7b23331d0612e218bf695ec07531",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9909584522247314,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 8.101753337541595e-05
+      },
+      {
+        "id": "glass",
+        "option_probability": 2.0717228835565038e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.0006044997135177255
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.008187285624444485
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.0001480396749684587
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9909584522247314
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash92.jpg",
+    "image_sha256": "7eb5719dc7a61fa54d46e7f7ebe17933322c94d7b1913e0545f3b5362c684745",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.6804843544960022,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.20319579541683197
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0029507640283554792
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.02648109197616577
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0714988186955452
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.015389206819236279
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.6804843544960022
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash96.jpg",
+    "image_sha256": "5bfe21d663958b01b145a4934d211f721beb68db99b0be6ccf65289fdb6a92f5",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.993468165397644,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0014140321873128414
+      },
+      {
+        "id": "glass",
+        "option_probability": 9.411834616912529e-05
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00038399483310058713
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.0046298145316541195
+      },
+      {
+        "id": "plastic",
+        "option_probability": 9.898019925458357e-06
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.993468165397644
+      }
+    ]
+  },
+  {
+    "image": "dataset-resized/trash/trash98.jpg",
+    "image_sha256": "1c04329bd1a226bf2498f4b4693d97eeaa6531da1ea2f9ce46aca3703637e3c9",
+    "ground_truth": "trash",
+    "selected": "trash",
+    "raw_top1": "trash",
+    "candidate_mass": null,
+    "top_option_probability": 0.9284180402755737,
+    "abstention_reasons": [],
+    "latency_ms": null,
+    "scores": [
+      {
+        "id": "cardboard",
+        "option_probability": 0.0016486934619024396
+      },
+      {
+        "id": "glass",
+        "option_probability": 0.0004505398974288255
+      },
+      {
+        "id": "metal",
+        "option_probability": 0.00153585325460881
+      },
+      {
+        "id": "paper",
+        "option_probability": 0.016436973586678505
+      },
+      {
+        "id": "plastic",
+        "option_probability": 0.05150992423295975
+      },
+      {
+        "id": "trash",
+        "option_probability": 0.9284180402755737
+      }
+    ]
+  }
+]

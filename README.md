@@ -1,408 +1,380 @@
 # L2S1 — LLM to System 1
 
-**Swap the model while keeping your application's decision contract.**
 
-L2S1 is a Rust library and CLI that turns a compatible local GGUF chat model into a typed decision backend. Applications supply a state and a list of binary, choice, or ordinal decisions. L2S1 prepares each question for the selected model, reads next-token scores, and returns a decision or an explicit abstention.
+C++17 applications can use the [C++ SDK](sdks/cpp/README.md) for a resident Rust process, typed decisions and native batch calls.
+**Turn local GGUF model scores into typed decisions.**
 
-Application option IDs, result types, and acceptance rules stay consistent across models. Templates, token IDs, predictions, and calibration are model-specific. Changing a model does not guarantee the same answer or accuracy.
+English · [한국어](README.ko.md) · [日本語](README.ja.md) · [Documentation](docs/en/README.md) · [Model results](docs/en/MODEL_RESULTS.md)
 
-The crate is named `l2s1`. The default inference executable uses **llama.cpp and local GGUF files**. An optional `wgpu` feature provides a separate `l2s1-wgpu` executable for native GPU inference. Model switching currently means loading a new backend or replacing an owned worker; there is no automatic model router or live hot-swap service.
+L2S1 is a Rust library and CLI for binary, choice, and ordinal decisions with local chat models. Give it JSON state, a question, and candidate criteria; receive a typed value, model scores, and an explicit abstention when the acceptance policy is not met.
 
-## Optional wgpu backend
+Use it to classify messages, route requests, check conditions, or assign ordered levels. Questions and candidate IDs are supplied by your application at request time. You can change the compatible GGUF model while keeping the same request and result types.
 
-The `wgpu` feature is separate from `llama` and `llama-cuda`. It uses [FlareLLM](https://github.com/sauravpanda/flarellm)'s Rust compute backend through Metal on Apple Silicon. The small [compatibility fork](crates/flarellm-gpu) disables two optional shaders that wgpu 24 rejects on the tested Mac; baseline GPU compute remains enabled. The backend requires a text-only ChatML GGUF and its matching Hugging Face `tokenizer.json`. It rejects missing GPU devices, raw layer weights, and changed answer-token boundaries instead of falling back to CPU.
+[Python SDK](sdks/python/README.md), [native batching](docs/en/BATCHING_API_REVIEW.md), and the [GitHub Release/npm/PyPI/Cargo pipeline](docs/en/RELEASE_PIPELINE.md).
+
+Latest measured public JevBench subset (231 items): Gemma 4 12B QAT Q4_0 **194/231 correct (83.98%), p50 93.48 ms**; E2B Q8_0 **159/231 (68.83%), p50 40.41 ms** on RTX 3080. Model loading and warmup excluded; these `74334ec` results do not establish production accuracy. [Comparison, Laya limits and improvement review](docs/en/PERFORMANCE_REVIEW.md).
+
+**Recorded on RTX 5090 / Windows:** Gemma 4 E2B Q8_0 reached **94.3% accepted accuracy**, **97.2% coverage**, and **67.6 ms p50 per three-decision request** on `decision-rules-v1`. Correct accepted answers were 91.7% of all decisions (33 correct, 2 wrong, 1 abstention per pass). This is 36 synthetic rule decisions repeated 3 times; loading and warmups are excluded. [Results and conditions](docs/en/BENCHMARK.md#recorded-windows-rtx-5090-results) · [Summary JSON](benchmarks/decision-rules-windows-20260926/summary.json).
+
+## Install
+
+[v0.2.2](https://github.com/LuticaCANARD/L2S1/releases/tag/v0.2.2) is available on PyPI, npm and crates.io.
+
+v0.2.0 changes the default text-parallel prompt layout and wave ordering. Re-evaluate your workload and calibration when upgrading; [compatibility details](CHANGELOG.md#020-2026-09-30).
+
+| Package | Install command |
+| --- | --- |
+| [Python 3.11+](sdks/python/README.md) | `pip install l2s1-sdk==0.2.2` |
+| [TypeScript / Node.js 22+](sdks/typescript/README.md) | `npm install @l2s1/node@0.2.2` |
+| Rust library | `cargo add l2s1@0.2.2 --features llama` |
+
+Python keeps `import l2s1` and needs a separate Rust runtime. Use a platform runtime from the release with `runtime_dir`, or a custom executable with `binary_path`. npm selects the matching prebuilt runtime automatically; keep optional dependencies enabled. Supply GGUF model weights separately. The Rust `llama` feature requires CMake and a C++17 compiler.
+
+## Quick start
+
+You need a current stable Rust toolchain with edition 2024 support, CMake 3.24+, a C++17 compiler, and a compatible chat/instruct GGUF. The first native build downloads the pinned llama.cpp source. Model weights are supplied separately.
 
 ```sh
-cargo run --release --locked --features wgpu --bin l2s1-wgpu -- \
-  --model /models/model.gguf --tokenizer /models/tokenizer.json \
+git clone https://github.com/LuticaCANARD/L2S1.git
+cd L2S1
+cargo build --release --locked --features llama --bin l2s1
+
+./target/release/l2s1 \
+  --model /path/to/chat-model.gguf \
   --input examples/warehouse.json
 ```
 
-The wgpu path supports typed binary, choice and ordinal decisions, full-vocabulary mass, and complete multi-token answer-code scoring. It currently uses fresh execution and ChatML prompting only. llama.cpp-specific options such as multimodal projectors, LoRA, output heads, calibration, CUDA placement, and HTTP serving remain on the `llama` executable. GPU results may differ from llama.cpp because the inference and tokenization implementations differ; validate each model and task before using its scores as calibrated probabilities.
-
-On the tested M1 Mac (16 GB), SmolLM2-135M Q8_0 and Qwen2.5-0.5B Q8_0 completed all three decisions in `examples/warehouse.json` through wgpu, but every decision abstained for low candidate mass. Qwen2.5-1.5B Q4_K_M loaded and completed one decision with the same outcome. These runs establish execution compatibility, not decision accuracy.
-
-## Architecture
-
-```mermaid
-flowchart TD
-    A[Application or CLI] --> B[DecisionRequest: state and decisions]
-    B --> C[Backend: model-specific prompt and token preparation]
-    C --> D[llama.cpp or optional FlareLLM wgpu: GGUF inference]
-    D --> E[Candidate logits or complete answer-code likelihoods]
-    E --> F[Shared scoring, optional calibration or head, and DecisionPolicy]
-    F --> G[DecisionResponse: typed values, scores, and abstention reasons]
-```
-
-| Component | Responsibility |
-| --- | --- |
-| [`decision.rs`](src/decision.rs) | Request/response types, `DecisionBackend`, shared scoring and acceptance policy |
-| [`prompt.rs`](src/prompt.rs) | Compile state, instructions and options into the selected prompt layout |
-| [`llama.rs`](src/llama.rs) | Own the model/context, select the prompt profile, tokenize inputs, dispatch inference and assemble results |
-| [`wgpu.rs`](src/wgpu.rs), [`flarellm-gpu`](crates/flarellm-gpu) | Optional Rust wgpu/Metal text inference and full-vocabulary scoring |
-| [`l2s1-llama-sys`](crates/l2s1-llama-sys), [`bridge.cpp`](crates/l2s1-llama-sys/native/bridge.cpp), [`chat.cpp`](crates/l2s1-llama-sys/native/chat.cpp) | Call llama.cpp, render GGUF Jinja templates, manage sequence memory and copy inference evidence |
-| [`evidence.rs`](src/evidence.rs) | Validate complete vocabulary logits and preserve semantic option/token mappings |
-| [`codes.rs`](src/codes.rs), [`llama/code_sequences.rs`](src/llama/code_sequences.rs) | Size A-Z/AA-ZZ/AAA-ZZZ codes and score complete token paths for larger candidate sets |
-| [`calibration.rs`](src/calibration.rs), [`output_head.rs`](src/output_head.rs) | Optional task-scoped temperature calibration or learned output scoring |
-| [`interoperability.rs`](src/interoperability.rs), [`llama/interchange.rs`](src/llama/interchange.rs) | Model fingerprints, capabilities, request preflight, structured failures and execution diagnostics |
-| [`worker.rs`](src/worker.rs) | Bounded admission and dedicated-thread ownership of a backend |
-
-The standard CLI calls `LlamaBackend` directly; the optional GPU CLI calls `WgpuBackend`. Long-running applications can place either backend behind `BackendWorker`.
-
-## Direct image input and HTTP API
-
-Load a vision-capable chat GGUF with its matching multimodal projector GGUF (`mmproj`). The projector encodes a still image through llama.cpp `libmtmd`; L2S1 then scores the same typed options from the resulting next-token logits. `LlamaBackend::load_vision_projector(path)` and `LlamaBackend::decide_vision(&request, image_bytes)` expose the Rust API. Existing text requests still use `decide`.
-
-The opt-in HTTP listener accepts JSON at `POST /v1/decisions` and reports readiness at `GET /healthz`:
-
-```sh
-cargo run --release --locked --features llama-cuda -- \
-  --model /models/vision-model.gguf --mmproj /models/mmproj.gguf \
-  --device cuda --context 4096 --listen 127.0.0.1:8080
-```
-
-The JSON body contains the ordinary `state` and `decisions` fields. Add `image_base64` with standard base64 of one JPEG, PNG or other still-image format accepted by libmtmd to invoke direct vision scoring. Without that field, the endpoint uses the text path. Vision responses include the projector path and SHA-256 hash. For example, add an image to [`examples/warehouse.json`](examples/warehouse.json):
-
-```sh
-jq --arg image "$(base64 -w0 photo.jpg)" '. + {image_base64: $image}' \
-  examples/warehouse.json | \
-  curl -sS -H 'Content-Type: application/json' --data-binary @- \
-  http://127.0.0.1:8080/v1/decisions
-```
-
-The library also accepts original image bytes without base64. The CLI equivalent is `--mmproj /models/mmproj.gguf --image photo.jpg --input request.json`. One request supports one image and any number of decisions with up to 26 options each. Vision uses fresh execution and full-vocabulary scoring; output heads, scalar calibration, parallel/prefix-reuse modes and wide answer codes are currently rejected for image requests. Images are limited to 8 MiB and the HTTP JSON body to 12 MiB. The listener handles one request at a time; bind to loopback or place an authenticated reverse proxy in front of it for remote clients. Check model-specific image prompt behavior and labeled task quality before treating scores as reliable decisions.
-
-Gemma is a possible vision backend: Gemma 3 4B/12B/27B and Gemma 4 E2B/E4B have image-capable variants in llama.cpp. Gemma 3 1B is text-only. Pair a vision checkpoint with its matching `mmproj`; a text-only GGUF file alone cannot accept pixels. See the [llama.cpp multimodal model list](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md) and [Gemma 3 vision guide](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal/gemma3.md).
-
-For CPU/CUDA latency measurements with Gemma 4 and two labeled image fixtures, see the [direct vision benchmark](VISION_BENCHMARK.md).
-
-## The decision contract
-
-A request has shared JSON `state` and one or more decisions. Each decision supplies an ID, an instruction and its output kind:
-
-| Kind | Definition | Result |
-| --- | --- | --- |
-| `binary` | False and true criteria | `p_true` and an optional Boolean |
-| `choice` | Semantic option IDs and criteria | An optional selected option ID |
-| `ordinal` | Ordered levels with strictly increasing numeric values | Expected value and an optional selected level ID |
-
-For example:
+The [warehouse request](examples/warehouse.json) asks three independent questions about the same shipment: storage zone, cold-chain requirement, and dispatch priority. Its first decision looks like this:
 
 ```json
 {
   "state": { "storage_requirement": "chilled" },
-  "decisions": [
-    {
-      "id": "storage_zone",
-      "instruction": "Select the storage zone matching storage_requirement.",
-      "kind": {
-        "type": "choice",
-        "options": [
-          { "id": "ambient", "criterion": "Ambient storage is required." },
-          { "id": "chilled", "criterion": "Chilled storage is required." },
-          { "id": "frozen", "criterion": "Frozen storage is required." }
-        ]
-      }
+  "decisions": [{
+    "id": "storage_zone",
+    "instruction": "Select the storage zone matching storage_requirement.",
+    "kind": {
+      "type": "choice",
+      "options": [
+        { "id": "ambient", "criterion": "Ambient storage is required." },
+        { "id": "chilled", "criterion": "Chilled storage is required." },
+        { "id": "frozen", "criterion": "Frozen storage is required." }
+      ]
     }
-  ]
+  }]
 }
 ```
 
-L2S1 maps these semantic IDs to answer codes and checks their tokenization at the model's actual assistant answer boundary. Up to 26 options retain the original `A`–`Z` single-token path. Larger candidate sets automatically use fixed-width codes: `AA`–`ZZ`, then `AAA`–`ZZZ`, and so on. Complete code-sequence likelihoods are scored when codes span multiple tokens. The application receives `chilled`, not a model-specific code, as its selected value. Token paths and raw scores remain available as evidence. See [answer-code expansion and intent evaluation](INTENT_BENCHMARK.md).
+A [recorded Gemma 4 CUDA run](examples/warehouse.gemma4.cuda.output.json) returned this result for `storage_zone` (excerpt):
 
-Each decision is evaluated independently. A request can contain different decision kinds over the same state; it is not encoded as a conversation in which later questions see earlier answers. See [`examples/warehouse.json`](examples/warehouse.json) for all three kinds.
-
-### Scores and abstention
-
-For native candidate logits `z`, L2S1 computes two separate quantities:
-
-```text
-option_probability[i] = exp(z[i] - logsumexp(candidate logits))
-candidate_mass        = exp(logsumexp(candidate logits) - logsumexp(all vocabulary logits))
+```json
+{
+  "id": "storage_zone",
+  "value": { "type": "choice", "selected": "chilled" },
+  "abstention_reasons": []
+}
 ```
 
-`option_probability` compares the supplied options. `candidate_mass` measures how much of the model's next-token probability belongs to those options at all. A high candidate-relative probability alone does not establish a reliable answer.
+The complete CLI response includes backend information, policy, candidate scores, probability mass, and token usage. Predictions and scores depend on the model and configuration; validate them on labeled examples for your task.
 
-The default `DecisionPolicy` requires top-option probability at least **0.8**, candidate mass at least **0.05**, and no tied top candidates. Otherwise, the selected value is `null` and `abstention_reasons` explains why. Scores are still returned. Ordinal expected values are probability-weighted level values; they remain available when selection is withheld.
+## Features
 
-These are model scores, not universal probabilities of correctness. Partial top-k responses or model-generated numeric estimates do not satisfy the exact native evidence contract.
+- **Typed outputs.** Binary checks, categorical choices, and ordered levels share one request format. Semantic option IDs stay consistent across compatible models.
+- **Direct local scoring.** Read scores at the model's assistant answer boundary. Larger candidate sets use complete answer-code likelihoods when codes span multiple tokens.
+- **Explicit abstention.** Keep the scores and explain why a selection was withheld. The default policy checks both relative option probability and full-vocabulary candidate mass.
+- **Text and images.** Use a supported vision model with its matching `mmproj` GGUF for still-image decisions.
+- **Rust, TypeScript, CLI, and HTTP.** Keep a backend resident in your application, use the [TypeScript package](docs/en/typescript/README.md) from Node.js, run JSON from a file or stdin, or serve the versioned decision API.
+- **Inspectable execution.** Inspect model identity, preflight requests, and record diagnostics. Optional caching, state restoration, parallel execution, LoRA, and task-scoped calibration have explicit contracts.
 
-## Build
+## Decision types and scores
 
-The pure Rust library supports validation, scoring, scalar calibration and worker ownership without native inference:
+| Kind | You provide | Local result |
+| --- | --- | --- |
+| `binary` | False and true criteria | Boolean or `null`, plus `p_true` |
+| `choice` | Candidate IDs and criteria | Selected ID or `null` |
+| `ordinal` | Ordered levels with increasing numeric values | Selected level ID or `null`, plus expected value |
+
+Each decision is evaluated independently. All kinds return candidate scores and abstention reasons. Up to 26 candidates use `A`–`Z`; larger sets use fixed-width codes such as `AA`–`ZZ`. Tokenization and context limits are checked against the selected model.
+
+Two scores determine default acceptance:
+
+- `option_probability`: the candidate's probability relative to the supplied candidates.
+- `candidate_mass`: the probability assigned to the candidates within the complete vocabulary or answer-code paths.
+
+The default policy requires top-option probability **≥ 0.8**, candidate mass **≥ 0.05**, and no tied top candidates. Otherwise, the selected value is `null`. These are model scores; they are not calibrated probabilities of correctness. Optional calibration is bound to a specific model, configuration, and task.
+
+See the [decision contract](docs/en/GUIDE.md#the-decision-contract) for formulas, answer codes, and validation rules.
+
+## Backends and hardware
+
+| Backend | Models and input | Hardware | Evidence |
+| --- | --- | --- | --- |
+| `llama` / `llama-cuda` / `llama-metal` | Compatible GGUF chat models; vision needs a matching projector | CPU, NVIDIA CUDA, Apple Metal | Local model scores |
+| `wgpu` | Gemma 4 text GGUF, optionally with a matching vision projector | Native wgpu GPU adapter | Local model scores |
+| `openrouter` | Provider models supporting the requested modality | Remote API | Selection only; no probabilities |
+
+The default features are empty. Enable `llama` for the local CLI. Models must be supported by the pinned runtime, have a usable chat template, and fit the selected device and context. The wgpu adapter is specific to Gemma 4. Model changes can change predictions, latency, tokenization, and calibration.
+
+For local GPU inference, build the matching feature and select the device:
 
 ```sh
-cargo test --locked
+# NVIDIA CUDA: requires the CUDA toolkit.
+cargo build --release --locked --features llama-cuda --bin l2s1
+./target/release/l2s1 --model /path/to/chat-model.gguf \
+  --device cuda --input examples/warehouse.json
+
+# macOS Metal: requires an Xcode toolchain with the Metal compiler.
+cargo build --release --locked --features llama-metal --bin l2s1
+./target/release/l2s1 --model /path/to/chat-model.gguf \
+  --device metal --input examples/warehouse.json
 ```
 
-The inference backend and CLI require Linux, Rust with edition 2024 support, CMake, and a C++17 compiler. The `l2s1-llama-sys` workspace dependency builds llama.cpp and the matching native bridge together.
+CPU is the default. An explicitly requested GPU must be available. The first build fetches the native source; offline builds can set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`. See the [build guide](docs/en/GUIDE.md#build) for native libraries, packaging, and separate CUDA architecture builds.
+
+For [wgpu](docs/en/GUIDE.md#optional-wgpu-backend), use the separate `l2s1-wgpu` executable. For [OpenRouter](docs/en/GUIDE.md#openrouter-adapter), use `l2s1-openrouter` and supply `OPENROUTER_API_KEY`. OpenRouter responses use the shared typed HTTP envelope with `selection_only` evidence and no local probability policy.
+
+## Inspect and run
 
 ```sh
-cargo build --release --locked --features llama
-# CUDA toolkit required for GPU support:
-cargo build --release --locked --features llama-cuda
-```
+# Inspect the loaded model and capabilities.
+./target/release/l2s1 --model /path/to/chat-model.gguf --inspect
 
-The default CPU build uses CMake FetchContent to download and verify llama.cpp revision `3d82ef62d47fd74e18f36c5eccbdcf965b617b17`; the first build needs network access. For an offline build or another revision, set `L2S1_LLAMA_CPP_SOURCE=/path/to/llama.cpp`; the legacy `LLAMA_CPP_DIR` source override also works. `LLAMA_LIB_DIR` is no longer used. Validate custom revisions with the native contract tests. See [verification commands](VERIFICATION.md) and [native dependency details](crates/l2s1-llama-sys/README.md).
-
-For an independent source release, publish `l2s1-llama-sys` before `l2s1`. A prebuilt executable must ship its matching native shared libraries with a portable loader path; swapping only `libllama.so` is unsupported.
-
-### Dataset and benchmark tools
-
-Data preparation, local benchmark orchestration, saved-prediction audits, and report generation use the repository-only Rust `l2s1-tools` binary. It does not link llama.cpp; inference commands launch the separately built `evaluate_jsonl` example. Model training and direct PyTorch probes remain Python workflows.
-
-```sh
-cargo build --release --locked -p l2s1-tools
-target/release/l2s1-tools --help
-```
-
-See the [tool command map](crates/l2s1-tools/README.md) and each benchmark guide for arguments and evidence boundaries. Historical Python adapters remain available for artifact comparison and training imports.
-
-Model files are supplied by the caller. Place an appropriate text chat/instruct GGUF under `models/` or another directory. The CLI does not download weights. Loading verifies checkpoint and runtime identities, including reading the full checkpoint for its checksum, so release builds are recommended.
-
-## Inspect, validate and run
-
-After building, inspect a model without reading a request:
-
-```sh
-./target/release/l2s1 \
-  --model models/SmolLM2-135M-Instruct-Q8_0.gguf --inspect
-```
-
-Check the actual request's template, candidate tokens, context usage, execution support and active artifact bindings without a forward pass:
-
-```sh
-./target/release/l2s1 \
-  --model models/SmolLM2-135M-Instruct-Q8_0.gguf \
+# Validate the actual request without a forward pass.
+./target/release/l2s1 --model /path/to/chat-model.gguf \
   --input examples/warehouse.json --preflight
+
+# Run with execution diagnostics.
+./target/release/l2s1 --model /path/to/chat-model.gguf \
+  --input examples/warehouse.json --diagnostics
 ```
 
-Run the same request with either compatible model:
+`--input -` reads stdin. Results go to stdout; native logs go to stderr. Inputs that exceed the configured context are rejected without truncation. See [inspection and diagnostics](docs/en/GUIDE.md#inspect-validate-and-run) for compute settings and structured failures.
+
+## HTTP and image input
+
+Start a local server:
 
 ```sh
-./target/release/l2s1 \
-  --model models/SmolLM2-135M-Instruct-Q8_0.gguf \
-  --input examples/warehouse.json
+./target/release/l2s1 --model /path/to/chat-model.gguf \
+  --listen 127.0.0.1:8080
+```
 
-./target/release/l2s1 \
-  --model models/Qwen3-0.6B-Q8_0.gguf \
+From another terminal:
+
+```sh
+curl -sS -H 'Content-Type: application/json' \
+  --data-binary @examples/warehouse.json \
+  http://127.0.0.1:8080/v1/decisions
+```
+
+The server exposes `POST /v1/decisions`, `GET /v1/capabilities`, and `GET /healthz`. HTTP responses carry an API version, request ID, backend, policy, and typed results with evidence. Bind to loopback or use an authenticated reverse proxy for remote access.
+
+For a still image, load the vision model and its matching projector:
+
+```sh
+./target/release/l2s1 --model /path/to/vision-model.gguf \
+  --mmproj /path/to/projector.gguf --image photo.jpg \
   --input examples/warehouse.json
 ```
 
-The request and result schema stay the same. Each model uses its own tokenizer and prompt profile. Auto selection uses Qwen3's non-thinking profile for compatible dense Qwen3 checkpoints, Harmony final prefill for GPT-OSS, and the embedded GGUF Jinja template for other supported models.
+HTTP image requests use named `media` and per-decision `media_ids`. Local backends accept one image per decision. See the [image and HTTP contract](docs/en/GUIDE.md#direct-image-input-and-http-api) for payloads, limits, and backend-specific behavior.
 
-CPU is the default. Select `--device cuda` explicitly for GPU inference. An unavailable CUDA device or unsupported model produces an error; oversized inputs are rejected without truncation. `--context`, `--batch`, `--ubatch`, `--threads` and `--flash-attention off|auto|on` control requested compute settings. `--input -` reads stdin, ordinary results go to stdout, and native logs go to stderr.
+## Use from TypeScript
 
-Add `--diagnostics` to receive a separate envelope containing the normal response, model identity, prompt-token fingerprints, requested/effective execution mode, fallback reasons, calibration IDs and request-local timings. Ordinary `decide()` responses retain their existing shape. Request-stage failures under `--preflight` or `--diagnostics` have structured JSON and a nonzero exit status; model loading or malformed JSON can fail before that envelope.
+The [`@l2s1/node` package](docs/en/typescript/README.md) selects a prebuilt Rust runtime for the current OS/architecture and exposes typed `load()`, `decide()`, `capabilities()` and `close()` calls. Install it with `npm install @l2s1/node@0.2.2`. Supply GGUF weights separately. `connect()` uses an HTTP server, and `fromBackend()` accepts a custom backend with the same application API.
 
-## Rust integration
+With Node.js 24+, run the following from the repository root to build the local CPU runtime and TypeScript package, check the example types, and run the [warehouse example](sdks/typescript/examples/warehouse.ts). Replace the model path with your GGUF file. The shell commands below use Bash or Zsh. `npm pack` creates `sdks/typescript/l2s1-node-0.2.2.tgz`.
 
-Enable the crate's `llama` feature to use `LlamaBackend`. A caller can keep its request unchanged while passing a different model path:
+```sh
+cargo build --release --locked --features llama --bin l2s1
+cd sdks/typescript
+npm ci
+npm run build
+npm run check
+L2S1_BINARY=../../target/release/l2s1 \
+  node examples/warehouse.ts /absolute/path/to/chat-model.gguf
+npm pack
+cd ../..
+```
+
+```ts
+import { L2S1 } from '@l2s1/node';
+
+const engine = await L2S1.load({
+  model: '/path/to/chat-model.gguf',
+});
+try {
+  const response = await engine.decide({
+    state: { x: 1 },
+    decisions: [{ id: 'positive', instruction: 'Is x positive?',
+      kind: { type: 'binary', false_label: 'x <= 0', true_label: 'x > 0' } }],
+  });
+  console.log(response.results);
+} finally { await engine.close(); }
+```
+
+For an existing server or a browser application, import `L2S1Client` from `@l2s1/node/http`. See the [package guide](docs/en/typescript/README.md) for installation, images, reasoning, errors and portability.
+
+## Use from Rust
+
+Enable the `llama` feature on the `l2s1` dependency. Load once and keep the backend for repeated requests:
 
 ```rust
 use std::path::Path;
 use l2s1::{
-    DecisionBackend, DecisionPolicy, DecisionRequest, DecisionResponse,
-    llama::LlamaBackend,
+    Decision, DecisionBackend, DecisionKind, DecisionPolicy, DecisionRequest,
+    Level, OptionSpec, llama::LlamaBackend,
 };
+use serde_json::{Map, Value};
 
-fn decide_with_model(
-    model: &Path,
-    request: &DecisionRequest,
-) -> l2s1::Result<DecisionResponse> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let request = DecisionRequest {
+        state: Value::Object(Map::from_iter([
+            ("shipment_id".into(), Value::from("BOX-103")),
+            ("storage_requirement".into(), Value::from("chilled")),
+            ("hours_until_dispatch".into(), Value::from(4)),
+        ])),
+        decisions: vec![
+            Decision {
+                id: "storage_zone".into(),
+                instruction: "Select the storage zone that matches the shipment's storage_requirement.".into(),
+                kind: DecisionKind::Choice {
+                    options: vec![
+                        OptionSpec {
+                            id: "ambient".into(),
+                            criterion: "The shipment requires ambient storage.".into(),
+                        },
+                        OptionSpec {
+                            id: "chilled".into(),
+                            criterion: "The shipment requires chilled storage.".into(),
+                        },
+                        OptionSpec {
+                            id: "frozen".into(),
+                            criterion: "The shipment requires frozen storage.".into(),
+                        },
+                    ],
+                },
+            },
+            Decision {
+                id: "cold_chain_required".into(),
+                instruction: "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.".into(),
+                kind: DecisionKind::Binary {
+                    false_label: "No temperature control is required.".into(),
+                    true_label: "Temperature control is required.".into(),
+                },
+            },
+            Decision {
+                id: "dispatch_priority".into(),
+                instruction: "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.".into(),
+                kind: DecisionKind::Ordinal {
+                    levels: vec![
+                        Level {
+                            id: "low".into(),
+                            criterion: "More than 24 hours remain until dispatch.".into(),
+                            value: 0.0,
+                        },
+                        Level {
+                            id: "medium".into(),
+                            criterion: "More than 6 hours and at most 24 hours remain until dispatch.".into(),
+                            value: 1.0,
+                        },
+                        Level {
+                            id: "high".into(),
+                            criterion: "At most 6 hours remain until dispatch.".into(),
+                            value: 2.0,
+                        },
+                    ],
+                },
+            },
+        ],
+    };
+    request.validate()?;
     let mut backend = LlamaBackend::load(
-        model, 2048, 256, 4, false, DecisionPolicy::default(),
+        Path::new("/path/to/chat-model.gguf"),
+        2048, 256, 4, false, DecisionPolicy::default(),
     )?;
-    backend.decide(request)
+    let response = backend.decide(&request)?;
+    println!("{}", serde_json::to_string_pretty(&response)?);
+    Ok(())
 }
 ```
 
-For repeated requests, retain the backend instead of loading it for every call. `inspect()`, `preflight()` and `decide_detailed()` expose the corresponding inspection, validation and diagnostics APIs. `decide_batch()` accepts independent requests and preserves their result grouping.
+Add `serde_json` to your dependencies. The request is constructed directly in Rust; no input file is needed. A model-free [runnable example](examples/warehouse.rs) constructs and validates the same request with `cargo run --locked --example warehouse`. Use `BackendWorker` for dedicated-thread ownership and bounded admission. On Metal, release the backend before process exit; worker users should call `close()` and wait for its owner thread. See [Rust integration](docs/en/GUIDE.md#rust-integration) for lifecycle and native linking details.
 
-`BackendWorker::spawn()` constructs a backend on its owner thread. Its factory can return the non-Send/non-Sync `LlamaBackend`; the native context never moves between threads. The worker bounds queued request count and serialized request size, reserves an operator-estimated memory budget, rejects a full queue immediately, and returns a `DecisionTicket` for admitted work. `close()` drains work and drops the backend on that same thread. Reservations control admission, not operating-system RSS. See [worker usage and lifecycle](MODEL_INTERCHANGEABILITY.md#bounded-ownership-and-scheduling).
+## Execution modes and vision throughput
 
-`BackendWorker::spawn_batched()` additionally collects requests under explicit request-count, model-input-token and collection-wait limits. With `LlamaBackend`, native batching requires selecting `ExecutionMode::Parallel`; other modes keep requests serial. Collection alone does not make inference parallel, and the existing parallel score-drift limits still apply.
+The llama.cpp backend supports four execution modes:
 
-### Optional prompt detail and answer-code mixtures
+Compatible resident text servers (`--listen` / `--stdio`, including SDK `load`) automatically use bounded fixed-schema prefix KV reuse when no execution mode is specified. One-shot CLI calls and the low-level Rust backend retain `fresh`. Explicit execution modes, vision/projector settings, calibration/output heads and compact evidence preserve their existing paths; recurrent/hybrid models fall back to fresh with a startup message. Use `--execution-mode fresh` to opt out, or `--fixed-schema` to require support. Native parallel batching still requires `--execution-mode parallel`. This changes the split plan and can change scores; check capabilities and `usage.reused_prefix_tokens`.
 
-`--prompt-detail minimal` and `--code-rotation 0` preserve the existing prompt and remain the defaults. `typed` adds the decision kind, semantic option IDs, ordinal values and exact-comparison guidance. `typed-examples` also adds generic numerical interval examples before the input. These variants remain model-neutral, accept changing schemas and can change predictions and context usage; they are not measured accuracy guarantees.
+This default is available in v0.1.4. Published v0.1.3 requires explicit `fixedSchema: true` / `fixed_schema=True`.
 
-```sh
-./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \
-  --input examples/warehouse.json --prompt-detail typed-examples --code-rotation 1
-```
-
-Rotation changes code assignment: displayed position `i` represents canonical option `(i + rotation) % option_count`. The backend accepts nonnegative rotations, reduces them modulo the option count, and returns scores in the original semantic order, including the original ordinal scale. Returned codes and token IDs describe the actual rotated assignment. The corresponding Rust setters are `set_prompt_detail(PromptDetail::TypedExamples)` and `set_code_rotation(1)?`. Changing either clears preparation caches and changes the prompt identity, so calibrations and heads must match that configuration. Default response JSON omits the added detail/rotation fields.
-
-For multiple rotated passes, `score_semantic_mixture(&decision, &passes, &policy)` aligns results by semantic option ID and pools **full candidate probabilities**:
-
-```text
-q(y)                    = mean(candidate_mass[pass] * option_probability[pass][y])
-mixture candidate_mass  = mean(candidate_mass[pass])
-mixture option_probability[y] = q(y) / sum(q)
-```
-
-This retains the mass gate instead of setting it to one. It accepts at least two uncalibrated native passes; learned-head, calibrated and previously mixed results are rejected. The caller must use the same model, state, task and inference configuration, changing only code rotation. Mixture scores are not calibrated probabilities of correctness. The result is marked `semantic_probability_mixture_v1`; its `raw_logit` is `ln(q)`, code/token metadata represents the first pass, and token counts sum all passes. Additional passes consume additional inference time.
-
-The [paired evaluation example](examples/evaluate_accuracy.rs) runs these variants on JSONL records containing `id`, optional `group`, and a `request` with one decision:
-
-```sh
-cargo run --release --locked --features llama --example evaluate_accuracy -- \
-  --model models/Qwen3-0.6B-Q8_0.gguf --input cases.jsonl \
-  --output /tmp/l2s1-accuracy-passes.jsonl \
-  --prompt-details minimal,typed,typed-examples --all-rotations
-```
-
-The output must be new. The evaluator records native passes, mixture results, configuration identities and timing without reading answer labels. Evaluate task accuracy and acceptance coverage separately on held-out labels before selecting a variant.
-
-## Model-specific identity and calibration
-
-A `ModelIdentity` fingerprints the checkpoint, embedded template, effective prompt profile/version, runtime build and loaded libraries, active adapter/head, device label and compute/execution configuration. `preflight()` combines that identity with checks of the actual request. Capability inspection establishes available operations; labeled evaluation establishes task quality.
-
-Optional scalar temperature calibration is bound to the model/configuration fingerprint and exact task signature, including option order and ordinal values. Changing a binding rejects the artifact instead of applying it to another model. Calibration preserves raw logits and base candidate mass, while acceptance probabilities and coverage may change.
-
-```sh
-cargo run --release --locked --example fit_calibration -- \
-  fit-input.json task-temperature.json
-
-./target/release/l2s1 \
-  --model models/SmolLM2-135M-Instruct-Q8_0.gguf \
-  --input examples/warehouse.json \
-  --calibration task-temperature.json --diagnostics
-```
-
-The [calibration input schema and evaluation contract](MODEL_INTERCHANGEABILITY.md#scoped-scalar-calibration) describe measured raw-score records, independent source groups, held-out NLL/Brier and policy coverage checks. No trained calibration is bundled. Multiple task-scoped artifacts can be registered, but scalar calibration cannot be stacked with an output head.
-
-A compatible GGUF LoRA can be loaded with `--lora`. A learned task-specific scorer can be loaded with `--output-head`; hidden-feature heads currently require Gemma4, and heads require their recorded fresh-execution configuration. These are optional specializations. See [LoRA training](DECISION_FINETUNE.md) and [output-head contracts](OUTPUT_HEAD.md).
-
-## Execution and memory
-
-| `--execution-mode` | Behavior | Status |
-| --- | --- | --- |
-| `fresh` | Evaluate every decision from an empty sequence state | Default |
-| `prefix-reuse` | Reuse complete prefill batches from an exact common token prefix within one request | Opt-in; recurrent/hybrid memory falls back to fresh |
-| `state-restore` | Save a common prefix's whole sequence state and restore it before each suffix | Experimental; supports the tested hybrid path |
-| `parallel` | Batch independent questions into isolated sequences with shared-prefix prefill | Experimental; rejects recurrent/hybrid models and can change scores |
-
-The default prompt layout is `legacy`. `--prompt-layout state-first` places shared state earlier and can expose longer reusable prefixes, but it also changes the prompt and can change predictions.
-
-```sh
-./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \
-  --input examples/warehouse.json \
-  --prompt-layout state-first --execution-mode state-restore \
-  --snapshot-limit-bytes 268435456 --diagnostics
-```
-
-State restoration limits its snapshot buffer to 256 MiB by default and reports fresh fallback when a snapshot cannot be used. `--parallel-width` bounds questions per parallel wave and increases context memory. Ordinary requests clear native KV state at request boundaries and after errors; snapshots never survive their native call. Neither snapshot limits nor worker reservations are whole-process memory limits.
-
-State copying has a cost and does not guarantee a speedup. Parallel execution has measured probability and top-choice differences on some checkpoints. Both remain explicit options; see [execution details](MODEL_INTERCHANGEABILITY.md#experimental-whole-sequence-restore) and [parallel execution](PARALLEL_EXECUTION.md).
-
-### Optional preparation and evidence optimizations
-
-For models larger than VRAM, CUDA loading accepts `--gpu-layers N` or
-`--cpu-moe-layers N` to place part of the weights in CPU RAM. Placement is recorded
-in compute identity and can change numerical scores. See
-[CPU/GPU placement](MODEL_INTERCHANGEABILITY.md#cpugpu-placement).
-
-For lower model-loading peak process RSS, use `--model-load-mode read`; see [loading behavior and measurement limits](MODEL_INTERCHANGEABILITY.md#model-loading-and-peak-host-rss).
-
-Legacy prompts, fresh execution, full evidence transfer and disabled preparation caching remain the defaults. Existing repeated requests and fixed decision schemas continue to work; none of these options requires a fixed schema.
-
-```sh
-./target/release/l2s1 --model models/Qwen3-0.6B-Q8_0.gguf \
-  --input examples/warehouse.json --evidence-transfer compact \
-  --preparation-cache-bytes 8388608 --preparation-cache-entries 128
-```
-
-- **Preparation cache:** retain exact prepared prompts and answer-boundary candidate mappings within one loaded backend. `PreparationCacheConfig` limits entries per cache and divides one byte budget between them. It stores token preparation, not scores or KV state; new states and schemas use the normal preparation path. Repeated calls benefit most when the backend stays resident.
-- **Compact evidence:** retain candidate logits and the full-vocabulary normalizer while avoiding the complete native-host-to-Rust logits copy. llama.cpp still computes the full vocabulary and makes it available on the host. This is not GPU-side reduction or output-head elimination. It supports fresh/prefix-reuse execution without a learned output head and has a distinct calibration identity.
-- **Explicit shared state:** `backend.shared_state(state)?` borrows a backend configured for `PrefixReuse`. Repeated `session.decide(decisions)` calls may change IDs, instructions, option counts and decision kinds while sharing exact decoder prefixes over that immutable state. Session creation, errors and drop clear native state. Recurrent/hybrid models and output heads are rejected. This is a decoder session, not a separately trained state encoder.
-
-See [optimization APIs and limits](MODEL_INTERCHANGEABILITY.md#optional-execution-optimizations). The [local benchmark harness](examples/benchmark_optimizations.rs) compares fresh, cached, compact and shared-state paths using mixed-schema warehouse questions, records raw scores and selection differences, and refuses to overwrite its output:
-
-```sh
-cargo run --release --locked --features llama --example benchmark_optimizations -- \
-  --model models/Qwen3-0.6B-Q8_0.gguf --output /tmp/l2s1-optimizations.json
-```
-
-Repeat `--model` for additional checkpoints; use `--cuda` explicitly for GPU runs. The default benchmark uses three rounds, 1/4/16 questions and short/long synthetic states. It warms each path before timing, rotates path order and compares shared-state results to the same state-first prompt layout. Timings establish local workload behavior, not a general speedup or task accuracy.
-
-## Compatibility and validation
-
-A compatible checkpoint must be a decoder-only model supported by the linked runtime, have a renderable GGUF chat template that preserves the payload, and fit the chosen device/context. Decisions require at least two candidates; answer-code width grows automatically without an alphabet-derived count ceiling. The original path requires unique single-token continuations; multi-letter codes require stable, unique, prefix-free token sequences and support fresh or prefix-reuse execution with full evidence, without output heads, scalar calibration or feature export. Prompt length, answer-prefix length and available memory still bound real workloads. Compatibility is checked against actual model behavior rather than a general family-name promise.
-
-Local conformance checks have covered SmolLM2, Qwen3, Gemma3, TinyLlama, Gemma4, a Qwen3.8 file with `qwen35` hybrid architecture, and GPT-OSS across CPU/CUDA configurations. Support remains checkpoint- and configuration-specific; use the [verification guide](VERIFICATION.md) for your model. Base models without suitable templates, encoder-only models and unverified multimodal configurations are outside the validated contract. The direct image path requires its own checkpoint and task validation.
-
-```sh
-cargo test --locked
-cargo test --release --locked --features llama
-
-L2S1_CONFORMANCE_MODELS=/path/to/model-a.gguf:/path/to/model-b.gguf \
-  L2S1_CONFORMANCE_REPORT=/tmp/conformance.json \
-  cargo test --release --locked --features llama \
-  --test conformance -- --ignored --nocapture
-```
-
-The general test run skips model-dependent tests; invoke them explicitly with local checkpoints. Add `SKID_CUDA=1` to run conformance on CUDA. Tests do not download weights. Contract checks establish synthetic compatibility, not production accuracy. Keep generated conformance reports and benchmark artifacts in local output directories.
-
-## Recorded model comparison
-
-The September 23, 2026 JevBench matrix measured **22 GGUF checkpoints on all 231 public items** using the same frozen project build on an RTX 3060 12 GiB. All 5,082 predictions in the completed comparison runs were valid, with no inference errors or truncation. The 23 runtime configurations include one failed default GPT-OSS attempt and its successful CUDA Graphs-disabled recovery.
-
-The original 22 matrix rows use identical request and evaluator hashes, fresh/legacy execution, context 8192, batch/ubatch 256, four threads and FlashAttention off, without reasoning-token generation, LoRA, an output head or learned calibration. The explicit GPT-OSS exception is marked below. Rows marked † are separate September 24 runs.
-
-| Checkpoint | Argmax accuracy | Hard accuracy | Accepted wrong | Abstained / 231 | p50 / p95 ms |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| [Gemma 4 31B Q4_K_M](https://huggingface.co/google/gemma-4-31B-it) † | 89.61% | 78.38% | 22 | 3 | 2287.40 / 24524.56 |
-| Qwen3.5-4B-Q8_0 | 79.65% | 61.26% | 9 | 93 | 86.88 / 1137.30 |
-| Qwen3.5-9B-Q4_K_M | 77.92% | 58.56% | 13 | 64 | 130.55 / 1697.14 |
-| Qwen3.5-9B-Q8_0 | 77.92% | 56.76% | 14 | 66 | 124.68 / 1613.79 |
-| gemma-4-E4B-it-Q4_K_M | 77.49% | 55.86% | 30 | 37 | 86.62 / 1186.47 |
-| gemma-4-E4B-it-Q8_0 | 76.62% | 54.05% | 32 | 37 | 85.04 / 1146.21 |
-| Qwen3.5-4B-Q4_K_M | 76.19% | 55.86% | 10 | 91 | 88.47 / 1175.18 |
-| [Ternary Bonsai 27B Q2_g64](https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf) † | 75.32% | 53.15% | 15 | 80 | 187.15 / 2462.18 |
-| Qwen3.8-27B-UD-IQ2_XXS | 73.16% | 47.75% | 18 | 84 | 414.61 / 5460.22 |
-| Qwen3-8B-Q8_0 | 71.43% | 48.65% | 56 | 15 | 121.45 / 1817.94 |
-| [Bonsai 27B Q1_0](https://huggingface.co/prism-ml/Bonsai-27B-gguf) † | 71.00% | 46.85% | 14 | 91 | 184.51 / 2489.64 |
-| gemma-4-E2B-it-Q8_0 | 67.97% | 43.24% | 58 | 22 | 46.79 / 701.11 |
-| Qwen3-4B-Q8_0 | 65.80% | 44.14% | 63 | 29 | 85.26 / 1349.28 |
-| Ministral-3-8B-Instruct-2512-Q4_K_M | 65.37% | 47.75% | 23 | 93 | 441.43 / 2399.70 |
-| gpt-oss-20b-Q4_K_M (CUDA Graphs off) | 64.94% | 48.65% | 31 | 82 | 181.93 / 2262.28 |
-| Qwen3.5-2B-Q8_0 | 62.34% | 48.65% | 15 | 133 | 40.99 / 513.03 |
-| gemma-3-4b-it-Q8_0 | 59.74% | 36.04% | 88 | 9 | 74.71 / 879.92 |
-| Phi-4-mini-instruct.Q8_0 | 56.71% | 42.34% | 30 | 115 | 70.50 / 971.95 |
-| Qwen3.5-0.8B-Q8_0 | 51.95% | 42.34% | 16 | 183 | 27.93 / 350.53 |
-| SmolLM3-3B-Q8_0 | 46.32% | 31.53% | 41 | 127 | 71.47 / 884.76 |
-| Llama-3.2-3B-Instruct-Q8_0 | 43.72% | 30.63% | 46 | 147 | 68.18 / 884.75 |
-| gemma-3-1b-it-Q8_0 | 38.96% | 28.83% | 121 | 30 | 25.06 / 309.24 |
-| tinyllama-1.1b-chat-v1.0.Q4_K_M | 33.77% | 36.04% | 1 | 230 | 30.08 / 702.65 |
-| Qwen3-0.6B-Q8_0 | 31.60% | 31.53% | 129 | 41 | 34.01 / 445.12 |
-| SmolLM2-135M-Instruct-Q8_0 | 30.30% | 29.73% | 8 | 211 | 14.88 / 253.65 |
-
-The † rows used the same public dataset (SHA-256 `dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51`) and byte-identical 231 request JSONL (SHA-256 `6f96c4fc2b924ec0bef4aaa94c25b2456522909fdbebffe0c0df8fa44e5c2faa`). Candidate-argmax scores were 164/231 for Bonsai Q1_0, 174/231 for Ternary Bonsai Q2_g64 and 207/231 for Gemma 4 31B Q4_K_M. All 693 predictions were valid, with no inference errors or truncation; independent recounts reproduced each tier total. The Gemma 4 31B run also reproduced every candidate probability and policy value from its earlier validated run. The default policy accepted 140/151/228 decisions respectively, of which 126/136/206 were correct.
-
-These runs used fresh/legacy execution, context 8192, batch/ubatch 256, and no LoRA, output head or learned calibration. The Bonsai runs used an RTX 3080 with full GPU offload and four threads; Gemma 4 31B used an RTX 3060 with 24 GPU layers, read-mode loading and eight threads. Evaluator binaries also differed, so the † latency figures are not a controlled speed comparison with each other or the original matrix. Their local, gitignored evidence is in `results/bonsai-27b-20260924/` and `results/jevbench-gemma31-rust-20260924/`; these artifacts are not included in the repository.
-
-Qwen3.5-4B Q8_0 had the highest argmax accuracy in the original 22-checkpoint matrix: 184/231 (79.65%), including 68/111 Hard items (61.26%). Its default policy accepted 138 decisions: 129 correct and 9 wrong, for 93.48% accepted accuracy at 59.74% coverage. Qwen3.5-9B Q4_K_M covered 72.29% with 13 accepted errors; Gemma4 E2B covered 90.48% with 58 accepted errors. Accuracy before abstention, accepted accuracy and coverage answer different questions.
-
-GPT-OSS 20B Q4_K_M exhausted GPU memory in `cudaGraphInstantiate` after 129 predictions. With `GGML_CUDA_DISABLE_GRAPHS=1`, it completed all 231 at 64.94% accuracy and a sampled peak of 11,901 MiB. Its first 129 probability distributions were identical to the failed run. Keep this runtime exception when reproducing its result.
-
-After model downloads finished, complete reruns of Qwen3.5-4B Q8_0 and Gemma4 E2B produced identical probabilities for every item. Their confirmation p50/p95 latencies were 86.99/1139.49 ms and 46.08/699.14 ms respectively; the table retains the original matrix timings.
-
-These are public-subset, local inference measurements, not an official full-suite score, rank or production validation. Latency excludes loading and warmup; small models may exceed their training context. For the original 22-checkpoint matrix, raw predictions, model/source hashes, memory samples, failed-attempt evidence and independent accuracy/Brier/ECE recount are in the local, gitignored `results/jevbench-matrix-20260923/` directory; they are not included in this repository. The measured source snapshot is kept with those artifacts, and later working-tree optimizations are outside this frozen comparison. See the [evaluation method](JEVBENCH.md).
-
-## Further documentation
-
-| Topic | Document |
+| Mode | Use |
 | --- | --- |
-| Identity, preflight, calibration, diagnostics and worker API | [Model interchangeability](MODEL_INTERCHANGEABILITY.md) |
-| Build and model-specific validation | [Verification guide](VERIFICATION.md) |
-| Prefix reuse and parallel execution | [Prefix algorithm](SEMIF_ALGORITHM.md), [parallel execution](PARALLEL_EXECUTION.md) |
-| Evaluation methods | [Synthetic benchmark](BENCHMARK.md), [AG News](KAGGLE_BENCHMARK.md), [JevBench](JEVBENCH.md), [Laya/Jev tasks and CPU caching](LAYA_BENCHMARK.md) |
-| Optional model/task adaptation | [Decision fine-tuning](DECISION_FINETUNE.md), [output heads](OUTPUT_HEAD.md) |
+| `fresh` | Independent evaluation from empty sequence state; one-shot CLI / Rust default |
+| `prefix-reuse` | Reuse an exact common token prefix within one request |
+| `state-restore` | Snapshot and restore a common prefix before independent suffixes |
+| `parallel` | Batch independent questions into isolated sequences |
+
+For GPU vision workloads, `--vision-optimized` enables four decoder streams, dynamic context reservation, Flash Attention, compact evidence, bounded preparation caching, and identical-image projector reuse:
+
+```sh
+./target/release/l2s1 --model /path/to/vision-model.gguf \
+  --mmproj /path/to/projector.gguf --device cuda --vision-optimized \
+  --image photo.jpg --input examples/warehouse.json
+```
+
+Parallel execution and the vision profile are supported features with a different numerical execution path from `fresh`: scores and selections can change. Parallel mode rejects recurrent/hybrid models, and parallel vision supports at most 26 options. The vision profile requires CUDA or Metal and compatible GPU kernels; its Metal performance remains unverified. Validate task quality and acceptance coverage on your checkpoint. Model-dependent tests are opt-in and do not download weights. See [execution and memory](docs/en/GUIDE.md#execution-and-memory), [optimized vision](docs/en/GUIDE.md#optimized-vision), and [verification](docs/en/VERIFICATION.md).
+
+[Open the image and text demo](https://l2s1.luticalab.net/demo): inspect actual recorded model responses, choose direct or bounded thinking for supported local text inference, and edit acceptance thresholds and failure messages. [Demo setup](docs/en/IMAGE_DEMO.md) · [Reasoning contract](docs/en/REASONING.md). The Pages site serves recordings; fresh inference requires the documented local native server.
+
+[Run the browser WebGPU demo](https://l2s1.luticalab.net/webgpu) to load Qwen3 0.6B ONNX on demand and score your own text locally, with direct/thinking modes, acceptance thresholds and custom failure messages. It requires a WebGPU adapter; model downloads are 543.4 MiB (q4f16) or 876.5 MiB (q4). [Browser setup and runtime scope](docs/en/WEBGPU_DEMO.md).
+
+## Recorded measurements
+
+| Study | Recorded scope | Report |
+| --- | --- | --- |
+| decision-rules-v1 · RTX 5090 / Windows | 5 checkpoints × CPU/CUDA; 36 distinct synthetic decisions × 3 passes. Gemma4 CUDA: 94.3% accepted accuracy, 91.7% correct/all; CPU timeout retained | [Results and conditions](docs/en/BENCHMARK.md#recorded-windows-rtx-5090-results), [aggregate audit](benchmarks/decision-rules-windows-20260926/audit.json) |
+| decision-rules-v1 · Apple M5 Max / macOS | 5 checkpoints + Gemma4 26B-A4B × CPU/Metal; 36 distinct synthetic decisions × 3 passes. Gemma4 26B-A4B: 100% on both devices; Gemma4 E2B Metal: 97.1% accepted accuracy, 91.7% correct/all | [Results and conditions](docs/en/BENCHMARK.md#recorded-apple-m5-max-results), [summary JSON](benchmarks/decision-rules-macos-m5max-20260927/summary.json) |
+| decision-rules-v1 · Raspberry Pi 5 4GB | Gemma3 1B Q8: same-source portable fresh p50 15.643 → 4.450 s with ARM dispatch (3.52x); peak RSS 1.12 → 2.11 GiB; optimized raw accuracy 55.6%, accepted accuracy 54.5%, coverage 91.7%. Active undervoltage/throttling; probability and acceptance changes are reported separately. | [Fresh kernel and quality results](benchmarks/pi5-arm64-fresh-20260927/README.md) · [State-cache follow-up](benchmarks/pi5-state-cache-20260928/README.md) |
+| JevBench public subset | Original matrix: 22 checkpoints × 231 items; 5,082 valid predictions | [Model results](docs/en/MODEL_RESULTS.md), [method](docs/en/JEVBENCH.md) |
+| Intent classification | 77 English labels and 60 Korean labels; 200 examples per language per checkpoint | [Intent benchmark](docs/en/INTENT_BENCHMARK.md) |
+| typed-decisions | Complete test split: 400 cases / 2,000 judgments per model; Gemma 4 E2B 54.30%, Qwen3 0.6B 31.25% raw accuracy; Gemma4 LoRA specialist pilot: 57.85% raw, 48.35% coverage | [Protocol and results](docs/en/TYPED_DECISIONS_BENCHMARK.md) · [LoRA](benchmarks/jev-lora-20260927/README.md) |
+| Vision decisions | Still-image classification and execution-mode studies | [Vision benchmark](docs/en/VISION_BENCHMARK.md), [TrashNet study](docs/en/benchmarks/trashnet-vision-20260925/REPORT.md) |
+
+These are recorded local experiments at their stated revisions, hardware, and settings. Report accuracy, accepted accuracy, and coverage separately. Some raw benchmark artifacts remain local and gitignored; the reports identify their locations and reproduction procedures. The JevBench public subset is not an official full-suite score or rank.
+
+## Documentation
+
+For AI agents, use the portable [L2S1 skill](docs/en/skills/l2s1/SKILL.md) and optional
+stdio MCP adapter. MCP exposes documentation, typed request validation and the
+resident HTTP backend's decisions. See [agent setup](docs/en/AGENT_INTEGRATION.md).
+
+| Topic | Read |
+| --- | --- |
+| Build, requests, Rust API, HTTP, runtime options | [Guide](docs/en/GUIDE.md) |
+| Model identity, preflight, calibration, worker ownership | [Model interchangeability](docs/en/MODEL_INTERCHANGEABILITY.md) |
+| Model-specific test commands | [Verification](docs/en/VERIFICATION.md) |
+| Prefix reuse and parallel execution | [Prefix algorithm](docs/en/SEMIF_ALGORITHM.md), [parallel execution](docs/en/PARALLEL_EXECUTION.md) |
+| Learned specialization | [LoRA training](docs/en/DECISION_FINETUNE.md), [output heads](docs/en/OUTPUT_HEAD.md), [Jev-type training CLI](docs/JEV_LORA.md) (`pip install ./training`; `l2s1-train`) |
+| Dataset preparation and report tools | [l2s1-tools](docs/en/crates/l2s1-tools/README.md) |
+| Recorded model comparisons and their limits | [Model results](docs/en/MODEL_RESULTS.md) |
+
+## Repository and development
+
+| Path | Purpose |
+| --- | --- |
+| [`src/decision.rs`](src/decision.rs) | Typed requests, results, shared scoring, and policy |
+| [`src/llama.rs`](src/llama.rs), [`src/wgpu.rs`](src/wgpu.rs) | Local inference backends |
+| [`src/http.rs`](src/http.rs), [`src/http/contract.rs`](src/http/contract.rs) | HTTP server and versioned wire contract |
+| [`crates/l2s1-llama-sys/`](crates/l2s1-llama-sys) | Pinned llama.cpp build and native bridge |
+| [`crates/l2s1-tools/`](crates/l2s1-tools) | Dataset and benchmark tools |
+| [`examples/`](examples) | Requests, saved outputs, and integration examples |
+| [`sdks/`](sdks/README.md) | Language SDKs: TypeScript/Node.js and Python |
+| [`docs/`](docs/README.md) | Detailed guides, design notes, and evaluation reports |
+| [`web/`](web) | Svelte documentation site |
+
+Run the pure Rust checks with `cargo test --locked`. Native and model-specific checks are documented in [VERIFICATION.md](docs/en/VERIFICATION.md). For a bug report, open a [GitHub issue](https://github.com/LuticaCANARD/L2S1/issues) with the command, checkpoint/quantization, runtime/device, and error. Keep English, Korean, and Japanese README changes aligned when submitting documentation updates.
 
 ## License
 
-Project source is [MIT-licensed](LICENSE). Preserve the dependency notices in [THIRD_PARTY_LICENSES.txt](THIRD_PARTY_LICENSES.txt) when distributing the native components. Model weights have their own licenses; see [LICENSING.md](LICENSING.md) for the source and model distinction.
-
-Model weights, local build/results directories and the separate `web/` directory are excluded from the Cargo package. No weights are bundled with the source or tests.
+L2S1 source is [MIT-licensed](LICENSE). Model weights have their own licenses and are not bundled. Preserve the [third-party notices](THIRD_PARTY_LICENSES.txt) when distributing native components; see [LICENSING.md](docs/en/LICENSING.md).

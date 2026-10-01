@@ -1,0 +1,20 @@
+[
+  {
+    "utc": "2026-09-27T14:35:51.848348+00:00",
+    "monotonic": 5483.621729644,
+    "temperature_c": 65.55,
+    "throttled": 327680,
+    "arm_clock_hz": 2400023808,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 10976
+  },
+  {
+    "utc": "2026-09-27T14:35:53.861611+00:00",
+    "monotonic": 5485.634995105,
+    "temperature_c": 59.5,
+    "throttled": 327680,
+    "arm_clock_hz": 2400023808,
+    "scaling_cur_freq_khz": 2400000,
+    "swap_kib": 10976
+  }
+]

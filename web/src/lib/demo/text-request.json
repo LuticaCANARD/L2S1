@@ -1,0 +1,42 @@
+{
+  "state": {
+    "shipment_id": "BOX-103",
+    "storage_requirement": "chilled",
+    "hours_until_dispatch": 4
+  },
+  "decisions": [
+    {
+      "id": "storage_zone",
+      "instruction": "Select the storage zone that matches the shipment's storage_requirement.",
+      "kind": {
+        "type": "choice",
+        "options": [
+          {"id": "ambient", "criterion": "The shipment requires ambient storage."},
+          {"id": "chilled", "criterion": "The shipment requires chilled storage."},
+          {"id": "frozen", "criterion": "The shipment requires frozen storage."}
+        ]
+      }
+    },
+    {
+      "id": "cold_chain_required",
+      "instruction": "Does this shipment need temperature-controlled storage? Chilled and frozen shipments do; ambient shipments do not.",
+      "kind": {
+        "type": "binary",
+        "false_label": "No temperature control is required.",
+        "true_label": "Temperature control is required."
+      }
+    },
+    {
+      "id": "dispatch_priority",
+      "instruction": "Choose the priority using hours_until_dispatch and the exact thresholds in the levels.",
+      "kind": {
+        "type": "ordinal",
+        "levels": [
+          {"id": "low", "criterion": "More than 24 hours remain until dispatch.", "value": 0},
+          {"id": "medium", "criterion": "More than 6 hours and at most 24 hours remain until dispatch.", "value": 1},
+          {"id": "high", "criterion": "At most 6 hours remain until dispatch.", "value": 2}
+        ]
+      }
+    }
+  ]
+}

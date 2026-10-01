@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "l2s1-training"
+version = "0.1.1"
+description = "Reproducible Jev-type LoRA training and native GGUF evaluation for L2S1"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+
+[project.scripts]
+l2s1-train = "l2s1_training.cli:main"
+
+[project.optional-dependencies]
+# Tested training stack; install the CUDA-specific torch wheel for your host first.
+cuda = ["torch==2.14.0", "transformers==5.17.0", "peft==0.21.0", "bitsandbytes==0.50.2", "accelerate==1.15.0", "huggingface-hub==1.32.0"]
+# Apple Silicon; Gemma 4 needs mlx-lm main (ml-explore/mlx-lm#1349) until the next release.
+mlx = ["mlx-lm==0.31.3", "huggingface-hub==1.32.0"]
+fetch = ["huggingface-hub==1.32.0"]
+parquet = ["pyarrow==21.0.0"]
+
+[project.urls]
+Repository = "https://github.com/LuticaCANARD/L2S1"
+Documentation = "https://github.com/LuticaCANARD/L2S1/blob/main/docs/JEV_LORA.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+l2s1_training = ["*.json"]

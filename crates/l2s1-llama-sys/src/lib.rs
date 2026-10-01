@@ -1,5 +1,31 @@
-//! Raw FFI for the pinned native L2S1 llama.cpp bridge.
+//! Stable L2S1 ABI implemented in Rust over the pinned llama.cpp runtime.
 use std::ffi::{c_char, c_void};
+
+#[repr(C)]
+pub struct NativeVisionInput {
+    pub prefix: *const c_char,
+    pub prefix_len: usize,
+    pub data_before: *const c_char,
+    pub before_len: usize,
+    pub image: *const u8,
+    pub image_len: usize,
+    pub data_after: *const c_char,
+    pub after_len: usize,
+    pub suffix: *const c_char,
+    pub suffix_len: usize,
+}
+
+#[repr(C)]
+#[derive(Default, Clone, Copy, Debug)]
+pub struct NativeVisionBatchMetrics {
+    pub projector_encode_calls: usize,
+    pub projector_batch_max: usize,
+    pub decoder_calls: usize,
+    pub decoder_batch_max_sequences: usize,
+    pub projector_reused_chunks: usize,
+    pub kv_clear_calls: usize,
+    pub kv_clear_skipped: usize,
+}
 
 #[repr(C)]
 #[derive(Default)]
@@ -13,6 +39,89 @@ pub struct NativeRestoreMetrics {
     pub fallback: i32,
 }
 unsafe extern "C" {
+    pub fn sd_forward_thinking(
+        engine: *mut c_void,
+        tokens: *const i32,
+        count: i32,
+        close_token: i32,
+        suffix: *const i32,
+        suffix_count: usize,
+        max_tokens: usize,
+        generated_tokens: *mut usize,
+        completed: *mut bool,
+        logits: *mut f32,
+        logits_count: usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+    pub fn sd_set_vision_projector_reuse(engine: *mut c_void, enabled: bool);
+    pub fn sd_forward_vision_parallel_compact(
+        engine: *mut c_void,
+        inputs: *const NativeVisionInput,
+        sequences: i32,
+        capacity: u32,
+        dynamic_context: bool,
+        candidate_ids: *const *const i32,
+        candidate_counts: *const usize,
+        candidate_logits: *mut f32,
+        candidate_logits_count: usize,
+        log_normalizers: *mut f64,
+        input_tokens: *mut usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+    pub fn sd_forward_vision_compact(
+        engine: *mut c_void,
+        prefix: *const c_char,
+        prefix_len: usize,
+        data_before: *const c_char,
+        before_len: usize,
+        image: *const u8,
+        image_len: usize,
+        data_after: *const c_char,
+        after_len: usize,
+        suffix: *const c_char,
+        suffix_len: usize,
+        continuation: *const i32,
+        continuation_count: usize,
+        candidate_ids: *const i32,
+        candidate_count: usize,
+        candidate_logits: *mut f32,
+        candidate_logits_count: usize,
+        log_normalizer: *mut f64,
+        input_tokens: *mut usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+
+    pub fn sd_forward_vision_parallel(
+        engine: *mut c_void,
+        inputs: *const NativeVisionInput,
+        sequences: i32,
+        capacity: u32,
+        dynamic_context: bool,
+        logits: *mut f32,
+        logits_count: usize,
+        input_tokens: *mut usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
+    pub fn sd_vision_batch_metrics(
+        engine: *const c_void,
+        metrics: *mut NativeVisionBatchMetrics,
+    ) -> bool;
+    pub fn sd_forward_split(
+        engine: *mut c_void,
+        tokens: *const i32,
+        count: i32,
+        boundary: usize,
+        reuse: bool,
+        reused: *mut i32,
+        logits: *mut f32,
+        logits_count: usize,
+        error: *mut c_char,
+        cap: usize,
+    ) -> bool;
     pub fn sd_forward_compact(
         engine: *mut c_void,
         tokens: *const i32,
@@ -29,6 +138,7 @@ unsafe extern "C" {
         cap: usize,
     ) -> bool;
     pub fn sd_recurrent_or_hybrid(engine: *const c_void) -> bool;
+    pub fn sd_context_tokens(engine: *const c_void) -> u32;
     pub fn sd_training_context(engine: *const c_void) -> u32;
     pub fn sd_forward_restore(
         engine: *mut c_void,
@@ -61,7 +171,7 @@ unsafe extern "C" {
         ubatch: u32,
         flash_attention: i32,
         threads: i32,
-        cuda: bool,
+        device_kind: i32,
         gpu_layers: i32,
         cpu_moe_layers: i32,
         model_load_mode: i32,
@@ -88,6 +198,8 @@ unsafe extern "C" {
         after_len: usize,
         suffix: *const c_char,
         suffix_len: usize,
+        continuation: *const i32,
+        continuation_count: usize,
         logits: *mut f32,
         logits_count: usize,
         input_tokens: *mut usize,
@@ -146,6 +258,8 @@ unsafe extern "C" {
         counts: *const i32,
         sequences: i32,
         capacity: u32,
+        dynamic_context: bool,
+        flags: u32,
         reused: *mut i32,
         logits: *mut f32,
         logits_count: usize,
@@ -153,3 +267,28 @@ unsafe extern "C" {
         cap: usize,
     ) -> bool;
 }
+
+#[allow(
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals,
+    dead_code,
+    improper_ctypes,
+    unnecessary_transmutes,
+    clippy::all
+)]
+mod raw {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
+/// `sd_forward_parallel` flag: share exact prefixes at token granularity
+/// instead of rounding each shared segment down to a complete prefill batch.
+/// Shared KV is then not computed with serial execution's batch boundaries.
+pub const SD_PARALLEL_TOKEN_PREFIX: u32 = 1;
+/// `sd_forward_parallel` flag: after success, keep the wave's root shared prefix
+/// in sequence 0 and reuse it when the next call starts with the same tokens.
+/// Any other native call that clears the engine discards it.
+pub const SD_PARALLEL_RETAIN_PREFIX: u32 = 2;
+
+mod bridge;
+mod text;
+mod vision;

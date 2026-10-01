@@ -51,6 +51,7 @@ fn wide_prompt_and_probabilities_keep_every_candidate_in_semantic_order() {
     for count in [27, 60, 77, 677] {
         let d = choice(count);
         DecisionRequest {
+            shared: None,
             state: serde_json::json!({}),
             decisions: vec![d.clone()],
         }

@@ -1,0 +1,216 @@
+{
+  "decisions": [
+    {
+      "calibration_id": null,
+      "decision_id": "storage_zone",
+      "effective_mode": "fresh",
+      "evidence_kind": "native_full_vocabulary_logits_v1",
+      "fallback_reason": null,
+      "prompt_tokens_sha256": "31b1135813665073be8a8446f53af34c5879d79c467eba6aecde0893c5e1997f",
+      "requested_mode": "fresh",
+      "reused_prefix_tokens": 0
+    },
+    {
+      "calibration_id": null,
+      "decision_id": "cold_chain_required",
+      "effective_mode": "fresh",
+      "evidence_kind": "native_full_vocabulary_logits_v1",
+      "fallback_reason": null,
+      "prompt_tokens_sha256": "6584356105574bcf82175e7a54dd4bdfa8c0e264b9b70551048d596e497178a3",
+      "requested_mode": "fresh",
+      "reused_prefix_tokens": 0
+    },
+    {
+      "calibration_id": null,
+      "decision_id": "dispatch_priority",
+      "effective_mode": "fresh",
+      "evidence_kind": "native_full_vocabulary_logits_v1",
+      "fallback_reason": null,
+      "prompt_tokens_sha256": "9e4a2c4380331839fae01193b6365dd50653dc726d7af525d78e9699ef8474dc",
+      "requested_mode": "fresh",
+      "reused_prefix_tokens": 0
+    }
+  ],
+  "model": {
+    "adapter_sha256": null,
+    "compute": {
+      "batch": 256,
+      "context": 2048,
+      "flash_attention": "off",
+      "threads": 4,
+      "ubatch": 256
+    },
+    "device": "NVIDIA GeForce RTX 3060",
+    "execution_mode": "fresh",
+    "head_sha256": null,
+    "loaded_runtime_sha256": "ae19e1bb27af03e2057408582ca17f35a748b7fec5aab75db5bef03763a026d8",
+    "parallel_width": 1,
+    "prompt_profile": "model",
+    "prompt_version": "gguf-jinja-decision-v1",
+    "runtime_build_sha256": "771abedbe730b88af57cc1bc35543c4353b30382de7bf9c475a78e9814e66043",
+    "template_sha256": "872be49dbb638044ad01b60388f48d469ff2980e5f0dccdc22ec907db54d0788",
+    "weights_sha256": "5a1395716f7913741cc51d98581b9b1228d80987a9f7d3664106742eb06bba83"
+  },
+  "response": {
+    "backend": {
+      "compute": {
+        "batch": 256,
+        "context": 2048,
+        "flash_attention": "off",
+        "threads": 4,
+        "ubatch": 256
+      },
+      "execution_mode": "fresh",
+      "model_architecture": "llama",
+      "model_description": "llama 256M Q8_0",
+      "model_path": "/home/lutica/personal/skid/skid-desion/models/SmolLM2-135M-Instruct-Q8_0.gguf",
+      "offload_device": "NVIDIA GeForce RTX 3060",
+      "offload_requested": true,
+      "parallel_width": 1,
+      "prompt_layout": "legacy",
+      "prompt_profile": "model",
+      "prompt_version": "gguf-jinja-decision-v1",
+      "runtime": "local-libllama"
+    },
+    "policy": {
+      "min_candidate_mass": 0.05,
+      "min_top_probability": 0.8
+    },
+    "results": [
+      {
+        "abstention_reasons": [
+          "low_top_probability"
+        ],
+        "calibration_id": null,
+        "candidate_mass": 0.08503527706368441,
+        "entropy_confidence": 0.10211045005833808,
+        "id": "storage_zone",
+        "input_tokens": 171,
+        "reused_prefix_tokens": 0,
+        "scores": [
+          {
+            "code": "A",
+            "id": "ambient",
+            "option_probability": 0.5021336632390878,
+            "raw_logit": 31.6427001953125,
+            "token_id": 49
+          },
+          {
+            "code": "B",
+            "id": "chilled",
+            "option_probability": 0.13739410394580306,
+            "raw_logit": 30.34668731689453,
+            "token_id": 50
+          },
+          {
+            "code": "C",
+            "id": "frozen",
+            "option_probability": 0.3604722328151115,
+            "raw_logit": 31.311248779296875,
+            "token_id": 51
+          }
+        ],
+        "scoring_method": "single_token_conditional_softmax_v1",
+        "top_option_probability": 0.5021336632390878,
+        "truncated": false,
+        "value": {
+          "selected": null,
+          "type": "choice"
+        }
+      },
+      {
+        "abstention_reasons": [
+          "low_candidate_mass",
+          "low_top_probability"
+        ],
+        "calibration_id": null,
+        "candidate_mass": 0.0382627732383433,
+        "entropy_confidence": 0.01798335716396271,
+        "id": "cold_chain_required",
+        "input_tokens": 162,
+        "reused_prefix_tokens": 0,
+        "scores": [
+          {
+            "code": "A",
+            "id": "false",
+            "option_probability": 0.5787820841719111,
+            "raw_logit": 30.670166015625,
+            "token_id": 49
+          },
+          {
+            "code": "B",
+            "id": "true",
+            "option_probability": 0.4212179158280878,
+            "raw_logit": 30.35239028930664,
+            "token_id": 50
+          }
+        ],
+        "scoring_method": "single_token_conditional_softmax_v1",
+        "top_option_probability": 0.5787820841719111,
+        "truncated": false,
+        "value": {
+          "p_true": 0.4212179158280878,
+          "type": "binary",
+          "value": null
+        }
+      },
+      {
+        "abstention_reasons": [
+          "low_top_probability"
+        ],
+        "calibration_id": null,
+        "candidate_mass": 0.0871080439913378,
+        "entropy_confidence": 0.12021726122124476,
+        "id": "dispatch_priority",
+        "input_tokens": 192,
+        "reused_prefix_tokens": 0,
+        "scores": [
+          {
+            "code": "A",
+            "id": "low",
+            "option_probability": 0.5563095756255583,
+            "raw_logit": 32.063941955566406,
+            "token_id": 49
+          },
+          {
+            "code": "B",
+            "id": "medium",
+            "option_probability": 0.14415178181566118,
+            "raw_logit": 30.713483810424805,
+            "token_id": 50
+          },
+          {
+            "code": "C",
+            "id": "high",
+            "option_probability": 0.2995386425587796,
+            "raw_logit": 31.444860458374023,
+            "token_id": 51
+          }
+        ],
+        "scoring_method": "single_token_conditional_softmax_v1",
+        "top_option_probability": 0.5563095756255583,
+        "truncated": false,
+        "value": {
+          "expected_value": 0.7432290669332204,
+          "selected": null,
+          "type": "ordinal"
+        }
+      }
+    ]
+  },
+  "state_restore": {
+    "fallback_reason": null,
+    "prefill_ms": 0.0,
+    "restore_ms": 0.0,
+    "restores": 0,
+    "save_ms": 0.0,
+    "snapshot_bytes": 0,
+    "suffix_ms": 0.0
+  },
+  "timings": {
+    "decisions": 3,
+    "native_ms": 111.137932,
+    "prepare_ms": 1.516398,
+    "score_ms": 0.6298429999999999
+  }
+}

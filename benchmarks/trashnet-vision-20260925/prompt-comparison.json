@@ -1,0 +1,132 @@
+{
+  "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+  "traits_v1_sha256": "2f295757f010e5e6a18bdba7d26a79f802e2315a0a17b280cd75df08f341dbc1",
+  "models": {
+    "qwen3vl": {
+      "baseline": {
+        "accepted": 115,
+        "accepted_correct": 91,
+        "raw_top1_correct": 95,
+        "latency_p50_ms": 101.0771585
+      },
+      "traits_v1": {
+        "accepted": 107,
+        "accepted_correct": 89,
+        "raw_top1_correct": 93,
+        "latency_p50_ms": 129.40805699999999
+      },
+      "wrong_to_right": 2,
+      "right_to_wrong": 4,
+      "class_correct": {
+        "cardboard": {
+          "baseline": 19,
+          "traits_v1": 19
+        },
+        "glass": {
+          "baseline": 19,
+          "traits_v1": 20
+        },
+        "metal": {
+          "baseline": 19,
+          "traits_v1": 19
+        },
+        "paper": {
+          "baseline": 18,
+          "traits_v1": 15
+        },
+        "plastic": {
+          "baseline": 16,
+          "traits_v1": 15
+        },
+        "trash": {
+          "baseline": 0,
+          "traits_v1": 1
+        }
+      }
+    },
+    "gemma4": {
+      "baseline": {
+        "accepted": 113,
+        "accepted_correct": 64,
+        "raw_top1_correct": 64,
+        "latency_p50_ms": 79.115036
+      },
+      "traits_v1": {
+        "accepted": 115,
+        "accepted_correct": 65,
+        "raw_top1_correct": 65,
+        "latency_p50_ms": 126.372118
+      },
+      "wrong_to_right": 13,
+      "right_to_wrong": 12,
+      "class_correct": {
+        "cardboard": {
+          "baseline": 19,
+          "traits_v1": 12
+        },
+        "glass": {
+          "baseline": 14,
+          "traits_v1": 17
+        },
+        "metal": {
+          "baseline": 14,
+          "traits_v1": 14
+        },
+        "paper": {
+          "baseline": 7,
+          "traits_v1": 4
+        },
+        "plastic": {
+          "baseline": 9,
+          "traits_v1": 10
+        },
+        "trash": {
+          "baseline": 1,
+          "traits_v1": 8
+        }
+      }
+    },
+    "smolvlm": {
+      "baseline": {
+        "accepted": 0,
+        "accepted_correct": 0,
+        "raw_top1_correct": 13,
+        "latency_p50_ms": 108.7000395
+      },
+      "traits_v1": {
+        "accepted": 0,
+        "accepted_correct": 0,
+        "raw_top1_correct": 19,
+        "latency_p50_ms": 124.719257
+      },
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "class_correct": {
+        "cardboard": {
+          "baseline": 0,
+          "traits_v1": 0
+        },
+        "glass": {
+          "baseline": 0,
+          "traits_v1": 0
+        },
+        "metal": {
+          "baseline": 0,
+          "traits_v1": 0
+        },
+        "paper": {
+          "baseline": 0,
+          "traits_v1": 0
+        },
+        "plastic": {
+          "baseline": 0,
+          "traits_v1": 0
+        },
+        "trash": {
+          "baseline": 0,
+          "traits_v1": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+name: Rust native bridge checks
+on:
+  push:
+    paths: ['crates/l2s1-llama-sys/**', 'Cargo.lock', '.github/workflows/native-rust-checks.yml']
+  pull_request:
+    paths: ['crates/l2s1-llama-sys/**', 'Cargo.lock', '.github/workflows/native-rust-checks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_DISABLE: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: sudo apt-get update && sudo apt-get install -y libclang-dev
+      - run: cargo fmt --check -p l2s1-llama-sys
+      - run: cargo test --locked --features llama --lib --tests
+      # Prompt bytes must not change when any dependency enables preserve_order.
+      - run: cargo test --locked --features serde_json/preserve_order --test prompt_detail --test decision
+      - run: cargo test --locked -p l2s1-llama-sys --lib
+      - run: cargo clippy --locked -p l2s1-llama-sys --all-targets -- -D warnings

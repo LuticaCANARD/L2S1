@@ -90,6 +90,7 @@ fn shared_state_supports_dynamic_questions_and_clears_boundaries() {
         .map(|question| {
             backend
                 .decide(&DecisionRequest {
+                    shared: None,
                     state: request.state.clone(),
                     decisions: vec![question.clone()],
                 })

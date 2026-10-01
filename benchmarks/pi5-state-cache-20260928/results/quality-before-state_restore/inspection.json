@@ -1,0 +1,42 @@
+{
+  "inspection": {
+    "capabilities": {
+      "architecture": "gemma3",
+      "configured_context": 2048,
+      "evidence_status": "loaded_metadata; request preflight and measured quality are separate; state_restore uses bounded request-local sequence state",
+      "exact_full_vocabulary_logits": true,
+      "execution_modes": [
+        "fresh",
+        "prefix_reuse",
+        "state_restore",
+        "parallel"
+      ],
+      "hidden_features": false,
+      "prefix_reuse_fallback": null,
+      "recurrent_or_hybrid": false,
+      "snapshot_limit_bytes": 268435456,
+      "training_context": 32768,
+      "vocabulary_size": 262144
+    },
+    "identity": {
+      "adapter_sha256": null,
+      "compute": {
+        "batch": 256,
+        "context": 2048,
+        "flash_attention": "off",
+        "threads": 4,
+        "ubatch": 256
+      },
+      "device": "CPU",
+      "execution_mode": "fresh",
+      "head_sha256": null,
+      "loaded_runtime_sha256": "35c1896c79527634b742a30426584341a475bd1458faaa28e8c8c16e38689cdc",
+      "parallel_width": 1,
+      "prompt_profile": "model",
+      "prompt_version": "gguf-jinja-decision-v1",
+      "runtime_build_sha256": "d72e760203c47d5ee819b4d902be823499ac1bae82c69da6f1327290a4de8346",
+      "template_sha256": "7de1c58e208eda46e9c7f86397df37ec49883aeece39fb961e0a6b24088dd3c4",
+      "weights_sha256": "b205840c5dcef55078e37d344677869a714ffd42a4ae448c48dcfb52e4bb10d5"
+    }
+  }
+}

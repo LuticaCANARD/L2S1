@@ -1,0 +1,8 @@
+/home/lutica/personal/skid/skid-desion/results/finetune-20260923/venv/lib/python3.12/site-packages/torch/cuda/__init__.py:1174: UserWarning: Can't initialize NVML
+  raw_cnt = _raw_device_count_nvml()
+.............[transformers] Last layer must use `full_attention`, but got `sliding_attention`. Forcing last layer to `full_attention`.
+.
+----------------------------------------------------------------------
+Ran 14 tests in 0.849s
+
+OK

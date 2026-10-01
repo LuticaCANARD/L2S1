@@ -1,0 +1,3 @@
+# Official SDK v1 API; avoid silently changing to the v2 interface.
+mcp>=1.28,<2
+pydantic>=2.12,<3

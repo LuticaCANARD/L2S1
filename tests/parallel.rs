@@ -200,6 +200,99 @@ fn real_model_parallel_contract() {
 }
 
 #[test]
+#[ignore = "requires SKID_MODEL; measures native KV reservation and checks context mode switching"]
+fn real_model_dynamic_parallel_context() {
+    let mut backend = load();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_parallel_width(8).unwrap();
+    backend.set_parallel_context_dynamic(true);
+    let small_request = request(8, false);
+    let compact = backend.decide(&small_request).unwrap();
+    let allocated = compact.backend.parallel_context_tokens.unwrap() as usize;
+    let submitted: usize = compact
+        .results
+        .iter()
+        .map(|result| result.input_tokens)
+        .sum();
+    eprintln!(
+        "dynamic context: allocated={allocated}, input_sum={submitted}, legacy={}",
+        2048 * 8
+    );
+    assert!(allocated >= submitted);
+    assert!(
+        allocated < 2048 * 8,
+        "short prompts should avoid the full KV reservation"
+    );
+    assert!(compact.backend.parallel_context_dynamic);
+    assert_same(&compact, &backend.decide(&small_request).unwrap());
+
+    let mut invalid = small_request.clone();
+    invalid.decisions[7].instruction = "overlong ".repeat(4000);
+    assert!(backend.decide(&invalid).is_err());
+    assert_same(&compact, &backend.decide(&small_request).unwrap());
+
+    let larger = request(8, true);
+    let grown = backend.decide(&larger).unwrap();
+    let grown_capacity = grown.backend.parallel_context_tokens.unwrap();
+    assert!(grown_capacity as usize > allocated);
+    let retained = backend.decide(&small_request).unwrap();
+    assert_eq!(
+        retained.backend.parallel_context_tokens,
+        Some(grown_capacity)
+    );
+    assert_same(&retained, &backend.decide(&small_request).unwrap());
+
+    backend.set_parallel_context_dynamic(false);
+    let full = backend.decide(&small_request).unwrap();
+    assert!(!full.backend.parallel_context_dynamic);
+    assert_eq!(full.backend.parallel_context_tokens, None);
+    assert_eq!(full.results.len(), compact.results.len());
+    for (a, b) in full.results.iter().zip(compact.results.iter()) {
+        assert_eq!((&a.id, a.input_tokens), (&b.id, b.input_tokens));
+    }
+}
+
+#[test]
+#[ignore = "requires SKID_MODEL; checks 8 independent requests in one dynamically sized wave"]
+fn real_model_dynamic_request_batch() {
+    let mut backend = load();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_parallel_width(24).unwrap();
+    backend.set_parallel_context_dynamic(true);
+    let requests: Vec<_> = (0..8)
+        .map(|i| {
+            let mut request = request(3, false);
+            request.state["case"] = serde_json::json!(i);
+            request
+        })
+        .collect();
+    let responses = backend.decide_batch(&requests).unwrap();
+    assert_eq!(responses.len(), requests.len());
+    let submitted: usize = responses
+        .iter()
+        .flat_map(|response| response.results.iter())
+        .map(|result| result.input_tokens)
+        .sum();
+    let allocated = responses[0].backend.parallel_context_tokens.unwrap() as usize;
+    eprintln!(
+        "dynamic request batch: allocated={allocated}, input_sum={submitted}, legacy={}",
+        2048 * 24
+    );
+    assert!(allocated >= submitted);
+    assert!(allocated < 2048 * 24);
+    for (request, response) in requests.iter().zip(&responses) {
+        assert_eq!(response.results.len(), request.decisions.len());
+        assert_eq!(
+            response.backend.parallel_context_tokens,
+            Some(allocated as u32)
+        );
+        for (decision, result) in request.decisions.iter().zip(&response.results) {
+            assert_eq!(result.id, decision.id);
+        }
+    }
+}
+
+#[test]
 #[ignore = "requires SKID_MODEL; reports speed and score drift, not an accuracy pass claim"]
 fn real_model_parallel_measurement() {
     let mut backend = load();
@@ -320,5 +413,201 @@ fn real_model_parallel_labeled() {
     }
     if let Ok(path) = env::var("SKID_PARALLEL_OUTPUT") {
         std::fs::write(path,serde_json::to_vec_pretty(&serde_json::json!({"runs":runs,"scope":"36 synthetic labeled decisions, state-first v2; not held-out production accuracy"})).unwrap()).unwrap();
+    }
+}
+
+fn max_probability_delta(a: &[DecisionResponse], b: &[DecisionResponse]) -> f64 {
+    let mut delta = 0.0_f64;
+    for (a, b) in a.iter().zip(b) {
+        for (a, b) in a.results.iter().zip(&b.results) {
+            assert_eq!((&a.id, a.input_tokens), (&b.id, b.input_tokens));
+            for (x, y) in a.scores.iter().zip(&b.scores) {
+                delta = delta.max((x.option_probability - y.option_probability).abs());
+            }
+        }
+    }
+    delta
+}
+
+fn reused(responses: &[DecisionResponse]) -> Vec<usize> {
+    responses
+        .iter()
+        .flat_map(|r| r.results.iter().map(|r| r.reused_prefix_tokens))
+        .collect()
+}
+
+#[test]
+#[ignore = "requires SKID_MODEL; checks shared input, nested prefix groups, alignment and retention"]
+fn real_model_prefix_sharing() {
+    let model = env::var("SKID_MODEL").expect("set SKID_MODEL");
+    let mut backend = LlamaBackend::load(
+        model.as_ref(),
+        2048,
+        256,
+        4,
+        env::var("SKID_CUDA").as_deref() == Ok("1"),
+        DecisionPolicy::default(),
+    )
+    .unwrap();
+    // Without an explicit layout, only parallel execution selects state-first.
+    assert_eq!(backend.prompt_layout(), PromptLayout::Legacy);
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    assert_eq!(backend.prompt_layout(), PromptLayout::StateFirst);
+    assert_eq!(
+        backend.info().prompt_layout,
+        PromptLayout::StateFirst,
+        "reported identity follows the resolved layout"
+    );
+    // Legacy places the question before the state; only `shared` precedes it.
+    backend.set_prompt_layout(PromptLayout::Legacy);
+    backend.set_parallel_width(4).unwrap();
+    let knowledge = "Dispatch policy: frozen goods need a frozen truck; chilled goods \
+                     leave within 24 hours; ambient goods may wait for the next route. "
+        .repeat(12);
+    let requests: Vec<_> = (0..3)
+        .map(|i| {
+            let mut request = request(3, false);
+            request.shared = Some(serde_json::json!({"knowledge": knowledge}));
+            request.state["case"] = serde_json::json!(i);
+            request
+        })
+        .collect();
+    backend.set_execution_mode(ExecutionMode::Fresh);
+    let fresh = backend.decide_batch(&requests).unwrap();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_prompt_layout(PromptLayout::Legacy);
+    let batch = backend.decide_batch(&requests).unwrap();
+    let batch_reused = reused(&batch);
+    eprintln!("batch-aligned reuse: {batch_reused:?}");
+    // Only the question that evaluated the first shared prefix pays for it;
+    // later waves reuse the retained prefix inside the call.
+    assert_eq!(batch_reused.iter().filter(|&&r| r == 0).count(), 1);
+    assert!(batch_reused.iter().all(|&r| r % 256 == 0));
+    let delta = max_probability_delta(&fresh, &batch);
+    eprintln!("batch-aligned max probability delta vs fresh: {delta}");
+    assert!(delta < 0.05);
+    assert_eq!(
+        batch[0].backend.parallel_wave_order,
+        ParallelWaveOrder::Prefix
+    );
+    assert!(!batch[0].backend.parallel_prefix_retained);
+
+    // Request-order waves still produce request-ordered results.
+    backend.set_parallel_wave_order(ParallelWaveOrder::Request);
+    let ordered = backend.decide_batch(&requests).unwrap();
+    assert!(max_probability_delta(&fresh, &ordered) < 0.05);
+    backend.set_parallel_wave_order(ParallelWaveOrder::Prefix);
+
+    backend.set_parallel_prefix_alignment(ParallelPrefixAlignment::Token);
+    let token = backend.decide_batch(&requests).unwrap();
+    let token_reused = reused(&token);
+    eprintln!("token-aligned reuse: {token_reused:?}");
+    assert!(token_reused.iter().zip(&batch_reused).all(|(t, b)| t >= b));
+    assert!(token_reused.iter().sum::<usize>() > batch_reused.iter().sum::<usize>());
+    let delta = max_probability_delta(&fresh, &token);
+    eprintln!("token-aligned max probability delta vs fresh: {delta}");
+    assert!(delta < 0.05);
+    assert_eq!(
+        token[0].backend.parallel_prefix_alignment,
+        ParallelPrefixAlignment::Token
+    );
+    backend.set_parallel_prefix_alignment(ParallelPrefixAlignment::Batch);
+
+    {
+        let mut session = backend.parallel_prefix_session().unwrap();
+        let first = session.decide_batch(&requests).unwrap();
+        assert!(first[0].backend.parallel_prefix_retained);
+        for (a, b) in first.iter().zip(&batch) {
+            assert_same(a, b);
+        }
+        // The next call starts from the retained shared prefix.
+        let second = session.decide_batch(&requests).unwrap();
+        let second_reused = reused(&second);
+        eprintln!("session second-call reuse: {second_reused:?}");
+        assert!(second_reused.iter().all(|&r| r > 0));
+        for (a, b) in second.iter().zip(&first) {
+            assert_same(a, b);
+        }
+        // A failure clears the retained prefix and the session stays usable.
+        let mut invalid = requests.clone();
+        invalid[0].decisions[0].instruction = "overlong ".repeat(4000);
+        assert!(session.decide_batch(&invalid).is_err());
+        let recovered = session.decide_batch(&requests).unwrap();
+        assert_eq!(reused(&recovered), batch_reused);
+        for (a, b) in recovered.iter().zip(&first) {
+            assert_same(a, b);
+        }
+        assert_eq!(session.decide(&requests[0]).unwrap().results.len(), 3);
+    }
+    let after = backend.decide_batch(&requests).unwrap();
+    assert!(!after[0].backend.parallel_prefix_retained);
+    for (a, b) in after.iter().zip(&batch) {
+        assert_same(a, b);
+    }
+    backend.set_execution_mode(ExecutionMode::Fresh);
+    assert!(backend.parallel_prefix_session().is_err());
+}
+
+#[test]
+#[ignore = "requires SKID_MODEL; validates resident reuse within the measured FA-on compute profile"]
+fn real_model_resident_parallel_recovers_in_its_compute_profile() {
+    let model = env::var("SKID_MODEL").expect("set SKID_MODEL");
+    let mut backend = LlamaBackend::load_with_options(
+        model.as_ref(),
+        l2s1::ComputeOptions {
+            context: 2048,
+            batch: 128,
+            ubatch: 128,
+            threads: 4,
+            flash_attention: l2s1::FlashAttention::On,
+            gpu_layers: None,
+            cpu_moe_layers: 0,
+            model_load_mode: l2s1::ModelLoadMode::Auto,
+        },
+        env::var("SKID_CUDA").as_deref() == Ok("1"),
+        DecisionPolicy::default(),
+        l2s1::PromptProfile::Auto,
+    )
+    .unwrap();
+    backend.set_execution_mode(ExecutionMode::Parallel);
+    backend.set_prompt_layout(PromptLayout::Legacy);
+    backend.set_parallel_width(2).unwrap();
+    backend.set_parallel_context_dynamic(true);
+    let requests: Vec<_> = (0..3).map(|i| {
+        let mut r = request(3, false);
+        r.shared = Some(serde_json::json!({"manual":"Frozen goods need a frozen truck; chilled goods leave within 24 hours. ".repeat(24)}));
+        r.state["case"] = serde_json::json!(i);
+        r
+    }).collect();
+    // Cold parallel is the reference: fresh vs parallel can itself change
+    // quantized kernels. This test isolates cross-call retention, not that drift.
+    // Grow the dynamic allocation first. A resize clears KV; comparing reuse
+    // counts with the very first allocation would confound resize and recovery.
+    backend.decide_batch(&requests).unwrap();
+    let cold = backend.decide_batch(&requests).unwrap();
+    {
+        let mut session = backend.parallel_prefix_session().unwrap();
+        for _ in 0..2 {
+            let actual = session.decide_batch(&requests).unwrap();
+            assert!(max_probability_delta(&cold, &actual) <= 0.02);
+            for (a, b) in actual.iter().zip(&cold) {
+                assert_same(a, b);
+            }
+            assert!(reused(&actual).iter().any(|&count| count > 0));
+        }
+        let mut bad = requests.clone();
+        bad[0].state = serde_json::json!({"overlong":"word ".repeat(10000)});
+        assert!(session.decide_batch(&bad).is_err());
+        let recovered = session.decide_batch(&requests).unwrap();
+        assert_eq!(reused(&recovered), reused(&cold));
+        for (a, b) in recovered.iter().zip(&cold) {
+            assert_same(a, b);
+        }
+    }
+    let after = backend.decide_batch(&requests).unwrap();
+    assert!(!after[0].backend.parallel_prefix_retained);
+    assert_eq!(reused(&after), reused(&cold));
+    for (a, b) in after.iter().zip(&cold) {
+        assert_same(a, b);
     }
 }

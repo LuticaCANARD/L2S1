@@ -1,0 +1,14 @@
+{
+  "base_commit": "46851481926b388ee1b7f5dd5439c7413dfdbc9c",
+  "native_inputs_match_worktree": true,
+  "source_files_sha256": {
+    "Cargo.toml": "aa4ff7fdafbc3e1a54c24e155a772ec573b13439f80e68a1d0b10a8e1a42e5bb",
+    "Cargo.lock": "ef32dea95e05e403d4e0c3a4507b408597f3d08423d5df0ea01ce72bb51ed665",
+    "src/main.rs": "d695294e46c0b360c8773811a9b56bbb3ceb861fedae95bce199209ecc2f0358",
+    "crates/l2s1-llama-sys/Cargo.toml": "3e18883510809a81f0a5b8df80be6ad3205f461212d42f9f40c2ec76937f706b",
+    "crates/l2s1-llama-sys/build.rs": "60569b566c0acecd14dfe49c800447f6fe7ff01ba889e886d9d1310cc37aed63",
+    "crates/l2s1-llama-sys/native/exception.cpp": "50e739e2f9374a1fd94f08e17217006cf700ef3368c04773b4f473739c378b44",
+    "crates/l2s1-llama-sys/cmake/CMakeLists.txt": "cae24bd85ec234c131c09b494861018161f1197eafccbdf33152798c2c832502"
+  },
+  "scope": "All four builds reuse this one source directory, changing only dispatch/OpenMP flags. Source base is the Git archive plus this PR native build/loader patch; documentation edits do not affect the measured runtime."
+}

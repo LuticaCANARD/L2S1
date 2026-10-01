@@ -1,0 +1,24 @@
+{
+  "host_arch": "x86_64",
+  "native_upstream_commit": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "checks": {
+    "core_library": "28 passed",
+    "native_library": "37 passed, 1 ignored",
+    "cli": "2 passed",
+    "release_pipeline": "7 passed",
+    "strict_clippy": "passed",
+    "fixed_schema_real_model": "passed; SmolLM2-135M-Instruct-Q8_0",
+    "prefix_real_model": {
+      "comparisons": 45,
+      "changed_top1": 0,
+      "changed_selected": 0,
+      "max_probability_delta": 0.0,
+      "max_candidate_mass_delta": 0.0,
+      "reused_prefix_tokens": 7040,
+      "batch": 32,
+      "context": 2048,
+      "threads": 4
+    }
+  },
+  "scope": "Local x86 CPU regression, separate from the physical Pi measurements. HTTP tests were rerun successfully with local socket permission after sandbox listen failures."
+}

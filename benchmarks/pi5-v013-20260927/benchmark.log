@@ -1,0 +1,23 @@
+{"mode": "fresh", "completed_pass": -1, "requests": 0}
+{"mode": "fresh", "completed_pass": 0, "requests": 3}
+{"mode": "fresh", "completed_pass": 1, "requests": 6}
+Traceback (most recent call last):
+  File "/home/lutica/l2s1-v013-validation-20260927/benchmark.py", line 64, in <module>
+    asyncio.run(main())
+    ~~~~~~~~~~~^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/lutica/l2s1-v013-validation-20260927/benchmark.py", line 62, in main
+    summaries=[await run(mode,cases) for mode in ('fresh','fixed')]
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lutica/l2s1-v013-validation-20260927/benchmark.py", line 47, in run
+    scores=result['evidence']['scores'];top=max(scores,key=lambda s:s['option_probability'])['option_id'];good=top==expected[row['case_id']][result['id']]
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'option_id'

@@ -1,0 +1,23 @@
+{
+  "args": [
+    "/home/lutica/l2s1-arm64-fresh-20260927/installed/openmp/node_modules/@l2s1/runtime-linux-arm64/bin/l2s1",
+    "--model",
+    "/home/lutica/l2s1-pi-20260927/models/gemma-3-1b-it-Q8_0.gguf",
+    "--device",
+    "cpu",
+    "--context",
+    "2048",
+    "--batch",
+    "256",
+    "--ubatch",
+    "256",
+    "--threads",
+    "4",
+    "--execution-mode",
+    "fresh",
+    "--stdio"
+  ],
+  "LD_LIBRARY_PATH": "/home/lutica/l2s1-arm64-fresh-20260927/installed/openmp/node_modules/@l2s1/runtime-linux-arm64/bin",
+  "OMP_NUM_THREADS": "4",
+  "LD_PRELOAD": null
+}

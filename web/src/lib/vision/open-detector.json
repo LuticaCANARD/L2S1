@@ -1,0 +1,9 @@
+{
+  "model": "Xenova/owlvit-base-patch32",
+  "revision": "b75f4e52949639c3bb0b96546ea4149482f6e7ef",
+  "dtype": "q8",
+  "minimum_score": 0.03,
+  "display_score": 0.1,
+  "iou_threshold": 0.4,
+  "labels": ["a cardboard box", "a piece of cardboard", "a glass bottle", "a glass jar", "a metal can", "aluminum foil", "a sheet of paper", "crumpled paper", "a plastic bottle", "a plastic container", "a plastic bag", "a disposable cup", "a food wrapper", "a paper tissue", "a piece of garbage"]
+}

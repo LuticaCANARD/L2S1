@@ -1,0 +1,20 @@
+{
+  "repository": "https://github.com/ollaya-dev/ollaya",
+  "revision": "f9e2d11fee1d01235878bfa6cfa1eb1e42bbbaea",
+  "files": [
+    "crates/ollaya-decision/src/answer.rs",
+    "crates/ollaya-api/src/decide.rs",
+    "docs/api.md",
+    "docs/families/winnow.md",
+    "docs/families/llm-logits.md"
+  ],
+  "decisions": [
+    "Choice/Score confidence uses normalized pmax; do not substitute entropy confidence",
+    "Noul is p(true), without confidence",
+    "Score is expected ordered index; keep legend",
+    "Four decimal wire rounding only; score on unrounded probabilities",
+    "Follow the native token-logit readout pattern, retain L2S1 renderer and abstention",
+    "No cross-fitting on the test set; no temperature fitting in this pilot",
+    "No claim of API endpoint compatibility or one-forward-pass multiquestion architecture"
+  ]
+}

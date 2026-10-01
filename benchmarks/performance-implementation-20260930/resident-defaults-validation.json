@@ -1,0 +1,269 @@
+{
+  "date": "2026-09-30",
+  "base_commit": "e193b4c8ad32514318e917b90efaed2624051d71",
+  "scope": "Automatic resident schema invalidation and SDK inheritance. Contract validation, not a new accuracy/latency benchmark.",
+  "hardware": "RTX 3080 10 GiB, i9-9900K, WSL2, CUDA 12.4.131",
+  "compute": {
+    "context": 2048,
+    "batch": 256,
+    "ubatch": 256,
+    "flash_attention": "off",
+    "prompt_layout": "legacy",
+    "threads": {
+      "rust_and_cpp": 4,
+      "python_and_typescript": 2
+    }
+  },
+  "models": {
+    "e2b": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+    "12b": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b"
+  },
+  "binary_sha256": "187f81d3d906aafd953d9186a28c5c6ef13b2f1f310fa0ca848e6550c8ae52f7",
+  "source_sha256": {
+    "src/llama/fixed_schema.rs": "537b7b6fb3d12f707090be30fd7b3d68743e1fd4af48815c6337a51e53b130a4",
+    "src/main.rs": "b7f59b81ccc392925f9f84c9b230357943f20faee05356dd20df17b0af52be2e",
+    "tests/fixed_schema.rs": "033e3685e0691a49bd5fc90eb4166063f9c40360a75f308212bc663322f6e298",
+    "sdks/cpp/src/l2s1.cpp": "575c7e866e020c506ec5ce0bf79a0251521d4c55a15ff3ed5029570dcba06547",
+    "sdks/cpp/include/l2s1/l2s1.hpp": "6c366d6cbf45bcc4105356bcce03d11eafc4f89bb8982ed15296c81a1fef9ee6",
+    "sdks/cpp/tests/model.cpp": "3e56e0b1544c136cd6b945a0e34c7132e9a81eb4499113830105905f79d8b746",
+    "sdks/python/src/l2s1/native.py": "8d3fb67db3de917ef4c76a21212f8b99e8bbb9e743b5f731b73aa5f344ca1252",
+    "sdks/python/tests/test_model.py": "f26bb1279f9e38e88ccc8e385a350a9eae8d922b5c4ae1372abd2b0aea556a5d",
+    "sdks/typescript/src/native.ts": "da08ab7d2db28b10a5bd4f36fb9fc68fec652c730151c991f6bd96ac9a1d6789",
+    "sdks/typescript/test/model.integration.mjs": "09d22c067cf062f022c460da3ae698a491ed521d7fa0c42eeeb4c17946b646f1"
+  },
+  "native_tests": {
+    "per_model": 3,
+    "models": 2,
+    "passed": 6,
+    "failed": 0,
+    "cold_warm_probability_tolerance": 1e-06
+  },
+  "sdk_configurations": [
+    {
+      "sdk": "python",
+      "transport": "stdio",
+      "fixed_schema": null,
+      "reused_prefix_tokens": 103,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "e2b"
+    },
+    {
+      "sdk": "python",
+      "transport": "stdio",
+      "fixed_schema": false,
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "e2b"
+    },
+    {
+      "sdk": "python",
+      "transport": "http",
+      "fixed_schema": null,
+      "reused_prefix_tokens": 103,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "e2b"
+    },
+    {
+      "sdk": "python",
+      "transport": "http",
+      "fixed_schema": false,
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "e2b"
+    },
+    {
+      "sdk": "typescript",
+      "transport": "stdio",
+      "executionMode": "auto",
+      "reused_prefix_tokens": 103,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "e2b"
+    },
+    {
+      "sdk": "typescript",
+      "transport": "stdio",
+      "executionMode": "fresh",
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "e2b"
+    },
+    {
+      "sdk": "typescript",
+      "transport": "http",
+      "executionMode": "auto",
+      "reused_prefix_tokens": 103,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "e2b"
+    },
+    {
+      "sdk": "typescript",
+      "transport": "http",
+      "executionMode": "fresh",
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "e2b"
+    },
+    {
+      "fresh": false,
+      "recovery_tokens": 0,
+      "reused_prefix_tokens": 84,
+      "schema_return_tokens": 0,
+      "sdk": "cpp",
+      "transport": "stdio",
+      "model": "e2b"
+    },
+    {
+      "fresh": true,
+      "recovery_tokens": 0,
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "sdk": "cpp",
+      "transport": "stdio",
+      "model": "e2b"
+    },
+    {
+      "sdk": "python",
+      "transport": "stdio",
+      "fixed_schema": null,
+      "reused_prefix_tokens": 103,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "12b"
+    },
+    {
+      "sdk": "python",
+      "transport": "stdio",
+      "fixed_schema": false,
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "12b"
+    },
+    {
+      "sdk": "python",
+      "transport": "http",
+      "fixed_schema": null,
+      "reused_prefix_tokens": 103,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "12b"
+    },
+    {
+      "sdk": "python",
+      "transport": "http",
+      "fixed_schema": false,
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "12b"
+    },
+    {
+      "sdk": "typescript",
+      "transport": "stdio",
+      "executionMode": "auto",
+      "reused_prefix_tokens": 103,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "12b"
+    },
+    {
+      "sdk": "typescript",
+      "transport": "stdio",
+      "executionMode": "fresh",
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "12b"
+    },
+    {
+      "sdk": "typescript",
+      "transport": "http",
+      "executionMode": "auto",
+      "reused_prefix_tokens": 103,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "12b"
+    },
+    {
+      "sdk": "typescript",
+      "transport": "http",
+      "executionMode": "fresh",
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "recovery_tokens": 0,
+      "model": "12b"
+    },
+    {
+      "fresh": false,
+      "recovery_tokens": 0,
+      "reused_prefix_tokens": 84,
+      "schema_return_tokens": 0,
+      "sdk": "cpp",
+      "transport": "stdio",
+      "model": "12b"
+    },
+    {
+      "fresh": true,
+      "recovery_tokens": 0,
+      "reused_prefix_tokens": 0,
+      "schema_return_tokens": 0,
+      "sdk": "cpp",
+      "transport": "stdio",
+      "model": "12b"
+    }
+  ],
+  "log_sha256": {
+    "l2s1-auto-schema-python-e2b.log": "d5d7e3f018481bcde746300b408955a90d044d9b81bb8665f35090735f0c887d",
+    "l2s1-auto-schema-typescript-e2b.log": "6608dd20e14633c2dc360eff4ce205d92daa7aa00df02f4da91eff20fb6bf87b",
+    "l2s1-auto-schema-cpp-e2b.log": "09b63e3bc4750122ac8b0927bbc097711c21bce49db75910e5f95be29d972e72",
+    "l2s1-auto-schema-e2b.log": "f6eacc6078e8ed5e10e9eb494aa9f4a783deeda7bf83e37d4ba0ec1c437bf288",
+    "l2s1-auto-schema-python-12b.log": "7f180a90be7e6209be0755109225ef5eb25094a78fe81e079ff00e42ad4e5346",
+    "l2s1-auto-schema-typescript-12b.log": "b6e09ebbc7f03739010e9b1ae1d5be22e420293114a55576983d6849a72b9a77",
+    "l2s1-auto-schema-cpp-12b.log": "5bd96cc7bc9b3d376c2412708b65f263cf39b22f5e8ca16b3dd1d1bf439297e0",
+    "l2s1-auto-schema-12b.log": "8ce2f7088927ec2ebeabbdc5c512b8102d401b63fae7126b2a6f79f38c2c4e88"
+  },
+  "local_checks": {
+    "rust_default": {
+      "passed": 94
+    },
+    "native_unit": {
+      "passed": 38,
+      "ignored": 1
+    },
+    "cli_selection": {
+      "passed": 2
+    },
+    "python_unit": {
+      "passed": 19,
+      "skipped": 2
+    },
+    "typescript_unit": {
+      "passed": 24
+    },
+    "cpp_contract": "passed",
+    "python_and_typescript_typecheck": "passed",
+    "web_lint_check_build": "passed"
+  },
+  "reproduction": [
+    "cargo test --release --locked --features llama-cuda --test fixed_schema -- --ignored --test-threads=1 (set SKID_MODEL and SKID_CUDA=1)",
+    "python -m unittest discover -s sdks/python/tests -p test_model.py -k test_default_resident_reuse_and_explicit_fresh -v (set PYTHONPATH=sdks/python/src, L2S1_MODEL, L2S1_BINARY, L2S1_DEVICE=cuda)",
+    "node --test --test-name-pattern=\"resident defaults\" sdks/typescript/test/model.integration.mjs (build SDK; same L2S1_* environment)",
+    "build/cpp/l2s1_cpp_model_test /path/to/l2s1 /path/to/model.gguf cuda (CMake BUILD_TESTING=ON)"
+  ],
+  "limits": [
+    "Matching native shared libraries are required for all runs.",
+    "Python and TypeScript use stdio and HTTP; C++ uses stdio. GPU tests run serially.",
+    "One-shot CLI, low-level LlamaBackend and the JSONL evaluator retain explicit/fresh behavior.",
+    "Tests compare the resident split plan to itself; they do not assert fresh/split equivalence or establish a speed gain.",
+    "Same schema is not a trust-domain boundary; use a dedicated server per tenant.",
+    "The previous JevBench study uses an independently hashed evaluator binary and is unchanged."
+  ]
+}

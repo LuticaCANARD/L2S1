@@ -76,7 +76,7 @@ def main():
     requests = {}
     for color, path in (('red', args.red_image), ('blue', args.blue_image)):
         payload = dict(base)
-        payload['image_base64'] = base64.b64encode(path.read_bytes()).decode('ascii')
+        payload['media'] = [{'id': 'image', 'type': 'image', 'data_base64': base64.b64encode(path.read_bytes()).decode('ascii')}]
         requests[color] = json.dumps(payload, separators=(',', ':')).encode()
     url = 'http://' + args.listen
     command = [str(args.binary.resolve()), '--model', str(args.model.resolve()), '--mmproj',
@@ -115,7 +115,7 @@ def main():
                 elapsed_ms = (time.perf_counter_ns() - start) / 1_000_000
                 result = json.loads(body)
                 selected = result['results'][0]['value']['selected']
-                backend = result['backend']
+                backend = result['backend']['details']
                 if status != 200 or selected != color:
                     raise RuntimeError(f'{color} request failed: status={status}, selected={selected}')
                 if (args.device == 'cuda') != bool(backend['offload_requested']):
@@ -123,7 +123,7 @@ def main():
                 observations.append({'phase': 'warmup' if iteration < args.warmup else 'measured',
                                      'color': color, 'latency_ms': round(elapsed_ms, 6),
                                      'http_status': status, 'selected': selected,
-                                     'input_tokens': result['results'][0]['input_tokens'],
+                                     'input_tokens': result['results'][0]['usage']['input_tokens'],
                                      'offload_device': backend['offload_device']})
             loaded_gpu = gpu_sample()
             memory = rss_kib(server.pid)

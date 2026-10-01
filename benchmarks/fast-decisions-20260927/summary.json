@@ -1,0 +1,116 @@
+{
+  "date": "2026-09-27",
+  "scope": "Local diagnostics, not task accuracy or cross-hardware speed claims. Repeated passes are not independent samples.",
+  "hardware": {
+    "cpu": "Intel Core i9-9900K, 4 visible vCPUs under WSL2",
+    "gpu": "NVIDIA GeForce RTX 3080 10GB",
+    "runtime": "ONNX Runtime GPU 1.30.0, CUDA provider, TF32 disabled"
+  },
+  "prefix": {
+    "batch": 256,
+    "fresh_ms": [
+      29131.502392000002
+    ],
+    "identity": {
+      "adapter_sha256": null,
+      "compute": {
+        "batch": 256,
+        "context": 2048,
+        "flash_attention": "off",
+        "threads": 4,
+        "ubatch": 256
+      },
+      "device": "CPU",
+      "execution_mode": "fresh",
+      "head_sha256": null,
+      "loaded_runtime_sha256": "a6d47ce2bf5f243325567094943b8d466865b4e57c02c11cdf81d44205168f61",
+      "parallel_width": 1,
+      "prompt_profile": "qwen3",
+      "prompt_version": "qwen3-no-thinking-decision-v1",
+      "runtime_build_sha256": "a003ab0be63b5300bc80160f5d85f9ef818da1ff13d374278db60cfd0351ab45",
+      "template_sha256": "57f1fd00f0013a2be96aa79b857391f27e23df5b5f847072b524c897e24d0361",
+      "weights_sha256": "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
+    },
+    "passes": [
+      {
+        "cold_warm_max_delta": 0.0,
+        "flat_split_max_probability_delta": 0.0,
+        "flat_split_selection_changes": 0,
+        "input_tokens": 4983,
+        "reused_tokens": 2799
+      }
+    ],
+    "rounds": 1,
+    "scope": "decision-rules-v1, original multi-decision requests, one full warmup then paired passes; whole-pass milliseconds",
+    "split_cold_ms": [
+      31061.791275
+    ],
+    "split_reuse_ms": [
+      14962.220764
+    ]
+  },
+  "onnx": {
+    "cpu": {
+      "judgments": 200,
+      "input_tokens_equal": true,
+      "markers_equal": true,
+      "raw_logits_equal": true,
+      "max_probability_delta": 2.220446049250313e-16,
+      "top1_changes": 0,
+      "l2s1": {
+        "n": 40,
+        "p50_ms": 953.479328,
+        "p95_ms": 2474.4913730000003,
+        "scope": "in-process preparation + forward + probability scoring, excludes HTTP/model loading; 20 warmups, 2 passes"
+      },
+      "ollaya": {
+        "n": 40,
+        "p50_ms": 973.199188,
+        "p95_ms": 1281.9348850000001,
+        "scope": "in-process tokenization + forward; probability rendering excluded from timing"
+      }
+    },
+    "cuda": {
+      "judgments": 200,
+      "input_tokens_equal": true,
+      "markers_equal": true,
+      "raw_logits_equal": true,
+      "max_probability_delta": 2.220446049250313e-16,
+      "top1_changes": 0,
+      "l2s1": {
+        "n": 40,
+        "p50_ms": 19.178699,
+        "p95_ms": 22.164698,
+        "scope": "in-process preparation + forward + probability scoring, excludes HTTP/model loading; 20 warmups, 2 passes"
+      },
+      "ollaya": {
+        "n": 40,
+        "p50_ms": 19.566799,
+        "p95_ms": 23.338099,
+        "scope": "in-process tokenization + forward; probability rendering excluded from timing"
+      }
+    }
+  },
+  "http": {
+    "concurrent_requests": 16,
+    "max_coalesced_requests": 6,
+    "fast_route": "fast",
+    "unvalidated_route": "slow",
+    "oversized_route_reason": "fast_backend_failure",
+    "python_sdk_validated": true,
+    "calibration_rows": 18,
+    "validation_rows": 18,
+    "rule_count": 1,
+    "validation_accepted": 18,
+    "validation_errors": 0,
+    "quality_scope": "Toy ticket variations only. These do not establish generalization; do not deploy this smoke policy."
+  },
+  "sdk_native": {
+    "typescript_stdio_reused_tokens": 414,
+    "python_stdio_reused_tokens": 414,
+    "model": "SmolLM2-135M-Instruct-Q8_0",
+    "batch": 256,
+    "context": 2048,
+    "scope": "Two real native calls per SDK with fixedSchema/fixed_schema enabled; confirms configuration and reuse, not accuracy."
+  }
+}

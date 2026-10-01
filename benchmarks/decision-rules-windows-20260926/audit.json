@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "scope": "Aggregate arithmetic and fixture identity only; no inference rerun or per-case audit",
+  "summary_sha256": "fa0d65b66a8f89d953d870ea780126cbecbaae131d4c3953e030cc8c4bfe0ca7",
+  "provenance_canonical_json_sha256": "c611ac72c19796cbdb5689793c4f4173b18201a6d0764ba30a0afd6f491ab89b",
+  "fixture_lf_sha256": "f9d5380fdafe1bb686c9f4f1d44003a9f71c6f47fddd59063c62d3301b7d6c04",
+  "fixture_crlf_sha256": "cfe9219e45cfb66435c68945daf92f079693b8524b3da654c879f68f7ce53fe8",
+  "reported_fixture_line_endings": "CRLF",
+  "completed_runs": 9,
+  "timeout_runs": 1,
+  "timing_samples_checked": 324,
+  "independent_decisions_per_run": 36,
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "gpu_evidence": "User confirmed: 5090임. No device log supplied.",
+  "runs": [
+    {
+      "model": "smollm2",
+      "device": "cpu",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 1,
+      "acceptedWrongPerPass": 4,
+      "abstainedPerPass": 31,
+      "rawCorrectPerPass": 14
+    },
+    {
+      "model": "smollm2",
+      "device": "cuda",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 1,
+      "acceptedWrongPerPass": 3,
+      "abstainedPerPass": 32,
+      "rawCorrectPerPass": 14
+    },
+    {
+      "model": "qwen3",
+      "device": "cpu",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 10,
+      "acceptedWrongPerPass": 18,
+      "abstainedPerPass": 8,
+      "rawCorrectPerPass": 12
+    },
+    {
+      "model": "qwen3",
+      "device": "cuda",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 10,
+      "acceptedWrongPerPass": 20,
+      "abstainedPerPass": 6,
+      "rawCorrectPerPass": 15
+    },
+    {
+      "model": "gemma3",
+      "device": "cpu",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 17,
+      "acceptedWrongPerPass": 16,
+      "abstainedPerPass": 3,
+      "rawCorrectPerPass": 18
+    },
+    {
+      "model": "gemma3",
+      "device": "cuda",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 19,
+      "acceptedWrongPerPass": 14,
+      "abstainedPerPass": 3,
+      "rawCorrectPerPass": 22
+    },
+    {
+      "model": "tinyllama",
+      "device": "cpu",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 0,
+      "acceptedWrongPerPass": 0,
+      "abstainedPerPass": 36,
+      "rawCorrectPerPass": 14
+    },
+    {
+      "model": "tinyllama",
+      "device": "cuda",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 0,
+      "acceptedWrongPerPass": 0,
+      "abstainedPerPass": 36,
+      "rawCorrectPerPass": 14
+    },
+    {
+      "model": "gemma4",
+      "device": "cpu",
+      "status": "timeout"
+    },
+    {
+      "model": "gemma4",
+      "device": "cuda",
+      "status": "ok",
+      "decisionsPerPass": 36,
+      "acceptedCorrectPerPass": 33,
+      "acceptedWrongPerPass": 2,
+      "abstainedPerPass": 1,
+      "rawCorrectPerPass": 34
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "binding": {
+    "manifest_sha256": "222153065efcd504bddf79f7178ba69f500c1bc22673650c64f7f3b13d91777d",
+    "tokens_sha256": "163117ee3079bbd9ebae55f9e390324ff4556270a0c273ebf5f82946045fc63e",
+    "token_seal": {
+      "schema_version": 1,
+      "split": "train",
+      "manifest_sha256": "222153065efcd504bddf79f7178ba69f500c1bc22673650c64f7f3b13d91777d",
+      "tokens_sha256": "163117ee3079bbd9ebae55f9e390324ff4556270a0c273ebf5f82946045fc63e",
+      "requests_sha256": "ec9661bbe164144cb5a4ef1e83667111d2026eb25fd116035b33d13efd18ee5a",
+      "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+      "exporter_sha256": "87954c35b257b3b4be889c466ca26a007f8bb19c44ab705ff532fe8afe27ae7d",
+      "prompt_layout": "legacy",
+      "prompt_detail": "minimal"
+    },
+    "native_identity": {
+      "adapter_sha256": null,
+      "compute": {
+        "batch": 256,
+        "context": 2048,
+        "flash_attention": "off",
+        "threads": 4,
+        "ubatch": 256
+      },
+      "device": "CPU",
+      "execution_mode": "fresh",
+      "head_sha256": null,
+      "loaded_runtime_sha256": "b682be3a5cc008fb7f9e1cd3e84808797e3193519095f7b511a580e3d74caa4e",
+      "parallel_width": 1,
+      "prompt_profile": "model",
+      "prompt_version": "gguf-jinja-decision-v1/detail-Minimal-v1",
+      "runtime_build_sha256": "e4e7541406b19e246ff9c30ae12c218cd9d6dd744c00b6b471aed81434f4bb91",
+      "template_sha256": "0a2c8073c878ab1da004bee933a998606537bbb62016310352c7285c3f01c5b5",
+      "weights_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a"
+    },
+    "protocol": {
+      "epochs": 1,
+      "rank": 8,
+      "alpha": 16,
+      "dropout": 0,
+      "learning_rate": 0.0001,
+      "gradient_accumulation": 12,
+      "mass_loss_weight": 0.1,
+      "objective": "soft-target candidate cross entropy + candidate mass loss",
+      "rotation": "one SHA256-selected code rotation per decision, independent of labels",
+      "selection": "fixed final epoch; no development/test selection or calibration",
+      "prompt_layout": "legacy",
+      "prompt_detail": "minimal"
+    },
+    "checkpoint_sha256": "a785b9740af21066a831df3ec73354da1a6a9061785fcf46d46875e32bf91ed9",
+    "model_profile": {
+      "hf_model": "google/gemma-4-E2B-it",
+      "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+      "model_type": "gemma4",
+      "loader": "AutoModelForImageTextToText",
+      "target_modules": [
+        "q_proj",
+        "v_proj"
+      ],
+      "gguf": "gemma-4-E2B-it-Q8_0.gguf",
+      "name": "gemma4"
+    },
+    "trainer_sha256": "8f9cb915cd9970397e044ec74097ee8b08d9107eaff5fb392916d082b1a1e301",
+    "loader_sha256": "150eec3ddea128da80ecbc72529ee82f3c4b93c12db36395514188f3d2b2a864",
+    "data_code_sha256": "ded7d4345862e7ce4f5a8263bd5243e8ac03db7777e2dc43b673bd31d9b972ec"
+  },
+  "smoke": false,
+  "seed": 20260927,
+  "adapter_initialization_seed": 20260927,
+  "gpu": "NVIDIA GeForce RTX 3080",
+  "torch": "2.14.0+cu130",
+  "transformers": "5.17.0",
+  "peft": "0.21.0",
+  "training_examples": 600,
+  "trainable_parameters": 1339392
+}

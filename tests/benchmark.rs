@@ -258,6 +258,14 @@ mod native {
             Ok("0") | Err(env::VarError::NotPresent) => false,
             _ => panic!("SKID_CUDA must be 0 or 1"),
         };
+        let device = match env::var("SKID_DEVICE").as_deref() {
+            Err(env::VarError::NotPresent) if cuda => "cuda",
+            Err(env::VarError::NotPresent) => "cpu",
+            Ok(device @ ("cpu" | "metal")) if !cuda => device,
+            Ok("cuda") => "cuda",
+            _ => panic!("SKID_DEVICE must be cpu, cuda, or metal and agree with SKID_CUDA"),
+        }
+        .to_owned();
         let iterations = setting("SKID_BENCH_ITERATIONS", 3, 1);
         let warmup = setting("SKID_BENCH_WARMUP", 1, 0);
         let context = setting("SKID_CONTEXT", 2048, 1);
@@ -269,14 +277,32 @@ mod native {
         };
         policy.validate().unwrap();
         let started = Instant::now();
-        let mut backend = LlamaBackend::load(
-            Path::new(&model),
-            context,
-            batch,
-            threads,
-            cuda,
-            policy.clone(),
-        )
+        let mut backend = if device == "metal" {
+            LlamaBackend::load_with_metal_options(
+                Path::new(&model),
+                ComputeOptions {
+                    context,
+                    batch,
+                    ubatch: batch,
+                    threads,
+                    flash_attention: FlashAttention::Off,
+                    gpu_layers: None,
+                    cpu_moe_layers: 0,
+                    model_load_mode: ModelLoadMode::Auto,
+                },
+                policy.clone(),
+                PromptProfile::Auto,
+            )
+        } else {
+            LlamaBackend::load(
+                Path::new(&model),
+                context,
+                batch,
+                threads,
+                device == "cuda",
+                policy.clone(),
+            )
+        }
         .unwrap();
         let load_ms = started.elapsed().as_secs_f64() * 1000.0;
         backend.set_prompt_layout(match env::var("SKID_PROMPT_LAYOUT").as_deref() {
@@ -287,7 +313,24 @@ mod native {
         backend.set_execution_mode(match env::var("SKID_EXECUTION_MODE").as_deref() {
             Ok("fresh") | Err(env::VarError::NotPresent) => ExecutionMode::Fresh,
             Ok("prefix-reuse") => ExecutionMode::PrefixReuse,
-            _ => panic!("SKID_EXECUTION_MODE must be fresh or prefix-reuse"),
+            Ok("parallel") => ExecutionMode::Parallel,
+            Ok("state-restore") => ExecutionMode::StateRestore,
+            _ => panic!("invalid SKID_EXECUTION_MODE"),
+        });
+        backend
+            .set_parallel_width(setting("SKID_PARALLEL_WIDTH", 3, 1) as usize)
+            .unwrap();
+        backend
+            .set_evidence_transfer(match env::var("SKID_EVIDENCE_TRANSFER").as_deref() {
+                Ok("full") | Err(env::VarError::NotPresent) => EvidenceTransfer::Full,
+                Ok("compact") => EvidenceTransfer::Compact,
+                _ => panic!("SKID_EVIDENCE_TRANSFER must be full or compact"),
+            })
+            .unwrap();
+        let cache_bytes = setting("SKID_PREPARATION_CACHE_BYTES", 0, 0) as usize;
+        backend.set_preparation_cache(PreparationCacheConfig {
+            max_entries: 128,
+            max_bytes: cache_bytes,
         });
         let started = Instant::now();
         let first = backend
@@ -309,6 +352,8 @@ mod native {
         let mut baseline = BTreeMap::new();
         let mut repeated_comparisons = 0;
         let mut changed_outputs = 0;
+        let cache_before = backend.preparation_cache_stats();
+        backend.take_timings();
         for pass in 0..iterations {
             // Deterministic cyclic ordering reduces repeated adjacent-case effects.
             for offset in 0..suite.cases.len() {
@@ -378,6 +423,8 @@ mod native {
             "accepted_correct_decisions_per_second":total.accepted_correct as f64/seconds,
             "input_tokens":input_tokens,"input_tokens_per_second":input_tokens as f64/seconds,
             "reused_prefix_tokens":reused_prefix_tokens,
+            "timings":backend.take_timings(),
+            "preparation_cache":{"max_bytes":cache_bytes,"before":cache_before,"after":backend.preparation_cache_stats()},
             "evaluated_tokens":input_tokens-reused_prefix_tokens,
             "quality":total.report(),"by_group":grouped,
             "repeat_consistency":{"comparisons":repeated_comparisons,"changed_outputs":changed_outputs},

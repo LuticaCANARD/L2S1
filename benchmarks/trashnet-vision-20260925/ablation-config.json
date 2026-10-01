@@ -1,0 +1,93 @@
+{
+  "baseline": "fresh, batch/ubatch256, FlashAttention off, full evidence, context4096, threads4, model read, no preparation cache",
+  "screening": "One warmup group, then one frozen120 pass per variant. Use repeated finalist runs for latency claims.",
+  "variants": [
+    {
+      "id": "fresh-cache",
+      "flags": [
+        "--candidate-execution-mode",
+        "fresh",
+        "--candidate-cache-bytes",
+        "8388608"
+      ]
+    },
+    {
+      "id": "fresh-compact",
+      "flags": [
+        "--candidate-execution-mode",
+        "fresh",
+        "--candidate-evidence-transfer",
+        "compact"
+      ]
+    },
+    {
+      "id": "fresh-cache-compact",
+      "flags": [
+        "--candidate-execution-mode",
+        "fresh",
+        "--candidate-cache-bytes",
+        "8388608",
+        "--candidate-evidence-transfer",
+        "compact"
+      ]
+    },
+    {
+      "id": "fresh-batch1024",
+      "flags": [
+        "--candidate-execution-mode",
+        "fresh",
+        "--candidate-batch",
+        "1024"
+      ]
+    },
+    {
+      "id": "fresh-flashon",
+      "flags": [
+        "--candidate-execution-mode",
+        "fresh",
+        "--candidate-flash-attention",
+        "on"
+      ]
+    },
+    {
+      "id": "parallel256",
+      "flags": [
+        "--candidate-execution-mode",
+        "parallel"
+      ]
+    },
+    {
+      "id": "parallel256-independent-encoder",
+      "flags": [
+        "--candidate-execution-mode",
+        "parallel",
+        "--candidate-projector-reuse"
+      ]
+    },
+    {
+      "id": "parallel256-combined",
+      "flags": [
+        "--candidate-execution-mode",
+        "parallel",
+        "--candidate-projector-reuse",
+        "--candidate-cache-bytes",
+        "8388608",
+        "--candidate-evidence-transfer",
+        "compact",
+        "--candidate-dynamic-context"
+      ]
+    }
+  ],
+  "clear_probe": {
+    "baseline_flags": [
+      "--baseline-force-kv-clear"
+    ],
+    "candidate_flags": [
+      "--candidate-execution-mode",
+      "fresh"
+    ],
+    "repetitions": 1,
+    "same_binary": true,
+    "purpose": "Isolate dirty-only physical clearing from forced clearing of already-clean KV. Rust wrapper removal is not toggled."
+  }
+}

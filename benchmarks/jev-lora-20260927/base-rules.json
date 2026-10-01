@@ -1,0 +1,508 @@
+{
+  "suite": "decision-rules-v1",
+  "fixture_sha256": "f9d5380fdafe1bb686c9f4f1d44003a9f71c6f47fddd59063c62d3301b7d6c04",
+  "predictions_sha256": "fea14725b488aedac4b28969c302925eb1d2470f9cd0c11dfe258aa60b7a6bce",
+  "decisions": 36,
+  "accepted": 34,
+  "accepted_correct": 33,
+  "accepted_wrong": 1,
+  "raw_accuracy": 0.9722222222222222,
+  "coverage": 0.9444444444444444,
+  "accepted_accuracy": 0.9705882352941176,
+  "correct_all": 0.9166666666666666,
+  "outcomes": [
+    {
+      "case": "warehouse-01",
+      "decision": "storage_zone",
+      "expected": "ambient",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "ambient",
+      "probabilities": {
+        "ambient": 0.9999999996174949,
+        "chilled": 2.340774053730923e-10,
+        "frozen": 1.4842768120460136e-10
+      }
+    },
+    {
+      "case": "warehouse-01",
+      "decision": "cold_chain_required",
+      "expected": "false",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "false",
+      "probabilities": {
+        "false": 0.9999866205783075,
+        "true": 1.3379421692597213e-05
+      }
+    },
+    {
+      "case": "warehouse-01",
+      "decision": "dispatch_priority",
+      "expected": "high",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "high",
+      "probabilities": {
+        "low": 0.004801922402565205,
+        "medium": 0.00033802420952807726,
+        "high": 0.9948600533879067
+      }
+    },
+    {
+      "case": "warehouse-02",
+      "decision": "storage_zone",
+      "expected": "chilled",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "chilled",
+      "probabilities": {
+        "ambient": 8.039377065135193e-13,
+        "chilled": 0.9999999999600926,
+        "frozen": 3.9103489094518695e-11
+      }
+    },
+    {
+      "case": "warehouse-02",
+      "decision": "cold_chain_required",
+      "expected": "true",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "true",
+      "probabilities": {
+        "false": 1.0107501968991226e-06,
+        "true": 0.9999989892498031
+      }
+    },
+    {
+      "case": "warehouse-02",
+      "decision": "dispatch_priority",
+      "expected": "high",
+      "raw_correct": true,
+      "accepted": false,
+      "accepted_correct": false,
+      "selected": null,
+      "probabilities": {
+        "low": 0.0067719086460876375,
+        "medium": 0.22149552237256867,
+        "high": 0.7717325689813437
+      }
+    },
+    {
+      "case": "warehouse-03",
+      "decision": "storage_zone",
+      "expected": "frozen",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "frozen",
+      "probabilities": {
+        "chilled": 2.1846061984033756e-12,
+        "frozen": 0.9999999999541231,
+        "ambient": 4.369231295502343e-11
+      }
+    },
+    {
+      "case": "warehouse-03",
+      "decision": "cold_chain_required",
+      "expected": "true",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "true",
+      "probabilities": {
+        "false": 3.952121411109773e-08,
+        "true": 0.9999999604787858
+      }
+    },
+    {
+      "case": "warehouse-03",
+      "decision": "dispatch_priority",
+      "expected": "medium",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "medium",
+      "probabilities": {
+        "low": 0.00014457300797461562,
+        "medium": 0.9998125143316402,
+        "high": 4.2912660385219326e-05
+      }
+    },
+    {
+      "case": "warehouse-04",
+      "decision": "storage_zone",
+      "expected": "ambient",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "ambient",
+      "probabilities": {
+        "chilled": 3.014093935113938e-11,
+        "frozen": 2.6655227987030118e-11,
+        "ambient": 0.9999999999432039
+      }
+    },
+    {
+      "case": "warehouse-04",
+      "decision": "cold_chain_required",
+      "expected": "false",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "false",
+      "probabilities": {
+        "false": 0.999982226457529,
+        "true": 1.7773542470905826e-05
+      }
+    },
+    {
+      "case": "warehouse-04",
+      "decision": "dispatch_priority",
+      "expected": "medium",
+      "raw_correct": true,
+      "accepted": false,
+      "accepted_correct": false,
+      "selected": null,
+      "probabilities": {
+        "low": 0.310243669261807,
+        "medium": 0.6893067747238307,
+        "high": 0.0004495560143623308
+      }
+    },
+    {
+      "case": "warehouse-05",
+      "decision": "storage_zone",
+      "expected": "chilled",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "chilled",
+      "probabilities": {
+        "frozen": 1.3056299059738571e-11,
+        "ambient": 4.5168916496195624e-11,
+        "chilled": 0.9999999999417748
+      }
+    },
+    {
+      "case": "warehouse-05",
+      "decision": "cold_chain_required",
+      "expected": "true",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "true",
+      "probabilities": {
+        "false": 1.0027317433382967e-07,
+        "true": 0.9999998997268257
+      }
+    },
+    {
+      "case": "warehouse-05",
+      "decision": "dispatch_priority",
+      "expected": "low",
+      "raw_correct": false,
+      "accepted": true,
+      "accepted_correct": false,
+      "selected": "medium",
+      "probabilities": {
+        "low": 0.11537108030355585,
+        "medium": 0.8844597365460233,
+        "high": 0.00016918315042084413
+      }
+    },
+    {
+      "case": "warehouse-06",
+      "decision": "storage_zone",
+      "expected": "frozen",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "frozen",
+      "probabilities": {
+        "frozen": 0.9999999999667721,
+        "ambient": 1.6334762025270076e-11,
+        "chilled": 1.6892996787363217e-11
+      }
+    },
+    {
+      "case": "warehouse-06",
+      "decision": "cold_chain_required",
+      "expected": "true",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "true",
+      "probabilities": {
+        "false": 5.43145690135561e-07,
+        "true": 0.9999994568543099
+      }
+    },
+    {
+      "case": "warehouse-06",
+      "decision": "dispatch_priority",
+      "expected": "low",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "low",
+      "probabilities": {
+        "low": 0.99808937672991,
+        "medium": 0.0018219579815147084,
+        "high": 8.866528857527668e-05
+      }
+    },
+    {
+      "case": "access-01",
+      "decision": "role_scope",
+      "expected": "read",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "read",
+      "probabilities": {
+        "read": 0.9999999996685733,
+        "edit": 9.822285046376047e-11,
+        "administer": 2.332037408916771e-10
+      }
+    },
+    {
+      "case": "access-01",
+      "decision": "can_edit",
+      "expected": "false",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "false",
+      "probabilities": {
+        "false": 0.9999998617496088,
+        "true": 1.382503912489969e-07
+      }
+    },
+    {
+      "case": "access-01",
+      "decision": "review_priority",
+      "expected": "low",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "low",
+      "probabilities": {
+        "low": 0.9999999901907479,
+        "medium": 4.714152887868314e-09,
+        "high": 5.095099268343194e-09
+      }
+    },
+    {
+      "case": "access-02",
+      "decision": "role_scope",
+      "expected": "edit",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "edit",
+      "probabilities": {
+        "read": 1.1019074427630863e-10,
+        "edit": 0.9999999993100299,
+        "administer": 5.797793649205959e-10
+      }
+    },
+    {
+      "case": "access-02",
+      "decision": "can_edit",
+      "expected": "false",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "false",
+      "probabilities": {
+        "false": 0.9999999758627619,
+        "true": 2.413723819116747e-08
+      }
+    },
+    {
+      "case": "access-02",
+      "decision": "review_priority",
+      "expected": "medium",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "medium",
+      "probabilities": {
+        "low": 7.885927296243508e-07,
+        "medium": 0.9999989203589925,
+        "high": 2.9104827790698684e-07
+      }
+    },
+    {
+      "case": "access-03",
+      "decision": "role_scope",
+      "expected": "administer",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "administer",
+      "probabilities": {
+        "edit": 1.6069435157017716e-09,
+        "administer": 0.9999999850469384,
+        "read": 1.3346118049757713e-08
+      }
+    },
+    {
+      "case": "access-03",
+      "decision": "can_edit",
+      "expected": "true",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "true",
+      "probabilities": {
+        "false": 8.543414998938404e-08,
+        "true": 0.99999991456585
+      }
+    },
+    {
+      "case": "access-03",
+      "decision": "review_priority",
+      "expected": "medium",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "medium",
+      "probabilities": {
+        "low": 1.2388621184033061e-07,
+        "medium": 0.9999997296486288,
+        "high": 1.464651594349449e-07
+      }
+    },
+    {
+      "case": "access-04",
+      "decision": "role_scope",
+      "expected": "read",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "read",
+      "probabilities": {
+        "edit": 1.987009774352571e-10,
+        "administer": 3.634107083441614e-11,
+        "read": 0.9999999997649579
+      }
+    },
+    {
+      "case": "access-04",
+      "decision": "can_edit",
+      "expected": "false",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "false",
+      "probabilities": {
+        "false": 0.9999999959356811,
+        "true": 4.064318927193043e-09
+      }
+    },
+    {
+      "case": "access-04",
+      "decision": "review_priority",
+      "expected": "high",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "high",
+      "probabilities": {
+        "low": 4.065297499847998e-11,
+        "medium": 1.9786611133505012e-10,
+        "high": 0.999999999761481
+      }
+    },
+    {
+      "case": "access-05",
+      "decision": "role_scope",
+      "expected": "edit",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "edit",
+      "probabilities": {
+        "administer": 4.060630499131125e-10,
+        "read": 2.010171280519515e-10,
+        "edit": 0.9999999993929198
+      }
+    },
+    {
+      "case": "access-05",
+      "decision": "can_edit",
+      "expected": "true",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "true",
+      "probabilities": {
+        "false": 2.999462452169476e-07,
+        "true": 0.9999997000537547
+      }
+    },
+    {
+      "case": "access-05",
+      "decision": "review_priority",
+      "expected": "high",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "high",
+      "probabilities": {
+        "low": 4.156493477923505e-10,
+        "medium": 1.7392568492681694e-09,
+        "high": 0.9999999978450937
+      }
+    },
+    {
+      "case": "access-06",
+      "decision": "role_scope",
+      "expected": "administer",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "administer",
+      "probabilities": {
+        "administer": 0.9999999972150235,
+        "read": 7.367887463235054e-10,
+        "edit": 2.0481877365428e-09
+      }
+    },
+    {
+      "case": "access-06",
+      "decision": "can_edit",
+      "expected": "false",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "false",
+      "probabilities": {
+        "false": 0.9999999151321098,
+        "true": 8.486789015882917e-08
+      }
+    },
+    {
+      "case": "access-06",
+      "decision": "review_priority",
+      "expected": "low",
+      "raw_correct": true,
+      "accepted": true,
+      "accepted_correct": true,
+      "selected": "low",
+      "probabilities": {
+        "low": 0.9999999760581226,
+        "medium": 1.2610028617125138e-08,
+        "high": 1.1331848789148403e-08
+      }
+    }
+  ],
+  "scope": "Previously seen regression suite, single pass; not a new holdout or the Windows RTX 5090 run."
+}

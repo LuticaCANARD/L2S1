@@ -1,0 +1,606 @@
+{
+  "date": "2026-09-26",
+  "gpu": "NVIDIA GeForce RTX 3080",
+  "cuda_architecture": "86",
+  "llama_cpp_revision": "3d82ef62d47fd74e18f36c5eccbdcf965b617b17",
+  "scope": "Frozen balanced 120-image TrashNet sample, no official held-out split. Three timed full passes per mode, one warmup four-image group, four independent image decisions per HTTP request. Fresh and parallel compared on the same rebuilt executable. No CUDA fusion/graph override in these final runs.",
+  "equivalence_criterion": "max probability and candidate-mass delta < 0.02, unchanged selection/top1/abstention reasons/input token count; unchanged from existing tests",
+  "status": "native batching verified; all three CUDA model comparisons fail numerical equivalence; experimental opt-in only",
+  "isolation_tests": {
+    "models": [
+      "qwen3vl",
+      "gemma4",
+      "smolvlm"
+    ],
+    "passed": true,
+    "scope": "red/blue64 fixtures; five independent requests/six decisions, image substitution without changing other logits, partial wave, malformed images, too-long input, count mismatch, repeated calls, mode/width switching; separate from numerical parity"
+  },
+  "models": {
+    "qwen3vl": {
+      "protocol": "Identical 4-image HTTP groups, one independent decision per image; RTX 3080 CUDA, context4096, token batch256, threads4, width4; one warmup group then repeated full120 passes per mode. Filenames and labels excluded.",
+      "sample_size": 120,
+      "repetitions": 3,
+      "mode_order": [
+        "fresh",
+        "parallel"
+      ],
+      "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+      "model_sha256": "b7802e29f71a9e5b5e3f83f613df898a2204342dcea71a231ea501d481813c39",
+      "mmproj_sha256": "69066c8f279ec85ff48ab4059f6ebba0d2932ca57667f2bbdac7d9805bca9e7b",
+      "model": "models/Qwen3-VL-2B-Instruct-Q8_0.gguf",
+      "instruction": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": [
+        {
+          "id": "cardboard",
+          "criterion": "A piece of corrugated cardboard or cardboard packaging."
+        },
+        {
+          "id": "glass",
+          "criterion": "A glass object, such as a bottle or jar."
+        },
+        {
+          "id": "metal",
+          "criterion": "A metal object, such as a can or metal container."
+        },
+        {
+          "id": "paper",
+          "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+        },
+        {
+          "id": "plastic",
+          "criterion": "A plastic object, such as a bottle or plastic container."
+        },
+        {
+          "id": "trash",
+          "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+        }
+      ],
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "timing": {
+        "fresh": {
+          "mode": "fresh",
+          "images_per_request": 4,
+          "request_count": 90,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 3766.931493,
+          "warmup_group_ms": 589.435036,
+          "group_latency_ms": {
+            "mean": 406.7729347,
+            "p50": 406.00442699999996,
+            "p95_nearest_rank": 431.558233
+          },
+          "effective_ms_per_image": 101.69323367499999,
+          "images_per_second": 9.833495935392184,
+          "http_latency_sum_ms": 36609.564123,
+          "pass_http_latency_sum_ms": [
+            12163.763439,
+            12186.991966,
+            12258.808718
+          ]
+        },
+        "parallel": {
+          "mode": "parallel",
+          "images_per_request": 4,
+          "request_count": 90,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 3757.708432,
+          "warmup_group_ms": 625.887088,
+          "group_latency_ms": {
+            "mean": 346.9094526777778,
+            "p50": 344.07825049999997,
+            "p95_nearest_rank": 366.172042
+          },
+          "effective_ms_per_image": 86.72736316944444,
+          "images_per_second": 11.530386298569232,
+          "http_latency_sum_ms": 31221.850741,
+          "pass_http_latency_sum_ms": [
+            10378.387695,
+            10428.202556,
+            10415.26049
+          ]
+        }
+      },
+      "quality": {
+        "fresh": [
+          {
+            "repetition": 1,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 91,
+            "correct_over_all": 0.7583333333333333,
+            "accepted_accuracy": 0.7913043478260869,
+            "raw_top1_correct": 95
+          },
+          {
+            "repetition": 2,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 91,
+            "correct_over_all": 0.7583333333333333,
+            "accepted_accuracy": 0.7913043478260869,
+            "raw_top1_correct": 95
+          },
+          {
+            "repetition": 3,
+            "accepted": 115,
+            "abstained": 5,
+            "accepted_correct": 91,
+            "correct_over_all": 0.7583333333333333,
+            "accepted_accuracy": 0.7913043478260869,
+            "raw_top1_correct": 95
+          }
+        ],
+        "parallel": [
+          {
+            "repetition": 1,
+            "accepted": 117,
+            "abstained": 3,
+            "accepted_correct": 93,
+            "correct_over_all": 0.775,
+            "accepted_accuracy": 0.7948717948717948,
+            "raw_top1_correct": 95
+          },
+          {
+            "repetition": 2,
+            "accepted": 117,
+            "abstained": 3,
+            "accepted_correct": 93,
+            "correct_over_all": 0.775,
+            "accepted_accuracy": 0.7948717948717948,
+            "raw_top1_correct": 95
+          },
+          {
+            "repetition": 3,
+            "accepted": 117,
+            "abstained": 3,
+            "accepted_correct": 93,
+            "correct_over_all": 0.775,
+            "accepted_accuracy": 0.7948717948717948,
+            "raw_top1_correct": 95
+          }
+        ]
+      },
+      "comparison": {
+        "changed_selected": 6,
+        "changed_top1": 0,
+        "changed_abstention": 6,
+        "changed_input_tokens": 0,
+        "max_probability_delta": 0.08635026238367194,
+        "max_candidate_mass_delta": 1.6846378124713013e-05,
+        "image_evaluations": 360,
+        "unique_changed_image_indices": {
+          "selected": [
+            1,
+            63
+          ],
+          "raw_top1": [],
+          "abstention_reasons": [
+            1,
+            63
+          ]
+        },
+        "within_existing_equivalence_tolerance": false
+      },
+      "parallel_http_time_change_percent": -14.716682678598625,
+      "native_batch_shapes": [
+        {
+          "projector_batch_max": 1,
+          "decoder_batch_max_sequences": 4,
+          "http_requests": 90
+        }
+      ],
+      "native_counter_ranges": {
+        "projector_encode_calls": {
+          "min": 4,
+          "max": 4
+        },
+        "decoder_calls": {
+          "min": 7,
+          "max": 7
+        }
+      },
+      "raw_artifact_directory": "results/vision-trashnet-20260926-native-batch4-final/qwen3vl",
+      "instruction_sha256": "a6ee6617691cb33332c676ee8fa9e0f3d9c9495f03120be9772778500dbd884b"
+    },
+    "gemma4": {
+      "protocol": "Identical 4-image HTTP groups, one independent decision per image; RTX 3080 CUDA, context4096, token batch256, threads4, width4; one warmup group then repeated full120 passes per mode. Filenames and labels excluded.",
+      "sample_size": 120,
+      "repetitions": 3,
+      "mode_order": [
+        "parallel",
+        "fresh"
+      ],
+      "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+      "model_sha256": "996d08777aadc6bfd3c7375ef70ba25a0f55240075860754fdb18d6d860aa63a",
+      "mmproj_sha256": "9406f99c16d68cda4f1f0552192dcc99021ea1fc6d2fd50b1dc3ccf30d04b292",
+      "model": "models/gemma-4-E2B-it-Q8_0.gguf",
+      "instruction": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": [
+        {
+          "id": "cardboard",
+          "criterion": "A piece of corrugated cardboard or cardboard packaging."
+        },
+        {
+          "id": "glass",
+          "criterion": "A glass object, such as a bottle or jar."
+        },
+        {
+          "id": "metal",
+          "criterion": "A metal object, such as a can or metal container."
+        },
+        {
+          "id": "paper",
+          "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+        },
+        {
+          "id": "plastic",
+          "criterion": "A plastic object, such as a bottle or plastic container."
+        },
+        {
+          "id": "trash",
+          "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+        }
+      ],
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "timing": {
+        "parallel": {
+          "mode": "parallel",
+          "images_per_request": 4,
+          "request_count": 90,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 6521.783581,
+          "warmup_group_ms": 621.066613,
+          "group_latency_ms": {
+            "mean": 278.8694916777778,
+            "p50": 277.9291435,
+            "p95_nearest_rank": 294.947259
+          },
+          "effective_ms_per_image": 69.71737291944444,
+          "images_per_second": 14.343627106481177,
+          "http_latency_sum_ms": 25098.254251,
+          "pass_http_latency_sum_ms": [
+            8200.990853,
+            8356.678881,
+            8540.584517
+          ]
+        },
+        "fresh": {
+          "mode": "fresh",
+          "images_per_request": 4,
+          "request_count": 90,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 5510.718055,
+          "warmup_group_ms": 667.675978,
+          "group_latency_ms": {
+            "mean": 309.78895625555555,
+            "p50": 309.171184,
+            "p95_nearest_rank": 315.898625
+          },
+          "effective_ms_per_image": 77.44723906388889,
+          "images_per_second": 12.912016129781794,
+          "http_latency_sum_ms": 27881.006063,
+          "pass_http_latency_sum_ms": [
+            9294.233539,
+            9271.995815,
+            9314.776709
+          ]
+        }
+      },
+      "quality": {
+        "parallel": [
+          {
+            "repetition": 1,
+            "accepted": 112,
+            "abstained": 8,
+            "accepted_correct": 63,
+            "correct_over_all": 0.525,
+            "accepted_accuracy": 0.5625,
+            "raw_top1_correct": 64
+          },
+          {
+            "repetition": 2,
+            "accepted": 112,
+            "abstained": 8,
+            "accepted_correct": 63,
+            "correct_over_all": 0.525,
+            "accepted_accuracy": 0.5625,
+            "raw_top1_correct": 64
+          },
+          {
+            "repetition": 3,
+            "accepted": 112,
+            "abstained": 8,
+            "accepted_correct": 63,
+            "correct_over_all": 0.525,
+            "accepted_accuracy": 0.5625,
+            "raw_top1_correct": 64
+          }
+        ],
+        "fresh": [
+          {
+            "repetition": 1,
+            "accepted": 113,
+            "abstained": 7,
+            "accepted_correct": 64,
+            "correct_over_all": 0.5333333333333333,
+            "accepted_accuracy": 0.5663716814159292,
+            "raw_top1_correct": 64
+          },
+          {
+            "repetition": 2,
+            "accepted": 113,
+            "abstained": 7,
+            "accepted_correct": 64,
+            "correct_over_all": 0.5333333333333333,
+            "accepted_accuracy": 0.5663716814159292,
+            "raw_top1_correct": 64
+          },
+          {
+            "repetition": 3,
+            "accepted": 113,
+            "abstained": 7,
+            "accepted_correct": 64,
+            "correct_over_all": 0.5333333333333333,
+            "accepted_accuracy": 0.5663716814159292,
+            "raw_top1_correct": 64
+          }
+        ]
+      },
+      "comparison": {
+        "changed_selected": 18,
+        "changed_top1": 15,
+        "changed_abstention": 15,
+        "changed_input_tokens": 0,
+        "max_probability_delta": 0.9555451380435638,
+        "max_candidate_mass_delta": 0.00012220387397698929,
+        "image_evaluations": 360,
+        "unique_changed_image_indices": {
+          "selected": [
+            1,
+            3,
+            16,
+            23,
+            42,
+            68
+          ],
+          "raw_top1": [
+            1,
+            16,
+            68,
+            101,
+            103
+          ],
+          "abstention_reasons": [
+            1,
+            3,
+            23,
+            42,
+            68
+          ]
+        },
+        "within_existing_equivalence_tolerance": false
+      },
+      "parallel_http_time_change_percent": -9.98081563381209,
+      "native_batch_shapes": [
+        {
+          "projector_batch_max": 4,
+          "decoder_batch_max_sequences": 4,
+          "http_requests": 90
+        }
+      ],
+      "native_counter_ranges": {
+        "projector_encode_calls": {
+          "min": 1,
+          "max": 1
+        },
+        "decoder_calls": {
+          "min": 6,
+          "max": 6
+        }
+      },
+      "raw_artifact_directory": "results/vision-trashnet-20260926-native-batch4-final/gemma4",
+      "instruction_sha256": "a6ee6617691cb33332c676ee8fa9e0f3d9c9495f03120be9772778500dbd884b"
+    },
+    "smolvlm": {
+      "protocol": "Identical 4-image HTTP groups, one independent decision per image; RTX 3080 CUDA, context4096, token batch256, threads4, width4; one warmup group then repeated full120 passes per mode. Filenames and labels excluded.",
+      "sample_size": 120,
+      "repetitions": 3,
+      "mode_order": [
+        "fresh",
+        "parallel"
+      ],
+      "source_sha256": "0bf472790f8b20e5c950d5b5012a9d38af0d3392efd65f8ce171334fc16b07c2",
+      "selection_sha256": "1423b17be66e52b1fdf83d81b921eae309609b37b521466f9b5b2b8745ca6342",
+      "binary_sha256": "78b54a2347490c4a245d3bcf02a8e5ade28f65bda1fa44b73f81b9b5059691ee",
+      "model_sha256": "2a31195d3769c0b0fd0a4906201666108834848db768af11de1d2cef7cd35e65",
+      "mmproj_sha256": "7e943f7c53f0382a6fc41b6ee0c2def63ba4fded9ab8ed039cc9e2ab905e0edd",
+      "model": "models/SmolVLM-256M-Instruct-Q8_0.gguf",
+      "instruction": "Choose the primary material of the main waste item in the photo. Use the image only.",
+      "options": [
+        {
+          "id": "cardboard",
+          "criterion": "A piece of corrugated cardboard or cardboard packaging."
+        },
+        {
+          "id": "glass",
+          "criterion": "A glass object, such as a bottle or jar."
+        },
+        {
+          "id": "metal",
+          "criterion": "A metal object, such as a can or metal container."
+        },
+        {
+          "id": "paper",
+          "criterion": "A sheet of paper, newspaper, or paper packaging that is not cardboard."
+        },
+        {
+          "id": "plastic",
+          "criterion": "A plastic object, such as a bottle or plastic container."
+        },
+        {
+          "id": "trash",
+          "criterion": "Miscellaneous waste that is not primarily cardboard, glass, metal, paper, or plastic."
+        }
+      ],
+      "min_top_probability": 0.8,
+      "min_candidate_mass": 0.05,
+      "timing": {
+        "fresh": {
+          "mode": "fresh",
+          "images_per_request": 4,
+          "request_count": 90,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 1762.12984,
+          "warmup_group_ms": 711.537117,
+          "group_latency_ms": {
+            "mean": 436.49999725555557,
+            "p50": 434.7043265,
+            "p95_nearest_rank": 466.949614
+          },
+          "effective_ms_per_image": 109.12499931388888,
+          "images_per_second": 9.163803035852345,
+          "http_latency_sum_ms": 39284.999753,
+          "pass_http_latency_sum_ms": [
+            13165.123552000001,
+            13078.583949,
+            13041.292252
+          ]
+        },
+        "parallel": {
+          "mode": "parallel",
+          "images_per_request": 4,
+          "request_count": 90,
+          "image_evaluations": 360,
+          "startup_to_health_ms": 1754.75035,
+          "warmup_group_ms": 620.235317,
+          "group_latency_ms": {
+            "mean": 268.5576207444444,
+            "p50": 266.461056,
+            "p95_nearest_rank": 292.296908
+          },
+          "effective_ms_per_image": 67.1394051861111,
+          "images_per_second": 14.894382773097108,
+          "http_latency_sum_ms": 24170.185867,
+          "pass_http_latency_sum_ms": [
+            8185.305611,
+            8032.114465,
+            7952.765791
+          ]
+        }
+      },
+      "quality": {
+        "fresh": [
+          {
+            "repetition": 1,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          },
+          {
+            "repetition": 2,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          },
+          {
+            "repetition": 3,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 13
+          }
+        ],
+        "parallel": [
+          {
+            "repetition": 1,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 12
+          },
+          {
+            "repetition": 2,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 12
+          },
+          {
+            "repetition": 3,
+            "accepted": 0,
+            "abstained": 120,
+            "accepted_correct": 0,
+            "correct_over_all": 0.0,
+            "accepted_accuracy": null,
+            "raw_top1_correct": 12
+          }
+        ]
+      },
+      "comparison": {
+        "changed_selected": 0,
+        "changed_top1": 24,
+        "changed_abstention": 6,
+        "changed_input_tokens": 0,
+        "max_probability_delta": 0.19332289180216564,
+        "max_candidate_mass_delta": 0.0006789004866641592,
+        "image_evaluations": 360,
+        "unique_changed_image_indices": {
+          "selected": [],
+          "raw_top1": [
+            5,
+            14,
+            29,
+            32,
+            37,
+            67,
+            90,
+            107
+          ],
+          "abstention_reasons": [
+            58,
+            70
+          ]
+        },
+        "within_existing_equivalence_tolerance": false
+      },
+      "parallel_http_time_change_percent": -38.47477149301943,
+      "native_batch_shapes": [
+        {
+          "projector_batch_max": 1,
+          "decoder_batch_max_sequences": 4,
+          "http_requests": 90
+        }
+      ],
+      "native_counter_ranges": {
+        "projector_encode_calls": {
+          "min": 8,
+          "max": 8
+        },
+        "decoder_calls": {
+          "min": 7,
+          "max": 7
+        }
+      },
+      "raw_artifact_directory": "results/vision-trashnet-20260926-native-batch4-final/smolvlm",
+      "instruction_sha256": "a6ee6617691cb33332c676ee8fa9e0f3d9c9495f03120be9772778500dbd884b"
+    }
+  }
+}

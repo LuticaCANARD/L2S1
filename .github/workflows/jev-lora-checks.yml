@@ -1,0 +1,59 @@
+name: Jev LoRA contracts
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/*jev*'
+      - 'training/**'
+      - 'scripts/train_accuracy_lora.py'
+      - '.github/workflows/jev-lora-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/*jev*'
+      - 'training/**'
+      - 'scripts/train_accuracy_lora.py'
+      - '.github/workflows/jev-lora-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  output-and-matrix-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate output types and matrix failure reporting
+        run: python -m unittest discover -s scripts -p test_jev_lora.py
+
+  installed-package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.12']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install build
+      - run: python -m build training
+      - name: Install wheel and verify without the source package on sys.path
+        shell: bash
+        run: |
+          python -m pip install --no-deps training/dist/*.whl
+          cd "$RUNNER_TEMP"
+          l2s1-train --version
+          l2s1-train profiles
+          l2s1-train doctor
+          python -m unittest discover -s "$GITHUB_WORKSPACE/training/tests" -v
+      - uses: actions/upload-artifact@v4
+        with:
+          name: l2s1-training-${{ matrix.os }}-py${{ matrix.python }}
+          path: training/dist/*

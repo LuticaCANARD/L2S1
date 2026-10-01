@@ -1,0 +1,62 @@
+{
+  "warehouse-01": {
+    "storage_zone": "ambient",
+    "cold_chain_required": "false",
+    "dispatch_priority": "high"
+  },
+  "warehouse-02": {
+    "storage_zone": "chilled",
+    "cold_chain_required": "true",
+    "dispatch_priority": "high"
+  },
+  "warehouse-03": {
+    "storage_zone": "frozen",
+    "cold_chain_required": "true",
+    "dispatch_priority": "medium"
+  },
+  "warehouse-04": {
+    "storage_zone": "ambient",
+    "cold_chain_required": "false",
+    "dispatch_priority": "medium"
+  },
+  "warehouse-05": {
+    "storage_zone": "chilled",
+    "cold_chain_required": "true",
+    "dispatch_priority": "low"
+  },
+  "warehouse-06": {
+    "storage_zone": "frozen",
+    "cold_chain_required": "true",
+    "dispatch_priority": "low"
+  },
+  "access-01": {
+    "role_scope": "read",
+    "can_edit": "false",
+    "review_priority": "low"
+  },
+  "access-02": {
+    "role_scope": "edit",
+    "can_edit": "false",
+    "review_priority": "medium"
+  },
+  "access-03": {
+    "role_scope": "administer",
+    "can_edit": "true",
+    "review_priority": "medium"
+  },
+  "access-04": {
+    "role_scope": "read",
+    "can_edit": "false",
+    "review_priority": "high"
+  },
+  "access-05": {
+    "role_scope": "edit",
+    "can_edit": "true",
+    "review_priority": "high"
+  },
+  "access-06": {
+    "role_scope": "administer",
+    "can_edit": "false",
+    "review_priority": "low"
+  }
+}

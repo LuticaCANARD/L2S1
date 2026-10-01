@@ -12,5 +12,5 @@ FetchContent_Declare(llama_cpp
 )
 FetchContent_MakeAvailable(llama_cpp)
 
-# build.rs compiles the L2S1 bridge against these exact headers and Jinja files.
+# build.rs generates Rust bindings and compiles Jinja against this exact source.
 file(WRITE "${CMAKE_BINARY_DIR}/l2s1-llama-source.txt" "${llama_cpp_SOURCE_DIR}")
