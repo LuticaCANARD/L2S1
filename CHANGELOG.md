@@ -9,6 +9,11 @@
   `reasoning_incomplete` fail explicitly. Requires fresh execution, so
   servers need `--execution-mode fresh`; the fixed-schema default refuses
   thinking with that instruction.
+- HTTP listener: TypeSafe-compatible `POST /v1/systemone` and `GET /v1/models`,
+  so TypeSafe SDK clients switch by base URL. FastAPI-style `422`
+  issues, `422 STATE_TRUNCATED` on context overflow, `503 QUEUE_FULL` with
+  `Retry-After`, `x-typesafe-request-id`. Checked with the unmodified
+  `typesafe-sdk` 0.7.1. `/v1/decisions` is unchanged.
 
 ## 0.2.2 (2026-09-30)
 

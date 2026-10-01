@@ -282,6 +282,24 @@ For a 30-class, 150-image CUDA run through the HTTP vision API, see the [Caltech
 For a 70-image cat/dog validation with both answer orders, see the [Cats and Dogs vision report](../benchmarks/cats-dogs-vision-20260924/REPORT.md); it records a historical HTTP request shape and does not claim general image accuracy.
 For six-class waste-material classification and a paired prompt/acceptance-threshold study, see the [TrashNet vision benchmark](../benchmarks/trashnet-vision-20260925/REPORT.md).
 
+## TypeSafe-compatible route
+
+The local listener also accepts TypeSafe's wire format, so TypeSafe SDK clients can switch by changing only the base URL: `TYPESAFE_BASE_URL=http://127.0.0.1:8080`, any non-empty `TYPESAFE_API_KEY`, and `TYPESAFE_DEFAULT_MODEL` set to the name from `GET /v1/models` (the GGUF file stem).
+
+```sh
+curl http://127.0.0.1:8080/v1/systemone -d '{
+  "model": "Qwen3-0.6B-Q8_0",
+  "state": "Third time you double-charged me. Refund it today.",
+  "questions": {
+    "intent": {"type": "choice", "criteria": {"refund": "Wants money back", "other": "Anything else"}},
+    "is_urgent": {"type": "noul"},
+    "frustration": {"type": "score", "criteria": ["Calm", "Annoyed", "Angry"]}
+  }
+}'
+```
+
+`noul` maps to binary, `choice` to choice and `score` to ordinal levels `0..n-1`; missing `instructions` use the question ID, and criteria order is kept because it fixes answer codes. The response is exactly `model`, `answers` and `usage`, with TypeSafe's `choice`/`score`/`noul` shapes and four-decimal rounding. The native acceptance policy is not applied there: answers carry probabilities and no abstention. Validation errors return `422 INVALID_REQUEST` with every FastAPI-style `detail` issue; context overflow returns `422 STATE_TRUNCATED` instead of truncating; a different `model` returns `404 MODEL_NOT_FOUND`; a full queue returns `503 QUEUE_FULL` with `Retry-After: 1`. Every response has `x-typesafe-request-id`. Up to 128 questions are accepted. `POST /v1/decisions` keeps the native schema and is not a TypeSafe alias.
+
 ## OpenRouter adapter
 
 Set `OPENROUTER_API_KEY` in the process environment and select an [OpenRouter model](https://openrouter.ai/models) that accepts the requested modality. The optional executable does not build the native llama.cpp backend. For example, `prism-ml/ternary-bonsai-2-27b` accepts text and images; it is a different checkpoint from a local Bonsai 27B Q1_0 GGUF.
