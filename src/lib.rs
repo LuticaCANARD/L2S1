@@ -23,6 +23,7 @@ pub mod http;
 pub mod llama;
 #[cfg(feature = "openrouter")]
 pub mod openrouter;
+pub mod presets;
 pub mod stdio;
 mod vision;
 #[cfg(feature = "wgpu")]

@@ -292,6 +292,20 @@ For a 30-class, 150-image CUDA run through the HTTP vision API, see the [Caltech
 For a 70-image cat/dog validation with both answer orders, see the [Cats and Dogs vision report](benchmarks/cats-dogs-vision-20260924/REPORT.md); it records a historical HTTP request shape and does not claim general image accuracy.
 For six-class waste-material classification and a paired prompt/acceptance-threshold study, see the [TrashNet vision benchmark](benchmarks/trashnet-vision-20260925/REPORT.md).
 
+<a id="decision-presets"></a>
+## Decision presets
+
+A preset is a named decision set loaded at startup with `--preset file.json` (repeatable). The file holds `name`, an optional `description` and native `decisions`; see [the triage example](../../examples/presets/triage.json). Requests then send `"preset": "<name>"` in place of `decisions`, on `/v1/decisions`, each item of `/v1/decision-batches`, `--stdio` and CLI `--input`.
+
+```sh
+target/release/l2s1 --model model.gguf --listen 127.0.0.1:8080 \
+  --preset examples/presets/triage.json
+curl http://127.0.0.1:8080/v1/decisions -H 'Content-Type: application/json' \
+  -d '{"state": "Refund it today or I cancel.", "preset": "triage"}'
+```
+
+The preset's decisions are inserted before ordinary validation, so the response is the same as sending them explicitly. Names are 1–64 characters of `a-z`, `0-9`, `-` and `_`, starting with a letter or digit. Invalid or duplicate presets stop startup. Sending both `preset` and `decisions`, or an unknown name, is `400 invalid_request`. `GET /v1/capabilities` lists `presets` with each name, description and decision IDs. Presets are read-only for the life of the process; preset requests are not coalesced with other requests.
+
 <a id="typesafe-compatible-route"></a>
 ## TypeSafe-compatible route
 

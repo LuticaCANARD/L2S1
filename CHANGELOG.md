@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Decision presets: `--preset file.json` (repeatable) registers named
+  decision sets at startup; requests send `"preset": "<name>"` in place of
+  `decisions` over HTTP, batches, `--stdio` and CLI input. Capabilities list
+  them. Example: `examples/presets/triage.json`.
+
 - Native Qwen3 thinking is wired back in: `--reasoning-mode thinking`,
   `--max-reasoning-tokens` (1-1024), `LlamaBackend::set_reasoning`, and the
   HTTP `reasoning` field, as `docs/REASONING.md` describes. Bounded greedy

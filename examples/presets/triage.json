@@ -1,0 +1,29 @@
+{
+  "name": "triage",
+  "description": "Support messages: intent, urgency and refund request",
+  "decisions": [
+    {
+      "id": "intent",
+      "instruction": "What does the customer want?",
+      "kind": {"type": "choice", "options": [
+        {"id": "refund", "criterion": "Wants money back"},
+        {"id": "invoice", "criterion": "Needs an invoice or receipt"},
+        {"id": "other", "criterion": "Anything else"}
+      ]}
+    },
+    {
+      "id": "is_urgent",
+      "instruction": "Does the customer need an answer today?",
+      "kind": {"type": "binary", "false_label": "Can wait", "true_label": "Needs an answer today"}
+    },
+    {
+      "id": "frustration",
+      "instruction": "How frustrated is the customer?",
+      "kind": {"type": "ordinal", "levels": [
+        {"id": "calm", "criterion": "Calm", "value": 0},
+        {"id": "annoyed", "criterion": "Annoyed", "value": 1},
+        {"id": "angry", "criterion": "Angry or threatening to leave", "value": 2}
+      ]}
+    }
+  ]
+}
