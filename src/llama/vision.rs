@@ -498,13 +498,36 @@ impl LlamaBackend {
         if !matches!(
             self.execution_mode,
             ExecutionMode::Fresh | ExecutionMode::Parallel
-        ) || self.output_head.is_some()
-            || self.has_calibrations()
-            || self.collect_features
+        ) || self.collect_features
         {
             return Err(Error::Invalid(
-                "vision decisions require fresh or parallel execution without output heads, calibration or feature export".into(),
+                "vision decisions require fresh or parallel execution without feature export"
+                    .into(),
             ));
+        }
+        if let Some(head) = &self.output_head {
+            if head.feature_kind != "logit_affine" {
+                return Err(Error::Invalid(
+                    "vision decisions only support logit_affine output heads".into(),
+                ));
+            }
+            self.check_head_config(head)?;
+            for d in &request.decisions {
+                head.applies_to(d)?;
+            }
+        }
+        if self.has_calibrations() {
+            if self.execution_mode != ExecutionMode::Fresh {
+                return Err(Error::Invalid(
+                    "vision calibrations require fresh execution".into(),
+                ));
+            }
+            self.validate_calibrations()?;
+            for artifact in &self.calibrations {
+                for d in &request.decisions {
+                    artifact.applies_to(d)?;
+                }
+            }
         }
         let marker = unsafe { CStr::from_ptr(sd_vision_marker()) }
             .to_str()
@@ -707,6 +730,10 @@ impl LlamaBackend {
                     &self.policy,
                 )?
             };
+            if let Some(head) = &self.output_head {
+                scored = head.apply(decision, &[], scored, &self.policy)?;
+            }
+            let mut scored = self.apply_calibration(decision, scored)?;
             self.timings.score_ms += started.elapsed().as_secs_f64() * 1000.0;
             self.restore_code_metadata(&mut scored);
             results.push(scored);
