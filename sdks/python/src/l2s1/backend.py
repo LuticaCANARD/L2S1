@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
-from .models import Capabilities, DecisionRequest, DecisionResponse
+from .models import Capabilities, DecisionRequest, DecisionResponse, TuneRequest, TuneResponse
 
 
 class DecisionBackend(Protocol):
@@ -15,6 +15,12 @@ class DecisionBackend(Protocol):
 class BatchDecisionBackend(DecisionBackend, Protocol):
     """Optional native batch capability, never a serial loop."""
     async def decide_batch(self, requests: Sequence[DecisionRequest], *, timeout_ms: int | None = None) -> list[DecisionResponse]: ...
+
+
+@runtime_checkable
+class TuneDecisionBackend(DecisionBackend, Protocol):
+    """Optional decision accuracy tuning capability."""
+    async def tune(self, request: TuneRequest, *, timeout_ms: int | None = None) -> TuneResponse: ...
 
 
 class L2S1Error(Exception):

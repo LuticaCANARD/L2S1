@@ -339,4 +339,74 @@ class Capabilities(ResponseModel):
     limits: dict[str, int | float]
     reasoning: ReasoningCapability | None = None
     request_policy: RequestPolicyCapability | None = None
+    tuning: dict[str, JsonValue] | None = None
     batch: BatchCapability | None = None
+
+
+TuningMode: TypeAlias = Literal["auto", "policy_and_temperature", "logit_affine", "strategy_sweep"]
+
+
+class TuneExample(RequestModel):
+    group: Text = "default"
+    shared: JsonValue | None = None
+    state: JsonValue = None
+    expected: str | bool
+    raw_logits: list[float] | None = None
+    candidate_mass: float | None = Field(default=None, gt=0, le=1)
+
+
+class TuneRequest(RequestModel):
+    id: Text | None = None
+    shared: JsonValue | None = None
+    decision: Decision
+    examples: list[TuneExample] = Field(min_length=1)
+    held_out: list[TuneExample] = Field(default_factory=list)
+    mode: TuningMode = "auto"
+    target_accepted_accuracy: float | None = Field(default=None, gt=0, le=1)
+    min_coverage: float | None = Field(default=None, ge=0, le=1)
+    l2_regularization: float | None = Field(default=None, gt=0)
+    rotation_passes: int | None = Field(default=None, ge=1, le=26)
+    apply: bool = False
+
+
+class TuningSplitMetrics(ResponseModel):
+    examples: int
+    raw_top_accuracy: float
+    accepted: int
+    errors: int
+    coverage: float
+    accepted_accuracy: float | None = None
+    nll: float
+    brier: float
+    ece: float | None = None
+
+
+class PolicyEvaluation(ResponseModel):
+    policy: DecisionPolicy
+    examples: int
+    accepted: int
+    errors: int
+    coverage: float
+    accepted_accuracy: float | None = None
+    raw_top_accuracy: float
+
+
+class TuneResponse(ResponseModel):
+    api_version: ApiVersion
+    request_id: str
+    id: str
+    decision_id: str
+    mode: TuningMode
+    recommended_method: str
+    recommended_policy: DecisionPolicy
+    target_met: bool
+    applied: bool
+    uncalibrated_fit: TuningSplitMetrics
+    tuned_fit: TuningSplitMetrics
+    uncalibrated_held_out: TuningSplitMetrics | None = None
+    tuned_held_out: TuningSplitMetrics | None = None
+    scalar_calibration: dict[str, JsonValue] | None = None
+    output_head: dict[str, JsonValue] | None = None
+    policy_frontier: list[PolicyEvaluation]
+    strategies: list[dict[str, JsonValue]] = Field(default_factory=list)
+

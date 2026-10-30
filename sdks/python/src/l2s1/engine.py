@@ -8,9 +8,9 @@ from typing import Generic, TypeVar, cast, overload
 import httpx
 from pydantic import BaseModel, JsonValue, TypeAdapter
 
-from .backend import BatchDecisionBackend, DecisionBackend, L2S1Error
+from .backend import BatchDecisionBackend, DecisionBackend, L2S1Error, TuneDecisionBackend
 from .http import L2S1Client
-from .models import Capabilities, Decision, DecisionRequest, DecisionResponse
+from .models import Capabilities, Decision, DecisionRequest, DecisionResponse, TuneRequest, TuneResponse
 from .native import LoadOptions, RustProcessBackend
 
 StateT = TypeVar("StateT", contravariant=True)
@@ -65,6 +65,14 @@ class L2S1:
         for request, response in zip(snapshots, responses):
             response.check_request(request)
         return responses
+
+    async def tune(self, request: TuneRequest, *, timeout_ms: int | None = None) -> TuneResponse:
+        """Tune decision calibration, output head, and acceptance policy thresholds on labeled examples."""
+        self._check_open()
+        snapshot = TuneRequest.model_validate(request.model_dump(exclude_unset=True))
+        if not isinstance(self._backend, TuneDecisionBackend):
+            raise L2S1Error("Backend does not support accuracy tuning", "tune_unsupported")
+        return await self._backend.tune(snapshot, timeout_ms=timeout_ms)
 
     async def capabilities(self, *, timeout_ms: int | None = None) -> Capabilities:
         self._check_open()

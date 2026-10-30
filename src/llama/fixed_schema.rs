@@ -194,4 +194,10 @@ impl crate::http::HttpDecisionBackend for FixedSchemaBackend {
         response["backend"]["details"]["prefix_plan"] = "fixed-schema-split-v1".into();
         Ok(response)
     }
+    fn tune_json(&mut self, body: &[u8]) -> Result<serde_json::Value> {
+        self.clear();
+        let result = self.backend.tune_json(body);
+        self.clear();
+        result
+    }
 }

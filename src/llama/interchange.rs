@@ -166,6 +166,54 @@ impl LlamaBackend {
         self.family_calibrations.clear();
         unsafe { sd_clear(self.engine.as_ptr()) };
     }
+    /// Register or replace a task-scoped scalar calibration in place.
+    pub fn upsert_calibration(&mut self, artifact: ScalarCalibration) -> Result<()> {
+        if self.reasoning.is_thinking() {
+            return Err(Error::Invalid(
+                "thinking does not support learned calibration".into(),
+            ));
+        }
+        if self.output_head.is_some() {
+            return Err(Error::Invalid(
+                "scalar calibration and output head cannot be combined".into(),
+            ));
+        }
+        artifact.validate(&self.identity())?;
+        self.calibrations
+            .retain(|a| a.decision_id != artifact.decision_id && a.id != artifact.id);
+        self.calibrations.push(artifact);
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        Ok(())
+    }
+    pub(crate) fn calibrations_snapshot(&self) -> Vec<ScalarCalibration> {
+        self.calibrations.clone()
+    }
+    pub(crate) fn family_calibrations_snapshot(&self) -> Vec<FamilyCalibration> {
+        self.family_calibrations.clone()
+    }
+    pub(crate) fn output_head_snapshot(
+        &self,
+    ) -> (Option<OutputHead>, Option<String>, Option<String>) {
+        (
+            self.output_head.clone(),
+            self.output_head_path.clone(),
+            self.head_sha256.clone(),
+        )
+    }
+    pub(crate) fn restore_artifacts(
+        &mut self,
+        calibrations: Vec<ScalarCalibration>,
+        family_calibrations: Vec<FamilyCalibration>,
+        head: (Option<OutputHead>, Option<String>, Option<String>),
+    ) {
+        self.calibrations = calibrations;
+        self.family_calibrations = family_calibrations;
+        self.output_head = head.0;
+        self.output_head_path = head.1;
+        self.head_sha256 = head.2;
+        unsafe { sd_clear(self.engine.as_ptr()) };
+        self.clear_preparation_cache();
+    }
     pub(super) fn check_artifacts(&self, request: &DecisionRequest) -> Result<()> {
         self.check_reasoning_config()?;
         if self.reasoning.is_thinking() && request.decisions.iter().any(|d| d.options().len() > 26)

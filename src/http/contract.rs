@@ -62,6 +62,11 @@ pub trait HttpDecisionBackend {
         }
         self.decide_json_batch(requests, images)
     }
+
+    /// Accuracy tuning over labeled examples.
+    fn tune_json(&mut self, body: &[u8]) -> crate::Result<Value> {
+        crate::tuning::tune_http_backend(self, body)
+    }
 }
 
 #[cfg(any(feature = "llama", feature = "wgpu", test))]
@@ -209,11 +214,29 @@ impl HttpDecisionBackend for crate::llama::LlamaBackend {
             "max_tokens_limit":1024,"image_thinking":false});
         capabilities["request_policy"] = json!({"supported":true,
             "target_error_rate":"maps to a model-score threshold; not a guaranteed correctness error rate"});
+        capabilities["tuning"] = json!({
+            "supported": true,
+            "endpoint": "/v1/tune",
+            "modes": ["auto", "policy_and_temperature", "logit_affine", "strategy_sweep"],
+            "in_place_apply": true
+        });
         capabilities["batch"] = json!({"supported":true,"enabled":info.execution_mode == crate::ExecutionMode::Parallel,
             "execution":"native_parallel","max_requests":super::MAX_BATCH_REQUESTS,
             "max_decisions":MAX_DECISIONS,"max_decisions_per_wave":info.parallel_width,
             "text":true,"image":image_supported,"mixed_media":false,"reasoning_modes":["direct"]});
         capabilities
+    }
+
+    fn tune_json(&mut self, body: &[u8]) -> crate::Result<Value> {
+        let request: crate::TuneRequest = serde_json::from_slice(body)
+            .map_err(|e| Error::Invalid(format!("invalid tune request: {e}")))?;
+        let response = crate::tuning::tune_llama(self, &request)?;
+        let mut value =
+            serde_json::to_value(response).map_err(|e| Error::Backend(e.to_string()))?;
+        if let Value::Object(map) = &mut value {
+            map.insert("api_version".into(), json!(1));
+        }
+        Ok(value)
     }
 
     fn decide_native_batch_json(

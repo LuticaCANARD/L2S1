@@ -3,7 +3,7 @@ import { L2S1Client, L2S1Error } from './http.js';
 import type { CallOptions, ClientOptions } from './http.js';
 import { RustProcessBackend } from './native.js';
 import type { LoadOptions } from './native.js';
-import type { Capabilities, Decision, DecisionRequest, DecisionResponse, JsonValue } from './types.js';
+import type { Capabilities, Decision, DecisionRequest, DecisionResponse, JsonValue, TuneRequest, TuneResponse } from './types.js';
 
 /** One application API for a bundled engine, HTTP server, or custom backend. */
 export class L2S1 implements AsyncDisposable {
@@ -33,6 +33,12 @@ export class L2S1 implements AsyncDisposable {
     if (!snapshots.length) return [];
     if (!this.backend.decideBatch) throw new L2S1Error('Backend does not support native batching', 'batch_unsupported');
     return this.backend.decideBatch(snapshots, options);
+  }
+  /** Tune decision calibration, output head, and acceptance policy thresholds on labeled examples. */
+  async tune(request: TuneRequest, options: CallOptions = {}): Promise<TuneResponse> {
+    this.checkOpen();
+    if (!this.backend.tune) throw new L2S1Error('Backend does not support accuracy tuning', 'tune_unsupported');
+    return this.backend.tune(structuredClone(request), options);
   }
   /** Snapshot fixed questions; each invocation supplies independent state.
    * This is an application template, not model token compilation or KV reuse.

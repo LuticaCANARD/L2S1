@@ -32,10 +32,17 @@ pub use contract::HttpDecisionBackend;
 use contract::run_request;
 pub(crate) use contract::user_failure_messages;
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum JobOp {
+    Decide,
+    Batch,
+    Tune,
+}
+
 struct Job {
     body: Vec<u8>,
     request_id: String,
-    batch: bool,
+    op: JobOp,
     admitted: Instant,
     cancelled: Arc<AtomicBool>,
     reply: mpsc::Sender<Result<Value, Error>>,
@@ -61,7 +68,7 @@ pub fn serve<B: HttpDecisionBackend>(
             Some(job) => job,
             None => break,
         };
-        let mut decisions = if can_batch && !first.batch {
+        let mut decisions = if can_batch && first.op == JobOp::Decide {
             contract::coalescing_decisions(&first.body)
         } else {
             None
@@ -74,7 +81,7 @@ pub fn serve<B: HttpDecisionBackend>(
             else {
                 break;
             };
-            let count = (!job.batch)
+            let count = (job.op == JobOp::Decide)
                 .then(|| contract::coalescing_decisions(&job.body))
                 .flatten();
             if let Some(count) = count
@@ -151,7 +158,11 @@ pub fn serve_openrouter(
 }
 
 fn execute_job<B: HttpDecisionBackend>(backend: &mut B, job: &Job) -> Result<Value, Error> {
-    dispatch_wire(backend, &job.body, job.batch, &job.request_id)
+    match job.op {
+        JobOp::Decide => dispatch_wire(backend, &job.body, false, &job.request_id),
+        JobOp::Batch => dispatch_wire(backend, &job.body, true, &job.request_id),
+        JobOp::Tune => dispatch_tune(backend, &job.body, &job.request_id),
+    }
 }
 
 pub(crate) fn dispatch_wire<B: HttpDecisionBackend>(
@@ -172,6 +183,20 @@ pub(crate) fn dispatch_wire<B: HttpDecisionBackend>(
             response
         })
     }
+}
+
+pub(crate) fn dispatch_tune<B: HttpDecisionBackend>(
+    backend: &mut B,
+    body: &[u8],
+    request_id: &str,
+) -> Result<Value, Error> {
+    if body.len() > MAX_BODY {
+        return Err(Error::Invalid("tune body exceeds 44 MiB limit".into()));
+    }
+    backend.tune_json(body).map(|mut response| {
+        response["request_id"] = json!(request_id);
+        response
+    })
 }
 
 fn start_listener(
@@ -248,16 +273,20 @@ fn handle(
     if request.path == "/v1/systemone" {
         return handle_systemone(stream, sender, capabilities, request, request_id);
     }
-    let batch = request.path == "/v1/decision-batches";
-    if request.method != "POST" || !(request.path == "/v1/decisions" || batch) {
-        return respond_error(
-            stream,
-            404,
-            "route_not_found",
-            "route not found",
-            request_id,
-        );
-    }
+    let op = match (request.method.as_str(), request.path.as_str()) {
+        ("POST", "/v1/decisions") => JobOp::Decide,
+        ("POST", "/v1/decision-batches") => JobOp::Batch,
+        ("POST", "/v1/tune") => JobOp::Tune,
+        _ => {
+            return respond_error(
+                stream,
+                404,
+                "route_not_found",
+                "route not found",
+                request_id,
+            );
+        }
+    };
     let content_type = request.content_type.to_ascii_lowercase();
     if content_type != "application/json" && !content_type.starts_with("application/json;") {
         return respond_error(
@@ -269,7 +298,7 @@ fn handle(
         );
     }
     let failure_messages = contract::user_failure_messages(&request.body);
-    let result = match run_job(sender, std::mem::take(&mut request.body), request_id, batch) {
+    let result = match run_job(sender, std::mem::take(&mut request.body), request_id, op) {
         Ok(result) => result,
         Err((status, code, message)) => {
             return respond_error(stream, status, code, message, request_id);
@@ -319,14 +348,14 @@ fn run_job(
     sender: &SyncSender<Job>,
     body: Vec<u8>,
     request_id: &str,
-    batch: bool,
+    op: JobOp,
 ) -> Result<Result<Value, Error>, (u16, &'static str, &'static str)> {
     let (reply, receiver) = mpsc::channel();
     let cancelled = Arc::new(AtomicBool::new(false));
     match sender.try_send(Job {
         body,
         request_id: request_id.into(),
-        batch,
+        op,
         admitted: Instant::now(),
         cancelled: Arc::clone(&cancelled),
         reply,
@@ -390,7 +419,7 @@ fn handle_systemone(
         Ok(translated) => translated,
         Err(failure) => return fail(stream, failure),
     };
-    let output = match run_job(sender, translated.body.clone(), request_id, false) {
+    let output = match run_job(sender, translated.body.clone(), request_id, JobOp::Decide) {
         Ok(Ok(output)) => output,
         Ok(Err(error)) => return fail(stream, typesafe::Failure::from_native(&error)),
         Err((status, code, message)) => {
@@ -967,5 +996,50 @@ mod tests {
             }
             server.join().unwrap();
         }
+    }
+
+    #[test]
+    fn tune_route_dispatches_through_worker_and_rejects_selection_only() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let (sender, receiver) = mpsc::sync_channel(1);
+        let server = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            handle(&mut stream, &sender, &json!({}), "req-tune").unwrap();
+        });
+        let body = json!({
+            "id": "http-tune",
+            "decision": decision("flag", None),
+            "examples": [
+                {"group": "g1", "state": {}, "expected": false, "raw_logits": [3.0, 0.0], "candidate_mass": 0.9},
+                {"group": "g2", "state": {}, "expected": true, "raw_logits": [0.0, 3.0], "candidate_mass": 0.9}
+            ]
+        })
+        .to_string();
+        let mut client = TcpStream::connect(address).unwrap();
+        write!(
+            client,
+            "POST /v1/tune HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+            body.len()
+        )
+        .unwrap();
+        let job = receiver.recv_timeout(Duration::from_secs(2)).unwrap();
+        assert!(matches!(job.op, JobOp::Tune));
+        let mut backend = Probe {
+            max_images: 1,
+            ..Default::default()
+        };
+        let result = execute_job(&mut backend, &job);
+        job.reply.send(result).unwrap();
+        let mut response = String::new();
+        client.read_to_string(&mut response).unwrap();
+        assert!(response.starts_with("HTTP/1.1 200 OK"), "{response}");
+        let (_, resp_body) = response.split_once("\r\n\r\n").unwrap();
+        let output: Value = serde_json::from_str(resp_body).unwrap();
+        assert_eq!(output["api_version"], 1);
+        assert_eq!(output["request_id"], "req-tune");
+        assert_eq!(output["id"], "http-tune");
+        assert_eq!(output["tuned_fit"]["raw_top_accuracy"], 1.0);
+        server.join().unwrap();
     }
 }

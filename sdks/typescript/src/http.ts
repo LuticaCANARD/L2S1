@@ -1,5 +1,5 @@
 export type * from './types.js';
-import type { Capabilities, DecisionRequest, DecisionResponse } from './types.js';
+import type { Capabilities, DecisionRequest, DecisionResponse, TuneRequest, TuneResponse } from './types.js';
 
 export class L2S1Error extends Error {
   constructor(message: string, readonly code: string, readonly status?: number,
@@ -103,6 +103,11 @@ export class L2S1Client {
     }
     return value.responses.map((response, index) => decisionResponse(response, snapshots[index]!));
   }
+  async tune(request: TuneRequest, options: CallOptions = {}): Promise<TuneResponse> {
+    const snapshot = structuredClone(request);
+    const value = await this.request('/v1/tune', snapshot, options);
+    return tuneResponse(value, snapshot);
+  }
   /** Cancels this client's HTTP calls; the remote server remains running. */
   close(): void {
     this.lifetime.abort(new L2S1Error('HTTP client is closed', 'backend_closed'));
@@ -122,3 +127,15 @@ export function decisionResponse(value: unknown, request: DecisionRequest): Deci
     }
     return value as unknown as DecisionResponse;
   }
+
+export function tuneResponse(value: unknown, request: TuneRequest): TuneResponse {
+  if (!object(value) || value.api_version !== 1 || typeof value.request_id !== 'string'
+    || typeof value.id !== 'string' || value.decision_id !== request.decision.id
+    || typeof value.recommended_method !== 'string' || !object(value.recommended_policy)
+    || typeof value.target_met !== 'boolean' || typeof value.applied !== 'boolean'
+    || !object(value.uncalibrated_fit) || !object(value.tuned_fit)
+    || !Array.isArray(value.policy_frontier)) {
+    throw new L2S1Error('Server response does not match the v1 tune contract', 'invalid_response');
+  }
+  return value as unknown as TuneResponse;
+}

@@ -35,12 +35,14 @@ mod consensus;
 mod evidence;
 mod interoperability;
 mod optimization;
+pub mod tuning;
 mod worker;
 pub use calibration::*;
 pub use consensus::*;
 pub use evidence::*;
 pub use interoperability::*;
 pub use optimization::*;
+pub use tuning::*;
 pub use worker::*;
 
 pub mod cascade;

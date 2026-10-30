@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from pydantic import ValidationError
 
 from .backend import L2S1Error
-from .models import BatchResponse, Capabilities, DecisionRequest, DecisionResponse
+from .models import BatchResponse, Capabilities, DecisionRequest, DecisionResponse, TuneRequest, TuneResponse
 
 
 class JsonDecisionClient:
@@ -56,3 +56,16 @@ class JsonDecisionClient:
             return batch.responses
         except ValueError as error:
             raise L2S1Error("Server response does not match the native batch contract", "invalid_response") from error
+
+    async def tune(self, request: TuneRequest, *, timeout_ms: int | None = None) -> TuneResponse:
+        if self._closed:
+            raise L2S1Error("Decision client is closed", "backend_closed")
+        snapshot = TuneRequest.model_validate(request.model_dump(exclude_unset=True))
+        value = await self._request("/v1/tune", snapshot.model_dump_json(exclude_unset=True), timeout_ms)
+        try:
+            response = TuneResponse.model_validate(value)
+            if response.decision_id != snapshot.decision.id:
+                raise ValueError("tune response decision_id mismatch")
+            return response
+        except ValueError as error:
+            raise L2S1Error("Server response does not match the v1 tune contract", "invalid_response") from error

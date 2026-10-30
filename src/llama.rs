@@ -541,6 +541,49 @@ impl LlamaBackend {
         Ok(())
     }
 
+    /// Register an in-memory output head bound to this GGUF and inference configuration.
+    pub fn register_output_head(&mut self, head: OutputHead) -> Result<()> {
+        if self.reasoning.is_thinking() {
+            return Err(Error::Invalid(
+                "thinking does not support output heads".into(),
+            ));
+        }
+        if self.evidence_transfer != EvidenceTransfer::Full {
+            return Err(Error::Invalid(
+                "output heads require full evidence transfer".into(),
+            ));
+        }
+        if self.lora_path.is_some() || self.has_calibrations() {
+            return Err(Error::Invalid(
+                "only one output head, without LoRA, is supported".into(),
+            ));
+        }
+        head.validate(unsafe { sd_feature_size(self.engine.as_ptr()) } as usize)?;
+        if head.feature_kind == "hidden" && self.architecture != "gemma4" {
+            return Err(Error::Invalid(
+                "hidden output heads currently require Gemma4".into(),
+            ));
+        }
+        self.check_head_config(&head)?;
+        if self.weights_sha256 != head.model_sha256 {
+            return Err(Error::Invalid("output head GGUF SHA256 mismatch".into()));
+        }
+        let bytes = serde_json::to_vec(&head).map_err(|e| Error::Invalid(e.to_string()))?;
+        self.head_sha256 = Some(crate::interoperability::digest(&bytes));
+        self.output_head_path = Some(format!("in-memory:{}", head.id));
+        self.output_head = Some(head);
+        self.clear_preparation_cache();
+        Ok(())
+    }
+
+    /// Clear any active output head.
+    pub fn clear_output_head(&mut self) {
+        self.output_head = None;
+        self.output_head_path = None;
+        self.head_sha256 = None;
+        self.clear_preparation_cache();
+    }
+
     fn check_head_config(&self, head: &OutputHead) -> Result<()> {
         let info = self.info();
         if self.execution_mode != ExecutionMode::Fresh
@@ -764,6 +807,24 @@ impl LlamaBackend {
         unsafe { sd_clear(self.engine.as_ptr()) };
         self.code_rotation = rotation;
         self.clear_preparation_cache();
+        Ok(())
+    }
+
+    pub fn prompt_detail(&self) -> PromptDetail {
+        self.prompt_detail
+    }
+
+    pub fn code_rotation(&self) -> usize {
+        self.code_rotation
+    }
+
+    pub fn policy(&self) -> &DecisionPolicy {
+        &self.policy
+    }
+
+    pub fn set_policy(&mut self, policy: DecisionPolicy) -> Result<()> {
+        policy.validate()?;
+        self.policy = policy;
         Ok(())
     }
 
