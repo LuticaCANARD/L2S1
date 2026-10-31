@@ -1,7 +1,7 @@
 import type { ChildProcess } from 'node:child_process';
-import { L2S1Error, decisionResponse, positiveTimeout } from './http.js';
+import { L2S1Error, decisionResponse, positiveTimeout, tuneResponse } from './http.js';
 import type { CallOptions } from './http.js';
-import type { Capabilities, DecisionRequest, DecisionResponse } from './types.js';
+import type { Capabilities, DecisionRequest, DecisionResponse, TuneRequest, TuneResponse } from './types.js';
 
 interface Pending { resolve(value: unknown): void; reject(error: unknown): void }
 const object = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -92,6 +92,10 @@ export class StdioClient {
       throw new L2S1Error('Invalid native stdio batch response', 'invalid_response');
     }
     return value.responses.map((response, index) => decisionResponse(response, snapshots[index]!));
+  }
+  async tune(request: TuneRequest, options: CallOptions = {}): Promise<TuneResponse> {
+    const snapshot = structuredClone(request);
+    return tuneResponse(await this.request('tune', snapshot, options), snapshot);
   }
   close(): void { this.fail(new L2S1Error('stdio client is closed', 'backend_closed')); }
 }

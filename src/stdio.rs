@@ -52,6 +52,7 @@ pub fn serve_stream<B: HttpDecisionBackend, R: BufRead, W: Write>(
             }
             "decide" => crate::http::dispatch_wire(backend, body, false, &call.id),
             "decide_batch" => crate::http::dispatch_wire(backend, body, true, &call.id),
+            "tune" => crate::http::dispatch_tune(backend, body, &call.id),
             _ => Err(crate::Error::Invalid("unknown stdio operation".into())),
         };
         let response = match result {

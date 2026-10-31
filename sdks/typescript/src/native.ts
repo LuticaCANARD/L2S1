@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { L2S1Client, L2S1Error, positiveTimeout } from './http.js';
 import type { CallOptions } from './http.js';
-import type { Capabilities, DecisionPolicy, DecisionRequest, DecisionResponse } from './types.js';
+import type { Capabilities, DecisionPolicy, DecisionRequest, DecisionResponse, TuneRequest, TuneResponse } from './types.js';
 import { resolveRuntime } from './runtime.js';
 import { StdioClient } from './stdio.js';
 
@@ -154,6 +154,9 @@ export class RustProcessBackend implements AsyncDisposable {
   }
   decideBatch(requests: readonly DecisionRequest[], options: CallOptions = {}): Promise<DecisionResponse[]> {
     return this.client!.decideBatch(requests, this.callOptions(options));
+  }
+  tune(request: TuneRequest, options: CallOptions = {}): Promise<TuneResponse> {
+    return this.client!.tune(request, this.callOptions(options));
   }
   capabilities(options: CallOptions = {}): Promise<Capabilities> {
     return this.client!.capabilities(this.callOptions(options));

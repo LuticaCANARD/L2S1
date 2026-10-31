@@ -55,7 +55,7 @@ class StdioClient(JsonDecisionClient):
         if len(self._pending) >= 16:
             raise L2S1Error("stdio inference queue is full", "busy")
         timeout = positive_timeout(self._timeout_ms if timeout_ms is None else timeout_ms) / 1000
-        op = {"/healthz": "health", "/v1/capabilities": "capabilities", "/v1/decisions": "decide", "/v1/decision-batches": "decide_batch"}[path]
+        op = {"/healthz": "health", "/v1/capabilities": "capabilities", "/v1/decisions": "decide", "/v1/decision-batches": "decide_batch", "/v1/tune": "tune"}[path]
         self._counter += 1
         call_id = f"local-{self._counter}"
         line = json.dumps({"id": call_id, "op": op, "body": None if body is None else json.loads(body)},

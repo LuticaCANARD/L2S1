@@ -3,7 +3,7 @@ use l2s1::{
     ComputeOptions, DecisionBackend, DecisionPolicy, DecisionRequest, EvidenceTransfer,
     ExecutionMode, FlashAttention, ParallelPrefixAlignment, ParallelWaveOrder,
     PreparationCacheConfig, PromptDetail, PromptLayout, PromptProfile, ReasoningMode,
-    ReasoningOptions, llama::LlamaBackend,
+    ReasoningOptions, TuneRequest, TuningMode, llama::LlamaBackend,
 };
 use std::{
     io::{self, Read},
@@ -79,6 +79,15 @@ struct Args {
     /// Include request-local execution diagnostics and structured errors.
     #[arg(long)]
     diagnostics: bool,
+    /// Run decision accuracy tuning on a TuneRequest JSON input instead of single inference.
+    #[arg(long, conflicts_with_all = ["listen", "stdio", "image", "inspect", "preflight", "diagnostics"])]
+    tune: bool,
+    /// Override the tuning mode from the CLI when --tune is enabled.
+    #[arg(long, value_enum, requires = "tune")]
+    tune_mode: Option<TuningMode>,
+    /// Write the fitted calibration or output_head artifact to this path when --tune is enabled.
+    #[arg(long, requires = "tune")]
+    tune_output: Option<PathBuf>,
     /// Task-scoped scalar calibration; repeat for multiple decision IDs.
     #[arg(long, conflicts_with = "output_head")]
     calibration: Vec<PathBuf>,
@@ -328,6 +337,28 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         std::fs::read_to_string(&args.input)?
     };
+    if args.tune {
+        let mut tune_request: TuneRequest = serde_json::from_str(&text)?;
+        if let Some(mode) = args.tune_mode {
+            tune_request.mode = mode;
+        }
+        let response = l2s1::tuning::tune_llama(&mut backend, &tune_request)?;
+        if let Some(path) = &args.tune_output {
+            let artifact = if response.recommended_method == "logit_affine_head"
+                && let Some(head) = &response.output_head
+            {
+                serde_json::to_value(head)?
+            } else if let Some(cal) = &response.scalar_calibration {
+                serde_json::to_value(cal)?
+            } else {
+                serde_json::to_value(&response)?
+            };
+            std::fs::write(path, serde_json::to_vec_pretty(&artifact)?)?;
+        }
+        serde_json::to_writer_pretty(io::stdout().lock(), &response)?;
+        println!();
+        return Ok(());
+    }
     let request: DecisionRequest =
         serde_json::from_slice(&l2s1::presets::expand(text.as_bytes(), false)?)?;
 
@@ -566,6 +597,32 @@ mod tests {
             ])
             .is_err()
         );
+    }
+
+    #[test]
+    fn tune_cli_flags_validate_mode_and_conflicts() {
+        let parsed = Args::try_parse_from([
+            "l2s1",
+            "--model",
+            "m.gguf",
+            "--tune",
+            "--tune-mode",
+            "logit-affine",
+            "--tune-output",
+            "head.json",
+            "--input",
+            "labeled.json",
+        ])
+        .unwrap();
+        assert!(parsed.tune);
+        assert_eq!(parsed.tune_mode, Some(TuningMode::LogitAffine));
+        assert_eq!(parsed.tune_output, Some(PathBuf::from("head.json")));
+        // --tune-mode and --tune-output require --tune
+        assert!(
+            Args::try_parse_from(["l2s1", "--model", "m.gguf", "--tune-mode", "auto"]).is_err()
+        );
+        // --tune conflicts with --listen and --stdio
+        assert!(Args::try_parse_from(["l2s1", "--model", "m.gguf", "--tune", "--stdio"]).is_err());
     }
 }
 

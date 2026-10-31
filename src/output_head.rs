@@ -68,8 +68,7 @@ impl OutputHead {
             return Ok(false);
         }
         let options = decision.options();
-        if !matches!(decision.kind, DecisionKind::Choice { .. })
-            || decision.instruction != self.instruction
+        if decision.instruction != self.instruction
             || options.len() != self.options.len()
             || options.iter().any(|o| {
                 !self

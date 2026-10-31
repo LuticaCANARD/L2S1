@@ -17,7 +17,7 @@ from typing import Literal
 from .backend import L2S1Error, positive_timeout
 from .http import L2S1Client
 from .stdio import StdioClient
-from .models import Capabilities, DecisionPolicy, DecisionRequest, DecisionResponse
+from .models import Capabilities, DecisionPolicy, DecisionRequest, DecisionResponse, TuneRequest, TuneResponse
 
 VERSION = "0.2.3"
 Device = Literal["cpu", "cuda", "metal"]
@@ -204,6 +204,9 @@ class RustProcessBackend:
 
     async def decide_batch(self, requests: Sequence[DecisionRequest], *, timeout_ms: int | None = None) -> list[DecisionResponse]:
         return await self._open_client().decide_batch(requests, timeout_ms=timeout_ms)
+
+    async def tune(self, request: TuneRequest, *, timeout_ms: int | None = None) -> TuneResponse:
+        return await self._open_client().tune(request, timeout_ms=timeout_ms)
 
     async def capabilities(self, *, timeout_ms: int | None = None) -> Capabilities:
         return await self._open_client().capabilities(timeout_ms=timeout_ms)

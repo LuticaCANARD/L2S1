@@ -84,9 +84,74 @@ export interface Capabilities {
   limits: { [key: string]: number };
   reasoning?: { modes: string[]; thinking_supported: boolean; [key: string]: JsonValue };
   request_policy?: { supported: boolean; target_error_rate: string };
+  tuning?: {
+    supported: boolean; endpoint: '/v1/tune';
+    modes: TuningMode[]; in_place_apply?: boolean;
+  };
   batch?: {
     supported: boolean; enabled: boolean; execution: 'native_parallel';
     max_requests: number; max_decisions: number; max_decisions_per_wave: number;
     text: boolean; image: boolean; mixed_media: boolean; reasoning_modes: string[];
   };
+}
+export type TuningMode = 'auto' | 'policy_and_temperature' | 'logit_affine' | 'strategy_sweep';
+export interface TuneExample {
+  group?: string;
+  shared?: JsonValue;
+  state?: JsonValue;
+  expected: string | boolean;
+  raw_logits?: number[];
+  candidate_mass?: number;
+}
+export interface TuneRequest {
+  id?: string;
+  shared?: JsonValue;
+  decision: Decision;
+  examples: TuneExample[];
+  held_out?: TuneExample[];
+  mode?: TuningMode;
+  target_accepted_accuracy?: number;
+  min_coverage?: number;
+  l2_regularization?: number;
+  rotation_passes?: number;
+  apply?: boolean;
+}
+export interface TuningSplitMetrics {
+  examples: number;
+  raw_top_accuracy: number;
+  accepted: number;
+  errors: number;
+  coverage: number;
+  accepted_accuracy: number | null;
+  nll: number;
+  brier: number;
+  ece?: number;
+}
+export interface PolicyEvaluation {
+  policy: DecisionPolicy;
+  examples: number;
+  accepted: number;
+  errors: number;
+  coverage: number;
+  accepted_accuracy: number | null;
+  raw_top_accuracy: number;
+}
+export interface TuneResponse {
+  api_version: 1;
+  request_id: string;
+  id: string;
+  decision_id: string;
+  mode: TuningMode;
+  recommended_method: 'temperature_calibration' | 'logit_affine_head' | 'semantic_mixture' | string;
+  recommended_policy: DecisionPolicy;
+  target_met: boolean;
+  applied: boolean;
+  uncalibrated_fit: TuningSplitMetrics;
+  tuned_fit: TuningSplitMetrics;
+  uncalibrated_held_out?: TuningSplitMetrics;
+  tuned_held_out?: TuningSplitMetrics;
+  scalar_calibration?: JsonValue;
+  output_head?: JsonValue;
+  policy_frontier: PolicyEvaluation[];
+  strategies?: JsonValue[];
 }
