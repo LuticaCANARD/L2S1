@@ -24,7 +24,7 @@ export type AnalysisResult = {
   reason_messages?: { code: string; message: string; user_defined: boolean }[];
   evidence: {
     type: string;
-    scores?: { id: string; code: string; option_probability: number; raw_logit?: number; token_id?: number }[];
+    scores?: { id: string; code: string; option_probability: number; raw_logit?: number; logprob?: number; token_id?: number }[];
     candidate_mass?: number;
     top_option_probability?: number;
     scoring_method?: string;

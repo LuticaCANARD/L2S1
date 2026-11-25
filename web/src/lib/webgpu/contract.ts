@@ -1,4 +1,4 @@
-import { WebgpuMessageError, type WebgpuLocale, type WebgpuMessageKey, type MessageParams } from '../i18n/webgpu';
+import { WebgpuMessageError, type WebgpuLocale, type WebgpuMessageKey, type MessageParams } from '../i18n/webgpu.ts';
 import type { AnalysisResult, Decision } from '$lib/demo/types';
 export const MODEL_ID = 'onnx-community/Qwen3-0.6B-ONNX';
 export const MODEL_REVISION = 'da1453100cf3ff33ef56d17983fc7a8648706db6';

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import InstallGuide from '$lib/components/InstallGuide.svelte';
   import benchmarks from '$lib/benchmarks.json';
   import typedDecisions from '$lib/typed-decisions.json';
@@ -87,7 +88,7 @@
         <h1>{t('heroTitle')}<br /><em>{t('heroTitleEmphasis')}</em></h1>
         <p class="hero-description">{t('heroDescription')}<br />{t('heroDescriptionAnswer')}</p>
         <p class="hero-detail">{t('heroDetail')}</p>
-        <div class="hero-actions"><a class="button primary" href="#get-started">{t('getStarted')} <span aria-hidden="true">↗</span></a><a class="text-link" href="#playground">{t('exploreContract')} <span aria-hidden="true">↓</span></a></div>
+        <div class="hero-actions"><a class="button primary" href={resolve('/webgpu')}>{({ en: 'Open decision workspace', ko: '판단 작업공간 열기', ja: '判断ワークスペースを開く' })[$locale]}</a><a class="text-link" href="#get-started">{t('getStarted')}</a><a class="text-link" href="#performance">{({ en: 'Benchmarks', ko: '벤치마크', ja: 'ベンチマーク' })[$locale]}</a></div>
         <div class="hero-tags"><span>{t('mitCode')}</span><span>{t('devices')}</span><span>{t('ownModel')}</span><span>llama.cpp · GGUF</span></div>
       </div>
       <div class="decision-window" aria-label={t('illustrationAria')}>
@@ -344,6 +345,7 @@
   }
   .hero-actions {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 24px;
     margin-top: 31px;
