@@ -69,7 +69,8 @@
     {#if decisions}<button type="button" disabled={disabled || decisions.length >= 8} onclick={() => edit((items) => items.push({ id: newId(items, 'decision'), instruction: '', kind: kind('binary') }))}>{copy.add}</button>{/if}
   </div>
   {#if decisions}
-    {#each decisions as decision, index}
+    <!-- Editable IDs change while typing. Keep controls keyed by their position. -->
+    {#each decisions as decision, index (index)}
       <fieldset {disabled}>
         <legend>{decision.id || `#${index + 1}`}</legend>
         <div class="identity">
@@ -80,13 +81,13 @@
         </div>
         <label>{copy.rule}<textarea rows="2" value={decision.instruction} oninput={(event) => edit((items) => { items[index].instruction = event.currentTarget.value; })}></textarea></label>
         {#if decision.kind.type === 'binary'}
-          {#each ['false_label', 'true_label'] as key, labelIndex}
+          {#each ['false_label', 'true_label'] as key, labelIndex (key)}
             {@const field = key as 'false_label' | 'true_label'}
             <label>{labelIndex === 0 ? copy.false : copy.true}<input value={decision.kind[field] ?? ''} oninput={(event) => edit((items) => { items[index].kind[field] = event.currentTarget.value; })} /></label>
           {/each}
         {:else}
           {@const options = optionsFor(decision)}
-          {#each options as option, optionIndex}
+          {#each options as option, optionIndex (optionIndex)}
             <div class="option">
               <div class="identity">
                 <label>{copy.candidate}<input value={option.id} oninput={(event) => edit((items) => { optionsFor(items[index])[optionIndex].id = event.currentTarget.value; })} /></label>
