@@ -8,13 +8,17 @@ test.beforeEach(async ({ page }) => {
 
 test('local inference works without WebGPU and preserves input and acceptance policy', async ({ page }) => {
   const calls: string[] = [];
+  const instruction = 'Which storage zone does the shipment require?';
   await page.route('**/quality-inference/**', async route => {
     calls.push(route.request().url());
     if (route.request().url().endsWith('/v1/capabilities')) await route.fulfill({ json: { api_version: 1, backend: { model: '/models/large.gguf', runtime: 'local-libllama' }, evidence: 'model_scored', request_policy: { supported: true }, reasoning: { modes: ['direct'] } } });
     else {
       const request = route.request().postDataJSON();
       expect(request.state).toEqual(warehouse.state);
-      expect(request.decisions).toEqual(warehouse.decisions);
+      expect(request.decisions).toEqual([
+        { ...warehouse.decisions[0], instruction },
+        ...warehouse.decisions.slice(1)
+      ]);
       expect(request.policy).toEqual({ min_top_probability: 0.8, min_candidate_mass: 0.05 });
       expect(Object.keys(request.failure_reasons).sort()).toEqual(['low_candidate_mass', 'low_top_probability', 'native_failure', 'reasoning_limit', 'tied_candidates']);
       expect(request.failure_reasons.low_candidate_mass).toBe(messages.ko.failureLowMass);
@@ -27,6 +31,10 @@ test('local inference works without WebGPU and preserves input and acceptance po
   await page.locator('#min-top').fill('0.8');
   await page.locator('#min-mass').fill('0.05');
   await page.getByRole('button', { name: messages.ko.warehouseExample }).click();
+  const rule = page.getByRole('group', { name: 'storage_zone' }).getByLabel('판단 지침');
+  await rule.fill(instruction);
+  await page.locator('summary').filter({ hasText: messages.ko.editQuestions }).click();
+  expect(JSON.parse(await page.locator('#questions').inputValue())[0].instruction).toBe(instruction);
   expect(calls).toEqual([]);
   await page.locator('#execution').selectOption('local');
   expect(calls).toEqual([]);

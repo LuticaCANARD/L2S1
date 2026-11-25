@@ -96,3 +96,28 @@ npm run dev
 `http://127.0.0.1:5173/webgpu`를 엽니다. 별도 L2S1 추론 서버는 로컬 서버 모드에서만 필요합니다. WebGPU 모델을 실행하려면 지원 브라우저·어댑터와 모델을 내려받을 네트워크가 필요합니다.
 
 구현 확인에는 [Hugging Face 공식 Qwen3 WebGPU worker](https://github.com/huggingface/transformers.js-examples/blob/main/qwen3-webgpu/src/worker.js), [WebGPU 사용 문서](https://huggingface.co/docs/transformers.js/guides/webgpu), [양자화 문서](https://huggingface.co/docs/transformers.js/guides/dtypes), 고정 npm 패키지의 모델 forward·generation·Tensor·ONNX backend 소스를 사용했습니다.
+
+## Strata 로컬 엔진 연결
+
+Strata에서 모델을 로드하고 HTTP API를 실행한 뒤, 저장소의 `web/`에서
+Strata 주소를 지정해 L2S1 웹 개발 서버를 시작합니다. 주소의 포트는
+실제로 실행 중인 Strata 설정과 일치해야 합니다.
+
+```sh
+L2S1_STRATA_URL=http://127.0.0.1:8080 npm run dev
+```
+
+`/webgpu`에서 **로컬 서버 · GGUF 또는 Strata**를 선택하고 연결합니다.
+Strata의 `/v1/models`에 모델이 하나면 자동 선택합니다. 여러 모델이
+나오면 `L2S1_STRATA_MODEL`에 원하는 모델 ID를 지정합니다. 서버에 인증이
+설정된 경우 `L2S1_STRATA_API_KEY`를 서버 환경 변수에 넣습니다.
+
+이 어댑터는 Strata의 `/v1/chat/completions`에서 단일 후보 토큰에 대한
+전체 어휘 기준 로그확률을 읽습니다. Qwen 계열처럼 직접 응답에서
+`logprobs`를 제공하는 Strata 엔진과 모델 조합이 필요합니다.
+Hy4-Flash와 Inkling 2 Mini처럼 이 기능을 제공하지 않는 엔진은 연결
+단계에서 실패합니다. 제한된 상위 로그확률 목록에서 후보가 빠지거나,
+응답이 단일 후보 코드가 아니면 해당 판단을 보류합니다. 후보 간 상대
+점수와 후보 확률 질량 기준은 기존 L2S1 정책을 따릅니다.
+
+Strata 연결은 로컬 Vite 개발 서버에서 사용할 수 있습니다.
